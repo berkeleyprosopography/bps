@@ -1,0 +1,410 @@
+<teiCorpus>
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>BPS markup for cuneiform tablet collection</title>
+        <respStmt>
+          <resp>compiled by</resp> <name>Berkeley Prosopography Services</name>
+          version <name type="version">0.1</name>.
+        </respStmt>
+      </titleStmt>
+      <sourceDesc>From the file: 
+        <name type="file">riaa2 2008-06-30.txt</name></sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <sourceDesc>Tablet:
+          <name type="P">342418</name> = <name type="RIAA">293</name></sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text xml:lang="akk">
+      <note type="atf">use math</note>
+      <note type="inline">note: = MRAH O. 0199</note>
+      <div type="obverse">
+        <lb n="1"/>
+        <person id="p1" sex="2">
+          <persName>
+            <forename>{mi2}szu-bil-tu4</forename> DUMU-MI2 sza2 
+            <forename type="patronym">{m}{d}60-DUMU-MU-nu</forename>
+          </persName>
+        </person>
+        DAM         
+        <person id="p2" sex="1">
+          <persName>
+            <forename>{m}{d}60-TIN-it,</forename> DUMU sza2
+            <note type="lem">Šubiltu[  seller]PN; L; L; Anu-mar-ittannu[  father]PN; L; Anu-uballit[ husband]PN; L; L</note>
+            <lb n="2"/>
+            <forename type="patronym">{m}{d}60-SZESZ-MU-nu</forename>
+          </persName>
+        </person>
+        <relation name="married" mutual="#p1 #p2" />
+        ina hu-ud lib3-bi-szu2 E2 ku-ru-up-pu-szu2 ep-szu2 KI-ti3
+        <note type="lem">Anu-ah-ittannu[  father]PN; L; L; L; L; L; L; L</note>
+        <lb n="3"/>
+        E2 {d}LUGAL-GIR3-RA sza2 qe2-reb UNUG{ki} 7 5/6 KUSZ3 US2 AN-u2
+        <lb n="4"/>
+        {im}MAR-TU DA SILA SIG mu-taq UN{mesz} 7 5/6 KUSZ3 US2 KI-u2 
+        <lb n="5"/>
+        {im}KUR-RA DA E2 ku-ru-up-pu sza2 
+        <person id="p3" sex="1">
+          <persName>
+            <forename>{m}{d}60-TIN-it,</forename> DUMU sza2
+            <forename type="patronym">{m}il-lut-{d}60</forename>
+          </persName>
+        </person>
+        <note type="lem">L; L; L; L; L; Anu-uballit[ neighbor]PN; L; L; Illut-Anu[ father]PN</note>
+        <lb n="6"/>
+        5 5/6 KUSZ3 5 SZU-SI SAG-KI AN-ta {im}SI-SA2 DA SILA rap-szu2 mu-taq
+        <lb n="7"/>
+        DINGIR{mesz} u LUGAL 5 5/6 KUSZ3 5 SZU-SI SAG-KI KI-ta {im}U18-LU DA E2
+        <lb n="8"/>
+        <person id="p4" sex="1">
+          <persName>
+            <forename>{m}dum-qi2-{d}60</forename> 
+            <note type="question">This looks wacky. We have a {lu2} marker 
+              of "human" in the middle of a name sequence. What is this?</note>
+            {lu2}ma-hi-ra-nu E2 ku-ru-up-pu MU{mesz} DUMU sza2
+            <forename type="patronym">{m}tat-tan-nu-{d}na-na-a</forename>
+          </persName>
+        </person>
+        <note type="lem">Dumqi-Anu[ neighbor, seller]PN; L; L; L; L; L; L; Tattanu-Nana[ father]PN</note>
+        <lb n="9"/>
+        SZU-NIGIN 7 5/6 KUSZ3 US2 5 5/6 KUSZ3 5 SZU-SI SAG-KI mi-szih-tu4 E2 ku-ru-up-pu
+        <lb n="10"/>
+        MU{mesz} E2 ku-ru-up-pu MU{mesz} i-s,i u ma-a-du ma-la ba-szu-u2
+        <lb n="11"/>
+        gab-bi a-na 14 GIN2 KU3-BABBAR is-ta-tir-ra-nu sza2
+        <person id="p5" sex="1">
+          <persName>
+            <forename>{m}an-ti-'-i-ku-su</forename>
+          </persName>
+        </person>
+        <note type="lem">L; L; L; L; L; L; L; Antiochus[ weightstandard]PN</note>
+        <lb n="12"/>
+        bab-ba-nu-u2-tu2 a-na SZAM2 TIL{mesz} a-na
+        <person id="p6" sex="1">
+          <persName>
+            <forename>{m}dum-qi2-{d}60</forename> DUMU sza2
+            <note type="lem">L; L; L; L; L; Dumqi-Anu[ buyer]PN; L; L</note>
+            <lb n="13"/>
+            <forename type="patronym">{m}tat-tan-nu-{d}na-na-a</forename> DUMU sza2 
+            <forename type="patronym" subtype="grandfather">{m}ri-hat-{d}60</forename>
+          </persName>
+        </person>
+            a-na u4-mu s,a-a-tu2
+        <note type="lem">Tattanu-Nana[ father]PN; L; L; Rihat-Anu[ grandfather]PN; L; L; L</note>
+        <lb n="14"/>
+        tat-ta-din KU3-BABBAR-a4 14 GIN2 SZAM2 E2 ku-ru-up-pu MU{mesz} TIL{mesz}
+        <lb n="15"/>
+        <person id="p7" sex="2">
+          <persName>
+            <forename>{mi2}szu-bil-tu4</forename> DUMU-MI2 sza2 
+            <forename type="patronym">{m}{d}60-DUMU-MU-nu</forename> 
+          </persName>
+        </person> ina SZU-2 
+        <person id="p8" sex="1">
+          <persName>
+            <forename>{m}dum-qi2-{d}60</forename> DUMU sza2
+            <forename type="patronym">{m}tat-tan-nu-{d}na-na-a</forename>
+          </persName>
+        </person>
+        <note type="lem">SZubiltu[ seller]PN; L; L; Anu-mar-ittannu[ father]PN; L; L; Dumqi-Anu[ buyer]PN; L; L; Tattannu-Nana[ father]PN</note>
+        <lb n="16"/>
+        ma-hir-rat e-t,ir3-rat u4-mu pa-qa-ri ana muh-hi E2 ku-ru-up-pu MU{mesz}
+      </div>
+      <div type="reverse">
+        <lb n="1"/>
+        it-tab-szu-u2 
+        <person id="p9" sex="1">
+          <persName>
+            <forename>{m}IR3-E2-re-esz</forename> DUMU-szu2 DUMU sza2 
+            <forename type="patronym">{m}{d}60-TIN-it,</forename> 
+          </persName>
+        </person> u2-mar-raq-ma a-di
+        <note type="lem">L; Arad-bit-resz[ guarantor]PN; L; L; L; Anu-uballit[ father]PN; L; L</note>
+        <lb n="2"/>
+        12-TA-AM3 
+        <person id="p10" sex="1">
+          <persName>
+            <forename>{m}dum-qi2-{d}60</forename> DUMU sza2 
+            <forename type="patronym">{m}tat-tan-nu-{d}na-na-a</forename>
+          </persName> a-na
+        </person>
+        <note type="lem">L; Dumqi-Anu[ buyer]PN; L; L; Tattanu-Nana[ father]PN; L</note>
+        <lb n="3"/>
+        u4-mu s,a-a-tu2 ina-an-din pu-ut a-ha-mesz a-na mu-ru-qu sza2 E2 ku-ru-up-pu
+        <lb n="4"/>
+        MU{mesz} 
+        <person id="p11" sex="1">
+          <persName>
+            <forename>{mi2}szu-bil-tu4</forename> 
+          </persName> na-din-na-at E2 ku-ru-up-pu MU{mesz}
+        </person>
+        <note type="lem">L; SZubiltu[ guarantor]PN; L; L; L; L</note>
+        <lb n="5"/>
+        u 
+        <person id="p12" sex="1">
+          <persName>
+            <forename>{m}IR3-E2-re-esz</forename>
+          </persName>
+        </person> DUMU-szu2 a-na 
+        <person id="p13" sex="1">
+          <persName>
+            <forename>{m}dum-qi2-{d}60</forename> a-na u4-mu s,a-a-tu2 na-szu-u2
+          </persName>
+        </person>
+        <note type="lem">L; Arad-bit-resz[ guarantor]PN; L; L; Dumqi-Anu[ buyer]PN; L; L; L; L</note>
+        <lb n="6"/>
+        E2 ku-ru-up-pu MU{mesz} sza2 
+        <person id="p14" sex="1">
+          <persName>
+            <forename>{m}dum-qi2-{d}60</forename> DUMU sza2 
+            <forename type="patronym">{m}tat-tan-nu-{d}na-na-a</forename>
+          </persName>
+        </person>
+        <note type="lem">L; L; L; L; Dumqi-Anu[ buyer]PN; L; L; Tattanu-Nana[ father]PN</note>
+        <lb n="7"/>
+        a-na u4-mu s,a-a-tu2 szu-u2
+        <lb n="8"/>
+        {lu2}mu-kin7 
+        <person id="p15" sex="1">
+          <persName>
+            <forename>{m}ba-la-t,u</forename> DUMU sza2 
+            <forename type="patronym">{m}{d}60-SZESZ-MU-nu</forename> 
+          </persName>
+        </person> u 
+        <person id="p16" sex="1">
+          <persName>
+            <note type="question">Is this the right model?</note>
+            <forename>{m}{d}60-SZESZ-MU-nu</forename> 
+          </persName>
+        </person> DUMU-szu2
+        <note type="lem">L; Balatu[ witness]PN; L; L; Anu-ah-ittannu[ father]PN; L; Anu-ah-ittannu[ son]PN; L</note>
+        <lb n="9"/>
+        A 
+        {m}lu-usz-tam-mar-{d}IM 
+        <person id="p17" sex="1">
+          <persName>
+            <forename>{m}li-GISZ</forename> DUMU sza2
+            <forename type="patronym">{m}{d}60-SZESZ{mesz}-MU</forename> A 
+            <addname type="clan">{m}SZU-{d}60a</addname>
+          </persName>
+        </person>
+        <lb n="10"/>
+        <person id="p18" sex="1">
+          <persName>
+            <forename>{m}{d}60-AD-SZESZ</forename> DUMU sza2
+            <forename type="patronym">{m}KAR-{d}60</forename> A 
+            <addname type="clan">{m}lu-usz-tam-mar-{d}IM</addname>
+          </persName>
+        </person>
+        <person id="p19" sex="1">
+          <persName>
+            <forename>{m}ina-qi2-bit-{d}60</forename> DUMU sza2
+        <lb n="11"/>
+            <forename type="patronym">{m}{d}60-TIN-it,</forename> A 
+            <addname type="clan">{m}e2-kur-za-kir</addname>
+          </persName>
+        </person>
+        <person id="p20" sex="1">
+          <persName>
+            <forename>{m}{d}60-SZESZ-MU</forename> DUMU sza2 
+            <forename type="patronym">{m}ni-din-tu4-{d}60</forename>
+        <lb n="12"/>
+        A 
+            <addname type="clan">{m}SZESZ-'-u2-tu2</addname>
+          </persName>
+        </person>
+        <person id="p21" sex="1">
+          <persName>
+            <forename>{m}la-ba-szi</forename> DUMU sza2 
+            <forename type="patronym">{m}{d}60-AD-SZESZ</forename> A 
+            <addname type="clan">{m}lu-usz-tam-mar-{d}IM</addname>
+          </persName>
+        </person>
+        <lb n="13"/>
+        <person id="p22" sex="1">
+          <persName>
+            <forename>{m}{d}60-TIN-it,</forename> DUMU sza2 
+            <forename type="patronym">{m}{d}60-NUMUN-MU</forename> A 
+            <addname type="clan">{m}e2-kur-za-kir</addname> 
+          </persName>
+        </person>
+        <person id="p23" sex="1">
+          <persName>
+            <forename>{m}{d}60-AD-SZESZ</forename>
+        <lb n="14"/>
+        DUMU sza2 
+            <forename type="patronym">{m}szip-qat2-{d}60</forename> A 
+            <addname type="clan">{m}lu-usz-tam-mar-{d}IM</addname> 
+          </persName>
+        </person>
+        <person id="p24" sex="1">
+          <persName>
+            <forename>{m}{d}na-na-a-MU</forename> DUMU sza2
+        <lb n="15"/>
+            <forename type="patronym">{m}ki-{d}60-HE2-NUN</forename> A 
+            <addname type="clan">{m}{d}30-TI-ER2</addname>
+          </persName>
+        </person>
+        <lb n="16"/>
+        <person id="p25" sex="1">
+          <persName>
+            <forename>{m}INANA-MU-KAM2</forename> {lu2}UMBISAG DUMU sza2 
+            <forename type="patronym">{m}{d}60-SU</forename> A 
+            <addname type="clan">{m}kur-i</addname>
+          </persName>
+        </person> UNUG{ki} {iti}APIN UD 2-KAM2
+        <lb n="17"/>
+        MU 101-KAM2 
+        <person id="p26" sex="1">
+          <persName>
+            <forename>{m}an-ti-'-i-ku-su</forename>
+          </persName>
+        </person> LUGAL
+      </div>
+      <div type="top">
+        <div type="column" n="1">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0696:H</rs></div>
+          <lb n="2"/>
+          <person id="p27" sex="1">
+            <persName>
+              <forename>{m}{d}60-AD-SZESZ</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="2">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0426:B</rs></div>
+          <lb n="2"/>
+          <person id="p28" sex="1">
+            <persName>
+              <forename>{m}la-ba-szi</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="3">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0426:C</rs></div>
+          <lb n="2"/>
+          <person id="p29" sex="1">
+            <persName>
+              <forename>{m}{d}60-SZESZ-MU</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="4">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0785:A</rs></div>
+          <lb n="2"/>
+          <person id="p30" sex="1">
+            <persName>
+              <forename>{m}li-GISZ</forename>
+            </persName>
+          </person>
+        </div>
+      </div>
+      <div type="bottom">
+        <div type="column" n="1">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0755:G</rs></div>
+          <lb n="2"/>
+          <person id="p31" sex="1">
+            <persName>
+              <forename>{m}{d}60-TIN-it,</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="2">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0185</rs></div>
+          <lb n="2"/>
+          <person id="p32" sex="1">
+            <persName>
+              <forename>{m}ina-qi2-bit-{d}60</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="3">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0755:F</rs></div>
+          <lb n="2"/>
+          <person id="p33" sex="1">
+            <persName>
+              <forename>{m}{d}na-na-a-MU</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="4">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0397:D</rs></div>
+          <lb n="2"/>
+          <person id="p34" sex="1">
+            <persName>
+              <forename>{m}{d}60-AD-SZESZ</forename>
+            </persName>
+          </person>
+        </div>
+      </div>
+      <div type="left">
+        <div type="column" n="1">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0247:C</rs></div>
+          <lb n="2"/>
+          <person id="p35" sex="1">
+            <persName>
+              <forename>{m}ba-la-t,u</forename>
+            </persName>
+          </person>
+        </div>
+        <div type="column" n="2">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0916:Q</rs></div>
+          <lb n="2"/>
+          <person id="p36" sex="1">
+            <persName>
+              <forename>{m}{d}60-SZESZ-MU-nu</forename>
+            </persName>
+          </person>
+      </div>
+      <div type="right">
+        </div>
+        <div type="column" n="1">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 1035:A</rs></div>
+          <lb n="2"/>
+          <person id="p37" sex="1">
+            <persName>
+              <forename>{mi2}szu-bil-tu4</forename>
+            </persName>
+          </person> na-din-na-at E2 ku-ru-up-pu; MU{mesz}
+        </div>
+        <div type="column" n="2">
+          <lb n="1"/>
+          un-qa
+          <div type="seal"><rs type="AUWE">19, 0444:E</rs></div>
+          <lb n="2"/>
+          <person id="p38" sex="1">
+            <persName>
+              <forename>{m}IR3-E2-SAG</forename>
+            </persName>
+          </person> DUMU-szu2
+        </div>
+      </div>
+    </text>
+  </TEI>
+</teiCorpus>
