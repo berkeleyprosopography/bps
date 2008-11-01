@@ -12,11 +12,10 @@
 		<style>
 		<![CDATA[
 			body { font-family: Ariel, Helvetica, sans; }
-			p { background-color:white; }
-			p.span { text-size:0.8em; }
+			p { background-color:white; font-size:0.8em;}
 			span.fn { color:blue; }
 			span.fnp { color:purple; }
-			span.add { color:red; }
+			span.fna { color:red; }
 			span.lineno { font-family:Courier New, Courier, fixed; background-color:white; }
 			span.note { color:green; background-color:white;  }
 			span.pers { background-color:#e4e4e4; }
