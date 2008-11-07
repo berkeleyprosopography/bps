@@ -171,20 +171,15 @@
         {lu2}mu-kin7 
         <person id="p15" sex="1">
           <persName>
-            <forename>{m}ba-la-t,u</forename> DUMU sza2 
-            <forename type="patronym">{m}{d}60-SZESZ-MU-nu</forename> 
+            <forename type="patronym">{m}ba-la-t,u</forename> DUMU sza2 
+            <forename type="patronym" subtype="grandfather">{m}{d}60-SZESZ-MU-nu</forename> 
+            u 
+						<forename>{m}{d}60-SZESZ-MU-nu</forename> DUMU-szu2
+						<note type="lem">L; Balatu[ witness]PN; L; L; Anu-ah-ittannu[ father]PN; L; Anu-ah-ittannu[ son]PN; L</note>
+						<lb n="9"/>
+            A <addname type="clan">{m}lu-usz-tam-mar-{d}IM</addname>
           </persName>
-        </person> u 
-        <person id="p16" sex="1">
-          <persName>
-            <note type="question">Is this the right model?</note>
-            <forename>{m}{d}60-SZESZ-MU-nu</forename> 
-          </persName>
-        </person> DUMU-szu2
-        <note type="lem">L; Balatu[ witness]PN; L; L; Anu-ah-ittannu[ father]PN; L; Anu-ah-ittannu[ son]PN; L</note>
-        <lb n="9"/>
-        A 
-        {m}lu-usz-tam-mar-{d}IM 
+        </person>
         <person id="p17" sex="1">
           <persName>
             <forename>{m}li-GISZ</forename> DUMU sza2
