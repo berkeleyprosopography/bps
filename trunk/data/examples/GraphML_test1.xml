@@ -1,0 +1,130 @@
+<graphml>
+  <key id="doc_id" for="node" attr.name="doc_id" attr.type="string">
+    <default>unknown</default>
+  </key>
+  <key id="doc_link" for="node" attr.name="doc_link" attr.type="string">
+  </key>
+  <key id="activity" for="node" attr.name="activity" attr.type="string">
+  </key>
+  <key id="subactivity" for="node" attr.name="subactivity" attr.type="string">
+  </key>
+  <key id="weight" for="node" attr.name="weight" attr.type="float">
+    <default>1</default>
+  </key>
+  <graph id="A" edgedefault="undirected">
+    <node id="21043">
+      <data key="name">test</data>
+      <data key="type">AS</data>
+      <data key="routeprefix">217.20.50.0</data>
+    </node>
+    <node id="6697">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="1239">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="6697" target="21043"/>
+    <edge source="21043" target="1239"/>
+    <node id="20965">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="1930">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="20965" target="21043"/>
+    <edge source="21043" target="1930"/>
+    <node id="1239">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="2497">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="1239" target="21043"/>
+    <edge source="21043" target="2497"/>
+    <node id="35422">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="3216">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="35422" target="21043"/>
+    <edge source="21043" target="3216"/>
+    <node id="1239">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="3257">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="1239" target="21043"/>
+    <edge source="21043" target="3257"/>
+    <node id="6320">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="3333">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="6320" target="21043"/>
+    <edge source="21043" target="3333"/>
+    <node id="8342">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="3356">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="8342" target="21043"/>
+    <edge source="21043" target="3356"/>
+    <node id="3216">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="3549">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="3216" target="21043"/>
+    <edge source="21043" target="3549"/>
+    <node id="6854">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <node id="3741">
+      <data key="name"/>
+      <data key="type">AS</data>
+      <data key="routeprefix"/>
+    </node>
+    <edge source="6854" target="21043"/>
+    <edge source="21043" target="3741"/>
+  </graph>
+</graphml>
+

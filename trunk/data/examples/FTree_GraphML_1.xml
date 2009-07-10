@@ -1,0 +1,85 @@
+<graphml>
+	<!-- This is an example of a family tree graph, rooted at a particular family name.
+	The edges are all directed, indicating parent-to-child relationships.
+	-->
+	<key id="label" for="node" attr.name="label" attr.type="string"/>
+	<key id="persID" for="node" attr.name="persID" attr.type="string"/>
+	<key id="gender" for="node" attr.name="gender" attr.type="string"/>
+	<key id="relation" for="edge" attr.name="relation" attr.type="string">
+		<default>child</default>
+	</key>
+	<key id="confidence" for="edge" attr.name="confidence" attr.type="float">
+		<default>1.0</default>
+	</key>
+  <graph id="A" edgedefault="directed">
+    <node id="1">
+      <data key="name">Ancestor Fred</data>
+      <data key="gender">M</data>
+    </node>
+    <node id="11">
+      <data key="name">Grampa Joe</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="1" target="11"/>
+    <node id="111">
+      <data key="name">Father Fred</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="11" target="111"/>
+    <node id="112">
+      <data key="name">Uncle Pete</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="11" target="112"/>
+    <node id="113">
+      <data key="name">Aunt Susie</data>
+      <data key="gender">F</data>
+    </node>
+    <edge source="11" target="113"/>
+    <node id="1111">
+      <data key="name">Mama Wilma</data>
+      <data key="gender">F</data>
+    </node>
+    <edge source="111" target="1111">
+			<data key="relation">wife</data>
+		</edge>
+    <node id="1112">
+      <data key="name">BamBam</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="111" target="1112"/>
+    <edge source="1111" target="1112"/>
+    <node id="1114">
+      <data key="name">Marilyn</data>
+      <data key="gender">F</data>
+    </node>
+    <edge source="111" target="1114"/>
+    <edge source="1111" target="1114"/>
+    <node id="12">
+      <data key="name">Great-Aunt Sue</data>
+      <data key="gender">F</data>
+    </node>
+    <edge source="1" target="12"/>
+    <node id="13">
+      <data key="name">Great-Aunt Mary</data>
+      <data key="gender">F</data>
+    </node>
+    <edge source="1" target="13"/>
+    <node id="14">
+      <data key="name">Great-Uncle Bob</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="1" target="14"/>
+    <node id="141">
+      <data key="name">Uncle Fred</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="14" target="141"/>
+    <node id="1411">
+      <data key="name">Cousin It</data>
+      <data key="gender">M</data>
+    </node>
+    <edge source="141" target="1411"/>
+  </graph>
+</graphml>
+
