@@ -1,0 +1,104 @@
+<graphml>
+	<!-- This is an example of a generic social graph.
+	The edges are all undirected, indicating shared activity.
+	-->
+	<key id="label" for="node" attr.name="label" attr.type="string"/>
+	<key id="persID" for="node" attr.name="persID" attr.type="string"/>
+	<key id="gender" for="node" attr.name="gender" attr.type="string"/>
+	<key id="doc-count" for="node" attr.name="doc-count" attr.type="int">
+		<default>1</default>
+	</key>
+	<key id="doc-list" for="node" attr.name="doc-list" attr.type="string"/>
+	<key id="activity" for="edge" attr.name="activity" attr.type="string">
+		<default>multi</default>
+	</key>
+	<key id="weight" for="edge" attr.name="weight" attr.type="float">
+		<default>1.0</default>
+	</key>
+  <graph id="A" edgedefault="undirected">
+		<node id="per.001" >
+			<data key="gender">M</data>
+			<data key="label">Alexander</data>
+		</node>
+		<node id="per.002" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabutika-Anu</data>
+		</node>
+		<node id="per.003" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabuti-Anu</data>
+		</node>
+		<node id="per.004" >
+			<data key="gender">U</data>
+			<data key="label">Ana-rabut-Anu</data>
+		</node>
+		<node id="per.005" >
+			<data key="gender">F</data>
+			<data key="label">Antiochis</data>
+		</node>
+		<node id="per.006" >
+			<data key="gender">F</data>
+			<data key="label">Antu-banat</data>
+		</node>
+		<node id="per.007" >
+			<data key="gender">F</data>
+			<data key="label">Antu-banat</data>
+		</node>
+		<node id="per.008" >
+			<data key="gender">U</data>
+			<data key="label">Anu-erib</data>
+		</node>
+		<node id="per.009" >
+			<data key="gender">M</data>
+			<data key="label">Hanina</data>
+		</node>
+		<node id="per.010" >
+			<data key="gender">M</data>
+			<data key="label">Idat-Anu</data>
+		</node>
+		<node id="per.011" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node id="per.012" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node id="per.013" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node id="per.014" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node id="per.015" >
+			<data key="gender">U</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node id="per.016" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<edge source="per.001" target="per.002"/>
+		<edge source="per.001" target="per.004"/>
+		<edge source="per.001" target="per.006"/>
+		<edge source="per.001" target="per.008"/>
+		<edge source="per.001" target="per.010"/>
+		<edge source="per.002" target="per.012"/>
+		<edge source="per.002" target="per.014"/>
+		<edge source="per.002" target="per.016"/>
+		<edge source="per.003" target="per.005"/>
+		<edge source="per.003" target="per.007"/>
+		<edge source="per.003" target="per.009"/>
+		<edge source="per.003" target="per.011"/>
+		<edge source="per.003" target="per.013"/>
+		<edge source="per.005" target="per.015"/>
+		<edge source="per.007" target="per.002"/>
+		<edge source="per.007" target="per.004"/>
+		<edge source="per.007" target="per.006"/>
+		<edge source="per.004" target="per.006"/>
+		<edge source="per.004" target="per.008"/>
+		<edge source="per.004" target="per.010"/>
+	</graph>
+</graphml>

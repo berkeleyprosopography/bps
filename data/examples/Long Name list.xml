@@ -1,0 +1,2436 @@
+<graphml>
+	<!-- This is an example of a family tree graph, rooted at a particular family name.
+	The edges are all directed, indicating parent-to-child relationships.
+	-->
+	<key id="label" for="node" attr.name="label" attr.type="string"/>
+	<key id="persID" for="node" attr.name="persID" attr.type="string"/>
+	<key id="gender" for="node" attr.name="gender" attr.type="string"/>
+	<key id="relation" for="edge" attr.name="relation" attr.type="string">
+		<default>child</default>
+	</key>
+	<key id="confidence" for="edge" attr.name="confidence" attr.type="float">
+		<default>1.0</default>
+	</key>
+  <graph id="A" edgedefault="undirected">
+		<node xml:id="per.x000001" >
+			<data key="gender">U</data>
+			<data key="label">Ah?utu</data>
+		</node>
+		<node xml:id="per.x000002" >
+			<data key="gender">M</data>
+			<data key="label">Alexander</data>
+		</node>
+		<node xml:id="per.x000003" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabutika-Anu</data>
+		</node>
+		<node xml:id="per.x000004" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabutika-I?tar</data>
+		</node>
+		<node xml:id="per.x000005" >
+			<data key="gender">F</data>
+			<data key="label">Ana-rabuti?u</data>
+		</node>
+		<node xml:id="per.x000006" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabuti-Anu</data>
+		</node>
+		<node xml:id="per.x000007" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabuti-Anu</data>
+		</node>
+		<node xml:id="per.x000008" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabuti-Anu</data>
+		</node>
+		<node xml:id="per.x000009" >
+			<data key="gender">M</data>
+			<data key="label">Ana-rabuti-Anu</data>
+		</node>
+		<node xml:id="per.x000010" >
+			<data key="gender">U</data>
+			<data key="label">Ana-rabut-Anu</data>
+		</node>
+		<node xml:id="per.x000011" >
+			<data key="gender">U</data>
+			<data key="label">Ana-rabut-Anu</data>
+		</node>
+		<node xml:id="per.x000012" >
+			<data key="gender">U</data>
+			<data key="label">Ana-rabut-Anu</data>
+		</node>
+		<node xml:id="per.x000013" >
+			<data key="gender">U</data>
+			<data key="label">Ana-rabut-Anu</data>
+		</node>
+		<node xml:id="per.x000014" >
+			<data key="gender">F</data>
+			<data key="label">Antiochis</data>
+		</node>
+		<node xml:id="per.x000015" >
+			<data key="gender">U</data>
+			<data key="label">Antiochus</data>
+		</node>
+		<node xml:id="per.x000016" >
+			<data key="gender">U</data>
+			<data key="label">Antiochus</data>
+		</node>
+		<node xml:id="per.x000017" >
+			<data key="gender">U</data>
+			<data key="label">Antiochus</data>
+		</node>
+		<node xml:id="per.x000018" >
+			<data key="gender">M</data>
+			<data key="label">Antiochus</data>
+		</node>
+		<node xml:id="per.x000019" >
+			<data key="gender">F</data>
+			<data key="label">Antu-banat</data>
+		</node>
+		<node xml:id="per.x000020" >
+			<data key="gender">F</data>
+			<data key="label">Antu-banat</data>
+		</node>
+		<node xml:id="per.x000021" >
+			<data key="gender">F</data>
+			<data key="label">Antu-banat</data>
+		</node>
+		<node xml:id="per.x000023" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-usur</data>
+		</node>
+		<node xml:id="per.x000024" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-usur</data>
+		</node>
+		<node xml:id="per.x000025" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-usur</data>
+		</node>
+		<node xml:id="per.x000026" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-usur</data>
+		</node>
+		<node xml:id="per.x000027" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000028" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000029" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000030" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000031" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000032" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000033" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000034" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000035" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000036" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000037" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000038" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000039" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000040" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000041" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?ur</data>
+		</node>
+		<node xml:id="per.x000042" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-utir</data>
+		</node>
+		<node xml:id="per.x000043" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-utir</data>
+		</node>
+		<node xml:id="per.x000044" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-utir</data>
+		</node>
+		<node xml:id="per.x000045" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?er</data>
+		</node>
+		<node xml:id="per.x000046" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ab-u?er</data>
+		</node>
+		<node xml:id="per.x000047" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ab-u?er</data>
+		</node>
+		<node xml:id="per.x000048" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ahhe-bullut</data>
+		</node>
+		<node xml:id="per.x000049" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-bullu?</data>
+		</node>
+		<node xml:id="per.x000050" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000051" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000052" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000053" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000054" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000055" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000056" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000057" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000058" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000059" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000060" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000061" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000062" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ahhe-iddin</data>
+		</node>
+		<node xml:id="per.x000063" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000064" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000065" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000066" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000067" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000068" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000069" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000070" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000071" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000072" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000073" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000074" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000075" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000076" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000077" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000078" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000079" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000080" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000081" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000082" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000083" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000084" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000085" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000086" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000087" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000088" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-ittannu</data>
+		</node>
+		<node xml:id="per.x000089" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-tuqqin</data>
+		</node>
+		<node xml:id="per.x000090" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-u?ab?i</data>
+		</node>
+		<node xml:id="per.x000091" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-u?ab?i</data>
+		</node>
+		<node xml:id="per.x000092" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-u?ab?i</data>
+		</node>
+		<node xml:id="per.x000093" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-u?ab?i</data>
+		</node>
+		<node xml:id="per.x000094" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-u?ab?i</data>
+		</node>
+		<node xml:id="per.x000095" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ah-u?ezib</data>
+		</node>
+		<node xml:id="per.x000096" >
+			<data key="gender">M</data>
+			<data key="label">Anu-balassu-iqbi</data>
+		</node>
+		<node xml:id="per.x000097" >
+			<data key="gender">M</data>
+			<data key="label">Anu-balassu-iqbi</data>
+		</node>
+		<node xml:id="per.x000098" >
+			<data key="gender">M</data>
+			<data key="label">Anu-balassu-iqbi</data>
+		</node>
+		<node xml:id="per.x000099" >
+			<data key="gender">U</data>
+			<data key="label">Anu-balassu-iqbi</data>
+		</node>
+		<node xml:id="per.x000100" >
+			<data key="gender">M</data>
+			<data key="label">Anu-balassu-iqbi</data>
+		</node>
+		<node xml:id="per.x000101" >
+			<data key="gender">M</data>
+			<data key="label">Anu-balassu-iqbi</data>
+		</node>
+		<node xml:id="per.x000102" >
+			<data key="gender">U</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000103" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000104" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000105" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000106" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000107" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000108" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000109" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000110" >
+			<data key="gender">U</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000111" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000112" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000113" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000114" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000115" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000116" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000117" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000118" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000119" >
+			<data key="gender">U</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000120" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000121" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000122" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000123" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000124" >
+			<data key="gender">M</data>
+			<data key="label">Anu-bel?unu</data>
+		</node>
+		<node xml:id="per.x000125" >
+			<data key="gender">U</data>
+			<data key="label">Anu-bel-?unu</data>
+		</node>
+		<node xml:id="per.x000126" >
+			<data key="gender">U</data>
+			<data key="label">Anu-erib</data>
+		</node>
+		<node xml:id="per.x000127" >
+			<data key="gender">M</data>
+			<data key="label">Anu-eriba</data>
+		</node>
+		<node xml:id="per.x000128" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ik?ur</data>
+		</node>
+		<node xml:id="per.x000129" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ik?ur</data>
+		</node>
+		<node xml:id="per.x000130" >
+			<data key="gender">U</data>
+			<data key="label">Anu-iqi?anni</data>
+		</node>
+		<node xml:id="per.x000131" >
+			<data key="gender">U</data>
+			<data key="label">Anu-iqi?anni</data>
+		</node>
+		<node xml:id="per.x000132" >
+			<data key="gender">U</data>
+			<data key="label">Anu-iqi?anni</data>
+		</node>
+		<node xml:id="per.x000133" >
+			<data key="gender">U</data>
+			<data key="label">Anu-iqi?annu</data>
+		</node>
+		<node xml:id="per.x000134" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ittannu</data>
+		</node>
+		<node xml:id="per.x000135" >
+			<data key="gender">U</data>
+			<data key="label">Anu-ittannu</data>
+		</node>
+		<node xml:id="per.x000136" >
+			<data key="gender">M</data>
+			<data key="label">Anu-ittannu</data>
+		</node>
+		<node xml:id="per.x000137" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000138" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000139" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000140" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000141" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000142" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000143" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000144" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000145" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000146" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000147" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000148" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000149" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000150" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000151" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000152" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000153" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000154" >
+			<data key="gender">U</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000155" >
+			<data key="gender">M</data>
+			<data key="label">Anu-mar-ittannu</data>
+		</node>
+		<node xml:id="per.x000156" >
+			<data key="gender">M</data>
+			<data key="label">Anu-qi?an</data>
+		</node>
+		<node xml:id="per.x000157" >
+			<data key="gender">M</data>
+			<data key="label">Anu-qi?an</data>
+		</node>
+		<node xml:id="per.x000158" >
+			<data key="gender">M</data>
+			<data key="label">Anu-qi?an</data>
+		</node>
+		<node xml:id="per.x000159" >
+			<data key="gender">M</data>
+			<data key="label">Anu-qi?an</data>
+		</node>
+		<node xml:id="per.x000160" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-lisir</data>
+		</node>
+		<node xml:id="per.x000161" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-lisir</data>
+		</node>
+		<node xml:id="per.x000162" >
+			<data key="gender">M</data>
+			<data key="label">Anu-?um-li?er</data>
+		</node>
+		<node xml:id="per.x000163" >
+			<data key="gender">M</data>
+			<data key="label">Anu-?um-li?er</data>
+		</node>
+		<node xml:id="per.x000164" >
+			<data key="gender">M</data>
+			<data key="label">Anu-?um-li?er</data>
+		</node>
+		<node xml:id="per.x000165" >
+			<data key="gender">M</data>
+			<data key="label">Anu-?um-li?er</data>
+		</node>
+		<node xml:id="per.x000166" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-li?er</data>
+		</node>
+		<node xml:id="per.x000167" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-li?ir</data>
+		</node>
+		<node xml:id="per.x000168" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-li?ir</data>
+		</node>
+		<node xml:id="per.x000169" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-li?ir</data>
+		</node>
+		<node xml:id="per.x000170" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-li?ir</data>
+		</node>
+		<node xml:id="per.x000171" >
+			<data key="gender">U</data>
+			<data key="label">Anu-?um-li?ir</data>
+		</node>
+		<node xml:id="per.x000172" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballissu</data>
+		</node>
+		<node xml:id="per.x000173" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballissu</data>
+		</node>
+		<node xml:id="per.x000174" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballissu</data>
+		</node>
+		<node xml:id="per.x000175" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballissu</data>
+		</node>
+		<node xml:id="per.x000176" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000177" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000178" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000179" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000180" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000181" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000182" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000183" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballit</data>
+		</node>
+		<node xml:id="per.x000184" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000185" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000186" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000187" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000188" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000189" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000190" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000191" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000192" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000193" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000194" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000195" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000196" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000197" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000198" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000199" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000200" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000201" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000202" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000203" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000204" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000205" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000206" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000207" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000208" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000209" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000210" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000211" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000212" >
+			<data key="gender">U</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000213" >
+			<data key="gender">M</data>
+			<data key="label">Anu-uballi?</data>
+		</node>
+		<node xml:id="per.x000214" >
+			<data key="gender">M</data>
+			<data key="label">Anu-u?ezib</data>
+		</node>
+		<node xml:id="per.x000215" >
+			<data key="gender">M</data>
+			<data key="label">Anu-X</data>
+		</node>
+		<node xml:id="per.x000216" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-ibni</data>
+		</node>
+		<node xml:id="per.x000217" >
+			<data key="gender">U</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000218" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000219" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000220" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000221" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000222" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000223" >
+			<data key="gender">U</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000224" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000225" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-iddin</data>
+		</node>
+		<node xml:id="per.x000226" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-li?er</data>
+		</node>
+		<node xml:id="per.x000227" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-li?er</data>
+		</node>
+		<node xml:id="per.x000228" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-li?er</data>
+		</node>
+		<node xml:id="per.x000229" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-li?er</data>
+		</node>
+		<node xml:id="per.x000230" >
+			<data key="gender">M</data>
+			<data key="label">Anu-zer-li?er</data>
+		</node>
+		<node xml:id="per.x000231" >
+			<data key="gender">U</data>
+			<data key="label">Anu-zer-li?ir</data>
+		</node>
+		<node xml:id="per.x000232" >
+			<data key="gender">M</data>
+			<data key="label">Apollonous</data>
+		</node>
+		<node xml:id="per.x000233" >
+			<data key="gender">M</data>
+			<data key="label">Arad-AMA.ARHU?</data>
+		</node>
+		<node xml:id="per.x000234" >
+			<data key="gender">M</data>
+			<data key="label">Arad-AMA.ARHU?</data>
+		</node>
+		<node xml:id="per.x000235" >
+			<data key="gender">U</data>
+			<data key="label">Arad-bit-re?</data>
+		</node>
+		<node xml:id="per.x000236" >
+			<data key="gender">U</data>
+			<data key="label">Arad-bit-re?</data>
+		</node>
+		<node xml:id="per.x000237" >
+			<data key="gender">M</data>
+			<data key="label">Arad-Nergal</data>
+		</node>
+		<node xml:id="per.x000238" >
+			<data key="gender">U</data>
+			<data key="label">Arad-Ninurta</data>
+		</node>
+		<node xml:id="per.x000239" >
+			<data key="gender">M</data>
+			<data key="label">Arad-Ninurta</data>
+		</node>
+		<node xml:id="per.x000240" >
+			<data key="gender">M</data>
+			<data key="label">Arad-Ninurta</data>
+		</node>
+		<node xml:id="per.x000241" >
+			<data key="gender">M</data>
+			<data key="label">Arad-Ninurta</data>
+		</node>
+		<node xml:id="per.x000242" >
+			<data key="gender">U</data>
+			<data key="label">Arad-res</data>
+		</node>
+		<node xml:id="per.x000243" >
+			<data key="gender">U</data>
+			<data key="label">Arad-res</data>
+		</node>
+		<node xml:id="per.x000244" >
+			<data key="gender">U</data>
+			<data key="label">Arad-Re?</data>
+		</node>
+		<node xml:id="per.x000245" >
+			<data key="gender">M</data>
+			<data key="label">Arad-re?</data>
+		</node>
+		<node xml:id="per.x000246" >
+			<data key="gender">U</data>
+			<data key="label">Arad-re?</data>
+		</node>
+		<node xml:id="per.x000247" >
+			<data key="gender">M</data>
+			<data key="label">Arad-re?</data>
+		</node>
+		<node xml:id="per.x000248" >
+			<data key="gender">U</data>
+			<data key="label">Arad-re?</data>
+		</node>
+		<node xml:id="per.x000249" >
+			<data key="gender">U</data>
+			<data key="label">Arad-Ummi-remet</data>
+		</node>
+		<node xml:id="per.x000250" >
+			<data key="gender">M</data>
+			<data key="label">Artemidoros</data>
+		</node>
+		<node xml:id="per.x000251" >
+			<data key="gender">U</data>
+			<data key="label">Ati-Anu</data>
+		</node>
+		<node xml:id="per.x000252" >
+			<data key="gender">U</data>
+			<data key="label">Attatinas</data>
+		</node>
+		<node xml:id="per.x000253" >
+			<data key="gender">U</data>
+			<data key="label">Balatu</data>
+		</node>
+		<node xml:id="per.x000254" >
+			<data key="gender">U</data>
+			<data key="label">Balatu</data>
+		</node>
+		<node xml:id="per.x000255" >
+			<data key="gender">M</data>
+			<data key="label">Bala?u</data>
+		</node>
+		<node xml:id="per.x000256" >
+			<data key="gender">M</data>
+			<data key="label">Bala?u</data>
+		</node>
+		<node xml:id="per.x000257" >
+			<data key="gender">M</data>
+			<data key="label">Bala?u</data>
+		</node>
+		<node xml:id="per.x000258" >
+			<data key="gender">U</data>
+			<data key="label">Bala?u</data>
+		</node>
+		<node xml:id="per.x000259" >
+			<data key="gender">M</data>
+			<data key="label">Bani-apli</data>
+		</node>
+		<node xml:id="per.x000260" >
+			<data key="gender">M</data>
+			<data key="label">Bel?unu</data>
+		</node>
+		<node xml:id="per.x000261" >
+			<data key="gender">M</data>
+			<data key="label">Dannat-Belti</data>
+		</node>
+		<node xml:id="per.x000262" >
+			<data key="gender">U</data>
+			<data key="label">Demetrios</data>
+		</node>
+		<node xml:id="per.x000263" >
+			<data key="gender">M</data>
+			<data key="label">Demetrios</data>
+		</node>
+		<node xml:id="per.x000264" >
+			<data key="gender">U</data>
+			<data key="label">Demetrius</data>
+		</node>
+		<node xml:id="per.x000265" >
+			<data key="gender">M</data>
+			<data key="label">Diophantos</data>
+		</node>
+		<node xml:id="per.x000266" >
+			<data key="gender">U</data>
+			<data key="label">Diophantos</data>
+		</node>
+		<node xml:id="per.x000267" >
+			<data key="gender">U</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000268" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000269" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000270" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000271" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000272" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000273" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000274" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000275" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000276" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000277" >
+			<data key="gender">M</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000278" >
+			<data key="gender">U</data>
+			<data key="label">Dumqi-Anu</data>
+		</node>
+		<node xml:id="per.x000279" >
+			<data key="gender">M</data>
+			<data key="label">Ebabbar-?um-ibni</data>
+		</node>
+		<node xml:id="per.x000280" >
+			<data key="gender">U</data>
+			<data key="label">Ekurzakir</data>
+		</node>
+		<node xml:id="per.x000281" >
+			<data key="gender">M</data>
+			<data key="label">Ekur-zakir</data>
+		</node>
+		<node xml:id="per.x000282" >
+			<data key="gender">F</data>
+			<data key="label">Ere?tu-Nana</data>
+		</node>
+		<node xml:id="per.x000283" >
+			<data key="gender">F</data>
+			<data key="label">Ere?tu-Nana</data>
+		</node>
+		<node xml:id="per.x000284" >
+			<data key="gender">F</data>
+			<data key="label">Ere?tu-Nana</data>
+		</node>
+		<node xml:id="per.x000285" >
+			<data key="gender">F</data>
+			<data key="label">Ere?tu-Nana</data>
+		</node>
+		<node xml:id="per.x000286" >
+			<data key="gender">M</data>
+			<data key="label">Eriba</data>
+		</node>
+		<node xml:id="per.x000287" >
+			<data key="gender">F</data>
+			<data key="label">E?irtu</data>
+		</node>
+		<node xml:id="per.x000288" >
+			<data key="gender">M</data>
+			<data key="label">Gimil-Anu</data>
+		</node>
+		<node xml:id="per.x000289" >
+			<data key="gender">M</data>
+			<data key="label">Hanina</data>
+		</node>
+		<node xml:id="per.x000290" >
+			<data key="gender">M</data>
+			<data key="label">Hanina</data>
+		</node>
+		<node xml:id="per.x000291" >
+			<data key="gender">M</data>
+			<data key="label">Hanina</data>
+		</node>
+		<node xml:id="per.x000292" >
+			<data key="gender">M</data>
+			<data key="label">Hanina</data>
+		</node>
+		<node xml:id="per.x000293" >
+			<data key="gender">U</data>
+			<data key="label">Hunzu</data>
+		</node>
+		<node xml:id="per.x000294" >
+			<data key="gender">M</data>
+			<data key="label">Idat-Anu</data>
+		</node>
+		<node xml:id="per.x000295" >
+			<data key="gender">M</data>
+			<data key="label">Idat-Anu</data>
+		</node>
+		<node xml:id="per.x000296" >
+			<data key="gender">M</data>
+			<data key="label">Idat-Anu</data>
+		</node>
+		<node xml:id="per.x000297" >
+			<data key="gender">M</data>
+			<data key="label">Idat-Anu</data>
+		</node>
+		<node xml:id="per.x000298" >
+			<data key="gender">M</data>
+			<data key="label">Idat-Anu</data>
+		</node>
+		<node xml:id="per.x000299" >
+			<data key="gender">U</data>
+			<data key="label">Iddina</data>
+		</node>
+		<node xml:id="per.x000300" >
+			<data key="gender">U</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000301" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000302" >
+			<data key="gender">U</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000303" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000304" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000305" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000306" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000307" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000308" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000309" >
+			<data key="gender">U</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000310" >
+			<data key="gender">U</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000311" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Anu</data>
+		</node>
+		<node xml:id="per.x000312" >
+			<data key="gender">M</data>
+			<data key="label">Illut-Belet-?eri</data>
+		</node>
+		<node xml:id="per.x000313" >
+			<data key="gender">M</data>
+			<data key="label">Illut-I?tar</data>
+		</node>
+		<node xml:id="per.x000314" >
+			<data key="gender">U</data>
+			<data key="label">Imbi-Anu</data>
+		</node>
+		<node xml:id="per.x000315" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000316" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000317" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000318" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000319" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000320" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000321" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000322" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000323" >
+			<data key="gender">U</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000324" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000325" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000326" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000327" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000328" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000329" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000330" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000331" >
+			<data key="gender">U</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000332" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000333" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000334" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu</data>
+		</node>
+		<node xml:id="per.x000335" >
+			<data key="gender">M</data>
+			<data key="label">Ina-qibit-Anu-ultazziz</data>
+		</node>
+		<node xml:id="per.x000336" >
+			<data key="gender">M</data>
+			<data key="label">Iqi?a</data>
+		</node>
+		<node xml:id="per.x000339" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-ah-iddin</data>
+		</node>
+		<node xml:id="per.x000340" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-?um-ere?</data>
+		</node>
+		<node xml:id="per.x000341" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-?um-ere?</data>
+		</node>
+		<node xml:id="per.x000342" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-?um-ere?</data>
+		</node>
+		<node xml:id="per.x000343" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-?um-ere?</data>
+		</node>
+		<node xml:id="per.x000344" >
+			<data key="gender">U</data>
+			<data key="label">I?tar-?um-ere?</data>
+		</node>
+		<node xml:id="per.x000345" >
+			<data key="gender">U</data>
+			<data key="label">I?tar-?um-ere?z</data>
+		</node>
+		<node xml:id="per.x000346" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-uballissu</data>
+		</node>
+		<node xml:id="per.x000347" >
+			<data key="gender">M</data>
+			<data key="label">I?tar-zer-ibni</data>
+		</node>
+		<node xml:id="per.x000348" >
+			<data key="gender">M</data>
+			<data key="label">Itti-Anu-nuh?u</data>
+		</node>
+		<node xml:id="per.x000349" >
+			<data key="gender">M</data>
+			<data key="label">Itti-Anu-nuh?u</data>
+		</node>
+		<node xml:id="per.x000350" >
+			<data key="gender">F</data>
+			<data key="label">Karatu</data>
+		</node>
+		<node xml:id="per.x000351" >
+			<data key="gender">M</data>
+			<data key="label">Kephalon</data>
+		</node>
+		<node xml:id="per.x000352" >
+			<data key="gender">M</data>
+			<data key="label">Kephalon</data>
+		</node>
+		<node xml:id="per.x000353" >
+			<data key="gender">M</data>
+			<data key="label">Kephalon</data>
+		</node>
+		<node xml:id="per.x000354" >
+			<data key="gender">M</data>
+			<data key="label">Kephalon</data>
+		</node>
+		<node xml:id="per.x000355" >
+			<data key="gender">U</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000356" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000357" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000358" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000359" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000360" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000361" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000362" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000363" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000364" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000365" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000366" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000367" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000368" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000369" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000370" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000371" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000372" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000373" >
+			<data key="gender">U</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000374" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-Anu</data>
+		</node>
+		<node xml:id="per.x000375" >
+			<data key="gender">U</data>
+			<data key="label">Kidin-Istar</data>
+		</node>
+		<node xml:id="per.x000376" >
+			<data key="gender">M</data>
+			<data key="label">Kidin-I?tar</data>
+		</node>
+		<node xml:id="per.x000377" >
+			<data key="gender">U</data>
+			<data key="label">Kidin-Marduk</data>
+		</node>
+		<node xml:id="per.x000379" >
+			<data key="gender">U</data>
+			<data key="label">Kittu-Anu</data>
+		</node>
+		<node xml:id="per.x000380" >
+			<data key="gender">U</data>
+			<data key="label">Kittu-Anu</data>
+		</node>
+		<node xml:id="per.x000381" >
+			<data key="gender">U</data>
+			<data key="label">Kitu-Anu</data>
+		</node>
+		<node xml:id="per.x000382" >
+			<data key="gender">F</data>
+			<data key="label">Kua</data>
+		</node>
+		<node xml:id="per.x000383" >
+			<data key="gender">U</data>
+			<data key="label">Kuri</data>
+		</node>
+		<node xml:id="per.x000384" >
+			<data key="gender">U</data>
+			<data key="label">Labasi</data>
+		</node>
+		<node xml:id="per.x000385" >
+			<data key="gender">U</data>
+			<data key="label">Labasi</data>
+		</node>
+		<node xml:id="per.x000386" >
+			<data key="gender">U</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000387" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000388" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000389" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000390" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000391" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000392" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000393" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000394" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000395" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000396" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000397" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000398" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000399" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000400" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000401" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000402" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000403" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000404" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000405" >
+			<data key="gender">M</data>
+			<data key="label">Laba?i</data>
+		</node>
+		<node xml:id="per.x000406" >
+			<data key="gender">U</data>
+			<data key="label">Laqip</data>
+		</node>
+		<node xml:id="per.x000407" >
+			<data key="gender">F</data>
+			<data key="label">Linakusu</data>
+		</node>
+		<node xml:id="per.x000408" >
+			<data key="gender">M</data>
+			<data key="label">Li?er</data>
+		</node>
+		<node xml:id="per.x000409" >
+			<data key="gender">M</data>
+			<data key="label">Li?er</data>
+		</node>
+		<node xml:id="per.x000410" >
+			<data key="gender">M</data>
+			<data key="label">Li?er</data>
+		</node>
+		<node xml:id="per.x000411" >
+			<data key="gender">U</data>
+			<data key="label">Li?ir</data>
+		</node>
+		<node xml:id="per.x000412" >
+			<data key="gender">U</data>
+			<data key="label">Li?ir</data>
+		</node>
+		<node xml:id="per.x000413" >
+			<data key="gender">U</data>
+			<data key="label">Li?ir</data>
+		</node>
+		<node xml:id="per.x000414" >
+			<data key="gender">M</data>
+			<data key="label">Lu?tammar-Adad</data>
+		</node>
+		<node xml:id="per.x000415" >
+			<data key="gender">U</data>
+			<data key="label">Marduk-x</data>
+		</node>
+		<node xml:id="per.x000416" >
+			<data key="gender">M</data>
+			<data key="label">Mattanat-Anu</data>
+		</node>
+		<node xml:id="per.x000417" >
+			<data key="gender">M</data>
+			<data key="label">Mattan-Anu</data>
+		</node>
+		<node xml:id="per.x000418" >
+			<data key="gender">M</data>
+			<data key="label">Mukin-apli</data>
+		</node>
+		<node xml:id="per.x000419" >
+			<data key="gender">M</data>
+			<data key="label">Mukin-apli</data>
+		</node>
+		<node xml:id="per.x000420" >
+			<data key="gender">M</data>
+			<data key="label">Mukin-apli</data>
+		</node>
+		<node xml:id="per.x000421" >
+			<data key="gender">M</data>
+			<data key="label">Mura?u</data>
+		</node>
+		<node xml:id="per.x000422" >
+			<data key="gender">M</data>
+			<data key="label">Mu?allim-Anu</data>
+		</node>
+		<node xml:id="per.x000423" >
+			<data key="gender">F</data>
+			<data key="label">Mu?ezibitu</data>
+		</node>
+		<node xml:id="per.x000424" >
+			<data key="gender">M</data>
+			<data key="label">Nadin</data>
+		</node>
+		<node xml:id="per.x000425" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000426" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000427" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000428" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000429" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000430" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000431" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000432" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000433" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000434" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000435" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000436" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000437" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000438" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000439" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000440" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000441" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000442" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000443" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000444" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000445" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000446" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000447" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000448" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000449" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000450" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000451" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000452" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000453" >
+			<data key="gender">U</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000454" >
+			<data key="gender">U</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000455" >
+			<data key="gender">M</data>
+			<data key="label">Nana-iddin</data>
+		</node>
+		<node xml:id="per.x000456" >
+			<data key="gender">F</data>
+			<data key="label">Nana-nadinat</data>
+		</node>
+		<node xml:id="per.x000457" >
+			<data key="gender">U</data>
+			<data key="label">NENNI</data>
+		</node>
+		<node xml:id="per.x000458" >
+			<data key="gender">U</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000459" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000460" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000461" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000462" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000463" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000464" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000465" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000466" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000467" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000468" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000469" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000470" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000471" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000472" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000473" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000474" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000475" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000476" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000477" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000478" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000479" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000480" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000481" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000482" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000483" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000484" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000485" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000486" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000487" >
+			<data key="gender">U</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000488" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000489" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000490" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000491" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000492" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000493" >
+			<data key="gender">U</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000494" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000495" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000496" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000497" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000498" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000499" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-Anu</data>
+		</node>
+		<node xml:id="per.x000500" >
+			<data key="gender">U</data>
+			<data key="label">Nidintu-I?tar</data>
+		</node>
+		<node xml:id="per.x000501" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-I?tar</data>
+		</node>
+		<node xml:id="per.x000502" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-I?tar</data>
+		</node>
+		<node xml:id="per.x000503" >
+			<data key="gender">U</data>
+			<data key="label">Nidintu-I?tar</data>
+		</node>
+		<node xml:id="per.x000504" >
+			<data key="gender">F</data>
+			<data key="label">Nidintu-Nana</data>
+		</node>
+		<node xml:id="per.x000505" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-?arri</data>
+		</node>
+		<node xml:id="per.x000506" >
+			<data key="gender">M</data>
+			<data key="label">Nidintu-?arri</data>
+		</node>
+		<node xml:id="per.x000507" >
+			<data key="gender">M</data>
+			<data key="label">Nikanor</data>
+		</node>
+		<node xml:id="per.x000508" >
+			<data key="gender">M</data>
+			<data key="label">Nikarchos</data>
+		</node>
+		<node xml:id="per.x000509" >
+			<data key="gender">M</data>
+			<data key="label">Nikolaos</data>
+		</node>
+		<node xml:id="per.x000510" >
+			<data key="gender">F</data>
+			<data key="label">Nuptu-Nana</data>
+		</node>
+		<node xml:id="per.x000511" >
+			<data key="gender">M</data>
+			<data key="label">Philippos</data>
+		</node>
+		<node xml:id="per.x000512" >
+			<data key="gender">M</data>
+			<data key="label">Qi?ti-Anu</data>
+		</node>
+		<node xml:id="per.x000513" >
+			<data key="gender">M</data>
+			<data key="label">Rabi-Anu</data>
+		</node>
+		<node xml:id="per.x000514" >
+			<data key="gender">U</data>
+			<data key="label">Rabi-Anu</data>
+		</node>
+		<node xml:id="per.x000515" >
+			<data key="gender">M</data>
+			<data key="label">Rabi-Anu</data>
+		</node>
+		<node xml:id="per.x000516" >
+			<data key="gender">M</data>
+			<data key="label">Rabi-Anu</data>
+		</node>
+		<node xml:id="per.x000517" >
+			<data key="gender">M</data>
+			<data key="label">Rabi-Anu</data>
+		</node>
+		<node xml:id="per.x000519" >
+			<data key="gender">U</data>
+			<data key="label">Re?u-alpi</data>
+		</node>
+		<node xml:id="per.x000520" >
+			<data key="gender">U</data>
+			<data key="label">Re'u-alpi</data>
+		</node>
+		<node xml:id="per.x000521" >
+			<data key="gender">U</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000522" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000523" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000524" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000525" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000526" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000527" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000528" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-Anu</data>
+		</node>
+		<node xml:id="per.x000529" >
+			<data key="gender">U</data>
+			<data key="label">Rihat-Belet-?eri</data>
+		</node>
+		<node xml:id="per.x000530" >
+			<data key="gender">F</data>
+			<data key="label">Rihat-Belet-?eri</data>
+		</node>
+		<node xml:id="per.x000531" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-I?tar</data>
+		</node>
+		<node xml:id="per.x000532" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-I?tar</data>
+		</node>
+		<node xml:id="per.x000533" >
+			<data key="gender">M</data>
+			<data key="label">Rihat-I?tar</data>
+		</node>
+		<node xml:id="per.x000534" >
+			<data key="gender">F</data>
+			<data key="label">Same-ramat</data>
+		</node>
+		<node xml:id="per.x000535" >
+			<data key="gender">M</data>
+			<data key="label">Saniqqa</data>
+		</node>
+		<node xml:id="per.x000536" >
+			<data key="gender">U</data>
+			<data key="label">Sapik</data>
+		</node>
+		<node xml:id="per.x000537" >
+			<data key="gender">U</data>
+			<data key="label">Sa-Anu-issu</data>
+		</node>
+		<node xml:id="per.x000538" >
+			<data key="gender">U</data>
+			<data key="label">Seleucus</data>
+		</node>
+		<node xml:id="per.x000539" >
+			<data key="gender">U</data>
+			<data key="label">Seleucus</data>
+		</node>
+		<node xml:id="per.x000540" >
+			<data key="gender">M</data>
+			<data key="label">Seleucus</data>
+		</node>
+		<node xml:id="per.x000541" >
+			<data key="gender">M</data>
+			<data key="label">Seleucus</data>
+		</node>
+		<node xml:id="per.x000542" >
+			<data key="gender">U</data>
+			<data key="label">Sin-leqe-unnini</data>
+		</node>
+		<node xml:id="per.x000543" >
+			<data key="gender">U</data>
+			<data key="label">Sirki-Anu</data>
+		</node>
+		<node xml:id="per.x000544" >
+			<data key="gender">M</data>
+			<data key="label">Straton</data>
+		</node>
+		<node xml:id="per.x000545" >
+			<data key="gender">U</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000546" >
+			<data key="gender">M</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000547" >
+			<data key="gender">F</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000548" >
+			<data key="gender">M</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000549" >
+			<data key="gender">U</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000550" >
+			<data key="gender">U</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000551" >
+			<data key="gender">M</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000552" >
+			<data key="gender">U</data>
+			<data key="label">Sumuttu-Anu</data>
+		</node>
+		<node xml:id="per.x000553" >
+			<data key="gender">U</data>
+			<data key="label">?ala-li?lim</data>
+		</node>
+		<node xml:id="per.x000554" >
+			<data key="gender">U</data>
+			<data key="label">?ama?-etir</data>
+		</node>
+		<node xml:id="per.x000555" >
+			<data key="gender">M</data>
+			<data key="label">?ama?-e?ir</data>
+		</node>
+		<node xml:id="per.x000556" >
+			<data key="gender">U</data>
+			<data key="label">?ama?-e?ir</data>
+		</node>
+		<node xml:id="per.x000557" >
+			<data key="gender">M</data>
+			<data key="label">?ama?-ittannu</data>
+		</node>
+		<node xml:id="per.x000558" >
+			<data key="gender">M</data>
+			<data key="label">?ama?-ittannu</data>
+		</node>
+		<node xml:id="per.x000559" >
+			<data key="gender">M</data>
+			<data key="label">?ama?-ittannu</data>
+		</node>
+		<node xml:id="per.x000560" >
+			<data key="gender">M</data>
+			<data key="label">?apik</data>
+		</node>
+		<node xml:id="per.x000561" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000562" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000563" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000564" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000565" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000566" >
+			<data key="gender">U</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000567" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000568" >
+			<data key="gender">M</data>
+			<data key="label">?a-Anu-i??u</data>
+		</node>
+		<node xml:id="per.x000569" >
+			<data key="gender">M</data>
+			<data key="label">?erki-Anu</data>
+		</node>
+		<node xml:id="per.x000570" >
+			<data key="gender">M</data>
+			<data key="label">?ibqat-Anu</data>
+		</node>
+		<node xml:id="per.x000571" >
+			<data key="gender">M</data>
+			<data key="label">?ibqat-Anu</data>
+		</node>
+		<node xml:id="per.x000572" >
+			<data key="gender">U</data>
+			<data key="label">?ubiltu</data>
+		</node>
+		<node xml:id="per.x000573" >
+			<data key="gender">F</data>
+			<data key="label">?ubiltu</data>
+		</node>
+		<node xml:id="per.x000574" >
+			<data key="gender">U</data>
+			<data key="label">?umati</data>
+		</node>
+		<node xml:id="per.x000575" >
+			<data key="gender">U</data>
+			<data key="label">?umatu</data>
+		</node>
+		<node xml:id="per.x000576" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000577" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000578" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000579" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000580" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000581" >
+			<data key="gender">U</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000582" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000583" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000584" >
+			<data key="gender">U</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000585" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000586" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000587" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000588" >
+			<data key="gender">M</data>
+			<data key="label">Tanittu-Anu</data>
+		</node>
+		<node xml:id="per.x000589" >
+			<data key="gender">M</data>
+			<data key="label">Tarrib</data>
+		</node>
+		<node xml:id="per.x000590" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000591" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000592" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000593" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000594" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000595" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000596" >
+			<data key="gender">M</data>
+			<data key="label">Tattannu</data>
+		</node>
+		<node xml:id="per.x000597" >
+			<data key="gender">U</data>
+			<data key="label">Tattannu-Nana</data>
+		</node>
+		<node xml:id="per.x000598" >
+			<data key="gender">U</data>
+			<data key="label">Tattanu</data>
+		</node>
+		<node xml:id="per.x000599" >
+			<data key="gender">U</data>
+			<data key="label">Tattanu</data>
+		</node>
+		<node xml:id="per.x000600" >
+			<data key="gender">U</data>
+			<data key="label">Tattanu</data>
+		</node>
+		<node xml:id="per.x000601" >
+			<data key="gender">U</data>
+			<data key="label">Tattanu-Nana</data>
+		</node>
+		<node xml:id="per.x000602" >
+			<data key="gender">M</data>
+			<data key="label">Ubar</data>
+		</node>
+		<node xml:id="per.x000603" >
+			<data key="gender">M</data>
+			<data key="label">Ubar</data>
+		</node>
+		<node xml:id="per.x000604" >
+			<data key="gender">M</data>
+			<data key="label">Ubar</data>
+		</node>
+		<node xml:id="per.x000605" >
+			<data key="gender">M</data>
+			<data key="label">Ubar</data>
+		</node>
+		<node xml:id="per.x000606" >
+			<data key="gender">M</data>
+			<data key="label">Ubar</data>
+		</node>
+		<node xml:id="per.x000608" >
+			<data key="gender">U</data>
+			<data key="label">Usursu-Anu</data>
+		</node>
+		<node xml:id="per.x000609" >
+			<data key="gender">U</data>
+			<data key="label">Usur?u-Anu</data>
+		</node>
+		<node xml:id="per.x000610" >
+			<data key="gender">M</data>
+			<data key="label">U?ur?u-Anu</data>
+		</node>
+		<node xml:id="per.x000611" >
+			<data key="gender">M</data>
+			<data key="label">U?ur?u-Anu</data>
+		</node>
+	</graph>
+</graphml>
