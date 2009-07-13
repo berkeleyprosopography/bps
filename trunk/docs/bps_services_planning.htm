@@ -1,0 +1,108 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>BPS Services Planning</title>
+<style>
+body {font-family: Arial, Helvetica, sans; }
+h2, h3, h4 {text-transform: uppercase;}
+h1, h2, h3 {background-color: #eeeeee; }
+p, ol.spaced li {line-height:1.6em;}
+p.caption {text-align:center; font-weight:bold;}
+pre.xml {font-size:0.7em; background-color: #eeeeee; padding:10px;}
+blockquote.excerpt {font-size:0.85em;line-height:1.2em; padding-left:5px; padding-right:10px; text-align:justify;}
+@media screen {
+  body { padding: 0.25in 0.5in 0.25in 0.5in; }
+  }
+</style>
+</head>
+
+<body>
+
+<h2>BPS Services Planning</h2>
+<h3><b>Corpus loader</b></h3>
+<h4>Service Stories</h4>
+        <ol>
+          <li>Corpus service consumer can upload a zipped corpus file that will
+            populate the raw corpus tables</li>
+          <li>User can import corpus into workspace</li>
+        </ol>
+<h4>Schemas</h4>
+        <ol>
+          <li>Corpus - name, owner (User, denormalized to force existence). Can
+            Denormalize things like #docs, date range, etc.</li>
+          <li>Document - ID(s), date (orig string, and normalized date).</li>
+          <li>Activity - ID (unique), name, parentID (may be null, if not, this
+            is a sub-genre). Note there is no Document-Activities, since we can
+            get that from Name-Role-Activity-Doc with a select distinct/unique,
+            or a group by to get counts.</li>
+          <li>Name - if an orthographic variant of another name, will include a
+            link to normal form. Gender (male, female, unknown).&nbsp;Type:
+            Person, Clan</li>
+          <li>Name-Role-Activity-Doc</li>
+          <li>Name-FamilyLink. Assertions in doc about familial relations.
+            Relates a Name (patronym or clan name) to a Name-Role-Activity-Doc
+            (i.e., an instance of a mention of a principle, in a document).</li>
+        </ol>
+<h4>Modules</h4>
+<h4>Testing</h4>
+<h3><b>Workspace</b></h3>
+<h4>Service Stories</h4>
+<h4>Schemas</h4>
+        <ol>
+          <li>Workspace - owner (User, denormalized to force existence),
+            public/private. Probably needs some other ACL mechanism.</li>
+          <li>Parameter - name, type?, description, range.</li>
+          <li>NameRefActions - subjectNameRoleActivityDocID,
+            objectNameRoleActivityDocID, actionType (sameAs, notSameAs</li>
+          <li>FilterSpec - name, description, some specification to filter which
+            corpus info is used for a graph. By Clan, by Gender, by Role, By
+            Activity(genre)</li>
+          <li>NameRefGroups - allows for grouping nodes to build a graph.</li>
+          <li>Graph - name, notes, date created, filterSpecID.</li>
+          <li>Graph-Parameters - parameterID, value (float).</li>
+          <li>Person - name, gender, patronym (multiple?), clan, active age
+            begin, active age end, comment</li>
+          <li>PersonCitations - personID, nameRoleActivityDocID.</li>
+          <li>Relation - type, weight, subject, object, graph</li>
+        </ol>
+<h4>Modules</h4>
+<h4>Testing</h4>
+<h3><b>Graph</b>-Builder</h3>
+<h4>Service Stories</h4>
+        <ol>
+          <li>User can specify a Workspace context (corpus, filters, parameters)
+            and get a family tree (an output Graph).</li>
+          <li>User can specify a Workspace context (corpus, filters, parameters)
+            and get a social network (an output Graph).</li>
+        </ol>
+<h4>Schemas</h4>
+<h4>Modules</h4>
+<h4>Testing</h4>
+<h3>User<b> </b> Management, <b> including</b> Authentication/Authorization support:</h3>
+<h4>Service Stories</h4>
+        <ol>
+          <li>User can sign in to system, and set up basic profile information.</li>
+          <li>Admin can create a new user.</li>
+          <li>Application can associate a new workspace to a new user.&nbsp;</li>
+          <li>Admin can set workspace-owner role for user on associated
+            workspace.</li>
+          <li>Workspace-owner can allow other users access to owned workspace.</li>
+        </ol>
+<h4>Schemas</h4>
+            <ol>
+              <li>User</li>
+              <li>Role</li>
+              <li>User-Roles</li>
+              <li>Permission</li>
+              <li>Role-Perms</li>
+            </ol>
+<h4>Modules</h4>
+<h4>Testing</h4>
+
+</body>
+
+</html>

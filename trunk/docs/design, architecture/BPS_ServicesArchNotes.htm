@@ -1,0 +1,238 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>BPS Services Architecture Notes</title>
+<style>
+body {font-family: Arial, Helvetica, sans; }
+h2, h3, h4 {text-transform: uppercase;}
+p.spaced, ol.spaced li {line-height:1.6em;}
+p.caption {text-align:center; font-weight:bold;}
+pre.xml {font-size:0.7em; background-color: #eeeeee; padding:10px;}
+blockquote.excerpt {font-size:0.85em;line-height:1.2em; padding-left:5px; padding-right:10px; text-align:justify;}
+@media screen {
+  body { padding: 0.25in 0.5in 0.25in 0.5in; }
+  }
+</style>
+
+</head>
+
+<body>
+
+<h2>BPS Services Architecture Notes</h2>
+
+<p>We are realizing that we need a broader set of central services than just a
+graph builder. We need to be able to model and manage workspaces, users, basic
+roles and permissions associated to workspaces. We need to manage a DB model of
+the information, and support simple (REST-based) query of the resources for
+visualization or other processing. </p>
+
+<p>These notes describe the basic requirements and likely approaches to
+providing these services. This is not intended to be exhaustive. We will take an
+agile approach to development, based most likely on XP techniques. </p>
+
+<h3>Primary service families</h3>
+
+<h4>User management Services</h4>
+
+<p>We will support a basic profile for each user, and simple authentication for
+access to the system. Later, this will incorporate SSO integration with CalNet,
+but we must also accommodate off-campus users, which CalNet is not yet
+providing. Ideally, we would reuse the CollectionSpace Authentication services,
+when we transition to a more robust SOA implementation.</p>
+
+<p>It will&nbsp; also be possible for unauthenticated users to access some
+resources.</p>
+
+<h4>Workspace management Services</h4>
+
+<p>Users will have access to workspaces (by default, a per-user workspace) in
+which they control changes to data. The workspace will also store preferred
+parameters and settings associated with graph operations, etc. </p>
+
+<p>A simple (access control list) ACL model (or equivalent) will control access
+to the workspace, allowing the owner to grant or deny read and/or write access
+to their workspace to other users, or to the broader community. This will use
+roles defined for the workspace, include viewer, collaborator, manager. </p>
+
+<p>By default, when a user account is created, a workspace will also be created,
+and the new user will be given admin rights over that workspace. It may be
+possible at some point for a new user to be created that has no personal
+workspace, but who is given access to an existing (shared) workspace.</p>
+
+<p>Longer term, it should be possible for users to publish changes they make to
+their workspace data, and for others to incorporate these changes into their
+respective workspaces. This will not involve any DB merging functionality in the
+manner of version control systems, but rather will be of the nature of logical
+operations (&quot;Merge Anu-Uballit[14] into Anu-Uballit[12]&quot;). [<i>Note to
+self and selected reviewers: this aligns to the model described for CONCUR, in
+which repeatable commands are associated to publishers, allowing for reputation
+tracking, and eventually a kind of recommender system for sharing research
+conclusions.</i>]</p>
+
+<p>Workspace owner/manager will be able to import corpora from the Corpus
+repository services. This may involve an actual data copy or it may just be the
+configuration of a data source - TBD.</p>
+
+<h4>Workspace Resource Services</h4>
+
+<p>REST services will support discovery and review of the interpreted
+information in the workspace corpus. (including the output of the Graph Builder
+Services described below). Resources modeled will likely include the following.
+Note that all of these will be constrained by the access rights of the caller,
+as specified by the workspace owner. Note also that these complement the corpus
+resources that model by the actual documents, etc. Resources will likely be
+exposed as GraphML, and may also be exposed as JSON. </p>
+<ul>
+  <li>Person (not name) list in corpus</li>
+  <li>Person info: Normalized name(s) used, document mentions, orthographic name
+    variants</li>
+  <li>Person actions: split, collapse</li>
+  <li>Relations in corpus. This is the heart of the social-network, and
+    generally includes Person references to define the relations (except for
+    summary reports by type, etc.). Resource
+    model includes query with a range of filters:
+    <ul>
+      <li>Centered on a single Person. Includes CRUD operations to support
+        addition of family relations</li>
+      <li>Centered on a given Document</li>
+      <li>Among a group of Persons, specified by some query params (e.g., in a
+        given family tree, of a certain gender)</li>
+      <li>Among a group of Documents, specified by some query params (e.g.,
+        representing a given activity genre)</li>
+      <li>Filtered by type, e.g., activity relations, familial relations, marriage,
+        roles, etc.</li>
+      <li>Summary (counts) by type, e.g., activity relations, familial relations, marriage,
+        roles, etc.</li>
+    </ul>
+  </li>
+  <li>Relation Info, to examine and, in particular, to create or update an
+    individual relation.</li>
+  <li>Model parameters, used by the Graph Services to produce the relations and
+    associated probability-weights. The list of (non-default?) parameters can be
+    retrieved, updated.</li>
+  <li>Model Actions: the set of actions taken by the user to modify the graph.
+    These actions will be defined in such a way that they can be exchanged among
+    workspaces to recapitulate changes. The history of such exchange and
+    &quot;adoption&quot; will be tracked as well, to eventually provide some
+    insight into authority and confidence of certain changes.<br>
+    The resource model for these actions will support a range of filters:
+    <ul>
+      <li>Changes since last update, allowing for RSS/Atom functionality on
+        changes made to the graph</li>
+      <li>By type, e.g., Person operations, Relation operations.</li>
+      <li>By filter, e.g., gender, family-clan.</li>
+      <li>By date range of people involved.</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>CORPUS REPOSITORY Services</h4>
+
+<p>The repository services allow users to upload raw data for a corpus, as TEI-for-BPS
+encoded XML files. Initially, a single bundle or incremental files will be
+supported, but later we may be able to support updates that can merge with an
+existing workspace. We will support zip'd bundles that may be a single file or
+multiple files. </p>
+
+<p>Access control will be supported, but will have a very simple model. The
+corpus owner can: </p>
+<ul>
+  <li>Allow or deny public list/read access to the corpus as a whole.</li>
+  <li>Grant list/read/import access on a workspace-by-workspace basis.</li>
+  <li>Grant management rights&nbsp; to another user.&nbsp;</li>
+</ul>
+<p>REST services will support discovery and review of the documents in the
+repository. Resources modeled will likely include the following. Note that all
+of these will be constrained by the access rights of the caller, as specified by
+the corpus owner. Note also that these are complemented by corpus resources that
+are modeled by the workspaces (especially all resources that involve some
+interpretation, like people and connections). </p>
+<ul>
+  <li>Corpora in the repository - a list of corpus IDs and names.</li>
+  <li>Corpus info - name, owner info (contact, affiliation, home page, etc.),
+    #docs, date range, topics, languages, etc.</li>
+  <li>Documents in corpus - a list of document&nbsp; IDs.</li>
+  <li>Document info: document-specific metadata provided at import, like tablet
+    IDs and numbers, date, and perhaps
+    characteristics of the document (faces, number of lines, etc.). In addition,
+    for each document, there will be information about activity genres and sub-genres,
+    and the associated roles of Named persons:
+    <ul>
+      <li>Activity(-ies) in a given Document (HBTIN corpus is one-per-document,
+        but a general model allows for <i>N</i>). For each activity, there will
+        be a set of Names with associated Roles (although a Role may sometimes
+        be &quot;<i>Unknown</i>&quot;).</li>
+      <li>Familial declarations for names.</li>
+    </ul>
+  </li>
+  <li>Name list (normalized) in entire corpus, with counts of mentions.</li>
+  <li>Name info: document mentions (either by normalized form, or orthographic
+    variant)</li>
+</ul>
+
+<p>It will be possible to associate a URL-builder with particular ID values for
+each document (and possibly for other resources as well), allowing for linkage to other repositories and resource for the
+corpus documents. </p>
+
+<h4>Graph Builder Services</h4>
+
+<p>These services require an existing corpus and a set of model parameters, and
+produce models of Persons and Relations that is stored in a Workspace. The graph
+builder services do not support much of a resource model; the workspace services
+expose the resulting graph models. </p>
+
+<p>In abstract, the Graph Builder takes a <i> workspace-context</i> and some specifier for the type of graph to produce (e.g.,
+family tree, social network, etc.) and produces a graph (Persons and Relations).
+The context includes: </p>
+<ul>
+  <li>a subset of a corpus, with annotations to indicate when name mentions in a
+    given document have been &quot;pinned&quot; by the workspace editor(s) to
+    the individual associated with another name-citation.
+    <ul>
+      <li>Refers to the corpus services for deep information</li>
+      <li>Collects Name-Role-Activity-Document tuples, with annotations to
+        constrain the Name to Individual mapping:
+        <ul>
+          <li>Indicated by the user as the same as another Individual. This
+            includes by an ID reference to another Name-Role-Activity-Document
+            tuple. Note that we do not use a direct reference to a modeled <i>individual</i>,
+            but link indirectly to the modeled individual that the other
+            document refers. It multiple documents are pinned to refer to the
+            same individual, we only need to refer to one as the graph builder
+            will gather all the references across the corpus into one
+            individual.</li>
+          <li>&nbsp;Indicated by the user as <i>not</i> the same as another
+            Individual. The same reference mechanism is used as above. There may
+            be multiple instances of this, but only if there are no instances of
+            positive references.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>model parameter values that control how probabilistic weight is
+    distributed. Candidate parameters might include:
+    <ul>
+      <li>How much to favor existing individuals (coalescing a population), or
+        not (increasing the population).</li>
+      <li>How much to assume individuals appear in a single (or few) genre(s) of
+        activity (separating a population by activity genre), or not
+        (distributing a population across activity genres).</li>
+      <li>How much to assume individuals favor interaction with family/clan
+        members (favoring isolated social networks by clan), or not (creating
+        social networks independent of clan).</li>
+      <li>How much significance to attach to orthographic variations. Ignoring
+        this assumes the variations are incidental, and considering this
+        significant assumes that different individuals tend to use different
+        orthographic variants for their names.</li>
+    </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>
+
+</body>
+
+</html>
