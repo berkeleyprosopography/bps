@@ -19,6 +19,13 @@ public class Activity {
 
 	/**
 	 * @param name A shorthand name for use in UI, etc.
+	 */
+	public Activity(String name) {
+		this(Activity.nextID++, name, null, null);
+	}
+
+	/**
+	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 * @param parent Broader activity that this specializes.
 	 */

@@ -3,6 +3,8 @@
  */
 package bps.services.corpus.main;
 
+import java.util.ArrayList;
+
 /**
  * @author pschmitz
  *
@@ -19,6 +21,9 @@ public class NameRoleActivity {
 	 * The ID of the token associated with this in the owning document
 	 */
 	private String			xmlID;
+
+	// Any family links. May be null.
+	private ArrayList<NameFamilyLink> nameFamilyLinks;
 
 	/**
 	 * Create a new empty instance.
@@ -57,6 +62,7 @@ public class NameRoleActivity {
 		this.role = role;
 		this.activity = activity;
 		this.xmlID = xmlID;
+		this.nameFamilyLinks = null;
 	}
 
 	/**
@@ -141,6 +147,27 @@ public class NameRoleActivity {
 	 */
 	public void setXmlID(String xmlID) {
 		this.xmlID = xmlID;
+	}
+
+	public void addNameFamilyLink( NameFamilyLink nfl ) {
+		nameFamilyLinks.add(nfl);
+	}
+
+	/**
+	 * @param nameRoleActivity the instance of a name being annotated
+	 * @param name The Name of the linked family member (or clan)
+	 * @param linkType one of the LINK_TO_* constants defined in the class
+	 * @param xmlID The ID of the token associated with this in the owning document
+	 */
+	public void addNameFamilyLink(Name name, int linkType, String xmlID) {
+		nameFamilyLinks.add(new NameFamilyLink(name, linkType, xmlID));
+	}
+
+	/**
+	 * @return the nameFamilyLinks
+	 */
+	public ArrayList<NameFamilyLink> getNameFamilyLinks() {
+		return nameFamilyLinks;
 	}
 
 	public boolean isValid() {

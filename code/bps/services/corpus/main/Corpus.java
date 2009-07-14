@@ -9,7 +9,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class Corpus {
 	private static int	nextID = 1;
@@ -65,13 +65,17 @@ public class Corpus {
 		this.name = name;
 		this.description = description;
 		documents = new HashMap<Integer, Document>();
+		activities = new HashMap<String, Activity>();
+		activityRoles = new HashMap<String, ActivityRole>();
+		names = new HashMap<String, Name>();
 	}
 
-	public static Corpus CreateFromTEI(Node docNode)
+	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate)
 		throws XPathExpressionException {
 		String name = "unknown";
 		String description = null;
 	    XPath xpath = XPathFactory.newInstance().newXPath();
+	    Corpus newCorpus = null;
        // XPath Query to get to the corpus title
 	    try {
 		    XPathExpression expr = xpath.compile("//teiHeader/fileDesc/titleStmt/title");
@@ -82,11 +86,27 @@ public class Corpus {
 		    Element descEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
 		    if(descEl!=null)
 		    	description = descEl.getTextContent().replaceAll("[\\s]+", " ");
+		    newCorpus = new Corpus(name, description);
+		    if(deepCreate) {
+		    	// Find the TEI nodes and create a document for each one
+		    	NodeList docNodes = docNode.getElementsByTagName( "TEI" );
+				if( docNodes.getLength() < 1 ) {  // Must define at least one.
+					System.err.println("Corpus:CreateFromTEI: Corpus file has no TEI elements!");
+				} else {
+					// For each info element, need to get all the fields.
+					int nDocs = docNodes.getLength();
+					for( int iDoc = 0; iDoc < nDocs; iDoc++) {
+					    Element teiEl = (Element)docNodes.item(iDoc);
+					    Document document = Document.CreateFromTEI(teiEl, true, newCorpus);
+					    newCorpus.addDocument(document);
+					}
+				}
+		    }
 	    } catch (XPathExpressionException xpe) {
 	    	// debug complaint
 	    	throw xpe;
 	    }
-	    return new Corpus(name, description);
+	    return newCorpus;
 	}
 
 	public int getId() {
@@ -117,12 +137,47 @@ public class Corpus {
 		documents.put(newDoc.getId(), newDoc);
 	}
 
+	public Activity findOrCreateActivity(String name) {
+		Activity instance = activities.get(name);
+		if(instance == null) {
+			instance = new Activity(name);
+			activities.put(name, instance);
+		}
+		return instance;
+	}
+
+	public Name findOrCreateName(String name) {
+		Name instance = names.get(name);
+		if(instance == null) {
+			instance = new Name(name);
+			names.put(name, instance);
+		}
+		return instance;
+	}
+
+	public ActivityRole findOrCreateActivityRole(String name) {
+		ActivityRole instance = activityRoles.get(name);
+		if(instance == null) {
+			instance = new ActivityRole(name);
+			activityRoles.put(name, instance);
+		}
+		return instance;
+	}
+
 	public void generateDependentSQL(String documentsFilename, String activitiesFilename,
 			String namesFilename, String activityRolesFilename, String nameRoleActivitiesFilename ) {
+    	System.out.print("Generating Documents (and NameRoleActivityDocs) SQL...");
 		SQLUtils.generateDocumentsSQL(documentsFilename, nameRoleActivitiesFilename, documents);
+    	System.out.println("Done.");
+    	System.out.print("Generating Activities SQL...");
 		SQLUtils.generateActivitiesSQL(activitiesFilename, activities);
+    	System.out.println("Done.");
+    	System.out.print("Generating ActivityRoles SQL...");
 		SQLUtils.generateActivityRolesSQL(activitiesFilename, activityRoles);
+    	System.out.println("Done.");
+    	System.out.print("Generating Names SQL...");
 		SQLUtils.generateNamesSQL(namesFilename, names);
+    	System.out.println("Done.");
 	}
 
 	/**
@@ -166,15 +221,27 @@ public class Corpus {
         }
         String outFileBase = corpusFile.replace(".xml", "_");
         String corpusSQLfile = outFileBase+"corpus_load.txt";
+        String docsSQLfile = outFileBase+"document_load.txt";
+        String activitiesSQLfile = outFileBase+"activity_load.txt";
+        String namesSQLfile = outFileBase+"name_load.txt";
+        String activityRolesSQLfile = outFileBase+"activityRole_load.txt";
+        String nameRoleActivitiesSQLfile = outFileBase+"nameRoleActivity_load.txt";
         HashMap<Integer, Corpus> corpora = new HashMap<Integer, Corpus>();
         try {
+        	System.out.print("Opening corpus file...");
 	        org.w3c.dom.Document doc = XMLUtils.OpenXMLFile("file:\\\\"+corpusFile);
-			Corpus testCorpus = Corpus.CreateFromTEI(doc);
+        	System.out.println("Done.");
+        	System.out.println("Creating corpus...");
+			Corpus testCorpus = Corpus.CreateFromTEI(doc, true);
+        	System.out.println("Done.");
 			corpora.put(testCorpus.getId(), testCorpus);
+        	System.out.print("Generating Corpus SQL...");
 			SQLUtils.generateCorpusSQL(corpusSQLfile, corpora);
-			//Document doc1 = new Document();
-			//testCorpus.addDocument(doc1);
-        	System.err.println("Corpus test completed.");
+        	System.out.println("Done.");
+        	System.out.println("Generating Dependent SQL...");
+			testCorpus.generateDependentSQL(docsSQLfile, activitiesSQLfile,
+					namesSQLfile, activityRolesSQLfile, nameRoleActivitiesSQLfile);
+        	System.out.println("Corpus test completed.");
         } catch (Exception e) {
         	System.err.println(e);
         }

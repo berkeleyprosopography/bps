@@ -2,7 +2,15 @@ package bps.services.corpus.main;
 
 import java.util.ArrayList;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author pschmitz
@@ -20,7 +28,6 @@ public class Document {
 	private int			date_norm;		// Normalized date
 
 	private ArrayList<NameRoleActivity> nameRoleActivities;
-	private ArrayList<NameFamilyLink> nameFamilyLinks;
 
 	/**
 	 * Ctor with all params - not generally used.
@@ -43,7 +50,6 @@ public class Document {
 		this.date_str = date_str;
 		this.date_norm = date_norm;
 		this.nameRoleActivities = new ArrayList<NameRoleActivity>();
-		this.nameFamilyLinks = new ArrayList<NameFamilyLink>();
 	}
 
 	/**
@@ -62,14 +68,143 @@ public class Document {
 	}
 
 	/**
+	 * Create a new Document from an alt_id
+	 * @param alt_id Secondary identifier string
+	 */
+	public Document(String alt_id) {
+		this(Document.nextID++, alt_id, null, null, null, null, 0);
+	}
+
+	/**
 	 * Create a new null Document.
 	 */
 	public Document() {
 		this(Document.nextID++, null, null, null, null, null, 0);
 	}
 
-	public static Document CreateFromTEI(Element docNode) {
-		return new Document();
+	/**
+	 * @param teiNode The XML node for this Document
+	 * @param deepCreate set to TRUE if this should also create Name, Activity, etc. instances
+	 * @param corpus must be non-null if deepCreate is TRUE. All other instances are added to corpus lists.
+	 * @return new Document
+	 * @throws XPathExpressionException
+	 */
+	public static Document CreateFromTEI(Element teiNode, boolean deepCreate, Corpus corpus)
+		throws XPathExpressionException {
+		String alt_id = "unknown";
+		//String notes = null;
+	    XPath xpath = XPathFactory.newInstance().newXPath();
+	    Document newDoc = null;
+	    try {
+	        // XPath Query to get to the doc CDLI id
+		    XPathExpression expr = xpath.compile("./teiHeader/fileDesc/titleStmt/title/name[@type='cdlicat:id_text']");
+		    Element nameEl = (Element) expr.evaluate(teiNode, XPathConstants.NODE);
+		    if(nameEl!=null)
+		    	alt_id = nameEl.getTextContent().replaceAll("[\\s]+", " ");
+		    newDoc = new Document(alt_id);
+		    Activity unkActivity = corpus.findOrCreateActivity("Unknown");
+		    ActivityRole principal = corpus.findOrCreateActivityRole("Principal");
+		    ActivityRole witness = corpus.findOrCreateActivityRole("Witness");
+		    if(deepCreate) {
+		    	// Find the principal persName nodes and create a nameRoleActivity for each one
+		    	newDoc.addNamesForActivity( ".//body//persName",
+		    								teiNode, corpus, unkActivity, principal );
+		    	// Find the witness persName nodes and create a nameRoleActivity for each one
+		    	newDoc.addNamesForActivity( ".//back//div[@subtype='witnesses']//persName",
+		    								teiNode, corpus, unkActivity, witness );
+		    }
+	    } catch (XPathExpressionException xpe) {
+	    	// debug complaint
+	    	throw xpe;
+	    }
+	    return newDoc;
+	}
+
+	public void addNamesForActivity( String xpathSel, Node context, Corpus corpus,
+			Activity activity, ActivityRole defaultActRole )
+		throws XPathExpressionException {
+
+	    XPath xpath = XPathFactory.newInstance().newXPath();
+	    try {
+			XPathExpression expr = xpath.compile(xpathSel);
+		    NodeList nodes = (NodeList) expr.evaluate(context, XPathConstants.NODESET);
+		    int nNodes = nodes.getLength();
+		    for (int i=0; i < nNodes; i++) {
+	        	NameRoleActivity nra = null;
+		        Element persNameEl = (Element)nodes.item(i);
+		        // Get the forenames
+		        NodeList fnNodes = persNameEl.getElementsByTagName("forename");
+			    int nNames = fnNodes.getLength();
+		        if(nNames<1) {
+		        	// Complain
+		        } else {
+		        	int patronymsLinked = 0;
+				    for (int iN=0; iN < nNames; iN++) {
+				        Element foreNameEl = (Element)fnNodes.item(iN);
+				        String fnNameStr = foreNameEl.getAttribute("n").replaceAll("\\[.*\\]$", "");
+				        if(fnNameStr.length()<1) {
+				        	// Complain
+				        } else {
+				        	Name nameInstance = corpus.findOrCreateName(fnNameStr);
+					        String fnXMLID = foreNameEl.getAttribute("xml:id");
+					        if(fnXMLID.length()<1)
+					        	fnXMLID = null;
+					        String fnType = foreNameEl.getAttribute("type");
+					        boolean isPatronym = fnType.equalsIgnoreCase("patronymic");
+					        if(!isPatronym) {
+					        	if(nra!=null) {
+						        	// Complain - only one primary name
+					        	} else {
+						        	nra = new NameRoleActivity(nameInstance, defaultActRole,
+						        			activity, fnXMLID);
+						        	addNameRoleActivity(nra);
+					        	}
+					        } else if(nra==null) {
+					        	// Complain - must already have primary name
+					        } else {
+					        	// Deal with patronyms - add a family link
+					        	int linkType;
+					        	if(patronymsLinked == 0) {
+					        		linkType = NameFamilyLink.LINK_TO_FATHER;
+					        	} else  if(patronymsLinked == 1) {
+					        		linkType = NameFamilyLink.LINK_TO_GRANDFATHER;
+					        	} else {
+					        		linkType = NameFamilyLink.LINK_TO_ANCESTOR;
+					        	}
+					        	nra.addNameFamilyLink(nameInstance, linkType, fnXMLID);
+					        	patronymsLinked++;
+					        }
+				        }
+				    }
+		        }
+		        // Get the clan names
+		        NodeList anNodes = persNameEl.getElementsByTagName("addName");
+			    nNames = anNodes.getLength();
+			    for (int iN=0; iN < nNames; iN++) {
+			        Element addNameEl = (Element)anNodes.item(iN);
+			        String anNameStr = addNameEl.getAttribute("n").replaceAll("\\[.*\\]$", "");
+			        if(anNameStr.length()<1) {
+			        	// Complain
+			        } else {
+			        	Name nameInstance = corpus.findOrCreateName(anNameStr);
+				        String fnXMLID = addNameEl.getAttribute("xml:id");
+				        if(fnXMLID.length()<1)
+				        	fnXMLID = null;
+				        if(!addNameEl.getAttribute("type").equalsIgnoreCase("clan")){
+				        	// Complain - must be of type clan
+				        } else if(nra==null) {
+				        	// Complain - must already have primary name
+				        } else {
+				        	// add clan name
+				        	nra.addNameFamilyLink(nameInstance, NameFamilyLink.LINK_TO_CLAN, fnXMLID);
+				        }
+			        }
+			    }
+		    }
+	    } catch (XPathExpressionException xpe) {
+	    	// debug complaint
+	    	throw xpe;
+	    }
 	}
 
 	/**
@@ -185,33 +320,11 @@ public class Document {
 		nameRoleActivities.add(new NameRoleActivity(name, role, activity, xmlID));
 	}
 
-	public void addNameFamilyLink( NameFamilyLink nfl ) {
-		nameFamilyLinks.add(nfl);
-	}
-
-	/**
-	 * @param nameRoleActivity the instance of a name being annotated
-	 * @param name The Name of the linked family member (or clan)
-	 * @param linkType one of the LINK_TO_* constants defined in the class
-	 * @param xmlID The ID of the token associated with this in the owning document
-	 */
-	public void addNameFamilyLink(NameRoleActivity nameRoleActivity, Name name,
-			int linkType, String xmlID) {
-		nameFamilyLinks.add(new NameFamilyLink(nameRoleActivity, name, linkType, xmlID));
-	}
-
 	/**
 	 * @return the nameRoleActivities
 	 */
 	public ArrayList<NameRoleActivity> getNameRoleActivities() {
 		return nameRoleActivities;
-	}
-
-	/**
-	 * @return the nameFamilyLinks
-	 */
-	public ArrayList<NameFamilyLink> getNameFamilyLinks() {
-		return nameFamilyLinks;
 	}
 
 	/**
