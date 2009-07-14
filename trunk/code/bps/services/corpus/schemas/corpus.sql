@@ -10,7 +10,7 @@ CREATE TABLE `corpus` (
   `description`   text NULL,
   `owner`         INT(10) UNSIGNED NOT NULL,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP 
+  `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP
 )ENGINE=MyIsam;
 SHOW WARNINGS;
@@ -21,13 +21,14 @@ SHOW WARNINGS;
 DROP TABLE IF EXISTS `document`;
 CREATE TABLE `document` (
   `id`            INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
-  `cdl_id`        VARCHAR(255) NULL,
   `alt_id`        VARCHAR(255) NULL,
+  `sourceURL`     VARCHAR(255) NULL,
+  `xml_id`        VARCHAR(255) NULL,
   `notes`         text NULL,
   `date_str`      VARCHAR(255) NULL,
   `date_norm`     INT(8) NULL,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP 
+  `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP
 )ENGINE=MyIsam;
 SHOW WARNINGS;
@@ -45,7 +46,7 @@ CREATE TABLE `activity` (
   `description`    text NULL,
   `parent`         INT(10) UNSIGNED default NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
-  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP 
+  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP
 )ENGINE=MyIsam;
 SHOW WARNINGS;
@@ -61,7 +62,7 @@ CREATE TABLE `act_role` (
   `name`           VARCHAR(255) NOT NULL,
   `description`    text NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
-  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP 
+  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP
 )ENGINE=MyIsam;
 SHOW WARNINGS;
@@ -76,14 +77,14 @@ CREATE TABLE `name` (
   `notes`          text NULL,
   `normal`         INT(10) UNSIGNED default NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
-  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP 
+  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
 	CONSTRAINT `name_ibfk_1` FOREIGN KEY (`normal`)
       REFERENCES `name` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
--- Define the table that collects all instances of names in documents 
+-- Define the table that collects all instances of names in documents
 -- with associated roles in activities.
 -- The xml_idref provides a link into the original TEI document, but
 -- may be needed for disambiguation if one name is involved in multiple
