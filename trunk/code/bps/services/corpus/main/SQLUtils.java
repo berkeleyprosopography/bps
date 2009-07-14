@@ -95,6 +95,14 @@ public class SQLUtils {
             //debugTrace(2, e);
 			throw new RuntimeException("Problem writing SQL entry for document." );
 		}
+		try {
+			docsWriter.flush();
+			docsWriter.close();
+			nrasWriter.flush();
+			nrasWriter.close();
+		} catch( IOException e ) {
+			throw new RuntimeException("Problem writing Document or NameRoleActivityDoc SQL.");
+		}
 	}
 
 	public static void generateNameRoleActivityDocumentsSQL(Writer writer,
@@ -135,6 +143,12 @@ public class SQLUtils {
 				throw new RuntimeException("Problem writing SQL entry for Activity:"+activity );
 			}
 		}
+		try {
+			writer.flush();
+			writer.close();
+		} catch( IOException e ) {
+			throw new RuntimeException("Problem writing Activity SQL.");
+		}
 	}
 
 	public static void generateActivityRolesSQL(String filename, HashMap<String, ActivityRole> activityRoles) {
@@ -161,6 +175,12 @@ public class SQLUtils {
 				throw new RuntimeException("Problem writing SQL entry for ActivityRole:"+ar );
 			}
 		}
+		try {
+			writer.flush();
+			writer.close();
+		} catch( IOException e ) {
+			throw new RuntimeException("Problem writing ActivityRole SQL.");
+		}
 	}
 
 	public static void generateNamesSQL(String filename, HashMap<String, Name> names) {
@@ -186,6 +206,12 @@ public class SQLUtils {
 			} catch( IOException e ) {
 				throw new RuntimeException("Problem writing SQL entry for Name:"+name );
 			}
+		}
+		try {
+			writer.flush();
+			writer.close();
+		} catch( IOException e ) {
+			throw new RuntimeException("Problem writing Name SQL.");
 		}
 	}
 

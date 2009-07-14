@@ -15,6 +15,14 @@ public class ActivityRole {
 	}
 
 	/**
+	 * Create a new ActivityRole with just a name.
+	 * @param name A shorthand name for use in UI, etc.
+	 */
+	public ActivityRole( String name ) {
+		this(ActivityRole.nextID++, name, null);
+	}
+
+	/**
 	 * Create a new ActivityRole with name and description.
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.

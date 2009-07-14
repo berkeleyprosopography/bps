@@ -21,7 +21,6 @@ public class NameFamilyLink {
 	private static int	nextID = 1;
 
 	private int					id;
-	private NameRoleActivity	nameRoleActivity;
 	private Name				name;
 	private int					linkType;
 	/**
@@ -33,7 +32,7 @@ public class NameFamilyLink {
 	 * Create a new empty instance.
 	 */
 	public NameFamilyLink() {
-		this(nextID++, null, null, LINK_TO_UNDEFINED, null);
+		this(nextID++, null, LINK_TO_UNDEFINED, null);
 	}
 
 	/**
@@ -42,23 +41,19 @@ public class NameFamilyLink {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameFamilyLink(NameRoleActivity nameRoleActivity, Name name,
-			int linkType, String xmlID) {
-		this(nextID++, nameRoleActivity, name, linkType, xmlID);
+	public NameFamilyLink(Name name, int linkType, String xmlID) {
+		this(nextID++, name, linkType, xmlID);
 	}
 
 	/**
 	 * Ctor with all params - not generally used.
 	 * @param id ID of the instance to be created. Must be unique.
-	 * @param nameRoleActivity the instance of a name being annotated
 	 * @param name The Name of the linked family member (or clan)
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameFamilyLink(int id, NameRoleActivity nameRoleActivity, Name name,
-			int linkType, String xmlID) {
+	public NameFamilyLink(int id, Name name, int linkType, String xmlID) {
 		this.id = id;
-		this.nameRoleActivity = nameRoleActivity;
 		this.name = name;
 		this.linkType = linkType;
 		this.xmlID = xmlID;
@@ -76,20 +71,6 @@ public class NameFamilyLink {
 	 */
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	/**
-	 * @return the nameRoleActivity
-	 */
-	public NameRoleActivity getNameRoleActivity() {
-		return nameRoleActivity;
-	}
-
-	/**
-	 * @param nameRoleActivity the nameRoleActivity to set
-	 */
-	public void setNameRoleActivity(NameRoleActivity nameRoleActivity) {
-		this.nameRoleActivity = nameRoleActivity;
 	}
 
 	/**
@@ -135,16 +116,15 @@ public class NameFamilyLink {
 	}
 
 	public boolean isValid() {
-		return !(nameRoleActivity==null||name==null
+		return !(name==null
 				||linkType<LINK_TYPE_MIN||linkType>LINK_TYPE_MAX);
 	}
 
 	/**
-	 * @return Name, Role-name, Activity-name, XML idref concatenated.
+	 * @return Name, link type, XML idref concatenated.
 	 */
 	public String toString() {
-		return "{"+((nameRoleActivity==null)?"?":nameRoleActivity.toString())+","
-				+((name==null)?"?":name.toString())+","
+		return "{"+((name==null)?"?":name.toString())+","
 				+linkType+","
 				+((xmlID==null)?"?":xmlID)+"}";
 	}
@@ -152,13 +132,14 @@ public class NameFamilyLink {
 	/**
 	 * Produce SQL loadfile content for this instance
 	 * @param sep The separator to use between entries
+	 * @param nraID id of the base NameRoleActivity instance
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(String sep, int docId) {
+	public String toXMLLoadString(String sep, int nraID) {
 		if(!isValid())
 			throw new RuntimeException(
-					"Attempt to generate XML loadfile string for invalid NameRoleActivity.");
-		return id+sep+nameRoleActivity.getId()+sep+name.getId()+sep+linkType
+					"Attempt to generate XML loadfile string for invalid NameFamilyLink.");
+		return id+sep+nraID+sep+name.getId()+sep+linkType
 				+sep+((xmlID==null)?"\\N":xmlID);
 	}
 }
