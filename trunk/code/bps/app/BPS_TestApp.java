@@ -16,7 +16,7 @@ public class BPS_TestApp {
 	 */
 	public static void main(String[] args) {
 		Corpus testCorpus = new Corpus("test", null);
-
+		System.out.println("built a new Corpus");
 	}
 
 }
