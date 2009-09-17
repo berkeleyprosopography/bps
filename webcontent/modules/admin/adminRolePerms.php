@@ -4,18 +4,18 @@ require_once("../../libs/env.php");
 require_once("authUtils.php");
 /*************************************/
 // If the user isn't logged in, send to the login page.
-if(($login_state != DELPHI_LOGGED_IN) && ($login_state != DELPHI_REG_PENDING)){
+if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	header( 'Location: ' . $CFG->wwwroot .
 					'/modules/auth/login.php?redir=' .$_SERVER['REQUEST_URI'] );
 	die();
 }
 
-$t->assign('page_title', 'PAHMA/Delphi: Edit Role Permissions');
+$t->assign('page_title', 'BPS: Edit Role Permissions');
 
 // This needs to verify perms. 
 if( !currUserHasPerm( 'EditRoles' ) ) {
 	$opmsg = "You do not have rights to Edit roles. <br />
-		Please contact your Delphi administrator for help.";
+		Please contact your BPS administrator for help.";
 	$t->assign('perm_error', $opmsg);
 
 	$t->display('adminPermissions.tpl');
@@ -55,7 +55,7 @@ function setPermForRoleRSC() {
 
 function setPermForRole( perm, role, action ) {
 	if( !xmlhttp )
-	  alert( "Cannot update role:permission - no http obj!\n Please advise Delphi support." );
+	  alert( "Cannot update role:permission - no http obj!\n Please advise BPS support." );
 	else {
 		var url = "../../api/setRolePerm.php";
 		var args = "r="+role+"&p="+perm+"&a="+action;

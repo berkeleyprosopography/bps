@@ -4,19 +4,19 @@ require_once("../../libs/env.php");
 require_once("authUtils.php");
 /*************************************/
 // If the user isn't logged in, send to the login page.
-if(($login_state != DELPHI_LOGGED_IN) && ($login_state != DELPHI_REG_PENDING)){
+if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	header( 'Location: ' . $CFG->wwwroot .
 					'/modules/auth/login.php?redir=' .$_SERVER['REQUEST_URI'] );
 	die();
 }
 
-$t->assign('page_title', 'PAHMA/Delphi: Edit Permission Definitions');
+$t->assign('page_title', 'BPS: Edit Permission Definitions');
 $opmsg = "";
 
 // This needs to verify perms. 
 if( !currUserHasPerm( 'EditPerms' ) ) {
 	$opmsg = "You do not have rights to Edit permissions. <br />
-		Please contact your Delphi administrator for help.";
+		Please contact your BPS administrator for help.";
 	$t->assign('perm_error', $opmsg);
 
 	$t->display('adminPermissions.tpl');
@@ -62,7 +62,7 @@ function updatePerm(permName) {
 	if( desc.length <= 2 )
 		alert( "You must enter a description that is at least 3 characters long" );
 	else if( !xmlhttp )
-		alert( "Cannot update permission - no http obj!\n Please advise Delphi support." );
+		alert( "Cannot update permission - no http obj!\n Please advise BPS support." );
 	else {
 		var url = "../../api/updatePerm.php";
 		var args = "p="+permName+"&d="+desc;
