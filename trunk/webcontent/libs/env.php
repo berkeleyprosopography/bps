@@ -69,9 +69,9 @@ if (PEAR::isError($db)) {
 	}
 }
 if( $noDB ) {
-    $t->assign('heading', "Delphi is not currently available...");
+    $t->assign('heading', "BPS is not currently available...");
 		$reason = $lockout?"scheduled maintenance":"a temporary outage";
-		$t->assign('message', "<p>The Delphi system is not currently available, due to ".$reason
+		$t->assign('message', "<p>The BPS system is not currently available, due to ".$reason
 			.".</p>Please try back again later.</p><p style=\"display:none\">DB error: ".$DBerr."</p>");
     $t->display('error.tpl');
     die();
@@ -89,7 +89,7 @@ $login_state = BPS_LOGGED_OUT;
 // Assign global UI defaults here
 $t->assign('page_title', $CFG->page_title_default);
 
-if( $login_state == DELPHI_LOGGED_IN || $login_state == DELPHI_REG_PENDING){
+if( $login_state == BPS_LOGGED_IN || $login_state == BPS_REG_PENDING){
 /*
 	$details = getUserDetails($_SESSION['username']);
 	$t->assign('currentUser_loggedIn', TRUE);
