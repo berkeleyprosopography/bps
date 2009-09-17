@@ -4,13 +4,12 @@ require_once("../../libs/env.php");
 require_once("../../libs/utils.php");
 
 // If the user isn't logged in, send to the login page.
-if(($login_state != DELPHI_LOGGED_IN) && ($login_state != DELPHI_REG_PENDING)){
+if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	header( 'Location: ' . $CFG->wwwroot .
 					'/modules/auth/login.php?redir=' .$_SERVER['REQUEST_URI'] );
 	die();
 }
 
-// TODO Update the perms for this.
 if( !currUserHasPerm( 'EditNewsContent' ) ) {
 	$t->assign('heading', "Unauthorized Action.");
 	$t->assign('message', "You do not have rights to edit news content. <br />
