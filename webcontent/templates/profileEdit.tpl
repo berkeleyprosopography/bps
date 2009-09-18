@@ -35,7 +35,7 @@
 	<textarea class="bpsFormInput" name="about" rows="15" cols="30">{$about}</textarea>
 	</fieldset>
 	<div class="buttonRow">
-		<input type="submit" name="subreq" value="Update"/> or <a href="{$wwwroot}/modules/auth/profile.php?uid={$currentUser_id}"> Discard changes</a>
+		<input type="submit" name="subreq" value="Update"/> or <a href="/profile/?uid={$currentUser_id}"> Discard changes</a>
 	</div>
 </form>
 </div>

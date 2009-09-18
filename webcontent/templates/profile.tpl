@@ -2,7 +2,7 @@
 
 <h1>{$username}</h1>
 <div class="profile_memberSince">Member since {$creation_time|date_format}</div>
-<p>{if $ownProfile}<a href="{$wwwroot}/modules/auth/profileEdit.php">Edit my profile</a>{/if}</p>
+<p>{if $ownProfile}<a href="/profileEdit">Edit my profile</a>{/if}</p>
 
 {if $real_name}
 <div class="profile_metadata">
