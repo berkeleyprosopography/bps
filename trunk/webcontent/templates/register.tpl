@@ -10,7 +10,7 @@
 	</ul>
 </div>
 {/if}
-<form action="{$wwwroot}/modules/auth/register.php" method="post" class="bpsForm">
+<form action="/register" method="post" class="bpsForm">
 	<label for="user">Username <span class="requiredFieldIndicator">*</span></label>
 	<input class="bpsFormInput" type="text" name="user" maxlength="40" value="{$user}">
 	

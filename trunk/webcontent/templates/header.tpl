@@ -29,23 +29,23 @@ Would be nice to have a shortcut icon
 		<div id="headerBar">
 			<div id="headerBarLinks" class="smaller">
 				{if $currentUser_loggedIn }
-					Logged in as <a href="/modules/auth/profile.php?uid={$currentUser_id}"><span>{$currentUser_name}</span></a> | 
-					<a href="/modules/help/help.php">Help</a> | 
+					Logged in as <a href="/profile/?uid={$currentUser_id}"><span>{$currentUser_name}</span></a> | 
+					<a href="/help">Help</a> | 
 					{if $currentUser_isAdmin || $currentUser_isAuthStaff }
-					<a href="/modules/admin/admin.php">Admin</a> |
+					<a href="/admin">Admin</a> |
 					{/if}
-					<a href="/modules/auth/logout.php">Sign Out</a>
+					<a href="/logout">Sign Out</a>
 				{else}
-					<a href="/modules/auth/register.php">Register</a> | 
-					<a href="/modules/help/help.php">Help</a> | 
-					<a href="/modules/auth/login.php?redir={$currentURI}">Sign In</a>
+					<a href="/register">Register</a> | 
+					<a href="/help">Help</a> | 
+					<a href="/login/?redir={$currentURI}">Sign In</a>
 				{/if}
 			</div>
 		</div>
 		<div id="navBar">
 			<div id="navBarLinks">
 				<a class="navLink" href="/">Home</a>
-				<a class="navLink" href="/modules/browser/browse.php">Browse</a>
+				<a class="navLink" href="/corpora">Corpora</a>
 			</div>
 			<!--
 			<div id="navBarSearchBox">

@@ -8,7 +8,7 @@
 	{$message}
 </div>
 {/if}
-<form action="{$wwwroot}/modules/auth/login.php" method="post" class="bpsForm">
+<form action="{$wwwroot}/login/" method="post" class="bpsForm">
 	<div>
 		<label for="user">Username <span class="requiredFieldIndicator">*</span></label>
 		<input type="text" name="user" maxlength="40" id="user" class="bpsFormInput"/>
@@ -26,6 +26,6 @@
 	</div>
 </form>
 <p><!-- <a href="register.php">Register</a> --><br/>
-<a href="forgotpw.php">Forgot your password?</a></p>
+<a href="/lostpass/">Forgot your password?</a></p>
 </div>
 {include file="footer.tpl"}
