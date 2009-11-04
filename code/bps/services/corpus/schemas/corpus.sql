@@ -8,10 +8,12 @@ CREATE TABLE `corpus` (
   `id`            INT(10) UNSIGNED PRIMARY KEY NOT NULL,
   `name`          VARCHAR(255) NOT NULL,
   `description`   text NULL,
-  `owner`         INT(10) UNSIGNED NOT NULL,
+  `owner_id`      INT(10) UNSIGNED NOT NULL,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
-        on update CURRENT_TIMESTAMP
+        on update CURRENT_TIMESTAMP,
+	CONSTRAINT `corp_ibfk_1` FOREIGN KEY (`owner_id`)
+      REFERENCES `user` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
@@ -21,6 +23,7 @@ SHOW WARNINGS;
 DROP TABLE IF EXISTS `document`;
 CREATE TABLE `document` (
   `id`            INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
+  `corpus_id`     INT(10) UNSIGNED NOT NULL,
   `alt_id`        VARCHAR(255) NULL,
   `sourceURL`     VARCHAR(255) NULL,
   `xml_id`        VARCHAR(255) NULL,
@@ -29,7 +32,9 @@ CREATE TABLE `document` (
   `date_norm`     INT(8) NULL,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
-        on update CURRENT_TIMESTAMP
+        on update CURRENT_TIMESTAMP,
+	CONSTRAINT `doc_ibfk_1` FOREIGN KEY (`corpus_id`)
+      REFERENCES `corpus` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
@@ -44,10 +49,12 @@ CREATE TABLE `activity` (
   `id`             int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
   `name`           VARCHAR(255) NOT NULL,
   `description`    text NULL,
-  `parent`         INT(10) UNSIGNED default NULL,
+  `parent_id`      INT(10) UNSIGNED default NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
-        on update CURRENT_TIMESTAMP
+        on update CURRENT_TIMESTAMP,
+	CONSTRAINT `act_ibfk_1` FOREIGN KEY (`parent_id`)
+      REFERENCES `activity` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
@@ -74,6 +81,8 @@ DROP TABLE IF EXISTS `name`;
 CREATE TABLE `name` (
   `id`             int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
   `name`           VARCHAR(255) NOT NULL,
+  `nametype`       ENUM ('person', 'clan') NOT NULL DEFAULT 'person',
+  `gender`         ENUM ('male', 'female', 'unknown') NOT NULL DEFAULT 'unknown',
   `notes`          text NULL,
   `normal`         INT(10) UNSIGNED default NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
@@ -92,22 +101,22 @@ SHOW WARNINGS;
 DROP TABLE IF EXISTS `name_role_activity_doc`;
 CREATE TABLE `name_role_activity_doc` (
   `id`          int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
-  `name`        int(10) unsigned NOT NULL,
-  `act_role`    int(10) unsigned NOT NULL,
-  `activity`    int(10) unsigned NOT NULL,
-  `document`    int(10) unsigned NOT NULL,
+  `name_id`     int(10) unsigned NOT NULL,
+  `act_role_id` int(10) unsigned NOT NULL,
+  `activity_id` int(10) unsigned NOT NULL,
+  `document_id` int(10) unsigned NOT NULL,
   `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
-  INDEX `nrad_nrad_index` (`name`,`act_role`,`activity`,`document`),
-  INDEX `nrad_r_index` (`act_role`),
-  INDEX `nrad_a_index` (`activity`),
-  INDEX `nrad_d_index` (`document`),
-	CONSTRAINT `nrad_ibfk_1` FOREIGN KEY (`name`)
+  INDEX `nrad_nrad_index` (`name`,`act_role_id`,`activity_id`,`document_id`),
+  INDEX `nrad_r_index` (`act_role_id`),
+  INDEX `nrad_a_index` (`activity_id`),
+  INDEX `nrad_d_index` (`document_id`),
+	CONSTRAINT `nrad_ibfk_1` FOREIGN KEY (`name_id`)
       REFERENCES `name` (`id`),
-	CONSTRAINT `nrad_ibfk_2` FOREIGN KEY (`act_role`)
+	CONSTRAINT `nrad_ibfk_2` FOREIGN KEY (`act_role_id`)
       REFERENCES `act_role` (`id`),
-	CONSTRAINT `nrad_ibfk_3` FOREIGN KEY (`activity`)
+	CONSTRAINT `nrad_ibfk_3` FOREIGN KEY (`activity_id`)
       REFERENCES `activity` (`id`),
-	CONSTRAINT `nrad_ibfk_4` FOREIGN KEY (`document`)
+	CONSTRAINT `nrad_ibfk_4` FOREIGN KEY (`document_id`)
       REFERENCES `document` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
@@ -119,14 +128,14 @@ SHOW WARNINGS;
 DROP TABLE IF EXISTS `familylink`;
 CREATE TABLE `familylink` (
   `id`          int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
-  `nrad`        int(10) unsigned NOT NULL,
-  `name`        int(10) unsigned NOT NULL,
+  `nrad_id`     int(10) unsigned NOT NULL,
+  `name_id`     int(10) unsigned NOT NULL,
   `link_type`   ENUM ('father', 'grandfather', 'mother', 'ancestor' ) NOT NULL DEFAULT 'father',
   `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
   INDEX `fl_nrad_index` (`nrad`),
-	CONSTRAINT `fl_ibfk_1` FOREIGN KEY (`nrad`)
+	CONSTRAINT `fl_ibfk_1` FOREIGN KEY (`nrad_id`)
       REFERENCES `name_role_activity_doc` (`id`),
-	CONSTRAINT `fl_ibfk_2` FOREIGN KEY (`name`)
+	CONSTRAINT `fl_ibfk_2` FOREIGN KEY (`name_id`)
       REFERENCES `name` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;

@@ -19,6 +19,7 @@ public class SQLUtils {
 
 	private static final String sep = "|";
 	private static final String newLn = "\n";
+	private static final String nullStr = "\\N";
 
 	// TODO Consider allowing the Docs, Activities, etc. writes to append.
 
@@ -41,7 +42,7 @@ public class SQLUtils {
 		for( Corpus corpus:corpora.values() ) {
 			try {
 				// Generate another row in the documents table
-				writer.append(corpus.toXMLLoadString(sep)+newLn);
+				writer.append(corpus.toXMLLoadString(sep, nullStr)+newLn);
 			} catch( IOException e ) {
 				throw new RuntimeException("Problem writing SQL entry for Corpus:"+corpus );
 			}
@@ -54,11 +55,14 @@ public class SQLUtils {
 		}
 	}
 
-	public static void generateDocumentsSQL(String filename, String nameRoleActivitiesFilename,
+	public static void generateDocumentsSQL(
+			String filename, String nameRoleActivitiesFilename,
+			 String nameFamilyLinksFilename,
 			HashMap<Integer, Document> documents) {
 		// Open the files
 		BufferedWriter docsWriter = null;
 		BufferedWriter nrasWriter = null;
+		BufferedWriter nflsWriter = null;
 		try {
 			docsWriter = new BufferedWriter(
 					  new OutputStreamWriter(
@@ -67,7 +71,7 @@ public class SQLUtils {
 			docsWriter.append("SET NAMES utf8;\n");
 			docsWriter.append("LOAD DATA LOCAL INFILE '"+filename+"' INTO TABLE document CHARACTER SET utf8\n");
 			docsWriter.append("FIELDS TERMINATED BY '"+sep+"' OPTIONALLY ENCLOSED BY '\"' IGNORE 6 LINES\n");
-			docsWriter.append("(id, alt_id, sourcURL, xml_id, notes, date_str, date_norm)\n");
+			docsWriter.append("(id, corpus_id, alt_id, sourcURL, xml_id, notes, date_str, date_norm)\n");
 			docsWriter.append("SET creation_time=now();\n");
 		} catch( IOException e ) {
 			throw new RuntimeException("Could not create output file: " + filename);
@@ -86,9 +90,22 @@ public class SQLUtils {
 			throw new RuntimeException("Could not create output file: " + nameRoleActivitiesFilename);
 		}
 		try {
+			nflsWriter = new BufferedWriter(
+					  new OutputStreamWriter(
+						new FileOutputStream(nameRoleActivitiesFilename),"UTF8"));
+			nflsWriter.append("To load this file, use a sql command:\n");
+			nflsWriter.append("SET NAMES utf8;\n");
+			nflsWriter.append("LOAD DATA LOCAL INFILE '"+filename+"' INTO TABLE name_role_activity_doc CHARACTER SET utf8\n");
+			nflsWriter.append("FIELDS TERMINATED BY '"+sep+"' OPTIONALLY ENCLOSED BY '\"' IGNORE 6 LINES\n");
+			nflsWriter.append("(id, name, act_role, activity, document, xml_idref)\n");
+			nflsWriter.append("SET creation_time=now();\n");
+		} catch( IOException e ) {
+			throw new RuntimeException("Could not create output file: " + nameRoleActivitiesFilename);
+		}
+		try {
 			for( Document doc:documents.values() ) {
 				// Generate another row in the documents table
-				docsWriter.append(doc.toXMLLoadString(sep)+newLn);
+				docsWriter.append(doc.toXMLLoadString(sep, nullStr)+newLn);
 				generateNameRoleActivityDocumentsSQL(nrasWriter, doc.getId(), doc.getNameRoleActivities());
 			}
 		} catch( IOException e ) {
@@ -105,16 +122,35 @@ public class SQLUtils {
 		}
 	}
 
-	public static void generateNameRoleActivityDocumentsSQL(Writer writer,
-			int docID, ArrayList<NameRoleActivity> nameRoleActivities) {
+	public static void generateNameRoleActivityDocumentsSQL(
+			Writer nraWriter, Writer nflWriter, int docID,
+			ArrayList<NameRoleActivity> nameRoleActivities) {
 		for( NameRoleActivity nra:nameRoleActivities ) {
 			try {
 				// Generate another row in the documents table
-				writer.append(nra.toXMLLoadString(sep, docID)+newLn);
+				nraWriter.append(nra.toXMLLoadString(docID, sep, nullStr)+newLn);
+				generateNameFamilyLinksSQL( nflWriter, nra);
 			} catch( IOException e ) {
 	            //debugTrace(2, e);
 				throw new RuntimeException("Problem writing SQL entry for NameRoleActivity:"+
 												nra+" in doc: "+docID);
+			}
+		}
+	}
+
+	public static void generateNameFamilyLinksSQL(Writer writer,
+			NameRoleActivity nameRoleActivity) {
+		ArrayList<NameFamilyLink> nameFamilyLinks =
+			nameRoleActivity.getNameFamilyLinks();
+		int nraId = nameRoleActivity.getId();
+		for( NameFamilyLink nfl:nameFamilyLinks ) {
+			try {
+				// Generate another row in the documents table
+				writer.append(nfl.toXMLLoadString(nraId, sep, nullStr)+newLn);
+			} catch( IOException e ) {
+	            //debugTrace(2, e);
+				throw new RuntimeException("Problem writing SQL entry for NameFamilyLink:"+
+												nfl+" for nra: "+nra);
 			}
 		}
 	}
@@ -138,7 +174,7 @@ public class SQLUtils {
 		for( Activity activity:activities.values() ) {
 			try {
 				// Generate another row in the documents table
-				writer.append(activity.toXMLLoadString(sep)+newLn);
+				writer.append(activity.toXMLLoadString(sep, nullStr)+newLn);
 			} catch( IOException e ) {
 				throw new RuntimeException("Problem writing SQL entry for Activity:"+activity );
 			}
@@ -170,7 +206,7 @@ public class SQLUtils {
 		for( ActivityRole ar:activityRoles.values() ) {
 			try {
 				// Generate another row in the documents table
-				writer.append(ar.toXMLLoadString(sep)+newLn);
+				writer.append(ar.toXMLLoadString(sep, nullStr)+newLn);
 			} catch( IOException e ) {
 				throw new RuntimeException("Problem writing SQL entry for ActivityRole:"+ar );
 			}
@@ -202,7 +238,7 @@ public class SQLUtils {
 		for( Name name:names.values() ) {
 			try {
 				// Generate another row in the documents table
-				writer.append(name.toXMLLoadString(sep)+newLn);
+				writer.append(name.toXMLLoadString(sep, nullStr)+newLn);
 			} catch( IOException e ) {
 				throw new RuntimeException("Problem writing SQL entry for Name:"+name );
 			}

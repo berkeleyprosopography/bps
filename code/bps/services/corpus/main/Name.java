@@ -119,11 +119,14 @@ public class Name {
 	/**
 	 * Produce SQL loadfile content for this instance
 	 * @param sep The separator to use between entries
+	 * @param nullStr The null indicator to use for missing entries
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(String sep) {
-		return id+sep+'"'+name+'"'+sep+'"'+notes+'"'+sep+
-		((normal==null)?"\\N":normal.id);
+	public String toXMLLoadString(String sep, String nullStr ) {
+		return id+sep+
+			((name!=null)?'"'+name+'"':nullStr)+sep+
+			((notes!=null)?'"'+notes+'"':nullStr)+sep+
+			((normal!=null)?normal.id:nullStr);
 	}
 
 }

@@ -16,7 +16,7 @@ ini_set('display_errors', "On");
 require_once('/home/content/93/4791793/html/config.php');
 
 // Include pear database handler, smarty
-ini_set('include_path',$CFG->dirroot."/libs/pear/:".ini_get('include_path'));
+ini_set('include_path',$CFG->dirroot."/libs/pear/:".$CFG->dirroot."/libs/pear/MDB2:".ini_get('include_path'));
 require_once $CFG->dirroot."/libs/pear/MDB2.php";
 require_once $CFG->dirroot."/libs/Smarty/Smarty.class.php";
 
@@ -42,7 +42,7 @@ $db =& MDB2::factory($dsn);
 $noDB = false;
 $lockout = false;
 $DBerr = "";
-/*
+
 if (PEAR::isError($db)) {
 	$noDB = true;
 	$DBerr = $db->getMessage();
@@ -80,17 +80,14 @@ if( $noDB ) {
 // Determine user's login state
 require_once "$CFG->dirroot/modules/auth/checkLogin.php";
 require_once "$CFG->dirroot/modules/admin/authUtils.php";
-$login_state = checkLogin();
+$login_state == BPS_LOGGED_OUT;
+//$login_state = checkLogin();
 // echo $login_state;
-
-*/
-$login_state = BPS_LOGGED_OUT;
 
 // Assign global UI defaults here
 $t->assign('page_title', $CFG->page_title_default);
 
 if( $login_state == BPS_LOGGED_IN || $login_state == BPS_REG_PENDING){
-/*
 	$details = getUserDetails($_SESSION['username']);
 	$t->assign('currentUser_loggedIn', TRUE);
 	$t->assign('currentUser_name', $details['username']);
@@ -102,16 +99,14 @@ if( $login_state == BPS_LOGGED_IN || $login_state == BPS_REG_PENDING){
 		$t->assign('currentUser_isAdmin', TRUE );
 	if( userHasRole( $details['id'], 'AuthorizedStaff' ))
 		$t->assign('currentUser_isAuthStaff', TRUE );
-*/
 } else {
 	$t->assign('currentUser_loggedIn', FALSE);
 	//	Get the name of the file being called
-	// $scriptName = end(explode("/", $_SERVER['SCRIPT_NAME']) );
-	// if ( $scriptName != "login.php" ) {
-	// 	header( 'Location: ' . $CFG->wwwroot . '/modules/auth/login.php' );
+	//$scriptName = end(explode("/", $_SERVER['SCRIPT_NAME']) );
+	//if ( $scriptName != "login.php" ) {
+	// 	header( 'Location: ' . $CFG->wwwroot . '/login' );
 	// 	die();
-	// }
+	//}
 }
-
 
 ?>

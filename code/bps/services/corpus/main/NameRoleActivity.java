@@ -150,6 +150,7 @@ public class NameRoleActivity {
 	}
 
 	public void addNameFamilyLink( NameFamilyLink nfl ) {
+		initNameFamilyLinks();
 		nameFamilyLinks.add(nfl);
 	}
 
@@ -160,7 +161,17 @@ public class NameRoleActivity {
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
 	public void addNameFamilyLink(Name name, int linkType, String xmlID) {
+		initNameFamilyLinks();
 		nameFamilyLinks.add(new NameFamilyLink(name, linkType, xmlID));
+	}
+
+	/**
+	 * Init the nameFamilyLinks
+	 */
+	private void initNameFamilyLinks() {
+		if(null==nameFamilyLinks) {
+			nameFamilyLinks = new ArrayList<NameFamilyLink>();
+		}
 	}
 
 	/**
@@ -185,14 +196,17 @@ public class NameRoleActivity {
 	/**
 	 * Produce SQL loadfile content for this instance
 	 * @param sep The separator to use between entries
+	 * @param nullStr The null indicator to use for missing entries
+	 * @param docId The document in which this appears.
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(String sep, int docId) {
+	public String toXMLLoadString(int docId, String sep, String nullStr ) {
 		if(!isValid())
 			throw new RuntimeException(
 					"Attempt to generate XML loadfile string for invalid NameRoleActivity.");
-		return id+sep+name.getId()+sep+role.getId()+sep+activity.getId()
-				+sep+docId+sep+((xmlID==null)?"\\N":xmlID);
+		return id+sep+name.getId()+sep+role.getId()+sep+
+				activity.getId()+sep+docId+sep+
+			((xmlID!=null)?xmlID:nullStr);
 	}
 
 }

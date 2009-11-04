@@ -17,10 +17,7 @@ function confirmUser($username, $password){
    }
 
    /* Verify that user is in database */
-	$sql = "	SELECT id, passwdmd5, pending 
-				FROM user 
-				WHERE username = '$username'
-			";
+	$sql = "	SELECT id, passwdmd5, pending FROM user WHERE username = '$username' ";
 
 	$res =& $db->query($sql);
 	if (PEAR::isError($res)) {

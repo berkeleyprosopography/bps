@@ -20,6 +20,7 @@ public class Document {
 	private static int	nextID = 1;
 
 	private int			id;				// Unique numeric id
+	private Corpus		corpus;			// Each doc exists in a corpus
 	private String		alt_id;			// Secondary identifier string
 	private String		sourceURL;		// TEI source for this document - may be relative
 	private String		xml_id;			// Element within source (for compound files).
@@ -40,9 +41,10 @@ public class Document {
 	 * @param date_str Date string from document
 	 * @param date_norm Normalized date
 	 */
-	public Document(int id, String alt_id, String sourceURL, String xml_id,
+	public Document(int id, Corpus corpus, String alt_id, String sourceURL, String xml_id,
 			String notes, String date_str, int date_norm) {
 		this.id = id;
+		this.corpus = corpus;
 		this.alt_id = alt_id;
 		this.sourceURL = sourceURL;
 		this.xml_id = xml_id;
@@ -61,9 +63,9 @@ public class Document {
 	 * @param date_str Date string from document
 	 * @param date_norm Normalized date
 	 */
-	public Document(String alt_id, String sourceURL, String xml_id,
+	public Document(Corpus corpus, String alt_id, String sourceURL, String xml_id,
 			String notes, String date_str, int date_norm) {
-		this(Document.nextID++, alt_id, sourceURL, xml_id,
+		this(Document.nextID++, corpus, alt_id, sourceURL, xml_id,
 				notes, date_str, date_norm);
 	}
 
@@ -71,15 +73,22 @@ public class Document {
 	 * Create a new Document from an alt_id
 	 * @param alt_id Secondary identifier string
 	 */
-	public Document(String alt_id) {
-		this(Document.nextID++, alt_id, null, null, null, null, 0);
+	public Document(Corpus corpus, String alt_id) {
+		this(Document.nextID++, corpus, alt_id, null, null, null, null, 0);
+	}
+
+	/**
+	 * Create a new null Document.
+	 */
+	public Document(Corpus corpus) {
+		this(Document.nextID++, corpus, null, null, null, null, null, 0);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
 	public Document() {
-		this(Document.nextID++, null, null, null, null, null, 0);
+		this(Document.nextID++, null, null, null, null, null, null, 0);
 	}
 
 	/**
@@ -101,7 +110,7 @@ public class Document {
 		    Element nameEl = (Element) expr.evaluate(teiNode, XPathConstants.NODE);
 		    if(nameEl!=null)
 		    	alt_id = nameEl.getTextContent().replaceAll("[\\s]+", " ");
-		    newDoc = new Document(alt_id);
+		    newDoc = new Document(corpus, alt_id);
 		    Activity unkActivity = corpus.findOrCreateActivity("Unknown");
 		    ActivityRole principal = corpus.findOrCreateActivityRole("Principal");
 		    ActivityRole witness = corpus.findOrCreateActivityRole("Witness");
@@ -222,6 +231,20 @@ public class Document {
 	}
 
 	/**
+	 * @return the corpus
+	 */
+	public Corpus getCorpus() {
+		return corpus;
+	}
+
+	/**
+	 * @param corpus the corpus to set
+	 */
+	public void setCorpus(Corpus corpus) {
+		this.corpus = corpus;
+	}
+
+	/**
 	 * @return the alt_id
 	 */
 	public String getAlt_id() {
@@ -331,17 +354,24 @@ public class Document {
 	 * @return alt_id.
 	 */
 	public String toString() {
-		return "{"+((alt_id==null)?"(null)":alt_id)+"}";
+		return "{"+corpus.getName()+':'+((alt_id==null)?"(null)":alt_id)+"}";
 	}
 
 	/**
 	 * Produce SQL loadfile content for this instance
 	 * @param sep The separator to use between entries
+	 * @param nullStr The null indicator to use for missing entries
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(String sep) {
-		return id+sep+'"'+alt_id+'"'+sep+'"'+sourceURL+'"'+sep+'"'+xml_id+'"'
-				+sep+'"'+notes+'"'+sep+'"'+date_str+'"'+sep+date_norm;
+	public String toXMLLoadString(String sep, String nullStr ) {
+		return id+sep+
+			((corpus!=null)?corpus.getId():nullStr)+sep+
+			((alt_id!=null)?'"'+alt_id+'"':nullStr)+sep+
+			((sourceURL!=null)?'"'+sourceURL+'"':nullStr)+sep+
+			((xml_id!=null)?'"'+xml_id+'"':nullStr)+sep+
+			((notes!=null)?'"'+notes+'"':nullStr)+sep+
+			((date_str!=null)?'"'+date_str+'"':nullStr)+sep+
+			date_norm;
 	}
 
 }
