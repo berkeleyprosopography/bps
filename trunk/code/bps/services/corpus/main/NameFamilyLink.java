@@ -132,14 +132,18 @@ public class NameFamilyLink {
 	/**
 	 * Produce SQL loadfile content for this instance
 	 * @param sep The separator to use between entries
+	 * @param nullStr The null indicator to use for missing entries
 	 * @param nraID id of the base NameRoleActivity instance
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(String sep, int nraID) {
+	public String toXMLLoadString(int nraID, String sep, String nullStr ) {
 		if(!isValid())
 			throw new RuntimeException(
-					"Attempt to generate XML loadfile string for invalid NameFamilyLink.");
-		return id+sep+nraID+sep+name.getId()+sep+linkType
-				+sep+((xmlID==null)?"\\N":xmlID);
+			"Attempt to generate XML loadfile string for invalid NameFamilyLink.");
+		return id+sep+
+			nraID+sep+
+			((name!=null)?name.getId():nullStr)+sep+
+			linkType+sep+
+			((xmlID!=null)?'"'+xmlID+'"':nullStr);
 	}
 }

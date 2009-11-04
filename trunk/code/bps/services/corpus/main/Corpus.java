@@ -173,7 +173,7 @@ public class Corpus {
 		SQLUtils.generateActivitiesSQL(activitiesFilename, activities);
     	System.out.println("Done.");
     	System.out.print("Generating ActivityRoles SQL...");
-		SQLUtils.generateActivityRolesSQL(activitiesFilename, activityRoles);
+		SQLUtils.generateActivityRolesSQL(activityRolesFilename, activityRoles);
     	System.out.println("Done.");
     	System.out.print("Generating Names SQL...");
 		SQLUtils.generateNamesSQL(namesFilename, names);
@@ -190,11 +190,13 @@ public class Corpus {
 	/**
 	 * Produce SQL loadfile content for this instance
 	 * @param sep The separator to use between entries
+	 * @param nullStr The null indicator to use for missing entries
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(String sep) {
-		// TODO put in a proper User ID. For now, fixed to the Admin user.
-		return id+sep+'"'+name+'"'+sep+'"'+description+'"'+sep+1;
+	public String toXMLLoadString(String sep, String nullStr ) {
+		return id+sep+
+			((name!=null)?'"'+name+'"':nullStr)+sep+
+			((description!=null)?'"'+description+'"':nullStr);
 	}
 
 
