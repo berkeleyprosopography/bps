@@ -6,7 +6,7 @@ require_once("authUtils.php");
 // If the user isn't logged in, send to the login page.
 if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	header( 'Location: ' . $CFG->wwwroot .
-					'/modules/auth/login.php?redir=' .$_SERVER['REQUEST_URI'] );
+					'/login?redir=' .$_SERVER['REQUEST_URI'] );
 	die();
 }
 
@@ -38,7 +38,7 @@ $t->assign("style_block", $style_block);
 $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $script_block = '
-<script type="text/javascript" src="'.$themebase.'/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 <script>
 
 // The ready state change callback method that waits for a response.
@@ -64,7 +64,7 @@ function updatePerm(permName) {
 	else if( !xmlhttp )
 		alert( "Cannot update permission - no http obj!\n Please advise BPS support." );
 	else {
-		var url = "../../api/updatePerm.php";
+		var url = "/api/updatePerm.php";
 		var args = "p="+permName+"&d="+desc;
 		//alert( "Preparing request: POST: "+url+"?"+args );
 		xmlhttp.open("POST", url, true);
