@@ -25,7 +25,7 @@
 	
 	<div class="buttonRow">
 		<input type="submit" name="submit" value={if $id<0}"Add Item"{else}"Update Item"{/if}/>
-		<input type="button" value="Cancel" onClick="window.location.href='admin.php'"/>
+		<input type="button" value="Cancel" onClick="window.location.href='/admin'"/>
 	</div>
 	<input type="hidden" name="id" value="{$id}" id="id" />
 </form>

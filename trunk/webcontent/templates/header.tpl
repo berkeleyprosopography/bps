@@ -29,7 +29,7 @@ Would be nice to have a shortcut icon
 		<div id="headerBar">
 			<div id="headerBarLinks" class="smaller">
 				{if $currentUser_loggedIn }
-					Logged in as <a href="/profile/?uid={$currentUser_id}"><span>{$currentUser_name}</span></a> | 
+					Logged in as <a href="/profile?uid={$currentUser_id}"><span>{$currentUser_name}</span></a> | 
 					<a href="/help">Help</a> | 
 					{if $currentUser_isAdmin || $currentUser_isAuthStaff }
 					<a href="/admin">Admin</a> |
@@ -38,7 +38,7 @@ Would be nice to have a shortcut icon
 				{else}
 					<a href="/register">Register</a> | 
 					<a href="/help">Help</a> | 
-					<a href="/login/?redir={$currentURI}">Sign In</a>
+					<a href="/login?redir={$currentURI}">Sign In</a>
 				{/if}
 			</div>
 		</div>
