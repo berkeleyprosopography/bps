@@ -1,7 +1,7 @@
 <?php
 
 require_once("../../libs/env.php");
-require_once("../../libs/utils.php");
+require_once($CFG->dirroot."/libs/utils.php");
 
 
 $t->assign('messages', null);
@@ -59,7 +59,7 @@ function usernameTaken($username){
 
 function sendRegMail($uid, $username, $email){
 	global $CFG;
-	$confirmUrl = $CFG->wwwroot . '/modules/auth/register.php?confirm=' . $uid;
+	$confirmUrl = $CFG->wwwroot . '/register?confirm=' . $uid;
 	$plaintextmsg = 
 		'Thank you for registering with BPS!
 
