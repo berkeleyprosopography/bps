@@ -73,7 +73,6 @@ function cleanFormDataAllowHTML($str) {
 		}
 
 		if(in_array($tag, $safeFormatTags)) {
-		//if( false ) {
 			if($closetag)
 				$tag = "</$tag>";
 			else
@@ -132,7 +131,8 @@ function allEntitiesDecode( $str, $mode, $charset ) {
 
 
 function sendBPSMail($nameTo, $emailTo, $subj, $plaintextmsg, $htmlmsg, $emailFrom = "bps_feedback@lists.berkeley.edu", $nameFrom = "BPS"){
-	require_once 'XPM/XPM3_MAIL.php';
+	global $CFG;
+	require_once $CFG->dirroot."/libs/XPM/XPM3_MAIL.php";
 	
 	$mail = new XPM3_MAIL;
 	$mail->Delivery('local');
