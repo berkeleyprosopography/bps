@@ -1,6 +1,6 @@
 <?php
 require_once("../../libs/env.php");
-require_once("../common/imgthumb.php");
+// require_once("../common/imgthumb.php");
 
 if(isset($_GET['uid']) && is_numeric($_GET['uid'])){
 	$profileId = $_GET['uid'];
