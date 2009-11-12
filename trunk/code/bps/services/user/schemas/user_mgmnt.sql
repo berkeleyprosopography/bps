@@ -29,6 +29,7 @@ DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role` (
   `id`            int(10) unsigned NOT NULL auto_increment,
   `name`          varchar(40) NOT NULL UNIQUE,
+  `wksp_role`     boolean NOT NULL default false, -- Workspace specific
   `description`   text,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
@@ -55,7 +56,7 @@ SHOW WARNINGS;
 --
 -- Table structure for table `user_roles`
 -- Associates roles to users for a workspace,
--- or globally if workspace context is NULL.
+-- or globally if workspace context is -1.
 --
 DROP TABLE IF EXISTS `user_roles`;
 CREATE TABLE `user_roles` (
