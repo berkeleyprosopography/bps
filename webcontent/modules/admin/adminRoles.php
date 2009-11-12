@@ -34,10 +34,8 @@ form.form_row  { padding:0px; margin:0px;}
 
 $t->assign("style_block", $style_block);
 
-$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
-
 $script_block = '
-<script type="text/javascript" src="'.$themebase.'/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 <script>
 
 // The ready state change callback method that waits for a response.
@@ -62,7 +60,7 @@ function updateRole(roleName) {
 	else if( !xmlhttp )
 		alert( "Cannot update role - no http obj!\n Please advise BPS support." );
 	else {
-		var url = "../../api/updateRole.php";
+		var url = "/api/updateRole.php";
 		var args = "r="+roleName+"&d="+desc;
 		//alert( "Preparing request: POST: "+url+"?"+args );
 		xmlhttp.open("POST", url, true);
@@ -147,16 +145,19 @@ else if(isset($_POST['add'])){
 			$roledesc = trim($_POST['desc']);
 			if( strlen( $roledesc ) > 255 )
 				$errmsg = "Invalid role description (too long);";
-			else if( preg_match( "/[^\w\-\s.:'()]/", $roledesc ))
+			else if( preg_match( "/[^\w\-\s.,:'()]/", $roledesc ))
 				$errmsg = "Invalid role description (invalid chars): [".$roledesc."]";
+			else {
+				$wksp_role = (empty($_POST['wr'])||($_POST['wr']=='0'))?'0':'1';
+			}
 		}
 	}
 	if(!empty($errmsg))
 		$opmsg = $errmsg;
 	else {
-		$addQ = "INSERT IGNORE INTO role(name, description, creation_time)"
+		$addQ = "INSERT IGNORE INTO role(name, wksp_role, description, creation_time)"
 			." VALUES ('".mysql_real_escape_string($rolename)."', '"
-			.mysql_real_escape_string($roledesc)."', now())";
+			.$wksp_role."', '".mysql_real_escape_string($roledesc)."', now())";
 		$res =& $db->query($addQ);
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem adding role \"".$rolename."\".<br />".$res->getMessage();
@@ -169,13 +170,14 @@ else if(isset($_POST['add'])){
 function getFullRoles(){
 	global $db;
    /* Get all the users and their assigned roles */
-	$q = "select name, description from role";
+	$q = "select name, wksp_role, description from role order by wksp_role";
 	$res =& $db->query($q);
 	if (PEAR::isError($res))
 		return false;
 	$roles = array();
 	while ($row = $res->fetchRow()) {
 		$role = array(	'name' => $row['name'], 
+						'wksp_role' => $row['wksp_role'],
 						'description' => $row['description']);
 		
 		array_push($roles, $role);

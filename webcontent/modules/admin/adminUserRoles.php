@@ -35,7 +35,7 @@ $t->assign("style_block", $style_block);
 $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $script_block = '
-<script type="text/javascript" src="'.$themebase.'/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 
 <script>
 var sess_login_id = '.((isset($_SESSION['login_id']))?$_SESSION['login_id']:-1).';
@@ -58,10 +58,8 @@ function setRoleForUser( role, user, action ) {
 	if( !xmlhttp )
 	  alert( "Cannot update role:permission - no http obj!\n Please advise BPS support." );
 	else {
-		var url = "../../api/setUserRole.php";
+		var url = "/api/setUserRole.php";
 		var args = "r="+role+"&u="+user+"&a="+action;
-		if(sess_login_id >= 0)
-			args += "&ap="+sess_login_id;
 		//alert( "Preparing request: POST: "+url+"?"+args );
 		xmlhttp.open("POST", url, true);
 		xmlhttp.setRequestHeader("Content-Type",
@@ -94,9 +92,9 @@ $t->assign("script_block", $script_block);
 function getRoles(){
 	global $db;
   /* Get all the roles */
-	$q = "select name from role";
+	$q = "SELECT name FROM role WHERE NOT wksp_role";
 	if( !currUserHasRole( 'Admin' ) ) {
-		$q .= " where NOT name like 'Admin'";
+		$q .= " AND NOT name like 'Admin'";
 	}
 	$res =& $db->query($q);
 	if (PEAR::isError($res))
@@ -113,7 +111,7 @@ function getUserRoles(){
    /* Get all the users and their assigned roles */
 	$q = "select u.username user, r.name role from user u "
 			." left join user_roles ur on ( u.id=ur.user_id )"
-	 		." left join role r on (ur.role_id=r.id)";
+	 		." left join role r on (ur.role_id=r.id AND NOT r.wksp_role)";
 	if( !currUserHasRole( 'Admin' ) ) {
 		$q .= " where NOT r.name like 'Admin' and NOT u.username like 'admin'";
 	} else {
