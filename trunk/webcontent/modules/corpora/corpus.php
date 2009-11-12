@@ -1,3 +1,11 @@
+/*
+ * Based upon viewset or something. This is just a pattern and needs complete rewrite.
+ * Review what we need to do for an individual corpus - 
+ * View stats and properties.
+ * Should probably encapsulate that somehow, so can use it i nthe context of a workspace as well.
+ * OR - could just make that info go through the sandbox workspace public to all.
+ * Then the corpora management page links to that.
+ */
 <?php
 
 require_once("../../libs/env.php");

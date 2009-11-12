@@ -1,3 +1,14 @@
+/*
+ * This should combine both an admin view and a browse view, depending upon
+ * the role of the logged in user. Can check for CorporaAdmin role.
+ * If not an admin, just lists the corpora with name and description.
+ * Should probably base this upon something like the adminRoles page.
+ * If an Admin, can make those widgets be editable. Else, just <p> elements.
+ * They link to the default workspace for each, to see stats, etc.
+ * Question: should we separate view and admin, so the view feature is
+ * the common one for all, and then support an admin link that has the alternate
+ * UI? Could make it the same page, with a different option. I think yes.
+ */
 <?php
 
 require_once("../../libs/env.php");
