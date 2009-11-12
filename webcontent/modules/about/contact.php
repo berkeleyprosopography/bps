@@ -1,7 +1,7 @@
 <?php
 
 require_once("../../libs/env.php");
-require_once("../../libs/utils.php");
+require_once($CFG->dirroot."/libs/utils.php");
 
 $t->assign('messages', null);
 $t->assign('name', "");
