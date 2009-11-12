@@ -22,6 +22,7 @@ RewriteRule   ^admin/userroles/{0,1}$ modules/admin/adminUserRoles.php
 RewriteRule   ^admin/roles/{0,1}$ modules/admin/adminRoles.php
 RewriteRule   ^admin/roleperms/{0,1}$ modules/admin/adminRolePerms.php
 RewriteRule   ^admin/permissions/{0,1}$ modules/admin/adminPermissions.php
+RewriteRule   ^admin/editnews/{0,1}$ modules/admin/editNews.php
 
 #Corpora rules
 RewriteRule   ^corpora/{0,1}$ modules/corpora/corpora.php
