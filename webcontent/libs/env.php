@@ -81,11 +81,12 @@ if( $noDB ) {
 require_once "$CFG->dirroot/modules/auth/checkLogin.php";
 require_once "$CFG->dirroot/modules/admin/authUtils.php";
 $login_state == BPS_LOGGED_OUT;
-//$login_state = checkLogin();
+$login_state = checkLogin();
 // echo $login_state;
 
 // Assign global UI defaults here
 $t->assign('page_title', $CFG->page_title_default);
+$t->assign('currentURI', $_SERVER['REQUEST_URI']);
 
 if( $login_state == BPS_LOGGED_IN || $login_state == BPS_REG_PENDING){
 	$details = getUserDetails($_SESSION['username']);
