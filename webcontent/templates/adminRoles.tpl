@@ -1,7 +1,7 @@
 {include file="header.tpl"}
 
  <div class="admin_hdr" >
-	<p id="orient"><a href="admin.php">Admin Main</a> -> Edit Role Definitions</p>
+	<p id="orient"><a href="/admin">Admin Main</a> -> Edit Role Definitions</p>
  </div>
 
 {if isset($perm_error) }
@@ -14,6 +14,7 @@
 				<tr>
 					 <td class="title" width="100px">&nbsp;</td>
 					 <td class="title 2" width="200px">Role Name</td>
+					 <td class="title 2" width="200px">Wksp. Role</td>
 					 <td class="title" width="320px">Description</td>
 					 <td class="title" width="100px">&nbsp;</td>
 				</tr>
@@ -25,6 +26,12 @@
 					<tr>
 						<td class="role" width="100px"><input type="submit" name="delete" value="Delete" /></td>
 						<td class="role rolename 2" width="200px"><p>{$roles[role].name}</p></td>
+						<td class="role rolename 2" width="20px">
+							<input type="checkbox" class="set" disabled="true" 
+							{if isset($roles[role].wksp_role) && $roles[role].wksp_role!=0}
+								checked="true"
+							{/if} />
+						</td>
 						<td class="role roledesc">
 							<textarea id="D_{$roles[role].name}" cols="40" rows="2"
 								onkeyup="enableElement('U_{$roles[role].name}')"
@@ -48,6 +55,7 @@
 			<tr>
 				<td class="label" width="100px">Name:</td>
 				<td class="2" width="200px"><input type="text" name="role" maxlength="40"></td>
+				<td class="2" width="20px"> <input type="checkbox" class="set" name="wr"></td>
 				<td><textarea name="desc" rows="2" cols="40" 
 				       onkeypress="limitChars(this,255);"
 							 onblur="limitChars(this,255);"

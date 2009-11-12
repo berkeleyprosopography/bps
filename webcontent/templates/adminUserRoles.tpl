@@ -1,7 +1,7 @@
 {include file="header.tpl"}
 
  <div class="admin_hdr" >
-	<p id="orient"><a href="admin.php">Admin Main</a> -> Edit User Roles</p>
+	<p id="orient"><a href="/admin">Admin Main</a> -> Edit User Roles</p>
  </div>
 
 {if isset($perm_error) }
