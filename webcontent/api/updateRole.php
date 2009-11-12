@@ -17,7 +17,7 @@ require_once('apiSetup.php');
 			$roledesc = trim($_POST['d']);
 			if( strlen( $roledesc ) > 255 )
 				$errmsg = "Invalid role description (too long);";
-			else if( preg_match( "/[^\w\-\s.:'()]/", $roledesc ))
+			else if( preg_match( "/[^\w\-\s,.:'()]/", $roledesc ))
 				$errmsg = "Invalid role description (invalid chars): [".$roledesc."]";
 		}
 	}
@@ -27,8 +27,8 @@ require_once('apiSetup.php');
 		exit();
 	}
 	$updateQ = "UPDATE role set description='"
-		.mysql_real_escape_string($roledesc)."' where name='"
-		.mysql_real_escape_string($rolename)."'";
+		.addslashes($roledesc)."' where name='"
+		.addslashes($rolename)."'";
 	$res =& $db->query($updateQ);
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error\n"+$res->getMessage());

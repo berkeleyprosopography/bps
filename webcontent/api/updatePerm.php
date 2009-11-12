@@ -27,11 +27,12 @@ require_once('apiSetup.php');
 		exit();
 	}
 	$updateQ = "UPDATE permission set description='"
-		.mysql_real_escape_string($permdesc)."' where name='"
-		.mysql_real_escape_string($permname)."'";
+		.addslashes($permdesc)."' where name='"
+		.addslashes($permname)."'";
 	$res =& $db->query($updateQ);
 	if (PEAR::isError($res)) {
-		header("HTTP/1.0 500 Internal Server Error\n"+$res->getMessage());
+		header("HTTP/1.0 500 Internal Server Error");
+		echo $res->getMessage();
 	}
 	else
 		header("HTTP/1.0 200 OK");

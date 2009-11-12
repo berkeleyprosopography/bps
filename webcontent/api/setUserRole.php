@@ -38,7 +38,9 @@ require_once('apiSetup.php');
 	}
   $res =& $db->query($updateQ);
 	if (PEAR::isError($res)) {
-		header("HTTP/1.0 500 Internal Server Error\n"+$res->getMessage());
+		header("HTTP/1.0 500 Internal Server Error");
+		echo $res->getMessage();
+		echo "\n\nQuery was:\n".$updateQ;
 	}
 	else
 		header("HTTP/1.0 200 OK");
