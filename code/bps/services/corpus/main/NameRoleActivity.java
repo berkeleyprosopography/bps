@@ -206,7 +206,7 @@ public class NameRoleActivity {
 					"Attempt to generate XML loadfile string for invalid NameRoleActivity.");
 		return id+sep+name.getId()+sep+role.getId()+sep+
 				activity.getId()+sep+docId+sep+
-			((xmlID!=null)?xmlID:nullStr);
+				((xmlID!=null)?'"'+xmlID+'"':nullStr);
 	}
 
 }

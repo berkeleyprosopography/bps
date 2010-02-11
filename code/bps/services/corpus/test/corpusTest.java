@@ -37,6 +37,7 @@ public class corpusTest {
         String docsSQLfile = outFileBase+"document_load.txt";
         String activitiesSQLfile = outFileBase+"activity_load.txt";
         String namesSQLfile = outFileBase+"name_load.txt";
+        String familyLinksSQLfile = outFileBase+"familyLink_load.txt";
         String activityRolesSQLfile = outFileBase+"activityRole_load.txt";
         String nameRoleActivitiesSQLfile = outFileBase+"nameRoleActivity_load.txt";
         HashMap<Integer, Corpus> corpora = new HashMap<Integer, Corpus>();
@@ -53,7 +54,8 @@ public class corpusTest {
         	System.out.println("Done.");
         	System.out.println("Generating Dependent SQL...");
 			testCorpus.generateDependentSQL(docsSQLfile, activitiesSQLfile,
-					namesSQLfile, activityRolesSQLfile, nameRoleActivitiesSQLfile);
+					namesSQLfile, familyLinksSQLfile,
+					activityRolesSQLfile, nameRoleActivitiesSQLfile);
         	System.out.println("Corpus test completed.");
         } catch (Exception e) {
         	System.err.println(e);
