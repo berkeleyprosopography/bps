@@ -106,7 +106,7 @@ public class Document {
 	    Document newDoc = null;
 	    try {
 	        // XPath Query to get to the doc CDLI id
-		    XPathExpression expr = xpath.compile("./teiHeader/fileDesc/titleStmt/title/name[@type='cdlicat:id_text']");
+		    XPathExpression expr = xpath.compile(TEI_Constants.XPATH_ALT_ID);
 		    Element nameEl = (Element) expr.evaluate(teiNode, XPathConstants.NODE);
 		    if(nameEl!=null)
 		    	alt_id = nameEl.getTextContent().replaceAll("[\\s]+", " ");
@@ -116,10 +116,10 @@ public class Document {
 		    ActivityRole witness = corpus.findOrCreateActivityRole("Witness");
 		    if(deepCreate) {
 		    	// Find the principal persName nodes and create a nameRoleActivity for each one
-		    	newDoc.addNamesForActivity( ".//body//persName",
+		    	newDoc.addNamesForActivity( TEI_Constants.XPATH_PRINCIPAL_PERSNAMES,
 		    								teiNode, corpus, unkActivity, principal );
 		    	// Find the witness persName nodes and create a nameRoleActivity for each one
-		    	newDoc.addNamesForActivity( ".//back//div[@subtype='witnesses']//persName",
+		    	newDoc.addNamesForActivity( TEI_Constants.XPATH_WITNESS_PERSNAMES,
 		    								teiNode, corpus, unkActivity, witness );
 		    }
 	    } catch (XPathExpressionException xpe) {
@@ -142,34 +142,36 @@ public class Document {
 	        	NameRoleActivity nra = null;
 		        Element persNameEl = (Element)nodes.item(i);
 		        // Get the forenames
-		        NodeList fnNodes = persNameEl.getElementsByTagName("forename");
+		        NodeList fnNodes = persNameEl.getElementsByTagName(TEI_Constants.FORENAME_EL);
 			    int nNames = fnNodes.getLength();
 		        if(nNames<1) {
-		        	// Complain
+		        	generateParseError(persNameEl, TEI_Constants.PERSNAME_EL+" has no "
+		        									+TEI_Constants.FORENAME_EL+" declarations.");
 		        } else {
 		        	int patronymsLinked = 0;
 				    for (int iN=0; iN < nNames; iN++) {
 				        Element foreNameEl = (Element)fnNodes.item(iN);
 				        String fnNameStr = foreNameEl.getAttribute("n").replaceAll("\\[.*\\]$", "");
 				        if(fnNameStr.length()<1) {
-				        	// Complain
+				        	generateParseError(foreNameEl,
+				        			TEI_Constants.FORENAME_EL+" has no (or empty) value.");
 				        } else {
 				        	Name nameInstance = corpus.findOrCreateName(fnNameStr);
-					        String fnXMLID = foreNameEl.getAttribute("xml:id");
+					        String fnXMLID = foreNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
 					        if(fnXMLID.length()<1)
 					        	fnXMLID = null;
-					        String fnType = foreNameEl.getAttribute("type");
-					        boolean isPatronym = fnType.equalsIgnoreCase("patronymic");
+					        String fnType = foreNameEl.getAttribute(TEI_Constants.TYPE_ATTR);
+					        boolean isPatronym = fnType.equalsIgnoreCase(TEI_Constants.TYPE_PATRONYMIC);
 					        if(!isPatronym) {
 					        	if(nra!=null) {
-						        	// Complain - only one primary name
+						        	generateParseError(foreNameEl, "Multiple foreNames encountered.");
 					        	} else {
 						        	nra = new NameRoleActivity(nameInstance, defaultActRole,
 						        			activity, fnXMLID);
 						        	addNameRoleActivity(nra);
 					        	}
 					        } else if(nra==null) {
-					        	// Complain - must already have primary name
+					        	generateParseError(foreNameEl, "Patronym with no primary forename.");
 					        } else {
 					        	// Deal with patronyms - add a family link
 					        	int linkType;
@@ -187,25 +189,29 @@ public class Document {
 				    }
 		        }
 		        // Get the clan names
-		        NodeList anNodes = persNameEl.getElementsByTagName("addName");
+		        NodeList anNodes = persNameEl.getElementsByTagName(TEI_Constants.ADDNAME_EL);
 			    nNames = anNodes.getLength();
+			    boolean fFoundClanName = false;
 			    for (int iN=0; iN < nNames; iN++) {
 			        Element addNameEl = (Element)anNodes.item(iN);
 			        String anNameStr = addNameEl.getAttribute("n").replaceAll("\\[.*\\]$", "");
 			        if(anNameStr.length()<1) {
-			        	// Complain
+			        	generateParseError(addNameEl, "Additional name empty.");
 			        } else {
 			        	Name nameInstance = corpus.findOrCreateName(anNameStr);
-				        String fnXMLID = addNameEl.getAttribute("xml:id");
+				        String fnXMLID = addNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
 				        if(fnXMLID.length()<1)
 				        	fnXMLID = null;
-				        if(!addNameEl.getAttribute("type").equalsIgnoreCase("clan")){
-				        	// Complain - must be of type clan
+				        if(!addNameEl.getAttribute(TEI_Constants.TYPE_ATTR).equalsIgnoreCase(TEI_Constants.TYPE_CLAN)){
+				        	generateParseError(addNameEl, "Additional name must of type clan.");
 				        } else if(nra==null) {
-				        	// Complain - must already have primary name
+				        	generateParseError(addNameEl, "Additional name with no primary name.");
+				        } else if(fFoundClanName) {
+				        	generateParseError(addNameEl, "Multiple clan name declarations.");
 				        } else {
 				        	// add clan name
 				        	nra.addNameFamilyLink(nameInstance, NameFamilyLink.LINK_TO_CLAN, fnXMLID);
+				        	fFoundClanName = true;
 				        }
 			        }
 			    }
@@ -355,6 +361,16 @@ public class Document {
 	 */
 	public String toString() {
 		return "{"+corpus.getName()+':'+((alt_id==null)?"(null)":alt_id)+"}";
+	}
+
+	private void generateParseError( Element node, String errorStr ) {
+		String nodeId = (node==null)?null:node.getAttribute(TEI_Constants.XMLID_ATTR);
+		String fullString = "Parse error in Document "+toString();
+		if(nodeId!=null) {
+			fullString += " on element: "+nodeId;
+		}
+		System.err.println(fullString);
+		System.err.println(errorStr);
 	}
 
 	/**

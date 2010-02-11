@@ -164,10 +164,16 @@ public class Corpus {
 		return instance;
 	}
 
-	public void generateDependentSQL(String documentsFilename, String activitiesFilename,
-			String namesFilename, String activityRolesFilename, String nameRoleActivitiesFilename ) {
+	public void generateDependentSQL(
+			String documentsFilename,
+			String activitiesFilename,
+			String namesFilename,
+			String nameFamilyLinksFilename,
+			String activityRolesFilename,
+			String nameRoleActivitiesFilename ) {
     	System.out.print("Generating Documents (and NameRoleActivityDocs) SQL...");
-		SQLUtils.generateDocumentsSQL(documentsFilename, nameRoleActivitiesFilename, documents);
+		SQLUtils.generateDocumentsSQL(documentsFilename,
+				nameRoleActivitiesFilename, nameFamilyLinksFilename, documents);
     	System.out.println("Done.");
     	System.out.print("Generating Activities SQL...");
 		SQLUtils.generateActivitiesSQL(activitiesFilename, activities);
@@ -228,6 +234,7 @@ public class Corpus {
         String namesSQLfile = outFileBase+"name_load.txt";
         String activityRolesSQLfile = outFileBase+"activityRole_load.txt";
         String nameRoleActivitiesSQLfile = outFileBase+"nameRoleActivity_load.txt";
+        String familyLinksSQLfile = outFileBase+"familyLink_load.txt";
         HashMap<Integer, Corpus> corpora = new HashMap<Integer, Corpus>();
         try {
         	System.out.print("Opening corpus file...");
@@ -242,7 +249,8 @@ public class Corpus {
         	System.out.println("Done.");
         	System.out.println("Generating Dependent SQL...");
 			testCorpus.generateDependentSQL(docsSQLfile, activitiesSQLfile,
-					namesSQLfile, activityRolesSQLfile, nameRoleActivitiesSQLfile);
+					namesSQLfile, familyLinksSQLfile,
+					activityRolesSQLfile, nameRoleActivitiesSQLfile);
         	System.out.println("Corpus test completed.");
         } catch (Exception e) {
         	System.err.println(e);
