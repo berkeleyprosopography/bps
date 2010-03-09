@@ -130,7 +130,7 @@ CREATE TABLE `familylink` (
   `id`          int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
   `nrad_id`     int(10) unsigned NOT NULL,
   `name_id`     int(10) unsigned NOT NULL,
-  `link_type`   ENUM ('father', 'grandfather', 'mother', 'ancestor' ) NOT NULL DEFAULT 'father',
+  `link_type`   ENUM ('father', 'grandfather', 'mother', 'ancestor', 'clan' ) NOT NULL DEFAULT 'father',
   `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
   INDEX `fl_nrad_index` (`nrad`),
 	CONSTRAINT `fl_ibfk_1` FOREIGN KEY (`nrad_id`)
