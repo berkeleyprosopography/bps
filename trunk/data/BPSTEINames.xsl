@@ -46,7 +46,7 @@
 		</xsl:element>
 	</h4>
 	<p><span class="label">Date:</span>
-		<xsl:apply-templates select="./tei:text//tei:div[@subtype='date']" />
+		<xsl:apply-templates select="./tei:text//tei:div[@type='discourse' and @subtype='date']" />
 	</p>
 	<xsl:if test="$dates_only=0">
 		<p><span class="label">Principles:</span><br />
@@ -117,13 +117,24 @@
 	<span class="milestone">(<xsl:value-of select="@n" />)<br /></span>
 </xsl:template>
 
-<xsl:template match="tei:div[@subtype='date']">
-	<xsl:apply-templates select=".//tei:seg[@type='num']"/>
+<xsl:template match="tei:div[@type='discourse' and @subtype='date']">
+	<xsl:apply-templates select=".//tei:c[@type='num'][1]/preceding-sibling::tei:c[@type='sign' and @subtype='logo']"/>
+	<xsl:apply-templates select=".//tei:c[@type='num']"/>
 	<xsl:apply-templates select=".//tei:persName[1]" mode="date"/>
+	<!-- If persName not there, we may find undemarcated names -->
+	<xsl:apply-templates select=".//tei:c[@type='num'][last()]/following-sibling::tei:c[@type='determinative' and @subtype='semantic']/following-sibling::text()[1]" mode="reign"/>
 </xsl:template>
 
-<xsl:template match="tei:seg[@type='num']">
-	<span class="numeric"><xsl:value-of select="." />.</span>
+<xsl:template match="tei:c[@type='sign' and @subtype='logo']">
+	<span class="month"><xsl:value-of select="." /><xsl:text> </xsl:text></span>
+</xsl:template>
+
+<xsl:template match="tei:c[@type='num']">
+	<span class="numeric"><xsl:value-of select="." /><xsl:text> </xsl:text></span>
+</xsl:template>
+
+<xsl:template match="text()" mode="reign">
+	<span class="person">Reign: <span><xsl:value-of select="." /></span></span>
 </xsl:template>
 
 </xsl:stylesheet>
