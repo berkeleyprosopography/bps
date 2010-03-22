@@ -6,13 +6,17 @@
 	xmlns:xl="http://www.w3.org/1999/xlink"
 	exclude-result-prefixes="xl"
     version="2.0">
+	
+<xsl:param name="datesOnly" select="1" />
 
 <!-- Output as an HTML file. -->
 <xsl:output method="html" indent="yes"/>
 <xsl:template match="/">
 <html>
 	<head>
-		<title>BPS Names Summary for corpus</title>
+		<title>BPS Names Summary for corpus
+			<xsl:if test="$datesOnly != 0"><xsl:text> (Dates only)</xsl:text></xsl:if>
+		</title>
 		<style>
 			body { font-family: Ariel, Helvetica, sans;  font-size:0.8em;}
 			.lineNum { font-style:italic; font-weight:normal; font-size:0.85em;}
@@ -24,9 +28,11 @@
 		</style>
 	</head>
 	<body>
-		<h2>BPS Names Summary for corpus</h2>
-		   <xsl:apply-templates select="/tei:teiCorpus/tei:TEI" >
-			   <xsl:with-param name="dates_only" select="1" />
+		<h2>BPS Names Summary for corpus
+			<xsl:if test="$datesOnly != 0"><xsl:text> (Dates only)</xsl:text></xsl:if>
+		</h2>
+		   <xsl:apply-templates select="/tei:teiCorpus/tei:TEI[tei:text[@type='transliteration']]" >
+			   <xsl:with-param name="dates_only" select="$datesOnly" />
 		   </xsl:apply-templates>
 	</body>
 </html>
@@ -50,10 +56,10 @@
 	</p>
 	<xsl:if test="$dates_only=0">
 		<p><span class="label">Principles:</span><br />
-			<xsl:apply-templates select="./tei:text/tei:body" />
+			<xsl:apply-templates select="./tei:text[@type='transliteration']/tei:body" />
 		</p>
 		<p><span class="label">Witnesses:</span><br />
-			<xsl:apply-templates select="./tei:text/tei:back" />
+			<xsl:apply-templates select="./tei:text[@type='transliteration']/tei:back" />
 		</p>
 	</xsl:if>
 </xsl:template>
