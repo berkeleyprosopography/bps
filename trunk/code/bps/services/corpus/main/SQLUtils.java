@@ -135,7 +135,7 @@ public class SQLUtils {
 		for( NameRoleActivity nra:nameRoleActivities ) {
 			try {
 				// Generate another row in the documents table
-				nraWriter.append(nra.toXMLLoadString(docID, sep, nullStr)+newLn);
+				nraWriter.append(nra.toXMLLoadString(sep, nullStr)+newLn);
 				generateNameFamilyLinksSQL( nflWriter, nra);
 			} catch( IOException e ) {
 	            //debugTrace(2, e);

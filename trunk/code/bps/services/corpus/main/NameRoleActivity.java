@@ -3,6 +3,7 @@
  */
 package bps.services.corpus.main;
 
+import bps.services.common.main.LinkTypes;
 import java.util.ArrayList;
 
 /**
@@ -17,6 +18,7 @@ public class NameRoleActivity {
 	private Name			normalName;
 	private ActivityRole	role;
 	private Activity		activity;
+	private Document		document;
 	/**
 	 * The ID of the token associated with this in the owning document
 	 */
@@ -28,8 +30,8 @@ public class NameRoleActivity {
 	/**
 	 * Create a new empty instance.
 	 */
-	public NameRoleActivity() {
-		this(nextID++, null, null, null, null);
+	private NameRoleActivity() {
+		this(nextID++, null, null, null, null, null);
 	}
 
 	/**
@@ -39,8 +41,8 @@ public class NameRoleActivity {
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
 	public NameRoleActivity(Name name, ActivityRole role,
-			Activity activity, String xmlID) {
-		this(nextID++, name, role, activity, xmlID);
+			Activity activity, String xmlID, Document document) {
+		this(nextID++, name, role, activity, xmlID, document);
 	}
 
 	/**
@@ -51,8 +53,8 @@ public class NameRoleActivity {
 	 * @param activity The Activity involved in this instance
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameRoleActivity(int id, Name name, ActivityRole role,
-			Activity activity, String xmlID) {
+	private NameRoleActivity(int id, Name name, ActivityRole role,
+			Activity activity, String xmlID, Document document) {
 		this.id = id;
 		this.name = name;
 		if(name==null)
@@ -62,6 +64,7 @@ public class NameRoleActivity {
 		this.role = role;
 		this.activity = activity;
 		this.xmlID = xmlID;
+		this.document = document;
 		this.nameFamilyLinks = null;
 	}
 
@@ -160,7 +163,7 @@ public class NameRoleActivity {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public void addNameFamilyLink(Name name, int linkType, String xmlID) {
+	public void addNameFamilyLink(Name name, LinkTypes linkType, String xmlID) {
 		initNameFamilyLinks();
 		nameFamilyLinks.add(new NameFamilyLink(name, linkType, xmlID));
 	}
@@ -181,8 +184,65 @@ public class NameRoleActivity {
 		return nameFamilyLinks;
 	}
 
+	/**
+	 * @return a declared Father if there is one
+	 */
+	public Name getFatherName() {
+		return findFamilyLinkNameByType(LinkTypes.LINK_TO_FATHER);
+	}
+
+	/**
+	 * @return a declared Clan if there is one
+	 */
+	public Name getClanName() {
+		return findFamilyLinkNameByType(LinkTypes.LINK_TO_CLAN);
+	}
+
+	/**
+	 * @return a declared GrandFather if there is one
+	 */
+	public Name getGrandFatherName() {
+		return findFamilyLinkNameByType(LinkTypes.LINK_TO_GRANDFATHER);
+	}
+
+	/**
+	 * @return any declared ancestors
+	 */
+	public ArrayList<Name> getAncestorNames() {
+		return findFamilyLinkNamesByType(LinkTypes.LINK_TO_ANCESTOR);
+	}
+
+	/**
+	 * @param linkType one of LinkTypes.LINK_TO_*
+	 * @return name of the first family link matching linkType
+	 */
+	public Name findFamilyLinkNameByType(LinkTypes linkType) {
+		for(NameFamilyLink nfl:nameFamilyLinks) {
+			if(nfl.getLinkType()==linkType)
+				return nfl.getName();
+		}
+		return null;
+	}
+
+	/**
+	 * @param linkType one of NameFamilyLink.LINK_TO_*
+	 * @return array of names for family links matching linkType
+	 */
+	public ArrayList<Name> findFamilyLinkNamesByType(LinkTypes linkType) {
+		ArrayList<Name> list = null;
+		for(NameFamilyLink nfl:nameFamilyLinks) {
+			if(nfl.getLinkType()==linkType) {
+				if(list==null) {
+					list = new ArrayList<Name>();
+				}
+				list.add(nfl.getName());
+			}
+		}
+		return list;
+	}
+
 	public boolean isValid() {
-		return !(name==null||role==null||activity==null);
+		return (name!=null && role!=null && activity!=null && document!=null);
 	}
 
 	/**
@@ -200,13 +260,21 @@ public class NameRoleActivity {
 	 * @param docId The document in which this appears.
 	 * @return loadfile string with no line terminator or newline.
 	 */
-	public String toXMLLoadString(int docId, String sep, String nullStr ) {
+	public String toXMLLoadString(String sep, String nullStr ) {
 		if(!isValid())
 			throw new RuntimeException(
 					"Attempt to generate XML loadfile string for invalid NameRoleActivity.");
 		return id+sep+name.getId()+sep+role.getId()+sep+
-				activity.getId()+sep+docId+sep+
+				activity.getId()+sep+document.getId()+sep+
 				((xmlID!=null)?'"'+xmlID+'"':nullStr);
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
 	}
 
 }

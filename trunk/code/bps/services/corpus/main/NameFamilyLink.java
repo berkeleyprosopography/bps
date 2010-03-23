@@ -2,27 +2,19 @@
  *
  */
 package bps.services.corpus.main;
+import bps.services.common.main.LinkTypes;
 
 /**
  * @author pschmitz
  *
  */
 public class NameFamilyLink {
-	public static final int LINK_TO_UNDEFINED = -1;
-	private static final int LINK_TYPE_MIN = 0;
-	public static final int LINK_TO_FATHER = 0;
-	public static final int LINK_TO_MOTHER = 1;
-	public static final int LINK_TO_GRANDFATHER = 2;
-	public static final int LINK_TO_GRANDMOTHER = 3;
-	public static final int LINK_TO_ANCESTOR = 4;
-	public static final int LINK_TO_CLAN = 5;
-	private static final int LINK_TYPE_MAX = 5;
 
 	private static int	nextID = 1;
 
 	private int					id;
 	private Name				name;
-	private int					linkType;
+	private LinkTypes			linkType;
 	/**
 	 * The ID of the token associated with this in the owning document
 	 */
@@ -32,7 +24,7 @@ public class NameFamilyLink {
 	 * Create a new empty instance.
 	 */
 	public NameFamilyLink() {
-		this(nextID++, null, LINK_TO_UNDEFINED, null);
+		this(nextID++, null, null, null);
 	}
 
 	/**
@@ -41,7 +33,7 @@ public class NameFamilyLink {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameFamilyLink(Name name, int linkType, String xmlID) {
+	public NameFamilyLink(Name name, LinkTypes linkType, String xmlID) {
 		this(nextID++, name, linkType, xmlID);
 	}
 
@@ -52,7 +44,7 @@ public class NameFamilyLink {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameFamilyLink(int id, Name name, int linkType, String xmlID) {
+	public NameFamilyLink(int id, Name name, LinkTypes linkType, String xmlID) {
 		this.id = id;
 		this.name = name;
 		this.linkType = linkType;
@@ -90,14 +82,14 @@ public class NameFamilyLink {
 	/**
 	 * @return the linkType
 	 */
-	public int getLinkType() {
+	public LinkTypes getLinkType() {
 		return linkType;
 	}
 
 	/**
 	 * @param linkType the linkType to set
 	 */
-	public void setLinkType(int linkType) {
+	public void setLinkType(LinkTypes linkType) {
 		this.linkType = linkType;
 	}
 
@@ -116,8 +108,7 @@ public class NameFamilyLink {
 	}
 
 	public boolean isValid() {
-		return !(name==null
-				||linkType<LINK_TYPE_MIN||linkType>LINK_TYPE_MAX);
+		return !(name==null||linkType==null);
 	}
 
 	/**
