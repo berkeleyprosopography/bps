@@ -25,7 +25,7 @@ public class Name {
 	/**
 	 * Create a new empty name.
 	 */
-	public Name() {
+	private Name() {
 		this(Name.nextID++, null, null, null);
 	}
 
@@ -127,6 +127,23 @@ public class Name {
 			((name!=null)?'"'+name+'"':nullStr)+sep+
 			((notes!=null)?'"'+notes+'"':nullStr)+sep+
 			((normal!=null)?normal.id:nullStr);
+	}
+
+	public boolean equals(Name compareTo) {
+		if(id==compareTo.id)
+			return true;
+		// Check this normal form against compareTo and its normal
+		if(normal!=null) {
+			if(normal.id==compareTo.id) {
+				return true;
+			} else if((compareTo.normal!=null)&&(compareTo.normal.id==normal.id)) {
+				return true;
+			}
+		// Check this against compareTo normal
+		} else if((compareTo.normal!=null)&&(compareTo.normal.id==id)) {
+			return true;
+		}
+		return false;
 	}
 
 }

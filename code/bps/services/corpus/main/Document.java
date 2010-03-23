@@ -1,5 +1,6 @@
 package bps.services.corpus.main;
 
+import bps.services.common.main.LinkTypes;
 import java.util.ArrayList;
 
 import javax.xml.xpath.XPath;
@@ -129,7 +130,7 @@ public class Document {
 	    return newDoc;
 	}
 
-	public void addNamesForActivity( String xpathSel, Node context, Corpus corpus,
+	protected void addNamesForActivity( String xpathSel, Node context, Corpus corpus,
 			Activity activity, ActivityRole defaultActRole )
 		throws XPathExpressionException {
 
@@ -167,20 +168,20 @@ public class Document {
 						        	generateParseError(foreNameEl, "Multiple foreNames encountered.");
 					        	} else {
 						        	nra = new NameRoleActivity(nameInstance, defaultActRole,
-						        			activity, fnXMLID);
+						        			activity, fnXMLID, this);
 						        	addNameRoleActivity(nra);
 					        	}
 					        } else if(nra==null) {
 					        	generateParseError(foreNameEl, "Patronym with no primary forename.");
 					        } else {
 					        	// Deal with patronyms - add a family link
-					        	int linkType;
+					        	LinkTypes linkType;
 					        	if(patronymsLinked == 0) {
-					        		linkType = NameFamilyLink.LINK_TO_FATHER;
+					        		linkType = LinkTypes.LINK_TO_FATHER;
 					        	} else  if(patronymsLinked == 1) {
-					        		linkType = NameFamilyLink.LINK_TO_GRANDFATHER;
+					        		linkType = LinkTypes.LINK_TO_GRANDFATHER;
 					        	} else {
-					        		linkType = NameFamilyLink.LINK_TO_ANCESTOR;
+					        		linkType = LinkTypes.LINK_TO_ANCESTOR;
 					        	}
 					        	nra.addNameFamilyLink(nameInstance, linkType, fnXMLID);
 					        	patronymsLinked++;
@@ -210,7 +211,7 @@ public class Document {
 				        	generateParseError(addNameEl, "Multiple clan name declarations.");
 				        } else {
 				        	// add clan name
-				        	nra.addNameFamilyLink(nameInstance, NameFamilyLink.LINK_TO_CLAN, fnXMLID);
+				        	nra.addNameFamilyLink(nameInstance, LinkTypes.LINK_TO_CLAN, fnXMLID);
 				        	fFoundClanName = true;
 				        }
 			        }
@@ -346,7 +347,7 @@ public class Document {
 	 */
 	public void addNameRoleActivity(Name name, ActivityRole role,
 			Activity activity, String xmlID) {
-		nameRoleActivities.add(new NameRoleActivity(name, role, activity, xmlID));
+		nameRoleActivities.add(new NameRoleActivity(name, role, activity, xmlID, this));
 	}
 
 	/**
@@ -357,10 +358,17 @@ public class Document {
 	}
 
 	/**
-	 * @return alt_id.
+	 * @return String description based upon corpus and alt_id
 	 */
 	public String toString() {
 		return "{"+corpus.getName()+':'+((alt_id==null)?"(null)":alt_id)+"}";
+	}
+
+	/**
+	 * @return String description based upon corpus and alt_id
+	 */
+	public boolean equals(Document other) {
+		return id==other.id;
 	}
 
 	private void generateParseError( Element node, String errorStr ) {
