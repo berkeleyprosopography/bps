@@ -4,6 +4,7 @@
 package bps.services.corpus.main;
 
 import bps.services.common.main.LinkTypes;
+import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -208,7 +209,7 @@ public class NameRoleActivity {
 	/**
 	 * @return any declared ancestors
 	 */
-	public ArrayList<Name> getAncestorNames() {
+	public List<Name> getAncestorNames() {
 		return findFamilyLinkNamesByType(LinkTypes.LINK_TO_ANCESTOR);
 	}
 
@@ -242,7 +243,8 @@ public class NameRoleActivity {
 	}
 
 	public boolean isValid() {
-		return (name!=null && role!=null && activity!=null && document!=null);
+		// Have to allow empty names - sometimes they are missing...
+		return (role!=null && activity!=null && document!=null);
 	}
 
 	/**
@@ -264,7 +266,7 @@ public class NameRoleActivity {
 		if(!isValid())
 			throw new RuntimeException(
 					"Attempt to generate XML loadfile string for invalid NameRoleActivity.");
-		return id+sep+name.getId()+sep+role.getId()+sep+
+		return id+sep+((name==null)?nullStr:name.getName())+sep+role.getId()+sep+
 				activity.getId()+sep+document.getId()+sep+
 				((xmlID!=null)?'"'+xmlID+'"':nullStr);
 	}

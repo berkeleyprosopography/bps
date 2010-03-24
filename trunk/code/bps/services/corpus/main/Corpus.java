@@ -1,5 +1,6 @@
 package bps.services.corpus.main;
 
+import bps.services.common.main.time.*;
 import java.util.HashMap;
 
 import javax.xml.xpath.XPath;
@@ -17,6 +18,7 @@ public class Corpus {
 	private int			id;
 	private String		name;
 	private String		description;
+	private TimeSpan	defaultDocTimeSpan = null;
 	// TODO Link to a User instance from bps.services.user.main
 	//private User		owner;
 
@@ -41,7 +43,7 @@ public class Corpus {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(Corpus.nextID++, null, null);
+		this(Corpus.nextID++, null, null, null);
 	}
 
 	/**
@@ -49,8 +51,8 @@ public class Corpus {
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 */
-	public Corpus( String name, String description ) {
-		this(Corpus.nextID++, name, description);
+	public Corpus( String name, String description, TimeSpan defaultDocTimeSpan ) {
+		this(Corpus.nextID++, name, description, defaultDocTimeSpan);
 	}
 
 	/**
@@ -60,17 +62,19 @@ public class Corpus {
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 */
-	public Corpus(int id, String name, String description) {
+	public Corpus(int id, String name, String description, TimeSpan defaultDocTimeSpan) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
+		this.defaultDocTimeSpan = defaultDocTimeSpan;
 		documents = new HashMap<Integer, Document>();
 		activities = new HashMap<String, Activity>();
 		activityRoles = new HashMap<String, ActivityRole>();
 		names = new HashMap<String, Name>();
 	}
 
-	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate)
+	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
+			TimeSpan defaultDocTimeSpan)
 		throws XPathExpressionException {
 		String name = "unknown";
 		String description = null;
@@ -86,7 +90,7 @@ public class Corpus {
 		    Element descEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
 		    if(descEl!=null)
 		    	description = descEl.getTextContent().replaceAll("[\\s]+", " ");
-		    newCorpus = new Corpus(name, description);
+		    newCorpus = new Corpus(name, description, defaultDocTimeSpan);
 		    if(deepCreate) {
 		    	// Find the TEI nodes and create a document for each one
 		    	NodeList docNodes = docNode.getElementsByTagName( "TEI" );
@@ -203,5 +207,19 @@ public class Corpus {
 		return id+sep+
 			((name!=null)?'"'+name+'"':nullStr)+sep+
 			((description!=null)?'"'+description+'"':nullStr);
+	}
+
+	/**
+	 * @return the defaultDocTimeSpan
+	 */
+	public TimeSpan getDefaultDocTimeSpan() {
+		return defaultDocTimeSpan;
+	}
+
+	/**
+	 * @param defaultDocTimeSpan the defaultDocTimeSpan to set
+	 */
+	public void setDefaultDocTimeSpan(TimeSpan defaultDocTimeSpan) {
+		this.defaultDocTimeSpan = defaultDocTimeSpan;
 	}
 }

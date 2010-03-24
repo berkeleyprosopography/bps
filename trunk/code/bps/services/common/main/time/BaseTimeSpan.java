@@ -15,7 +15,7 @@ public abstract class BaseTimeSpan implements TimeSpan {
 	}
 
 	public void setStdDev(double value) {
-		if(stdDev<=0)
+		if(value<=0)
 			throw new IllegalArgumentException("TimeSpace StdDev must be > 0");
 		stdDev = value;
 		twoVariance = 2*stdDev*stdDev;
