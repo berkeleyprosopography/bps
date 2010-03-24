@@ -17,6 +17,7 @@ public class DerivedTimeSpan extends BaseTimeSpan {
 
 	public DerivedTimeSpan(TimeSpan baseSpan, long offset, double stdDev) {
 		super(stdDev);
+		this.offset = offset;
 		baseTimeSpan = baseSpan;
 	}
 

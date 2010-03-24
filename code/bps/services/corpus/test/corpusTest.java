@@ -1,12 +1,23 @@
 package bps.services.corpus.test;
 
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
+import bps.services.common.main.time.*;
 import bps.services.corpus.main.Corpus;
 import bps.services.corpus.main.SQLUtils;
 import bps.services.corpus.main.XMLUtils;
 
 public class corpusTest {
+
+	public static void printUsage(String error) {
+		if(error!=null)
+			System.err.println(error);
+
+	}
 
 	/**
 	 * @param args
@@ -15,6 +26,9 @@ public class corpusTest {
 		int i = 0;
 		String arg;
 		String corpusFile = null;
+        double corpusTSStdDev =
+    		TimeUtils.getApproxTimeInMillisForYearOffset(50);
+        long corpusCenterPoint = TimeUtils.getTimeInMillisForYear(-180);
 
         while (i < args.length && args[i].startsWith("-")) {
             arg = args[i++];
@@ -23,13 +37,26 @@ public class corpusTest {
                 if (i < args.length)
                 	corpusFile = args[i++];
                 else
-                    System.err.println("-c requires a filename");
+                    printUsage("-c requires a filename");
+            } else if(arg.equals("-cy")) {
+                if (i < args.length) {
+                	int year = Integer.parseInt(args[i++]);
+                	corpusCenterPoint = TimeUtils.getTimeInMillisForYear(year);
+                } else
+                	printUsage("-cy requires a year");
+            } else if(arg.equals("-sd")) {
+                if (i < args.length) {
+                	double stdDevYrs = Double.parseDouble(args[i++]);
+                	corpusTSStdDev =
+                		TimeUtils.getApproxTimeInMillisForYearOffset(stdDevYrs);
+                } else
+                	printUsage("-cy requires a year");
             } else {
-            	System.err.println("Unknown option: "+arg);
+            	printUsage("Unknown option: "+arg);
             }
         }
         if(corpusFile==null) {
-        	System.err.println("Missing corpus file argument.");
+        	printUsage("Missing corpus file argument.");
         	System.exit(0);
         }
         String outFileBase = corpusFile.replace(".xml", "_");
@@ -45,8 +72,15 @@ public class corpusTest {
         	System.out.print("Opening corpus file...");
 	        org.w3c.dom.Document doc = XMLUtils.OpenXMLFile("file:"+corpusFile);
         	System.out.println("Done.");
-        	System.out.println("Creating corpus...");
-			Corpus testCorpus = Corpus.CreateFromTEI(doc, true);
+        	System.out.print("Creating corpus with centerpoint: "
+        			+TimeUtils.millisToSimpleYearString(corpusCenterPoint)
+        			+" and StdDev: "
+        			+TimeUtils.millisToYearOffsetString(corpusTSStdDev)
+        			+" (yrs)");
+
+        	EvidenceBasedTimeSpan defaultCorpusTS =
+        		new EvidenceBasedTimeSpan(corpusCenterPoint, corpusTSStdDev);
+			Corpus testCorpus = Corpus.CreateFromTEI(doc, true, defaultCorpusTS);
         	System.out.println("Done.");
 			corpora.put(testCorpus.getId(), testCorpus);
         	System.out.print("Generating Corpus SQL...");

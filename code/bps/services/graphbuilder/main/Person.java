@@ -1,7 +1,10 @@
 package bps.services.graphbuilder.main;
 
+import java.util.List;
 import java.util.ArrayList;
 import bps.services.corpus.main.*;
+import bps.services.common.main.LinkTypes;
+import bps.services.common.main.time.*;
 
 /*
  * TODO Need to model the links from this Person to other Persons, docs, etc.
@@ -27,23 +30,43 @@ public class Person {
 	private Name declaredName = null;
 	private Name declaredFather = null;
 	private Name declaredGrandFather = null;
-	private ArrayList<Name> declaredAncestors = null;
 	// TODO - rewrite to support an array of ancestors for more cases
+	private List<Name> declaredAncestors = null;
+	// TODO?? Do we need to model the clan and link to it? What if we are inferring
+	// it from various other rules?
 	private Name declaredClan = null;
-	public NameRoleActivity nrad = null;
+	private PersonLinkSet<Person>	fatherLinks = null;
 
-	public Person(NameRoleActivity nrad) {
+	protected NameRoleActivity nrad = null;
+	private LinkTypes roleInNRAD = null;
+	private TimeSpan activeTimeSpan = null;
+	// lifeTimeSpan should generally be a DerivedTimeSpan linked to activeTimeSpan.
+	private TimeSpan lifeTimeSpan = null;
 
+
+	public Person(NameRoleActivity nrad, String displayName,
+			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan) {
+		this(nrad.getName(), nrad.getFatherName(), nrad.getGrandFatherName(),
+				nrad.getAncestorNames(), activeTimeSpan, lifeTimeSpan,
+				nrad, LinkTypes.LINK_TO_PERSON, displayName );
 	}
 
-	public Person(NameRoleActivity nrad, String displayName) {
+	public Person(Name forename, Name father, Name grandfather, List<Name> ancestors,
+			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan,
+			NameRoleActivity nrad, LinkTypes roleInNRAD, String displayName ) {
 		if(nrad==null)
 			throw new IllegalArgumentException("Person ctor must take valid NameRoleActivity.");
+		if(activeTimeSpan==null || lifeTimeSpan==null)
+			throw new IllegalArgumentException("Person ctor must take valid active and life TimeSpans.");
 		this.nrad = nrad;
-		declaredName = nrad.getName();
-		declaredFather = nrad.getFatherName();
-		declaredGrandFather = nrad.getGrandFatherName();
-		declaredAncestors = nrad.getAncestorNames();
+		this.roleInNRAD = roleInNRAD;
+		this.activeTimeSpan = activeTimeSpan;
+		this.lifeTimeSpan = lifeTimeSpan;
+		declaredName = forename;
+		declaredFather = father;
+		declaredGrandFather = grandfather;
+		declaredAncestors = ancestors;
+		fatherLinks = new PersonLinkSet<Person>(this, LinkTypes.LINK_TO_FATHER);
 		if(displayName!=null)
 			this.displayName = displayName;
 		else {
@@ -54,6 +77,44 @@ public class Person {
 			this.displayName = ((declaredName!=null)?declaredName:"(unknown)")
 								+"."+((suffix!=null)?suffix:nrad.getId());
 		}
+	}
+
+	public Person createPersonForDeclaredFather(
+			long activeTimeSpanOffset, long lifeTimeSpanOffset,
+			double activeTimeSpanStdDev, double lifeTimeSpanStdDev,
+			boolean addToFatherLinks) {
+		if(declaredFather==null)
+			return null;
+		DerivedTimeSpan fatherActiveTimeSpan =
+			new DerivedTimeSpan(activeTimeSpan, activeTimeSpanOffset, activeTimeSpanStdDev);
+		DerivedTimeSpan fatherLifeTimeSpan =
+			new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);
+		Name fathersGF = null;
+		List<Name> fathersAncestors = null;
+		if(declaredAncestors!=null&&!declaredAncestors.isEmpty()) {
+			fathersGF = declaredAncestors.get(0);
+			if(declaredAncestors.size()>1)
+				fathersAncestors = declaredAncestors.subList(1, declaredAncestors.size()-1);
+		}
+		LinkTypes fatherRoleInNRAD;
+		switch(roleInNRAD) {
+		case LINK_TO_PERSON:
+			fatherRoleInNRAD = LinkTypes.LINK_TO_FATHER; break;
+		case LINK_TO_FATHER:
+			fatherRoleInNRAD = LinkTypes.LINK_TO_GRANDFATHER; break;
+		default:
+		//case LinkTypes.LINK_TO_GRANDFATHER:
+		//case LinkTypes.LINK_TO_ANCESTOR:
+			fatherRoleInNRAD = LinkTypes.LINK_TO_ANCESTOR; break;
+		}
+		Person father = new Person(declaredFather, declaredGrandFather, fathersGF,
+				fathersAncestors, fatherActiveTimeSpan, fatherLifeTimeSpan,
+				nrad, fatherRoleInNRAD, displayName );
+		if(addToFatherLinks) {
+			fatherLinks.addLink(father, 1.0);
+			fatherLinks.normalize();
+		}
+		return father;
 	}
 
 	public boolean isDeclaredSimple() {

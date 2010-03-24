@@ -22,6 +22,8 @@ public class TEI_Constants {
 	public static final String TYPE_CLAN = "clan";
 
 	public static final String XPATH_ALT_ID ="./teiHeader/fileDesc/titleStmt/title/name[@type='cdlicat:id_text']";
-	public static final String XPATH_PRINCIPAL_PERSNAMES = ".//body//persName";
-	public static final String XPATH_WITNESS_PERSNAMES = ".//back//div[@subtype='witnesses']//persName";
+	public static final String XPATH_PRINCIPAL_PERSNAMES =
+		"./text[@type='transliteration']/body//persName";
+	public static final String XPATH_WITNESS_PERSNAMES =
+		"./text[@type='transliteration']/back/div[@subtype='witnesses']//persName";
 }

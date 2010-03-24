@@ -27,7 +27,7 @@ public class Document {
 	private String		xml_id;			// Element within source (for compound files).
 	private String		notes;			// Any notes on document
 	private String		date_str;		// Date string from document
-	private int			date_norm;		// Normalized date
+	private long		date_norm;		// Normalized date
 
 	private ArrayList<NameRoleActivity> nameRoleActivities;
 
@@ -43,7 +43,7 @@ public class Document {
 	 * @param date_norm Normalized date
 	 */
 	public Document(int id, Corpus corpus, String alt_id, String sourceURL, String xml_id,
-			String notes, String date_str, int date_norm) {
+			String notes, String date_str, long date_norm) {
 		this.id = id;
 		this.corpus = corpus;
 		this.alt_id = alt_id;
@@ -65,7 +65,7 @@ public class Document {
 	 * @param date_norm Normalized date
 	 */
 	public Document(Corpus corpus, String alt_id, String sourceURL, String xml_id,
-			String notes, String date_str, int date_norm) {
+			String notes, String date_str, long date_norm) {
 		this(Document.nextID++, corpus, alt_id, sourceURL, xml_id,
 				notes, date_str, date_norm);
 	}
@@ -74,21 +74,21 @@ public class Document {
 	 * Create a new Document from an alt_id
 	 * @param alt_id Secondary identifier string
 	 */
-	public Document(Corpus corpus, String alt_id) {
-		this(Document.nextID++, corpus, alt_id, null, null, null, null, 0);
+	public Document(Corpus corpus, String alt_id, String date, long date_norm) {
+		this(Document.nextID++, corpus, alt_id, null, null, null, date, date_norm);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
-	public Document(Corpus corpus) {
+	private Document(Corpus corpus) {
 		this(Document.nextID++, corpus, null, null, null, null, null, 0);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
-	public Document() {
+	private Document() {
 		this(Document.nextID++, null, null, null, null, null, null, 0);
 	}
 
@@ -111,7 +111,11 @@ public class Document {
 		    Element nameEl = (Element) expr.evaluate(teiNode, XPathConstants.NODE);
 		    if(nameEl!=null)
 		    	alt_id = nameEl.getTextContent().replaceAll("[\\s]+", " ");
-		    newDoc = new Document(corpus, alt_id);
+		    // TODO Find the date, normalize, and pass it in.
+		    // If no date, use the corpus midpoint date.
+		    String date = null;
+		    long date_norm = corpus.getDefaultDocTimeSpan().getCenterPoint();
+		    newDoc = new Document(corpus, alt_id, date, date_norm);
 		    Activity unkActivity = corpus.findOrCreateActivity("Unknown");
 		    ActivityRole principal = corpus.findOrCreateActivityRole("Principal");
 		    ActivityRole witness = corpus.findOrCreateActivityRole("Witness");
@@ -146,8 +150,11 @@ public class Document {
 		        NodeList fnNodes = persNameEl.getElementsByTagName(TEI_Constants.FORENAME_EL);
 			    int nNames = fnNodes.getLength();
 		        if(nNames<1) {
-		        	generateParseError(persNameEl, TEI_Constants.PERSNAME_EL+" has no "
-		        									+TEI_Constants.FORENAME_EL+" declarations.");
+		        	//generateParseError(persNameEl, TEI_Constants.PERSNAME_EL+" has no "
+		        	//								+TEI_Constants.FORENAME_EL+" declarations.");
+		        	// Create an empty NRAD to represent this
+		        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
+		        	addNameRoleActivity(nra);
 		        } else {
 		        	int patronymsLinked = 0;
 				    for (int iN=0; iN < nNames; iN++) {
@@ -156,6 +163,8 @@ public class Document {
 				        if(fnNameStr.length()<1) {
 				        	generateParseError(foreNameEl,
 				        			TEI_Constants.FORENAME_EL+" has no (or empty) value.");
+				        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
+				        	addNameRoleActivity(nra);
 				        } else {
 				        	Name nameInstance = corpus.findOrCreateName(fnNameStr);
 					        String fnXMLID = foreNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
@@ -171,9 +180,13 @@ public class Document {
 						        			activity, fnXMLID, this);
 						        	addNameRoleActivity(nra);
 					        	}
-					        } else if(nra==null) {
-					        	generateParseError(foreNameEl, "Patronym with no primary forename.");
-					        } else {
+					        } else{
+					        	if(nra==null) {
+						        	//generateParseError(foreNameEl, "Patronym with no primary forename.");
+						        	// Create an empty NRAD to represent missing forename
+						        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
+						        	addNameRoleActivity(nra);
+					        	}
 					        	// Deal with patronyms - add a family link
 					        	LinkTypes linkType;
 					        	if(patronymsLinked == 0) {
@@ -324,14 +337,14 @@ public class Document {
 	/**
 	 * @return the date_norm
 	 */
-	public int getDate_norm() {
+	public long getDate_norm() {
 		return date_norm;
 	}
 
 	/**
 	 * @param date_norm the date_norm to set
 	 */
-	public void setDate_norm(int date_norm) {
+	public void setDate_norm(long date_norm) {
 		this.date_norm = date_norm;
 	}
 
