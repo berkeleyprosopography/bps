@@ -219,9 +219,20 @@ form.bpsForm legend {
 }
 
 /*Should be applied to all textarea and text input fields*/
-.bpsFormInput{
+.bpsFormInput {
 	padding:2px 2px 2px 4px;
 	border:1px solid #603913;
+}
+
+/*Should be applied to all textarea and text input fields*/
+select.bpsFormInput {
+	padding:2px;
+	border:1px solid #603913;
+}
+
+/*Should be applied to all textarea and text input fields*/
+.bpsFormInput option {
+	padding:3px 4px;
 }
 
 /* Used for styling grey help text that appears in form fields. */
@@ -241,6 +252,21 @@ label.overlabel-apply {
 	padding:20px;
 	color:#F00;
 	font-weight:bold;
+}
+
+table.params {
+	margin-left:20px;
+	background-color:#F8E0BC;
+}
+
+.paramDesc{
+	padding:7px 20px;
+	font-weight:bold;
+	border-bottom:1px solid black;
+}
+
+.paramNote{
+	font-weight:normal;
 }
 
 .requiredFieldIndicator{
