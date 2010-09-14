@@ -220,19 +220,19 @@ form.bpsForm legend {
 
 /*Should be applied to all textarea and text input fields*/
 .bpsFormInput {
-	padding:2px 2px 2px 4px;
+	padding:2px 0px 2px 4px;
 	border:1px solid #603913;
 }
 
 /*Should be applied to all textarea and text input fields*/
 select.bpsFormInput {
-	padding:2px;
+	padding:0px;
 	border:1px solid #603913;
 }
 
 /*Should be applied to all textarea and text input fields*/
 .bpsFormInput option {
-	padding:3px 4px;
+	padding:2px 6px 1px 4px;
 }
 
 /* Used for styling grey help text that appears in form fields. */
@@ -259,10 +259,25 @@ table.params {
 	background-color:#F8E0BC;
 }
 
-.paramDesc{
-	padding:7px 20px;
+.caseTitle{
+	padding:7px 10px;
 	font-weight:bold;
+	border-top:1px solid black;
 	border-bottom:1px solid black;
+}
+
+.paramDesc{
+	padding:1px 20px;
+	font-weight:bold;
+	/* border-bottom:1px solid black; */
+}
+
+tr.paramDesc.lastParamRow{
+	border-bottom:1px solid black;
+}
+
+tr.paramDesc.lastParamRow td{
+	padding-bottom:5px;
 }
 
 .paramNote{
