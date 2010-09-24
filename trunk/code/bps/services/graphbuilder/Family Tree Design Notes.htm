@@ -1,0 +1,297 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>New Page 1</title>
+</head>
+
+<body>
+
+<p>Several approaches:</p>
+<ol>
+  <li>Run through the name-references and build up a set of Persons that the
+    name-refs are associated to. 
+    <ol>
+      <li>Order the processing to prefer:
+        <ol>
+          <li>Those with both a father and a clan</li>
+          <li>Those with a clan</li>
+          <li>Those with a father</li>
+          <li>Unqualified references</li>
+        </ol>
+      </li>
+      <li>As add each one, either align to an existing name, or posit a new one
+        and distribute weight<br>
+        Problem with this is that there is a different distribution for the
+        early names compared to the later ones. </li>
+    </ol>
+  </li>
+  <li>Find all the name-references that share a given name:
+    <ol>
+      <li>Determine the maximum number of potential Persons</li>
+      <li>Work to reduce the number, e.g., where there are two equivalent and
+        fully qualified names, eliminate one Person</li>
+      <li>For each name-ref, distribute the weight evenly to all Persons, and
+        then redistribute according to rules</li>
+    </ol>
+  </li>
+  <li>Hybrid. Do as for 2, but as we consider the name-refs, order them
+    according to the rules in 1. 
+    <ol>
+      <li>Know the number of potential persons up front, to get even
+        distribution. </li>
+      <li>Can consider step 2.2 as an extreme weight redistribution (could allow
+        for some very small percentage of weight to go to others)</li>
+      <li>By considering the fully qualified name-refs first, can get the more
+        likely Person assignments done, and then can use these to prefer
+        existing Persons for the other name refs. <i>But this presumes filter as
+        we go, instead of creating them all and filtering. Better to create them
+        all, then using the ranking by qualification/constraints to eliminate
+        the likely ones. </i></li>
+    </ol>
+  </li>
+</ol>
+<p>In general, need to think about running over the model to do weight
+distributions, and then possible filters. This is an iterative process.</p>
+<p>Think about finding the parents/children/clans for Persons as a variant on
+this. Once have all the Persons, and presumably after one round of clear
+coalescing based upon simple uniqueness measures (function of name qualification
++/- dates), want to find fathers for each Person. If have no patronym or clan,
+skip this (not really worth it). If have only clan that is not the No-Clan clan,
+then can still distribute among clan members. If have patronym (+/- others and
+clan) then look for fits by name and constraints. Here, alternate names would be
+useful (both a.k.a. as well as variant orthographies).&nbsp; Can do weight-redist
+with rules like: if have candidate with only simple patronym, favor father
+variants such that candidate name matches grandfather. Need to think about clan
+conflicts: if declared clan, then assume 100%. If undeclared and assume NoClan,
+then assume 90% or something, and use this to redist weight, but not to remove.
+This implies that the constraints are also weighted: the clan conflict is
+expressed as 100% weight shift to matching clans, where a &quot;probable&quot;
+clan association is a partial weight shift. </p>
+<p>Need to consider how rule processing works. Basically, each rule should be
+the basis of weight redistribution, and is a multiplier on the existing weights.
+E.g.,:</p>
+<ol>
+  <li>Date rule will reduce weights based upon dates of name-refs, normalize,
+    and apply to existing weights. </li>
+</ol>
+<p>Need to consider how to build in the references for fatherhood and clan
+membership. </p>
+<ol>
+  <li>If have a declaration of clan, then 
+    <ol>
+      <li>Can consider association of name ref to Person with clan membership
+        that matches clan</li>
+      <li>Can consider association of name ref to Person with unknown clan
+        membership</li>
+      <li>Should not consider association association to member with conflicting
+        clan membership.</li>
+    </ol>
+    <p>How do we establish clan membership of Person entities? When have a name
+    ref in a doc, it either has clan membership or not. If it does, then when we
+    posit a new Person for that name-ref, it <i>must</i> have the clan
+    association. Similarly, if the name-ref has a patronym, then the new Person
+    must have a link to a Person with the father's name (and accordingly with
+    any clan association). So:
+    <ol>
+      <li>Assume any clan declaration is fact, and assign all weight to that
+        clan, as a constraint.</li>
+      <li>Assume missing clan declaration allows for any association, and so
+        link to all clans with equal weight. Add rules for distribution of
+        weight to undeclared clans?</li>
+      <li>If have a declared clan association, the weight of the name ref is all
+        distributed among the Persons that have some association to the named
+        clan. This filters out conflicts, but allows for undeclared name-refs to
+        also match. 
+        <ol>
+          <li>Can add a rule to prefer Persons that have declared clan
+            associations.</li>
+          <li>Can add a rule to prefer dominant clans over obscure ones - use
+            the relative proportion of declared clan associations to determine
+            dominancy. This basically recognizes that the odds of someone being
+            in an osbcure clan are lower than of them being in a dominant clan.
+            A rule like this should range from 0 to <i>ignore</i>, to 1 to <i>consider</i>
+            to 2 (or <i>N)</i> to <i>emphasize</i> the rule. How many rules are
+            of this form? Probably most. See other notes on how to do this
+            boost.</li>
+          <li>A variant on rule 2 above is to consider the dominance of clans
+            for a given name. Especially for obscure names (e.g., greek names),
+            this could be useful.</li>
+        </ol>
+      </li>
+    </ol>
+    <p>This argues for a model in which we run over the data to create the
+    Persons first. When we do this, we build in the clan associations with
+    weight distribution. This assumes we know all the clan names <i>a priori</i>
+    (which we should from an examination of the names table). We would also make
+    basic father associations at this point, based purely upon the constraints
+    expressed (with a clan must match to Persons with same clan association).
+    This means that there may be more Persons than name-doc-refs because of
+    name-relation citations. </p>
+    <p>So some pseudo-code might look like:</p>
+    <p>Assumes: all data from TEI are in tables. We have assembled names,
+    name-refs, family-link-refs
+    <ol>
+      <li>Assemble Clans, from the names table. Include no unknown clans - we
+        simply distribute clans among the known ones. Include a measure of the
+        weight distribution across all names with clan citations, and normalize.
+        This can be done with a query to the familylink table, something like:<br>
+        SELECT n.name AS clanname, n.id AS clanid, count(*) AS count_for_clan
+        FROM names n, familylink fl WHERE fl.link_type='clan' AND fl.name_id=n.id;<br>
+        May want to pick up the name type to assert the right type (clan).<br>
+        Then, normalize these weights and assign back to the names. </li>
+      <li>For each name, build a distribution of the weight association to
+        clans, based upon the number of name-refs that have clan associations. <br>
+        This is like the clan weight distribution, except that we want 
+        <ol>
+          <li>a name distribution generally</li>
+          <li>a name distribution by clan (i.e., a distribution per name, across
+            clans)</li>
+        </ol>
+      </li>
+      <li>Assemble Person candidates.<br>
+        Create a Person instance for all unqualified NRAD instances. <br>
+        For a person with a clan association, this just helps with filtering,
+        but still create a new Person.<br>
+        For each qualified person (name with a patronym and clan), should not
+        create a new person if one exists, and dates are reasonable. Assign
+        weight.<br>
+        For a person with a father/ancestor (partial qualification), create the
+        qualified Person. Assign weights to all potential qualified candidates
+        (from among the other partially qualified Persons as well as fully
+        qualified). If rules allow, distribute some to the unqualified Persons. <br>
+        Last, assign weights for the unqualified NRADs among the Persons.<br>
+        <b>Pseudo-code</b> looks like:
+        <ol>
+          <li>Build a list of name-refs (NRAD instances), including any clan
+            associations (null/unknown if none), and with a count of family+clan
+            links (later, we may weight father/husband/wife most, then
+            grandfather, then ancestor, then clan, or some variant thereon, but
+            for now, just count them).</li>
+          <li>For each name-ref (NRAD instance) with no family links (but may
+            have clan association)
+            <ol>
+              <li>Create a Person instance, named for the
+                Name/Role/Activity/Doc. Link from the NRAD.</li>
+              <li>If NRAD has no clan association, distribute Clan association
+                evenly, then modify with any clan-distribution rules.<br>
+                Else put all Clan association weight on the indicated clan.</li>
+              <li>Hold list, but do not distribute any citation weight yet.</li>
+            </ol>
+          </li>
+          <li>For each name-ref (NRAD instance) ordered (descending) by number
+            of family+clan links
+            <ol>
+              <li>If do not already have a Person linked (from step 2.1 above,
+                which means these NRADs have at least one family link)
+                <ol>
+                  <li>Find any Person instances that match on all family links
+                    and clan constraints, and that are not excluded on dates.<br>
+                    If any found
+                    <ol>
+                      <li>Compute weight to be assigned to matches, using weight
+                        distribution rules for family links, and for clan
+                        association. Need to develop these. E.g., want a formula
+                        that basically results in: if #family_links &gt;= 2 (two
+                        family links), assign all weight to matches, and if
+                        #links == 1, assign 50% (e.g.) to matches. Assume that
+                        for family matches, clans <i>must not</i> conflict (but
+                        unknown clan does not conflict with any clan). For clan
+                        association, shift weight among matches by boosting on
+                        direct matches (clan==clan) by 50% over non-matches (curr
+                        name-ref has clan,&nbsp; potential Person match has
+                        unknown clan).</li>
+                      <li>Distribute computed weight to the found links. Apply
+                        weight distribution rules (e.g., for clans, dates, for
+                        activity, etc.).</li>
+                    </ol>
+                  </li>
+                  <li>Create a Person instance, named for the
+                    Name/Role/Activity/Doc, and link to the NRAD</li>
+                  <li>&nbsp;</li>
+                </ol>
+              </li>
+              <li>Put all Clan association weight on the indicated clan.</li>
+            </ol>
+          </li>
+          <li>&nbsp;
+            <ol>
+              <li>If has clan, then create a Person with a clan association<br>
+                Else, create a Person with distribution across clans. <br>
+                Apply any clan-related rules to distribute weights.</li>
+              <li>If has other family links, then need to create Person
+                instances for these. <br>
+                They inherit the same clan as the associated NRAD, or are
+                distributed similarly.<br>
+                How to model/maintain the family link? Should link these Persons
+                as related - it is a<br>
+                How to model the date of the father? Need to assume doc date
+                minus some typical generation difference.<br>
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+</ol>
+<h3>Capturing dates for Documents</h3>
+<p>Need to work on the capture of dates. Laurie provided some guidelines, and I
+just need to pull this out of the docs. </p>
+<ul>
+  <li><b>What about docs with no date info</b>? <br>
+    Do we assume a date in the midrange of the corpus?<br>
+    Do we compute the corpus date range?</li>
+</ul>
+<h3>Modeling dates for Persons</h3>
+<p>Need to work on the modeling of date info per Person. Each person has a range
+of citations. This is used as the basis for three date ranges:</p>
+<ol>
+  <li>Probable life span </li>
+  <li>Probably active business span</li>
+  <li>Probable span when could sire children</li>
+  <li>May need to model the spans relative to another Person, or to another role
+    (son, where the father is mentioned as qualification). Keeping it relative,
+    allows the father range to change as the son does (or vice versa). May need
+    to have a weight on the relative-ness of this, so that adding other data to
+    the father's dates can contribute to them along with the son's. Similalry,
+    if user makes two father citations the same, then we take both of their
+    son's dates to compute the father's dates. </li>
+</ol>
+<p>Must we consider name-references by type?</p>
+<ol>
+  <li>Reference to name in business role (principal or witness). Contributes to
+    the calculated business life span. This is probably most important, and
+    trumps the others. </li>
+  <li>Mention as minor principal not in normal business life (by proxy as child,
+    as elder, e.g.). Contributes to the calculated life span. This can constrain
+    the business life, and may contribute to some shift, but should probably be
+    weighted below type 1 references in determining active business range..</li>
+  <li>Mention as relative (esp. father or grandfather). Contributes to the
+    calculated life span and to the fathering span. Lowest weight, but again,
+    can constrain things.</li>
+</ol>
+<h3>Managing Dates in the BPS system</h3>
+<p>The document has a string date and a normalized numeric date. Could convert
+to a date type, but these have issues with older dates and systems. Perhaps just
+compute as a normalized int and a reference to a BPSDate system that describes
+an origin in some other terms. </p>
+<p>A BPSDate is some information about how to convert a normalized date to
+various string representations (in original terms, and in modern terms). This
+may require code, and will include converters supported by tables, etc.
+Generalize this? Not yet. </p>
+<p>Need to support the notion of Date recognizer that gets invoked to:</p>
+<ol type="A">
+  <li>Find a span of text that indicates the document date. Other recognizers
+    might find a span of text that dates an activity, etc.</li>
+  <li>Find a date in a span of text. This may be a trivial exercise if first
+    step is accurate.</li>
+  <li>Convert text span into a normalized date offset from some BPSDate system. </li>
+</ol>
+
+</body>
+
+</html>

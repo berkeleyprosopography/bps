@@ -1,0 +1,32 @@
+Loop over the Documents, as for generating the DB loads:
+			
+			ArrayList<Integer> idsAsList = new ArrayList<Integer>(documents.keySet());
+			// Can skip this: Collections.sort(idsAsList);
+			for( Integer id:idsAsList ) {
+				Document doc = documents.get(id);
+			}
+
+			Could also just do 
+			for( Document doc:documents.values)
+
+For each document
+  for each role: Principle, then Witness
+		Generate a Person for each NRAD matching role. Generate unique displayName based upon
+		doc id and the number of Persons already added with that forename (get from multimap).
+
+		Add person to multimap of forenames to a list of Persons.
+		For each list in map
+			Create a sorted list in descending order of qualification count. 
+			  Use Collections.sort, with a comparator that just checks the qualification count
+			Loop over this list, and for each Person, 
+			  Consider all remaing Persons in the list. 
+			    Consider rules in order, and apply first match (then stop)
+					  Match can shift % of weight in either direction (shift to heavier)
+				Normalize results.
+				Apply threshold to remove noise, renormalize
+			For each non-zero weight person, create any declared Father, but 
+				
+			Run through the Persons, and for each, create a PersonLinkSet, using only the document Persons. Consider subclassing to get a weight-shifting set that includes a self link, which has the weight defined as 1-sum of the others. note that for each weight shift, we compute the amount of shift based upon dates and rules, and then we shift to the item with more previous weight - this favors previous winners to get collapse. 
+
+
+
