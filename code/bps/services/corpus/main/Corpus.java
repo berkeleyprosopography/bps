@@ -168,6 +168,8 @@ public class Corpus {
 		return instance;
 	}
 
+	// TODO move this to the SQL Utils class - it should not be here. Provide read accessors
+	// to the various maps as needed.
 	public void generateDependentSQL(
 			String documentsFilename,
 			String activitiesFilename,

@@ -26,9 +26,10 @@ public class corpusTest {
 		int i = 0;
 		String arg;
 		String corpusFile = null;
+        // Defaults come from original test corpus - HBTIN
         double corpusTSStdDev =
     		TimeUtils.getApproxTimeInMillisForYearOffset(50);
-        long corpusCenterPoint = TimeUtils.getTimeInMillisForYear(-180);
+        long corpusCenterPoint = TimeUtils.getTimeInMillisForYear(-142);
 
         while (i < args.length && args[i].startsWith("-")) {
             arg = args[i++];

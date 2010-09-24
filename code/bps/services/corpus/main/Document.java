@@ -1,6 +1,7 @@
 package bps.services.corpus.main;
 
 import bps.services.common.main.LinkTypes;
+import java.util.List;
 import java.util.ArrayList;
 
 import javax.xml.xpath.XPath;
@@ -117,8 +118,15 @@ public class Document {
 		    long date_norm = corpus.getDefaultDocTimeSpan().getCenterPoint();
 		    newDoc = new Document(corpus, alt_id, date, date_norm);
 		    Activity unkActivity = corpus.findOrCreateActivity("Unknown");
+		    // TODO - this is all corpus specific, and needs to go elsewhere!!!
 		    ActivityRole principal = corpus.findOrCreateActivityRole("Principal");
 		    ActivityRole witness = corpus.findOrCreateActivityRole("Witness");
+		    List<String> missingNames = new ArrayList<String>(2);
+		    missingNames.add("xxx");
+		    missingNames.add("NUMMI");
+		    List<Pattern> elides = new ArrayList<Pattern>(1);
+		    elides.add("[\d*]");
+		    
 		    if(deepCreate) {
 		    	// Find the principal persName nodes and create a nameRoleActivity for each one
 		    	newDoc.addNamesForActivity( TEI_Constants.XPATH_PRINCIPAL_PERSNAMES,
