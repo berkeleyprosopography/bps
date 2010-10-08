@@ -38,7 +38,7 @@ unset($CFG);  // Ignore this line
 //
 
 $CFG->dbtype    = 'mysql';       // mysql
-$CFG->dbhost    = 'bpsdev.db.4791793.hostedresource.com';   // eg localhost or db.isp.com
+$CFG->dbhost    = 'bpsdev.db.6836812.hostedresource.com';   // eg localhost or db.isp.com
 $CFG->dbname    = 'bpsdev';      // database name
 $CFG->dbuser    = 'bpsdev';    // your database username
 $CFG->dbpass    = 'G0Names!';    // your database password
@@ -76,7 +76,7 @@ $CFG->shortbase   = '/';
 //    $CFG->dirroot = '/var/www/html/delphi';     // Redhat Linux
 //    $CFG->dirroot = '/home/example/public_html/delphi'; // Cpanel host
 
-$CFG->dirroot           = '/home/content/93/4791793/html';
+$CFG->dirroot           = '/home/content/p/l/s/plschmitz/html';
 
 
 //=========================================================================
