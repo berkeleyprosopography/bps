@@ -85,7 +85,7 @@ $CFG->dirroot           = '/home/content/93/4791793/html';
 // Specify an email address to recieve messages from the contact form
 //
 
-$CFG->contactEmail          = "bps_team@lists.berkeley.edu";
+$CFG->contactEmail          = "bps_feedback@lists.berkeley.edu";
 
 
 //=========================================================================

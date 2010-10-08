@@ -266,11 +266,25 @@ table.params {
 	border-bottom:1px solid black;
 }
 
-.paramDesc{
-	padding:1px 20px;
+.paramTitle{
+	padding:4px 20px;
 	font-weight:bold;
-	/* border-bottom:1px solid black; */
+	text-align:center;
 }
+
+.paramDesc{
+	padding:4px 20px;
+	font-weight:bold;
+	border-bottom:1px solid black;
+}
+
+.paramData{
+	padding:4px 20px;
+	font-weight:bold;
+	border-bottom:1px solid black;
+	text-align:center;
+}
+
 
 tr.paramDesc.lastParamRow{
 	border-bottom:1px solid black;
