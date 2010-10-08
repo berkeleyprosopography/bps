@@ -3,7 +3,7 @@
 ini_set('display_errors', "On");
 
 //Bring in the user's config file
-require_once('/home/content/93/4791793/html/config.php');
+require_once('/home/content/p/l/s/plschmitz/html/config.php');
 
 // Include pear database handler
 ini_set('include_path',"$CFG->dirroot/libs/pear/:".ini_get('include_path'));
