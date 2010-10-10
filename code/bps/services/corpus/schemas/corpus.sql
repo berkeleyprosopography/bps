@@ -5,7 +5,7 @@
 -- Define the main corpus table
 DROP TABLE IF EXISTS `corpus`;
 CREATE TABLE `corpus` (
-  `id`            INT(10) UNSIGNED PRIMARY KEY NOT NULL,
+  `id`            int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
   `name`          VARCHAR(255) NOT NULL,
   `description`   text NULL,
   `owner_id`      INT(10) UNSIGNED NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE `name_role_activity_doc` (
   `activity_id` int(10) unsigned NOT NULL,
   `document_id` int(10) unsigned NOT NULL,
   `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
-  INDEX `nrad_nrad_index` (`name`,`act_role_id`,`activity_id`,`document_id`),
+  INDEX `nrad_nrad_index` (`name_id`,`act_role_id`,`activity_id`,`document_id`),
   INDEX `nrad_r_index` (`act_role_id`),
   INDEX `nrad_a_index` (`activity_id`),
   INDEX `nrad_d_index` (`document_id`),
@@ -132,7 +132,7 @@ CREATE TABLE `familylink` (
   `name_id`     int(10) unsigned NOT NULL,
   `link_type`   ENUM ('father', 'grandfather', 'mother', 'ancestor', 'clan' ) NOT NULL DEFAULT 'father',
   `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
-  INDEX `fl_nrad_index` (`nrad`),
+  INDEX `fl_nrad_index` (`nrad_id`),
 	CONSTRAINT `fl_ibfk_1` FOREIGN KEY (`nrad_id`)
       REFERENCES `name_role_activity_doc` (`id`),
 	CONSTRAINT `fl_ibfk_2` FOREIGN KEY (`name_id`)
