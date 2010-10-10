@@ -26,6 +26,7 @@ RewriteRule   ^admin/editnews/{0,1}$ modules/admin/editNews.php
 
 #Corpora rules
 RewriteRule   ^corpora/{0,1}$ modules/corpora/corpora.php
+RewriteRule   ^corpora/corpus/{0,1}$ modules/corpora/corpus.php
 RewriteRule   ^corpora/params/{0,1}$ modules/corpora/params.php
 
 
