@@ -1,130 +1,178 @@
-/*
- * Based upon viewset or something. This is just a pattern and needs complete rewrite.
- * Review what we need to do for an individual corpus - 
- * View stats and properties.
- * Should probably encapsulate that somehow, so can use it i nthe context of a workspace as well.
- * OR - could just make that info go through the sandbox workspace public to all.
- * Then the corpora management page links to that.
- */
 <?php
 
+/* Include Files *********************/
 require_once("../../libs/env.php");
-require_once("../common/imgthumb.php");
+require_once("../admin/authUtils.php");
+/*************************************/
 
-// If there is no id param in the url, send to object not found.
-if( isset( $_GET['sid'] ) ) {
-	$setId = $_GET['sid'];
-} else {
-	$t->assign('heading', "Whoops!");
-	$t->assign('message', "We could not find the set you were looking for!");
-	$t->display('error.tpl');
-	die;
+// If the user isn't logged in, send to the login page.
+// FIXME - allow not logged in state - will be all no-edit
+if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
+	header( 'Location: ' . $CFG->wwwroot .
+					'/login?redir=' .$_SERVER['REQUEST_URI'] );
+	die();
 }
 
-/**********************************
-FETCH SET DETAILS
-***********************************/
+$t->assign('page_title', 'Corpus Details'.$CFG->page_title_default);
 
-// Query DB
-$sql = 	"	SELECT sets.id, sets.name, sets.description, user.username, sets.owner_id, sets.policy
-			FROM sets
-			LEFT JOIN user
-			ON sets.owner_id = user.id
-			WHERE sets.id = $setId
-			LIMIT 1
-		";
-
-$res =& $db->query($sql);
-if (PEAR::isError($res)) {
-    die($res->getMessage());
+$canUpdateCorpus = false;
+if(currUserHasPerm( 'CorpusUpdate' )) {
+	$canUpdateCorpus = true;
+	$t->assign('canUpdateCorpus', 1);
 }
 
-// If nothing is found...
-if ( $res->numRows() < 1 ){
-	$t->assign('heading', "Whoops!");
-	$t->assign('message', "We could not find the set you were looking for.");
-	$t->display('error.tpl');
-	die;
-}
+$style_block = "<style>
+td.title { border-bottom: 2px solid black; font-weight:bold; text-align:left; 
+		font-style:italic; color:#777777; }
+td.corpus_label { font-weight:bold; color:#61615f; }
+td.corpusname { font-weight:bold; }
+td.corpusdesc p { font-weight:bold; }
+td.corpusX { border-bottom: 1px solid black; }
+td.corpusdesc textarea { font-family: Arial, Helvetica, sans-serif; padding:2px;}
+form.form_row  { padding:0px; margin:2px;}
+div.form_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
+</style>";
 
-// Assign vars to template
-while ($row = $res->fetchRow()) {
-    $t->assign('setId', $row['id']);
-    $t->assign('setName', $row['name']);
-    $t->assign('page_title', 'Set: '.$row['name'].' - '.$CFG->page_title_default);
-    $t->assign('setDescription', $row['description']);
-    $t->assign('username', $row['username']);
-	$t->assign('owner_id', $row['owner_id']);
-	$t->assign('policy', $row['policy']);
-}
+$t->assign("style_block", $style_block);
 
-if(isset($_SESSION['id']) && $row['owner_id'] == $_SESSION['id']){
-	$t->assign('ownSet', true);
-} else {
-	$t->assign('ownSet', false);
-}
+$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
+$script_block = '
+<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
+<script>
 
-// Free the result
-$res->free();
-
-/**********************************
-FETCH SET OBJECTS
-***********************************/
-
-// Query DB
-
-$sql =	"	SELECT objects.id, objects.name, objects.description, objects.img_path, objects.img_ar, set_objs.order_num
-			FROM set_objs 
-			LEFT JOIN objects
-			ON objects.id = set_objs.obj_id
-			WHERE set_objs.set_id = $setId
-			ORDER BY set_objs.order_num
-		";
-
-$res =& $db->query($sql);
-if (PEAR::isError($res)) {
-    die($res->getMessage());
-}
-
-// If nothing is found...
-if ( $res->numRows() < 1 ){
-	$t->assign('setHasObjects', false);
-	$t->assign('objectCount', null);
-	$t->assign('objects', null); 
-	$t->assign('firstObjectID', null);
-} else {
-	$t->assign('setHasObjects', true);
-	$objects = array();
-	while ($row = $res->fetchRow()) {
-		$imageOptions = array(	'img_path' => $row['img_path'],
-								'size' => 50,
-								'img_ar' => $row['img_ar'],
-								'vAlign' => "center",
-								'hAlign' => "left"
-							);
-		$object = array(	'id' => $row['id'], 
-							'name' => $row['name'],
-							'description' => $row['description'],
-							'thumb' => outputSimpleImage($imageOptions)
-						);
-		array_push($objects, $object);
+// The ready state change callback method that waits for a response.
+function updateCorpusRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			window.status = "Corpus updated.";
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to update corpus.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
 	}
-	$t->assign('objectCount', $res->numRows());
-	$t->assign('objects', $objects); 
-	$t->assign('firstObjectID', $objects[0]['id']);
 }
 
-$res->free();
+function updateCorpus(corpusID) {
+	// Could change cursor and disable button until get response
+	var descTextEl = document.getElementById("D_"+corpusID);
+	var desc = descTextEl.value;
+	if( desc.length <= 2 ) {
+		alert( "You must enter a description that is at least 3 characters long" );
+		return;
+	}
+	if( !xmlhttp ) {
+		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "/api/updateCorpus.php";
+	var args = "id="+corpusID+"&d="+desc;
+	//alert( "Preparing request: POST: "+url+"?"+args );
+	xmlhttp.open("POST", url, true);
+	xmlhttp.setRequestHeader("Content-Type",
+														"application/x-www-form-urlencoded" );
+	xmlhttp.onreadystatechange=updateCorpusRSC;
+	xmlhttp.send(args);
+	//window.status = "request sent: POST: "+url+"?"+args;
+	var el = document.getElementById("U_"+corpusID);
+	el.disabled = true;
+}
+
+// This should go into a utils.js - how to include?
+function enableElement( elID ) {
+	//alert( "enableElement" );
+	var el = document.getElementById(elID);
+	el.disabled = false;
+	//window.status = "Element ["+elID+"] enabled.";
+}
+
+function limitChars( field, maxlimit ) {
+  if ( field.value.length > maxlimit )
+  {
+    field.value = field.value.substring( 0, maxlimit-1 );
+    alert( "Description can only be 255 characters in length." );
+    return false;
+  }
+	return true;
+}
+
+function checkValues( e, name, desc, limit ) {
+	if( name.value.length < 4 ) {
+    alert( "Corpus name must be at least 4 characters in length." );
+		e.returnValue = false;
+		if( e.preventDefault )
+			e.preventDefault();
+    return false;
+  }
+	if( !limitChars( desc, limit ) ) {
+		e.returnValue = false;
+		if( e.preventDefault )
+			e.preventDefault();
+    return false;
+  }
+	return true;
+}
 
 
-/**********************************
-DISPLAY TEMPLATE
-***********************************/
-$t->assign("templateVarsJSON", json_encode($t->_tpl_vars));
-$t->display('viewset.tpl');
+</script>';
+
+$t->assign("script_block", $script_block);
+
+function getCorpus($id){
+	global $db;
+	// Get all the corpora, with doc counts, and order by when added
+	$sql = 	'	SELECT c.name, c.description FROM corpus c WHERE c.id='.$id;
+	$res =& $db->query($sql);
+	if (PEAR::isError($res)) {
+		// FIXME when debugged, comment this out and just return false
+    die( 'Error in sql ['.$sql.']to getCorpora: '.$res->getMessage());
+		// return false;
+	}
+	$corpus = false;
+	if ($row = $res->fetchRow()) {
+		$corpus = array( 'id' => $id, 'name' => $row['name'], 'description' => $row['description']);
+	}
+	// Free the result
+	$res->free();
+	return $corpus;
+}
+
+if(!isset($_GET['id'])) {
+	$errmsg = "Missing corpus specifier. ";
+} else {
+	$corpus = getCorpus($_GET['id']);
+	if($corpus){
+		$t->assign('corpus', $corpus);
+	} else {
+		$errmsg = "Bad or illegal corpus specifier. ";
+	}
+}
+
+
+if($errmsg!="")
+	$t->assign('errmsg', $errmsg);
+
+$t->display('corpus.tpl');
 
 ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
