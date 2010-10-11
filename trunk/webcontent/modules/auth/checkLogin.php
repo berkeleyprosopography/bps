@@ -17,9 +17,9 @@ function confirmUser($username, $password){
    }
 
    /* Verify that user is in database */
-	$sql = "	SELECT id, passwdmd5, pending FROM user WHERE username = '$username' ";
-
-	$res =& $db->query($sql);
+	$sql = "SELECT id, passwdmd5, pending FROM user WHERE username = ?";
+	$stmt = $db->prepare($sql, array('text'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute($username);
 	if (PEAR::isError($res)) {
 	    die($res->getMessage());
 	}
@@ -84,8 +84,9 @@ function checkLogin(){
 function getUserDetails($userName){
 	global $db;
 	// Query DB
-	$sql = "SELECT * FROM user WHERE username = '$userName'";
-	$res =& $db->query($sql);
+	$sql = "SELECT * FROM user WHERE username = ?";
+	$stmt = $db->prepare($sql, array('text'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute($userName);
 	if (PEAR::isError($res)) {
 	    die($res->getMessage());
 	}

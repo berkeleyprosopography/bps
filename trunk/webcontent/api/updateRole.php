@@ -26,10 +26,9 @@ require_once('apiSetup.php');
 		echo $errmsg;
 		exit();
 	}
-	$updateQ = "UPDATE role set description='"
-		.addslashes($roledesc)."' where name='"
-		.addslashes($rolename)."'";
-	$res =& $db->query($updateQ);
+	$updateQ = "UPDATE role set description=? where name=?";
+	$stmt = $db->prepare($updateQ, array('text','text'), MDB2_PREPARE_MANIP);
+	$res =& $stmt->execute(array($roledesc, $rolename));
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error\n"+$res->getMessage());
 	}

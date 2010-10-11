@@ -126,8 +126,9 @@ $t->assign("script_block", $script_block);
 function getCorpus($id){
 	global $db;
 	// Get all the corpora, with doc counts, and order by when added
-	$sql = 	'	SELECT c.name, c.description FROM corpus c WHERE c.id='.$id;
-	$res =& $db->query($sql);
+	$sql = 	'	SELECT c.name, c.description FROM corpus c WHERE c.id=?';
+	$stmt = $db->prepare($sql, array('integer'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute($id);
 	if (PEAR::isError($res)) {
 		// FIXME when debugged, comment this out and just return false
     die( 'Error in sql ['.$sql.']to getCorpora: '.$res->getMessage());
@@ -139,6 +140,7 @@ function getCorpus($id){
 	}
 	// Free the result
 	$res->free();
+	$stmt->free();
 	return $corpus;
 }
 

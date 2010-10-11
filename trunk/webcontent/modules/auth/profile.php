@@ -15,9 +15,10 @@ if(isset($_GET['uid']) && is_numeric($_GET['uid'])){
 Get current user info
 **********************************/
 
-$sql = "SELECT * FROM user WHERE id = $profileId LIMIT 1";
+$sql = "SELECT * FROM user WHERE id = ? LIMIT 1";
+$stmt = $db->prepare($sql, array('integer'), MDB2_PREPARE_RESULT);
 
-$res =& $db->query($sql);
+$res =& $stmt->execute($profileId);
 if (PEAR::isError($res)) {die($res->getMessage());}
 if ( $res->numRows() < 1 ){
 	$t->assign('heading', "No such user");
@@ -31,7 +32,7 @@ if ( $res->numRows() < 1 ){
 	$t->assign('real_name', $row['real_name']);
 	$t->assign('website_url', $row['website_url']);
 	$t->assign('about', $row['about']);
-	$t->assign('creation_time', $row['creation_time']);
+	$t->assign('member_since', strftime("%B %e, %Y", strtotime($row['creation_time'])));
 	$t->assign('username', $row['username']);
 
 	// Free the result

@@ -122,8 +122,9 @@ if(isset($_POST['delete'])){
 		$opmsg = "Problem deleting perm.";
 	else {
 		$permname = $_POST['perm'];
-		$deleteQ = "DELETE FROM permission WHERE name='".$permname."'";
-		$res =& $db->query($deleteQ);
+		$deleteQ = "DELETE FROM permission WHERE name=?";
+		$stmt = $db->prepare($deleteQ, array('text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute($permname);
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem deleting permission \"".$permname."\".<br />".$res->getMessage();
 		} else {
@@ -147,17 +148,15 @@ else if(isset($_POST['add'])){
 			$permdesc = trim($_POST['desc']);
 			if( strlen( $permdesc ) > 255 )
 				$errmsg = "Invalid permission description (too long);";
-			else if( preg_match( "/[^\w\-\s.:'()]/", $permdesc ))
-				$errmsg = "Invalid permission description (invalid chars): [".$permdesc."]";
 		}
 	}
 	if(!empty($errmsg))
 		$opmsg = $errmsg;
 	else {
 		$addQ = "INSERT IGNORE INTO permission(name, description, creation_time)"
-			." VALUES ('".mysql_real_escape_string($permname)."', '"
-			.mysql_real_escape_string($permdesc)."', now())";
-		$res =& $db->query($addQ);
+			." VALUES (?,?, now())";
+		$stmt = $db->prepare($addQ, array('text', 'text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($permname, $permdesc));
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem adding permission \"".$permname."\".<br />".$res->getMessage();
 		} else {

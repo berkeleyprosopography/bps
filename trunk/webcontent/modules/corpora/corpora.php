@@ -152,13 +152,15 @@ if(isset($_POST['delete'])){
 	} else {
 		$corpusID = $_POST['id'];
 		// FIXME need to move to prepared statements and params
-		$deleteQ = "DELETE FROM corpus WHERE id='".$corpusID."'";
-		$res =& $db->query($deleteQ);
+		$deleteQ = "DELETE FROM corpus WHERE id=?";
+		$stmt = $db->prepare($deleteQ, array('integer'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute($corpusID);
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem deleting corpus.<br />".$res->getMessage();
 		} else {
 			$opmsg = "Corpus deleted.";
 		}
+		$stmt->free();
 	}
 }
 else if(isset($_POST['add'])){
@@ -189,9 +191,9 @@ else if(isset($_POST['add'])){
 	else {
 		$user_id = $_SESSION['id'];
 		$addQ = "INSERT IGNORE INTO corpus(name, description, owner_id, creation_time)"
-			." VALUES ('".mysql_real_escape_string($corpusname)."', '"
-			.mysql_real_escape_string($corpusdesc)."', ".$user_id.", now())";
-		$res =& $db->query($addQ);
+			." VALUES (?,?,?, now())";
+		$stmt = $db->prepare($addQ, array('text','text','integer'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($corpusdesc,$corpusdesc,$user_id));
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem adding corpus \"".$corpusname."\".<br />".$res->getMessage();
 		} else {

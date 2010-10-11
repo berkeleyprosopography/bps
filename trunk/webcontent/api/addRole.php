@@ -26,9 +26,9 @@ require_once('apiSetup.php');
 		exit();
 	}
 	$updateQ = "INSERT IGNORE INTO role(name, description, creation_time)"
-		." VALUES ('".mysql_real_escape_string($rolename)."', '"
-		.mysql_real_escape_string($roledesc)."', now())";
-	$res =& $db->query($updateQ);
+		." VALUES (?,?, now())";
+	$stmt = $db->prepare($addQ, array('text','text'), MDB2_PREPARE_MANIP);
+	$res =& $stmt->execute(array($rolename,$roledesc));
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error\n"+$res->getMessage());
 	}

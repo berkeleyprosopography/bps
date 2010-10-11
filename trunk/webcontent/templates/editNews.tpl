@@ -17,12 +17,19 @@
 </div>
 {/if}
 <form action="" method="post" accept-charset="utf-8" class="delphiForm">
-	<label for="header">Headline</label>	
-	<input class="delphiFormInput" type="text" name="header" value="{$header}" id="header"  style="width:400px"/>
+	<p>
+		<label for="header">Headline</label><br />	
+		<input class="delphiFormInput" type="text" name="header" value="{$header}" id="header"
+				style="width:400px"/>
+	</p>
 
-	<label for="content">News content</label>
-	<textarea class="delphiFormInput" name="content" rows="8" cols="40" style="width:400px">{$content}</textarea>
-	
+	<p>
+		<label for="content">News content</label><br />
+		<textarea class="delphiFormInput" name="content" id="content" rows="8" cols="30"
+				style="width:400px">
+			{$content}
+		</textarea>
+	</p>
 	<div class="buttonRow">
 		<input type="submit" name="submit" value={if $id<0}"Add Item"{else}"Update Item"{/if}/>
 		<input type="button" value="Cancel" onClick="window.location.href='/admin'"/>

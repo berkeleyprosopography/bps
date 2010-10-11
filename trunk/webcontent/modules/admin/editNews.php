@@ -1,8 +1,9 @@
 <?php
-
+/* Include Files *********************/
 require_once("../../libs/env.php");
 require_once("../../libs/utils.php");
-
+require_once("authUtils.php");
+/*************************************/
 // If the user isn't logged in, send to the login page.
 if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	header( 'Location: ' . $CFG->wwwroot .
@@ -10,14 +11,16 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	die();
 }
 
+$t->assign('page_title', 'BPS: Edit News Content');
+
+/*
 if( !currUserHasPerm( 'EditNewsContent' ) ) {
 	$t->assign('heading', "Unauthorized Action.");
 	$t->assign('message', "You do not have rights to edit news content. <br />
 		Please contact your Delphi administrator for help.");
 	$t->display('error.tpl');
 	die();
-}
-
+} */
 
 $id = -1;
 $msg = array();
@@ -36,12 +39,15 @@ if(isset($_POST['submit'])){
 	$t->assign('header', $header);
 	$t->assign('content', $content);
 	if(empty($_POST['id']) || ($_POST['id'] < 0)) {
-		$q = "INSERT INTO newsContent(header, content) VALUES(\"$header\",\"$content\")";
+		$q = "INSERT INTO newsContent(header, content) VALUES(?,?)";
+		$stmt = $db->prepare($q, array('text', 'text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($header, $content));
 	} else {
 		$id = $_POST['id'];
-		$q = "UPDATE newsContent SET header=\"$header\", content=\"$content\" WHERE id=$id";
+		$q = "UPDATE newsContent SET header=?, content=? WHERE id=?";
+		$stmt = $db->prepare($q, array('text', 'text', 'integer'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($header, $content, $id));
 	}
-	$res =& $db->query($q);
 	if(PEAR::isError($res)) {
 		array_push($msg, "Error saving news Item to database.");
 		array_push($msg, "Query: ".$q);
@@ -54,8 +60,9 @@ if(isset($_POST['submit'])){
 } else if(isset($_GET['id'])){
 	$id = $_GET['id'];
 	if($id >=0 ) {
-		$q = "SELECT header, content FROM newsContent WHERE id=$id";
-		$res =& $db->query($q);
+		$q = "SELECT header, content FROM newsContent WHERE id=?";
+		$stmt = $db->prepare($q, array('integer'), MDB2_PREPARE_RESULT);
+		$res =& $stmt->execute($id);
 		if(!PEAR::isError($res) && ($res->numRows()==1) && ($row=$res->fetchRow())) {
 			$t->assign('header', $row['header']);
 			$t->assign('content', $row['content']);
@@ -65,6 +72,7 @@ if(isset($_POST['submit'])){
 		}
 	}
 }
+
 $t->assign('messages', $msg);
 $t->assign('id', $id);
 $t->display('editNews.tpl');

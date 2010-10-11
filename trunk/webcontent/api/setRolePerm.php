@@ -22,13 +22,16 @@ require_once('apiSetup.php');
 	if( $action == 'set' ) {
 		$updateQ = "insert ignore into role_perms(role_id, perm_id, creation_time)"
 			." select r.id, p.id, now() from role r, permission p"
-			." where r.name='".$rolename."' and p.name='".$permname."'";
+			." where r.name=? and p.name=?";
+		$stmt = $db->prepare($updateQ, array('text','text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($rolename,$permname));
 	} else {
-		$updateQ = "delete from rp using role_perms rp, role r, permission p"
+		$deleteQ = "delete from rp using role_perms rp, role r, permission p"
 			." where rp.role_id=r.id and rp.perm_id=p.id"
-			." and r.name='".$rolename."' and p.name='".$permname."'";
+			." and r.name=? and p.name=?";
+		$stmt = $db->prepare($deleteQ, array('text','text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($rolename,$permname));
 	}
-  $res =& $db->query($updateQ);
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error\n"+$res->getMessage());
 	}
