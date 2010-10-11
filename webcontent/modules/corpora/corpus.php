@@ -14,6 +14,9 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 }
 
 $t->assign('page_title', 'Corpus Details'.$CFG->page_title_default);
+$maxK = 10000;
+$maxfilesize = $maxK * 1024;
+$t->assign('maxfilesize', $maxfilesize);
 
 $canUpdateCorpus = false;
 if(currUserHasPerm( 'CorpusUpdate' )) {
