@@ -13,8 +13,6 @@ require_once('apiSetup.php');
 			$desc = trim($_POST['d']);
 			if( strlen( $desc ) > 255 )
 				$errmsg = "Invalid corpus description (too long);";
-			else if( preg_match( "/[^\w\-\s.,;:'()]/", $desc ))
-				$errmsg = "Invalid corpus description (invalid chars): [".$desc."]";
 		}
 	}
 	if(!empty($errmsg)) {
@@ -22,10 +20,9 @@ require_once('apiSetup.php');
 		echo $errmsg;
 		exit();
 	}
-	$updateQ = "UPDATE corpus set description='"
-		.addslashes($desc)."' where id='"
-		.addslashes($corpusid)."'";
-	$res =& $db->query($updateQ);
+	$updateQ = "UPDATE corpus set description=? where id=?";
+	$stmt = $db->prepare($updateQ, array('text','integer'), MDB2_PREPARE_MANIP);
+	$res =& $stmt->execute(array($desc, $corpusid));
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error");
 		echo $res->getMessage();

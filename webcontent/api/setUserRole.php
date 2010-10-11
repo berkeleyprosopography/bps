@@ -8,8 +8,11 @@ require_once('apiSetup.php');
 	else {
 		$rolename = $_POST['r'];
 		$username = $_POST['u'];
-		if(isset($_POST['ap']))
-			$approver_id = $_POST['ap'];
+		if(isset($_POST['ap'])) {
+			$approver_id = intval($_POST['ap']);
+			if($approver_id <=0 )
+				unset($approver_id);
+		}
 		$action = $_POST['a'];
 		if( $action!='set' && $action!='unset' ) 
 			$badarg = true;
@@ -22,21 +25,23 @@ require_once('apiSetup.php');
 		exit();
 	}
 	if( $action == 'set' ) {
-		$updateQ = "insert ignore into user_roles(user_id, role_id, ";
+		$insertQ = "INSERT IGNORE INTO user_roles(user_id, role_id, ";
 		if( isset($approver_id)){
-			$updateQ .= "approver_id, creation_time)"
-				." select u.id, r.id, ".$approver_id.", now()";
+			$insertQ ." approver_id, creation_time)"
+								." SELECT u.id, r.id, $approver_id, now() FROM role r, user u";
 		} else {
-			$updateQ .= "creation_time) select u.id, r.id, now()";
+			$insertQ .= " creation_time) SELECT u.id, r.id, now() FROM role r, user u";
 		}
-		$updateQ .= " from role r, user u"
-								." where r.name='".$rolename."' and u.username='".$username."'";
+		$insertQ .= " WHERE r.name=? and u.username=?";
+		$stmt = $db->prepare($insertQ, array('text','text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($rolename,$username));
 	} else {
-		$updateQ = "delete from ur using user_roles ur, role r, user u"
+		$deleteQ = "delete from ur using user_roles ur, role r, user u"
 			." where ur.role_id=r.id and ur.user_id=u.id"
-			." and r.name='".$rolename."' and u.username='".$username."'";
+			." and r.name=? and u.username=?";
+		$stmt = $db->prepare($deleteQ, array('text','text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($rolename,$username));
 	}
-  $res =& $db->query($updateQ);
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error");
 		echo $res->getMessage();

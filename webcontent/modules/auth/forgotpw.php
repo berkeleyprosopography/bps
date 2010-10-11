@@ -11,8 +11,8 @@ require_once("../../libs/utils.php");
 function checkUser($username){
 	global $db;
 	$sql = "select email from user where username = '$username'";
-	
-	$res =& $db->query($sql);
+	$stmt = $db->prepare($sql, array('text'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute($username);
 	if (PEAR::isError($res)) {
 		return FALSE;
 	    die($res->getMessage());

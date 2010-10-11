@@ -26,10 +26,9 @@ require_once('apiSetup.php');
 		echo $errmsg;
 		exit();
 	}
-	$updateQ = "UPDATE permission set description='"
-		.addslashes($permdesc)."' where name='"
-		.addslashes($permname)."'";
-	$res =& $db->query($updateQ);
+	$updateQ = "UPDATE permission set description=? where name=?";
+	$stmt = $db->prepare($updateQ, array('text','text'), MDB2_PREPARE_MANIP);
+	$res =& $stmt->execute(array($permdesc, $permname));
 	if (PEAR::isError($res)) {
 		header("HTTP/1.0 500 Internal Server Error");
 		echo $res->getMessage();

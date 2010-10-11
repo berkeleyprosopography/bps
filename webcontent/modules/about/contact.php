@@ -62,8 +62,9 @@ if(isset($_POST['submit'])){
 	}
 }
 if( isset($_SESSION['id']) ) {
-	$q = "select username, real_name, email from user where id=".$_SESSION['id'];
-	$res =& $db->query($q);
+	$q = "select username, real_name, email from user where id=?";
+	$stmt = $db->prepare($q, array('integer'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute($_SESSION['id']);
 	if (!(PEAR::isError($res))) {
 		if($row = $res->fetchRow()) {
 			if( isset( $row['real_name'] ))
@@ -75,6 +76,7 @@ if( isset($_SESSION['id']) ) {
 		}
 		// Free the result
 		$res->free();
+		$stmt->free();
 	}
 }
 

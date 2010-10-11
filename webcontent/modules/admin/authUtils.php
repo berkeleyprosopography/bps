@@ -19,9 +19,10 @@ function userHasPerm($user_id, $perm) {
 	$retVal = false;
    /* Get all the users and their assigned perms */
 	$q = "select u.username name from user u, permission p, user_roles ur, role_perms rp
-		where u.id = $user_id and u.id=ur.user_id and ur.role_id=rp.role_id and rp.perm_id=p.id
-		and p.name like '".$perm."'";
-	$res =& $db->query($q);
+		where u.id = ? and u.id=ur.user_id and ur.role_id=rp.role_id and rp.perm_id=p.id
+		and p.name like ?";
+	$stmt = $db->prepare($q, array('integer', 'text'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute(array($user_id, $perm));
 	if (!(PEAR::isError($res))) {
 		if(($row = $res->fetchRow()) && isset( $row['name'] ))
 			$retVal = true;
@@ -46,9 +47,10 @@ function userHasRole($user_id, $role) {
 	$retVal = false;
    /* Get all the users and their assigned perms */
 	$q = "select u.username name from user u, user_roles ur, role r
-		where u.id = $user_id and u.id=ur.user_id and ur.role_id=r.id
-		and r.name like '".$role."'";
-	$res =& $db->query($q);
+		where u.id=? and u.id=ur.user_id and ur.role_id=r.id
+		and r.name like ?";
+	$stmt = $db->prepare($q, array('integer', 'text'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute(array($user_id, $role));
 	if (!(PEAR::isError($res))) {
 		if(($row = $res->fetchRow()) && isset( $row['name'] ))
 			$retVal = true;

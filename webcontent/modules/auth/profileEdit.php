@@ -15,9 +15,10 @@ function getUserInfo(){
 	if(!is_numeric($id))
 		die("Illegal value set for the user ID in _SESSION");
 
-	$sql = "SELECT * FROM user WHERE id=$id";
+	$sql = "SELECT * FROM user WHERE id=?";
+	$stmt = $db->prepare($sql, array('integer'), MDB2_PREPARE_RESULT);
 	
-	$res =& $db->query($sql);
+	$res =& $stmt->execute($id);
 	if (PEAR::isError($res)) {
 		die($res->getMessage());
 	}
@@ -35,8 +36,9 @@ function updateField($field, $value){
 	$id = $_SESSION['id'];
 	if(!is_numeric($id))
 		die("Illegal value set for the user ID in _SESSION");
-	$sql = "UPDATE user SET $field='".$value."' WHERE id=$id";
-	$res =& $db->exec($sql);
+	$sql = "UPDATE user SET $field=? WHERE id=?";
+	$stmt = $db->prepare($sql, array('text','integer'), MDB2_PREPARE_MANIP);
+	$res =& $stmt->execute(array($value,$id));
 
 	// check that result is not an error
 	if (PEAR::isError($res)) {

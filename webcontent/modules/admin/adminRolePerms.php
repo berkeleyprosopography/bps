@@ -35,7 +35,7 @@ $t->assign("style_block", $style_block);
 $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $script_block = '
-<script type="text/javascript" src="'.$themebase.'/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 
 <script>
 
@@ -79,7 +79,6 @@ function MarkChanged(evt) {
 		var perm = targetID.substr( 0, iDot );
 		var role = targetID.substr( iDot+1 );
 		var action = target.checked? "set":"unset";
-		//alert( "Calling setPermForRole( "+perm+", "+role+", "+action+")" );
 		setPermForRole( perm, role, action );
 	}
 }

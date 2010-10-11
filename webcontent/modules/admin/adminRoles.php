@@ -120,13 +120,15 @@ if(isset($_POST['delete'])){
 		$opmsg = "Problem deleting role.";
 	else {
 		$rolename = $_POST['role'];
-		$deleteQ = "DELETE FROM role WHERE name='".$rolename."'";
-		$res =& $db->query($deleteQ);
+		$deleteQ = "DELETE FROM role WHERE name=?";
+		$stmt = $db->prepare($deleteQ, array('text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute($rolename);
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem deleting role \"".$rolename."\".<br />".$res->getMessage();
 		} else {
 			$opmsg = "Role \"".$rolename."\" deleted.";
 		}
+		$stmt->free();
 	}
 }
 else if(isset($_POST['add'])){
@@ -145,8 +147,6 @@ else if(isset($_POST['add'])){
 			$roledesc = trim($_POST['desc']);
 			if( strlen( $roledesc ) > 255 )
 				$errmsg = "Invalid role description (too long);";
-			else if( preg_match( "/[^\w\-\s.,:'()]/", $roledesc ))
-				$errmsg = "Invalid role description (invalid chars): [".$roledesc."]";
 			else {
 				$wksp_role = (empty($_POST['wr'])||($_POST['wr']=='0'))?'0':'1';
 			}
@@ -156,9 +156,10 @@ else if(isset($_POST['add'])){
 		$opmsg = $errmsg;
 	else {
 		$addQ = "INSERT IGNORE INTO role(name, wksp_role, description, creation_time)"
-			." VALUES ('".mysql_real_escape_string($rolename)."', '"
-			.$wksp_role."', '".mysql_real_escape_string($roledesc)."', now())";
-		$res =& $db->query($addQ);
+			." VALUES (?,?,?, now())";
+		$stmt = $db->prepare($addQ, array('text', 'boolean', 'text'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($rolename, $wksp_role, $roledesc));
+		
 		if (PEAR::isError($res)) {
 			$opmsg = "Problem adding role \"".$rolename."\".<br />".$res->getMessage();
 		} else {

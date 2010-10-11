@@ -1,7 +1,8 @@
 {include file="header.tpl"}
 
 <h1>{$username}</h1>
-<div class="profile_memberSince">Member since {$creation_time|date_format}</div>
+<div class="profile_memberSince">Member since: {$member_since}</div>
+
 <p>{if $ownProfile}<a href="/profileEdit">Edit my profile</a>{/if}</p>
 
 {if $real_name}

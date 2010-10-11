@@ -39,12 +39,9 @@ function usernameTaken($username){
       $username = addslashes($username);
    }
 
-	$sql = "	SELECT username 
-				FROM user 
-				WHERE username = '$username'
-			";
-
-	$res =& $db->query($sql);
+	$sql = "SELECT username FROM user WHERE username=? ";
+	$stmt = $db->prepare($sql, array('text'), MDB2_PREPARE_RESULT);
+	$res =& $stmt->execute($username);
 	if (PEAR::isError($res)) {
 	    die($res->getMessage());
 	}
@@ -101,11 +98,10 @@ function addNewUser($username, $password, $email){
 	}
 	
 	 if($affected) {
-		$sql = "SELECT *
-				FROM user
-				WHERE username = '$username'";
-		
-		$res =& $db->query($sql);
+		$sql = "SELECT * FROM user WHERE username=?";
+		$stmt = $db->prepare($sql, array('text'), MDB2_PREPARE_RESULT);
+		$res =& $stmt->execute($username);
+	
 		if (PEAR::isError($res)) {
 		    die($res->getMessage());
 		}
