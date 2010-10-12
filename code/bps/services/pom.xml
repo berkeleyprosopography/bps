@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.berkeley.bps.services</groupId>
     <artifactId>edu.berkeley.bps.services.main</artifactId>
-    <name>services.main</name>
+    <name>bps.services.main</name>
 		<version>0.9.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -22,6 +22,7 @@
         <module>corpus</module>
 				<module>workspace</module>
 				<module>graphbuilder</module>
+				<module>webapp</module>
     </modules>
 
     <repositories>
