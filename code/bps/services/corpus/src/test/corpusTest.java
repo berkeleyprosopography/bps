@@ -1,4 +1,4 @@
-package bps.services.corpus.test;
+package edu.berkeley.bps.services.corpus.test;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -6,10 +6,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
-import bps.services.common.main.time.*;
-import bps.services.corpus.main.Corpus;
-import bps.services.corpus.main.SQLUtils;
-import bps.services.corpus.main.XMLUtils;
+import edu.berkeley.bps.services.common.time.*;
+import edu.berkeley.bps.services.corpus.Corpus;
+import edu.berkeley.bps.services.corpus.SQLUtils;
+import edu.berkeley.bps.services.corpus.XMLUtils;
 
 public class corpusTest {
 
