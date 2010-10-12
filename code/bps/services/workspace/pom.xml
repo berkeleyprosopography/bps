@@ -15,7 +15,7 @@
   <version>0.9.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>bps.services.corpus</name>
+  <name>bps.services.workspace</name>
   <url>http://maven.apache.org</url>
 
   <properties>

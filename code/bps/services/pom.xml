@@ -18,10 +18,10 @@
 
     <modules>
         <module>common</module>
-				<!-- <module>user</module> -->
+				<module>user</module>
         <module>corpus</module>
-				<!-- <module>workspace</module>
-				<module>graph-builder</module> -->
+				<module>workspace</module>
+				<module>graphbuilder</module>
     </modules>
 
     <repositories>
