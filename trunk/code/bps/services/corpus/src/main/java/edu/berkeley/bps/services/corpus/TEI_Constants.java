@@ -1,7 +1,7 @@
 /**
  *
  */
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
 /**
  * @author pschmitz

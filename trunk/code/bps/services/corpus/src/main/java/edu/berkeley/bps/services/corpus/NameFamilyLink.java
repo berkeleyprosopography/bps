@@ -1,8 +1,8 @@
 /**
  *
  */
-package bps.services.corpus.main;
-import bps.services.common.main.LinkTypes;
+package edu.berkeley.bps.services.corpus;
+import edu.berkeley.bps.services.common.LinkTypes;
 
 /**
  * @author pschmitz

@@ -1,53 +1,47 @@
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
-import java.util.ArrayList;
-
-public class Activity {
+public class ActivityRole {
 	private static int	nextID = 1;
 
 	private int			id;
 	private String		name;
 	private String		description;
-	private Activity	parent;
-	private ArrayList<Activity>	children;
+
 	/**
-	 * Create a new empty corpus.
+	 * Create a new empty ActivityRole.
 	 */
-	public Activity() {
-		this(Activity.nextID++, null, null, null);
+	public ActivityRole() {
+		this(ActivityRole.nextID++, null, null);
 	}
 
 	/**
+	 * Create a new ActivityRole with just a name.
 	 * @param name A shorthand name for use in UI, etc.
 	 */
-	public Activity(String name) {
-		this(Activity.nextID++, name, null, null);
+	public ActivityRole( String name ) {
+		this(ActivityRole.nextID++, name, null);
 	}
 
 	/**
+	 * Create a new ActivityRole with name and description.
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
-	 * @param parent Broader activity that this specializes.
 	 */
-	public Activity(String name, String description, Activity parent) {
-		this(Activity.nextID++, name, description, parent);
+	public ActivityRole( String name, String description ) {
+		this(ActivityRole.nextID++, name, description);
 	}
 
 	/**
 	 * Ctor with all params - not generally used.
-	 * @see Activity( String name, String description, Activity parent )
-	 * @param id
+	 * @see ActivityRole( String name, String description )
+	 * @param id ID of the ActivityRole to be created. Must be unique.
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
-	 * @param parent Broader activity that this specializes.
 	 */
-	public Activity(int id, String name, String description, Activity parent) {
+	public ActivityRole(int id, String name, String description) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.parent = parent;
-		if(parent!=null)
-			parent.addChild(this);
 	}
 
 	/**
@@ -93,41 +87,6 @@ public class Activity {
 	}
 
 	/**
-	 * @return the parent
-	 */
-	public Activity getParent() {
-		return parent;
-	}
-
-	/**
-	 * @param parent the parent to set
-	 */
-	public void setParent(Activity parent) {
-		this.parent = parent;
-	}
-
-	/**
-	 * @param child the child to add
-	 */
-	public void addChild(Activity child) {
-		children.add(child);
-	}
-
-	/**
-	 * @return the number of children activities
-	 */
-	public int getNChildren() {
-		return children.size();
-	}
-
-	/**
-	 * @return the ith child
-	 */
-	public Activity getChild(int iChild) {
-		return children.get(iChild);
-	}
-
-	/**
 	 * @return Name.
 	 */
 	public String toString() {
@@ -143,8 +102,7 @@ public class Activity {
 	public String toXMLLoadString(String sep, String nullStr ) {
 		return id+sep+
 			((name!=null)?'"'+name+'"':nullStr)+sep+
-			((description!=null)?'"'+description+'"':nullStr)+sep+
-			((parent==null)?"\\N":parent.id);
+			((description!=null)?'"'+description+'"':nullStr);
 	}
 
 }

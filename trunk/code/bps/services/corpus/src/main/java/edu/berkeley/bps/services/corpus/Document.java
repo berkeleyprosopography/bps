@@ -1,6 +1,6 @@
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
-import bps.services.common.main.LinkTypes;
+import edu.berkeley.bps.services.common.LinkTypes;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -124,8 +124,9 @@ public class Document {
 		    List<String> missingNames = new ArrayList<String>(2);
 		    missingNames.add("xxx");
 		    missingNames.add("NUMMI");
-		    List<Pattern> elides = new ArrayList<Pattern>(1);
-		    elides.add("[\d*]");
+		    // INCOMPLETE
+				// List<Pattern> elides = new ArrayList<Pattern>(1);
+		    // elides.add("[\\d*]");
 		    
 		    if(deepCreate) {
 		    	// Find the principal persName nodes and create a nameRoleActivity for each one

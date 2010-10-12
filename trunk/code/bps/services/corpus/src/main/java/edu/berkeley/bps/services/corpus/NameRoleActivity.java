@@ -1,9 +1,9 @@
 /**
  *
  */
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
-import bps.services.common.main.LinkTypes;
+import edu.berkeley.bps.services.common.LinkTypes;
 import java.util.List;
 import java.util.ArrayList;
 
