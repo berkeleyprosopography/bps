@@ -1,7 +1,7 @@
 /**
  *
  */
-package edu.berkeley.bps.services.utils;
+package edu.berkeley.bps.services.common.utils;
 
 /**
  * A weight queue based on a binary heap.

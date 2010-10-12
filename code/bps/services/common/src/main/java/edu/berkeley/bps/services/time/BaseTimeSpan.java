@@ -1,4 +1,4 @@
-package edu.berkeley.bps.services.time;
+package edu.berkeley.bps.services.common.time;
 
 public abstract class BaseTimeSpan implements TimeSpan {
 
