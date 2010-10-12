@@ -1,6 +1,6 @@
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
-import bps.services.common.main.time.*;
+import edu.berkeley.bps.services.common.time.*;
 import java.util.HashMap;
 
 import javax.xml.xpath.XPath;

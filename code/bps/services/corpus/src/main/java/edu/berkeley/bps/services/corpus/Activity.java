@@ -1,47 +1,53 @@
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
-public class ActivityRole {
+import java.util.ArrayList;
+
+public class Activity {
 	private static int	nextID = 1;
 
 	private int			id;
 	private String		name;
 	private String		description;
-
+	private Activity	parent;
+	private ArrayList<Activity>	children;
 	/**
-	 * Create a new empty ActivityRole.
+	 * Create a new empty corpus.
 	 */
-	public ActivityRole() {
-		this(ActivityRole.nextID++, null, null);
+	public Activity() {
+		this(Activity.nextID++, null, null, null);
 	}
 
 	/**
-	 * Create a new ActivityRole with just a name.
 	 * @param name A shorthand name for use in UI, etc.
 	 */
-	public ActivityRole( String name ) {
-		this(ActivityRole.nextID++, name, null);
+	public Activity(String name) {
+		this(Activity.nextID++, name, null, null);
 	}
 
 	/**
-	 * Create a new ActivityRole with name and description.
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
+	 * @param parent Broader activity that this specializes.
 	 */
-	public ActivityRole( String name, String description ) {
-		this(ActivityRole.nextID++, name, description);
+	public Activity(String name, String description, Activity parent) {
+		this(Activity.nextID++, name, description, parent);
 	}
 
 	/**
 	 * Ctor with all params - not generally used.
-	 * @see ActivityRole( String name, String description )
-	 * @param id ID of the ActivityRole to be created. Must be unique.
+	 * @see Activity( String name, String description, Activity parent )
+	 * @param id
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
+	 * @param parent Broader activity that this specializes.
 	 */
-	public ActivityRole(int id, String name, String description) {
+	public Activity(int id, String name, String description, Activity parent) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
+		this.parent = parent;
+		if(parent!=null)
+			parent.addChild(this);
 	}
 
 	/**
@@ -87,6 +93,41 @@ public class ActivityRole {
 	}
 
 	/**
+	 * @return the parent
+	 */
+	public Activity getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent the parent to set
+	 */
+	public void setParent(Activity parent) {
+		this.parent = parent;
+	}
+
+	/**
+	 * @param child the child to add
+	 */
+	public void addChild(Activity child) {
+		children.add(child);
+	}
+
+	/**
+	 * @return the number of children activities
+	 */
+	public int getNChildren() {
+		return children.size();
+	}
+
+	/**
+	 * @return the ith child
+	 */
+	public Activity getChild(int iChild) {
+		return children.get(iChild);
+	}
+
+	/**
 	 * @return Name.
 	 */
 	public String toString() {
@@ -102,7 +143,8 @@ public class ActivityRole {
 	public String toXMLLoadString(String sep, String nullStr ) {
 		return id+sep+
 			((name!=null)?'"'+name+'"':nullStr)+sep+
-			((description!=null)?'"'+description+'"':nullStr);
+			((description!=null)?'"'+description+'"':nullStr)+sep+
+			((parent==null)?"\\N":parent.id);
 	}
 
 }

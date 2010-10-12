@@ -1,7 +1,7 @@
 /**
  *
  */
-package bps.services.corpus.main;
+package edu.berkeley.bps.services.corpus;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
