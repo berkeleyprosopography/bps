@@ -1,7 +1,7 @@
 /**
  *
  */
-package edu.berkeley.bps.services.time;
+package edu.berkeley.bps.services.common.time;
 import java.util.Date;
 
 /**

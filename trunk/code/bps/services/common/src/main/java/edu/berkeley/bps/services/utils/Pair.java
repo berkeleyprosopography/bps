@@ -2,7 +2,7 @@
  * A generic-typed pair of objects.
  * @author pschmitz
  */
-package edu.berkeley.bps.services.utils;
+package edu.berkeley.bps.services.common.utils;
 
 public class Pair<F,S> {
   F first;

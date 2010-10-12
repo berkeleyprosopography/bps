@@ -1,6 +1,6 @@
-package edu.berkeley.bps.services.hbtin;
+package edu.berkeley.bps.services.common.hbtin;
 
-import bps.services.common.main.time.Era;
+import edu.berkeley.bps.services.common.time.Era;
 
 import java.util.Date;
 import java.util.HashMap;
