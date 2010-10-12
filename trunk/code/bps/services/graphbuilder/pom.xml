@@ -26,12 +26,12 @@
 		<dependency>
 			<groupId>edu.berkeley.bps.services</groupId>
 			<artifactId>edu.berkeley.bps.services.common</artifactId>
-			<version>0.9.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.berkeley.bps.services</groupId>
 			<artifactId>edu.berkeley.bps.services.corpus</artifactId>
-			<version>0.9.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
     <dependency>
       <groupId>junit</groupId>
