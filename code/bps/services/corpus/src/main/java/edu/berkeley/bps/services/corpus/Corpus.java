@@ -1,6 +1,12 @@
 package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.time.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 
 import javax.xml.xpath.XPath;
@@ -13,6 +19,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 public class Corpus {
+	private final static String myClass = "Corpus";
 	private static int	nextID = 1;
 
 	private int			id;
@@ -72,7 +79,98 @@ public class Corpus {
 		activityRoles = new HashMap<String, ActivityRole>();
 		names = new HashMap<String, Name>();
 	}
-
+	
+	public static Corpus FindByID(Connection dbConn, int id) {
+		final String myName = ".FindByID: ";
+		final String SELECT_BY_ID = "SELECT id, name, description FROM corpus WHERE id = ?";
+		Corpus corpus = null;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+			stmt.setInt(1, id);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
+									rs.getString("description"), null); 
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return corpus;
+	}
+	
+	public static Corpus FindByName(Connection dbConn, String name) {
+		final String myName = ".FindByName: ";
+		final String SELECT_BY_NAME = "SELECT id, name, description FROM corpus WHERE name = ?";
+		Corpus corpus = null;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
+			stmt.setString(1, name);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				if(rs.next()){
+					corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
+										rs.getString("description"), null); 
+				}
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return corpus;
+	}
+	
+	public static Corpus CreateAndPersist(Connection dbConn, 
+			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
+		final String myName = ".CreateAndPersist: ";
+		final String INSERT_STMT = 
+			"INSERT INTO corpus(name, description, owner_id, creation_time) VALUES(?,?,?,now())";
+		Corpus corpus = null;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
+												Statement.RETURN_GENERATED_KEYS);
+			stmt.setString(1, name);
+			stmt.setString(2, description);
+			stmt.setInt(3, owner_id);
+			int nRows = stmt.executeUpdate();
+			if(nRows==1){
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()){
+					corpus = new Corpus(rs.getInt(1), name, description, defaultDocTimeSpan); 
+				}
+				rs.close();
+			}
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return corpus;
+	}
+	
+	public void persist(Connection dbConn) {
+		final String myName = ".CreateAndPersist: ";
+		final String UPDATE_STMT = 
+			"UPDATE corpus SET name=?, description=? WHERE id=?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+			stmt.setString(1, name);
+			stmt.setString(2, description);
+			stmt.setInt(3, id);
+			stmt.executeUpdate();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+	}
+	
 	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
 			TimeSpan defaultDocTimeSpan)
 		throws XPathExpressionException {
@@ -209,6 +307,37 @@ public class Corpus {
 		return id+sep+
 			((name!=null)?'"'+name+'"':nullStr)+sep+
 			((description!=null)?'"'+description+'"':nullStr);
+	}
+	
+	public Element toXMLPayload(org.w3c.dom.Document doc, boolean includeDetails) {
+		return toXMLPayload(doc, id, name, description, null);
+	}
+	
+	public static Element toXMLPayload(org.w3c.dom.Document doc, 
+			int id, String name, String description, String owner ) {
+        Element corpusEl = doc.createElement("corpus");
+
+        if(id > 0) {
+        	Element eltId = doc.createElement("id");
+        	eltId.appendChild(doc.createTextNode(Integer.toString(id)));
+        	corpusEl.appendChild(eltId);
+        }
+        if(name != null) {
+        	Element eltName = doc.createElement("name");
+        	eltName.appendChild(doc.createTextNode(name));
+        	corpusEl.appendChild(eltName);
+        }
+        if(description != null) {
+        	Element eltDescription = doc.createElement("description");
+        	eltDescription.appendChild(doc.createTextNode(description));
+        	corpusEl.appendChild(eltDescription);
+        }
+        if(owner != null) {
+        	Element eltOwner = doc.createElement("owner");
+        	eltOwner.appendChild(doc.createTextNode(owner));
+        	corpusEl.appendChild(eltOwner);
+        }
+        return corpusEl;
 	}
 
 	/**

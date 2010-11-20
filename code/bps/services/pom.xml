@@ -6,7 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.berkeley.bps.services</groupId>
-    <artifactId>edu.berkeley.bps.services.main</artifactId>
+    <artifactId>services</artifactId>
     <name>bps.services.main</name>
 		<version>0.9.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -67,6 +67,12 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+				<repository>  
+					<id>maven-restlet</id>  
+					<name>Public online Restlet repository</name>  
+					<url>http://maven.restlet.org</url>  
+				</repository>  
+				
     </repositories>
 
     <pluginRepositories>
