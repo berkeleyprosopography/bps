@@ -33,7 +33,10 @@
 						</td>
 						<td class="corpus corpusndocs" width="80px">{$corpora[corpus].nDocs}</td>
 					{if isset($canDeleteCorpus) }
-						<td class="corpus" width="100px"><input type="submit" name="delete" value="Delete Corpus" /></td>
+						<td class="corpus" width="100px">
+							<input id="deleteCorpButton_{$corpora[corpus].id}" type="button" value="Delete Corpus"
+										onclick="deleteCorpus({$corpora[corpus].id})" />
+						</td>
 					{/if}
 					</tr>
 				</table>
@@ -56,12 +59,14 @@
 					 <td class="corpus" width="80px">&nbsp;</td>
 				</tr>
 			<tr>
-				<td class="2" width="200px"><input type="text" name="corpname" maxlength="40"></td>
-				<td class="corpusdesc" width="320px"><textarea name="desc" rows="2" cols="40" 
+				<td class="2" width="200px"><input type="text" id="newCorpusName" name="corpname" maxlength="40"></td>
+				<td class="corpusdesc" width="320px"><textarea id="newCorpusDesc" name="desc" rows="2" cols="40" 
 				       onkeypress="limitChars(this,255);"
 							 onblur="limitChars(this,255);"
 							 onfocus="limitChars(this,255);"></textarea></td>
-				<td class="corpus" width="80px"><input type="submit" name="add" value=" Add " /></td>
+				<td class="corpus" width="80px">
+					<input id="addCorpButton" type="button" onclick="addCorpus()" value=" Add " />
+				</td>
 			</tr>
 		</table>
 	</form>

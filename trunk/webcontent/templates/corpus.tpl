@@ -30,7 +30,7 @@
 					{else}
 						<td class="corpus corpusdesc 2" width="320px">
 							<textarea id="D_{$corpus.id}" cols="40" rows="2"
-								onkeyup="enableElement('U_{$corpus.id}')"
+								onkeyup="enableElement('U_{$corpus.id}');setStatusP('')"
 								>{$corpus.description}</textarea>
 						</td>
 						<td class="corpus" width="100px">
@@ -61,9 +61,11 @@
 			</form>
 		</div>
 	{/if}
+	<p>&nbsp;</p>
 	{if isset($opmsg) }
-		<p>&nbsp;</p>
-		<p>{$opmsg}</p>
+		<p id="statusP">{$opmsg}</p>
+	{else}
+		<p id="statusP"> &nbsp; </p>
 	{/if}
 {/if}
 {include file="footer.tpl"}

@@ -56,9 +56,9 @@ public class CorporaResource extends BaseResource {
         String corpusOwnerStr = form.getFirstValue("owner");
         Response response = getResponse();
         try {
-        	if(corpusName==null||corpusName.isEmpty())
+        	if(corpusName==null||corpusName.length()==0)
         		throw new IllegalArgumentException("Missing value for corpus name");
-        	if(corpusOwnerStr==null||corpusOwnerStr.isEmpty())
+        	if(corpusOwnerStr==null||corpusOwnerStr.length()==0)
         		throw new IllegalArgumentException("Missing value for corpus owner id");
         	int corpusOwner;
         	try {

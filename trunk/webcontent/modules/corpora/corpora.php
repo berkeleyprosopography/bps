@@ -62,43 +62,78 @@ $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 <script>
 
+var curr_user_id = '.$_SESSION['id'].';
+	
 // The ready state change callback method that waits for a response.
-function updateCorpusRSC() {
+function addCorpusRSC() {
   if (xmlhttp.readyState==4) {
-		if( xmlhttp.status == 200 ) {
+		if( xmlhttp.status == 201 ) {
 			// Maybe this should change the cursor or something
-			window.status = "Corpus updated.";
+			window.status = "Corpus added.";
+			window.location.reload();
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
 		} else {
-			alert( "Error encountered when trying to update corpus.\nResponse: "
+			alert( "Error encountered when trying to add corpus.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
 		}
 	}
 }
 
-function updateCorpus(corpusID) {
-	// Could change cursor and disable button until get response
-	var descTextEl = document.getElementById("D_"+corpusID);
-	var desc = descTextEl.value;
+function addCorpus() {
+	var name = document.getElementById("newCorpusName").value;
+	var desc = document.getElementById("newCorpusDesc").value;
 	if( desc.length <= 2 ) {
 		alert( "You must enter a description that is at least 3 characters long" );
 		return;
 	}
 	if( !xmlhttp ) {
-		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		alert( "Cannot add corpus - no http obj!\n Please advise BPS support." );
 		return;
 	}
-	var url = "/api/updateCorpus.php";
-	var args = "id="+corpusID+"&d="+desc;
+	var url = "/bps.services.webapp/services/corpora";
+	var args = "owner="+curr_user_id+"&name="+name+"&description="+desc;
 	//alert( "Preparing request: POST: "+url+"?"+args );
 	xmlhttp.open("POST", url, true);
 	xmlhttp.setRequestHeader("Content-Type",
 														"application/x-www-form-urlencoded" );
-	xmlhttp.onreadystatechange=updateCorpusRSC;
+	xmlhttp.onreadystatechange=addCorpusRSC;
 	xmlhttp.send(args);
 	//window.status = "request sent: POST: "+url+"?"+args;
-	var el = document.getElementById("U_"+corpusID);
+	var el = document.getElementById("addCorpButton");
 	el.disabled = true;
+}
+
+// The ready state change callback method that waits for a response.
+function deleteCorpusRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			window.status = "Corpus deleted.";
+			window.location.reload();
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to delete corpus.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+function deleteCorpus(id) {
+	if( !xmlhttp ) {
+		alert( "Cannot delete corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "/bps.services.webapp/services/corpora/"+id;
+	//alert( "Preparing request: DELETE: "+url);
+	xmlhttp.open("DELETE", url, true);
+	xmlhttp.setRequestHeader("Content-Type",
+														"application/x-www-form-urlencoded" );
+	xmlhttp.onreadystatechange=deleteCorpusRSC;
+	xmlhttp.send(null);
+	//window.status = "request sent: POST: "+url+"?"+args;
+	var el = document.getElementById("deleteCorpButton_"+id);
+	if(el!=null)
+		el.disabled = true;
 }
 
 // This should go into a utils.js - how to include?

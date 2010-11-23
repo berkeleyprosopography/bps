@@ -55,7 +55,7 @@ public class CorpusResource extends BaseResource {
 			setAvailable(false);
 		}
 
-		System.out.println(myClass+" CTor called...");
+		//System.out.println(myClass+" CTor called...");
 	}
 
     /**
@@ -76,12 +76,12 @@ public class CorpusResource extends BaseResource {
     			corpus = null;
     		} catch(SQLException se) {
     			String tmp = myClass+".removeRepresentations: Problem querying DB.\n"+ se.getMessage();
-    			System.out.println(tmp);
+    			System.err.println(tmp);
     			throw new RuntimeException( tmp );
     		}
         }
         // Tells the client that the request has been successfully fulfilled.
-        getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+        getResponse().setStatus(Status.SUCCESS_OK);
     }
 
     @Override
@@ -115,23 +115,15 @@ public class CorpusResource extends BaseResource {
 
         // Fetch the name and description.
         Form form = new Form(entity);
-    	String idStr = form.getFirstValue("id");
     	String name = form.getFirstValue("name");
     	String description = form.getFirstValue("description");
     	Connection dbConn = openConnection(false);
         // The PUT request updates or creates the resource.
     	if(corpus!=null) {
-    		if(idStr==null) {
-    			String tmp = myClass+".PUT with empty ID.";
-    			System.out.println(tmp);
-    		}
-    		int id = Integer.parseInt(idStr);
-    		if(corpus.getId()!= id) {
-    			String tmp = myClass+".PUT ID does not match corpus value.";
-    			System.out.println(tmp);
-    		}
-    		corpus.setName(name);
-    		corpus.setDescription(description);
+    		if(name!=null&&name.length()>2)
+    			corpus.setName(name);
+    		if(description!=null&&description.length()>0)
+    			corpus.setDescription(description);
     		corpus.persist(dbConn);
             getResponse().setStatus(Status.SUCCESS_OK);
     	} else {
