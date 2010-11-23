@@ -49,7 +49,7 @@ function updateCorpusRSC() {
   if (xmlhttp.readyState==4) {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
-			window.status = "Corpus updated.";
+			setStatusP("Corpus updated.");
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
 		} else {
 			alert( "Error encountered when trying to update corpus.\nResponse: "
@@ -70,10 +70,10 @@ function updateCorpus(corpusID) {
 		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
 		return;
 	}
-	var url = "/api/updateCorpus.php";
-	var args = "id="+corpusID+"&d="+desc;
-	//alert( "Preparing request: POST: "+url+"?"+args );
-	xmlhttp.open("POST", url, true);
+	var url = "/bps.services.webapp/services/corpora/"+corpusID;
+	var args = "description="+desc;
+	//alert( "Preparing request: PUT: "+url+"?"+args );
+	xmlhttp.open("PUT", url, true);
 	xmlhttp.setRequestHeader("Content-Type",
 														"application/x-www-form-urlencoded" );
 	xmlhttp.onreadystatechange=updateCorpusRSC;
@@ -89,6 +89,11 @@ function enableElement( elID ) {
 	var el = document.getElementById(elID);
 	el.disabled = false;
 	//window.status = "Element ["+elID+"] enabled.";
+}
+
+function setStatusP(str) {
+	var el = document.getElementById("statusP");
+	el.innerHTML = str;
 }
 
 function limitChars( field, maxlimit ) {
