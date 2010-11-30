@@ -81,7 +81,7 @@ public class corpusTest {
 
         	EvidenceBasedTimeSpan defaultCorpusTS =
         		new EvidenceBasedTimeSpan(corpusCenterPoint, corpusTSStdDev);
-			Corpus testCorpus = Corpus.CreateFromTEI(doc, true, defaultCorpusTS);
+			Corpus testCorpus = Corpus.CreateFromTEI(doc, true, defaultCorpusTS, null);
         	System.out.println("Done.");
 			corpora.put(testCorpus.getId(), testCorpus);
         	System.out.print("Generating Corpus SQL...");

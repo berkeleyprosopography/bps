@@ -18,8 +18,12 @@ public class TEI_Constants {
 	public static final String XMLID_ATTR = "xml:id";
 	public static final String TYPE_ATTR = "type";
 
+	public static final String TYPE_GENDER_MASCULINE = "masculine";
+	public static final String TYPE_GENDER_FEMININE = "feminine";
+	public static final String TYPE_GENDER_UNMARKED = "unmarked";
 	public static final String TYPE_PATRONYMIC = "patronymic";
 	public static final String TYPE_CLAN = "clan";
+	public static final String TYPE_SPOUSE = "spouse";
 
 	public static final String XPATH_ALT_ID ="./teiHeader/fileDesc/titleStmt/title/name[@type='cdlicat:id_text']";
 	public static final String XPATH_PRINCIPAL_PERSNAMES =

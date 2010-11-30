@@ -18,6 +18,19 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+
+/* TODO Next steps:
+ * 1) When we create a Corpus from scratch, we should set up the 
+ *    docs, activities, etc. as emtpy hashmaps.
+ * 2) When we create a Corpus from the DB, we should set up the 
+ *    docs, activities, etc. as null pointers, and then
+ *    fill them from the DB if they ask for them. This requires adding 
+ *    getters on the doc lists, get by id, search, etc. 
+ * 3) Need to add a flag to persist to DB or not, as we go.
+ * 4) Need to rewrite findOrCreate[Name, Activity, ActivityRole] to persist.
+ * 5) Deal with the next steps in Document, Name, NameFamilyLink, NameRoleActivity.
+ */
+
 public class Corpus {
 	private final static String myClass = "Corpus";
 	private static int	nextID = 1;
@@ -41,10 +54,6 @@ public class Corpus {
 	 * The named roles in activities (not instances) for this corpus
 	 */
 	private HashMap<String, ActivityRole> activityRoles;
-	/**
-	 * The Names seen in this corpus (not instances)
-	 */
-	private HashMap<String, Name> names;
 
 	/**
 	 * Create a new empty corpus.
@@ -77,7 +86,6 @@ public class Corpus {
 		documents = new HashMap<Integer, Document>();
 		activities = new HashMap<String, Activity>();
 		activityRoles = new HashMap<String, ActivityRole>();
-		names = new HashMap<String, Name>();
 	}
 	
 	public static Corpus FindByID(Connection dbConn, int id) {
@@ -155,7 +163,7 @@ public class Corpus {
 	}
 	
 	public void persist(Connection dbConn) {
-		final String myName = ".CreateAndPersist: ";
+		final String myName = ".persist: ";
 		final String UPDATE_STMT = 
 			"UPDATE corpus SET name=?, description=? WHERE id=?";
 		try {
@@ -171,8 +179,21 @@ public class Corpus {
 		}
 	}
 	
+	public void deletePersistence(Connection dbConn) {
+		final String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
+			stmt.setInt(1, id);
+			stmt.executeUpdate();
+		} catch(SQLException se) {
+			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+	}
+	
 	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
-			TimeSpan defaultDocTimeSpan)
+			TimeSpan defaultDocTimeSpan, Connection dbConn)
 		throws XPathExpressionException {
 		String name = "unknown";
 		String description = null;
@@ -199,7 +220,7 @@ public class Corpus {
 					int nDocs = docNodes.getLength();
 					for( int iDoc = 0; iDoc < nDocs; iDoc++) {
 					    Element teiEl = (Element)docNodes.item(iDoc);
-					    Document document = Document.CreateFromTEI(teiEl, true, newCorpus);
+					    Document document = Document.CreateFromTEI(teiEl, true, newCorpus, dbConn);
 					    newCorpus.addDocument(document);
 					}
 				}
@@ -248,15 +269,6 @@ public class Corpus {
 		return instance;
 	}
 
-	public Name findOrCreateName(String name) {
-		Name instance = names.get(name);
-		if(instance == null) {
-			instance = new Name(name);
-			names.put(name, instance);
-		}
-		return instance;
-	}
-
 	public ActivityRole findOrCreateActivityRole(String name) {
 		ActivityRole instance = activityRoles.get(name);
 		if(instance == null) {
@@ -285,8 +297,6 @@ public class Corpus {
     	System.out.print("Generating ActivityRoles SQL...");
 		SQLUtils.generateActivityRolesSQL(activityRolesFilename, activityRoles);
     	System.out.println("Done.");
-    	System.out.print("Generating Names SQL...");
-		SQLUtils.generateNamesSQL(namesFilename, names);
     	System.out.println("Done.");
 	}
 
