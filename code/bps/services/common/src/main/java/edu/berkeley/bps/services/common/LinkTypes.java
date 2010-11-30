@@ -3,6 +3,7 @@ package edu.berkeley.bps.services.common;
 public enum LinkTypes {
 	LINK_TO_FATHER,
 	LINK_TO_MOTHER,
+	LINK_TO_SPOUSE,
 	LINK_TO_GRANDFATHER,
 	LINK_TO_GRANDMOTHER,
 	LINK_TO_ANCESTOR,
