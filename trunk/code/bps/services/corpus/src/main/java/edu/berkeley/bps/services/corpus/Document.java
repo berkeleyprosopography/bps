@@ -1,6 +1,8 @@
 package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.LinkTypes;
+
+import java.sql.Connection;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -100,7 +102,8 @@ public class Document {
 	 * @return new Document
 	 * @throws XPathExpressionException
 	 */
-	public static Document CreateFromTEI(Element teiNode, boolean deepCreate, Corpus corpus)
+	public static Document CreateFromTEI(Element teiNode, boolean deepCreate, Corpus corpus,
+			Connection dbConn)
 		throws XPathExpressionException {
 		String alt_id = "unknown";
 		//String notes = null;
@@ -130,10 +133,10 @@ public class Document {
 		    
 		    if(deepCreate) {
 		    	// Find the principal persName nodes and create a nameRoleActivity for each one
-		    	newDoc.addNamesForActivity( TEI_Constants.XPATH_PRINCIPAL_PERSNAMES,
+		    	newDoc.addNamesForActivity( dbConn, TEI_Constants.XPATH_PRINCIPAL_PERSNAMES,
 		    								teiNode, corpus, unkActivity, principal );
 		    	// Find the witness persName nodes and create a nameRoleActivity for each one
-		    	newDoc.addNamesForActivity( TEI_Constants.XPATH_WITNESS_PERSNAMES,
+		    	newDoc.addNamesForActivity( dbConn, TEI_Constants.XPATH_WITNESS_PERSNAMES,
 		    								teiNode, corpus, unkActivity, witness );
 		    }
 	    } catch (XPathExpressionException xpe) {
@@ -143,7 +146,8 @@ public class Document {
 	    return newDoc;
 	}
 
-	protected void addNamesForActivity( String xpathSel, Node context, Corpus corpus,
+	protected void addNamesForActivity( Connection dbConn, 
+			String xpathSel, Node context, Corpus corpus,
 			Activity activity, ActivityRole defaultActRole )
 		throws XPathExpressionException {
 
@@ -175,12 +179,27 @@ public class Document {
 				        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
 				        	addNameRoleActivity(nra);
 				        } else {
-				        	Name nameInstance = corpus.findOrCreateName(fnNameStr);
+					        String fnType = foreNameEl.getAttribute(TEI_Constants.TYPE_ATTR);
+					        boolean isPatronym = fnType.equalsIgnoreCase(TEI_Constants.TYPE_PATRONYMIC);
+				        	String nameGender = Name.GENDER_UNKNOWN;
+					        if( isPatronym || fnType.equalsIgnoreCase(TEI_Constants.TYPE_GENDER_MASCULINE)) {
+					        	nameGender = Name.GENDER_MALE;
+					        } else if( fnType.equalsIgnoreCase(TEI_Constants.TYPE_GENDER_FEMININE)) {
+					        	nameGender = Name.GENDER_FEMALE;
+					        }
+				        	Name nameInstance = Name.FindByName(dbConn, fnNameStr, corpus.getId());
+				        	if(nameInstance != null ) {
+				        		if(nameInstance.getGender()!=nameGender) {
+						        	generateParseError(foreNameEl,
+						        		"Name: "+fnNameStr+" gender does not match previous instance - ignoring.");
+				        		}
+				        	} else {
+				        		nameInstance = Name.CreateAndPersist(dbConn, corpus.getId(),
+				        				fnNameStr, Name.NAME_TYPE_PERSON, nameGender, null, null);
+				        	}
 					        String fnXMLID = foreNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
 					        if(fnXMLID.length()<1)
 					        	fnXMLID = null;
-					        String fnType = foreNameEl.getAttribute(TEI_Constants.TYPE_ATTR);
-					        boolean isPatronym = fnType.equalsIgnoreCase(TEI_Constants.TYPE_PATRONYMIC);
 					        if(!isPatronym) {
 					        	if(nra!=null) {
 						        	generateParseError(foreNameEl, "Multiple foreNames encountered.");
@@ -221,17 +240,56 @@ public class Document {
 			        if(anNameStr.length()<1) {
 			        	generateParseError(addNameEl, "Additional name empty.");
 			        } else {
-			        	Name nameInstance = corpus.findOrCreateName(anNameStr);
+			        	String nameGender = Name.GENDER_UNKNOWN;
+				        String anTypeAttr = addNameEl.getAttribute(TEI_Constants.TYPE_ATTR);
+				        boolean isClan = false;
+				        boolean isSpouse = false;
+				        String nametype = null;
+				        if(anTypeAttr.equalsIgnoreCase(TEI_Constants.TYPE_CLAN)){
+				        	isClan = true;
+				        	nametype = Name.NAME_TYPE_CLAN;
+				        	nameGender = Name.GENDER_MALE;
+				        } else if(anTypeAttr.equalsIgnoreCase(TEI_Constants.TYPE_SPOUSE)){
+				        	isSpouse = true;
+				        	nametype = Name.NAME_TYPE_PERSON;
+				        	Name baseName = nra.getName();
+				        	if(baseName==null || baseName.getGender()==Name.GENDER_UNKNOWN) {
+				        		nameGender = Name.GENDER_UNKNOWN;
+				        	} else {
+				        		nameGender = ( baseName.getGender()==Name.GENDER_MALE )?
+				        				Name.GENDER_FEMALE:Name.GENDER_MALE;
+				        	}
+				        } else {
+				        	generateParseError(addNameEl, "Additional name must be a clan or spouse.");
+				        	continue;
+				        }
+
+			        	Name nameInstance = Name.FindByName(dbConn, anNameStr, corpus.getId());
+			        	if(nameInstance != null ) {
+			        		if(nameInstance.getGender()!=nameGender) {
+					        	generateParseError(addNameEl,
+					        		"Name: "+anNameStr+" gender does not match previous instance - ignoring.");
+			        		}
+			        		if(nameInstance.getNameType()!=nametype) {
+					        	generateParseError(addNameEl,
+					        		"Name: "+anNameStr+" nametype does not match previous instance - ignoring.");
+			        		}
+			        	} else {
+			        		nameInstance = Name.CreateAndPersist(dbConn, corpus.getId(),
+			        				anNameStr, nametype, nameGender, null, null);
+			        	}
 				        String fnXMLID = addNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
 				        if(fnXMLID.length()<1)
 				        	fnXMLID = null;
-				        if(!addNameEl.getAttribute(TEI_Constants.TYPE_ATTR).equalsIgnoreCase(TEI_Constants.TYPE_CLAN)){
-				        	generateParseError(addNameEl, "Additional name must of type clan.");
-				        } else if(nra==null) {
+				        if(nra==null) {
 				        	generateParseError(addNameEl, "Additional name with no primary name.");
 				        } else if(fFoundClanName) {
 				        	generateParseError(addNameEl, "Multiple clan name declarations.");
-				        } else {
+				        } else if(isClan){
+				        	// add clan name
+				        	nra.addNameFamilyLink(nameInstance, LinkTypes.LINK_TO_CLAN, fnXMLID);
+				        	fFoundClanName = true;
+				        } else if(isSpouse){
 				        	// add clan name
 				        	nra.addNameFamilyLink(nameInstance, LinkTypes.LINK_TO_CLAN, fnXMLID);
 				        	fFoundClanName = true;

@@ -75,21 +75,25 @@ CREATE TABLE `act_role` (
 SHOW WARNINGS;
 
 -- Names are just the string variants, with linkages to normal forms
+-- Names are tied to corpora by default, but corpus could be null for a generic set
 -- If 'normal' is null, this is the normal form.
 -- The are not people (individuals), nor are they citations.
 DROP TABLE IF EXISTS `name`;
 CREATE TABLE `name` (
-  `id`             int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
+  `id`             INT(10) unsigned PRIMARY KEY NOT NULL auto_increment,
   `name`           VARCHAR(255) NOT NULL,
   `nametype`       ENUM ('person', 'clan') NOT NULL DEFAULT 'person',
   `gender`         ENUM ('male', 'female', 'unknown') NOT NULL DEFAULT 'unknown',
   `notes`          text NULL,
+  `corpus_id`      INT(10) UNSIGNED NULL,
   `normal`         INT(10) UNSIGNED default NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
 	CONSTRAINT `name_ibfk_1` FOREIGN KEY (`normal`)
-      REFERENCES `name` (`id`)
+      REFERENCES `name` (`id`),
+	CONSTRAINT `name_ibfk_2` FOREIGN KEY (`corpus_id`)
+      REFERENCES `corpus` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 

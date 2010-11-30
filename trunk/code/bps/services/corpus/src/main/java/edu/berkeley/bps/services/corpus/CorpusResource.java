@@ -63,22 +63,13 @@ public class CorpusResource extends BaseResource {
      */
     @Override
     public void removeRepresentations() throws ResourceException {
-    	Status status;
         if (corpus == null) {
     		System.out.println(myClass+" DELETE called for non-existent corpus");
         } else {
     		final String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
-    		try {
-            	Connection dbConn = openConnection(false);
-    			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
-    			stmt.setInt(1, corpus.getId());
-    			stmt.executeUpdate();
-    			corpus = null;
-    		} catch(SQLException se) {
-    			String tmp = myClass+".removeRepresentations: Problem querying DB.\n"+ se.getMessage();
-    			System.err.println(tmp);
-    			throw new RuntimeException( tmp );
-    		}
+        	Connection dbConn = openConnection(false);
+        	corpus.deletePersistence(dbConn);
+			corpus = null;
         }
         // Tells the client that the request has been successfully fulfilled.
         getResponse().setStatus(Status.SUCCESS_OK);
