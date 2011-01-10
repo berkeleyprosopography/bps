@@ -2,6 +2,9 @@
 -- SQL create script for BPS main object info tables
 -- ----------------------------------------------------------------------
 
+-- Will create with default collation of 'utf8_general_ci'
+CREATE DATABASE bpsdev CHARACTER SET utf8;
+
 -- The DBInfo table has a single row and is just used to hold system-wide
 -- parameters such as the sizes of alternate image sizes, the version of this
 -- DB schema, etc.

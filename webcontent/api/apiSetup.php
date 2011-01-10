@@ -3,11 +3,12 @@
 ini_set('display_errors', "On");
 
 //Bring in the user's config file
-require_once('/home/content/p/l/s/plschmitz/html/config.php');
+require_once('/var/www/config.php');
 
 // Include pear database handler
-ini_set('include_path',"$CFG->dirroot/libs/pear/:".ini_get('include_path'));
-require_once "$CFG->dirroot/libs/pear/MDB2.php";
+ini_set('include_path',$CFG->dirroot."/libs/:".ini_get('include_path'));
+//require_once "$CFG->dirroot/libs/pear/MDB2.php";
+require_once "MDB2.php";
 
 // Connect to the database
 $dsn = "$CFG->dbtype://$CFG->dbuser:$CFG->dbpass@$CFG->dbhost/$CFG->dbname";

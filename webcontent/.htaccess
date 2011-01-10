@@ -29,6 +29,8 @@ RewriteRule   ^corpora/{0,1}$ modules/corpora/corpora.php
 RewriteRule   ^corpora/corpus/{0,1}$ modules/corpora/corpus.php
 RewriteRule   ^corpora/params/{0,1}$ modules/corpora/params.php
 
+#Services rule
+RewriteRule   ^/services/(.*)$ /edu.berkeley.bps.services.BPSRestletApp/$1
 
 # Static-like pages. e.g.: /help --> modules/help/help.php
 #RewriteRule   ^([^/]+)/{0,1}$ modules/$1/$1.php
