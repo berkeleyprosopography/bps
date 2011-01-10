@@ -13,11 +13,12 @@ define("BPS_REG_PENDING", -4);
 ini_set('display_errors', "On");
 
 //Bring in the user's config file
-require_once('/home/content/p/l/s/plschmitz/html/config.php');
+require_once('/var/www/config.php');
 
 // Include pear database handler, smarty
-ini_set('include_path',$CFG->dirroot."/libs/pear/:".$CFG->dirroot."/libs/pear/MDB2:".ini_get('include_path'));
-require_once $CFG->dirroot."/libs/pear/MDB2.php";
+ini_set('include_path',$CFG->dirroot."/libs/:".ini_get('include_path'));
+//require_once $CFG->dirroot."/libs/pear/MDB2.php";
+require_once "MDB2.php";
 require_once $CFG->dirroot."/libs/Smarty/Smarty.class.php";
 
 // Setup template object
@@ -45,12 +46,14 @@ $DBerr = "";
 
 if (PEAR::isError($db)) {
 	$noDB = true;
-	$DBerr = $db->getMessage();
+	$DBerr = 'Error opening db: '.$db->getMessage().','.$db->getDebugInfo().'
+		Using connect string: '.$dsn;
 } else {
 	$exists = $db->connect();
 	if (PEAR::isError($exists)) {
 		$noDB = true;
-		$DBerr = $exists->getMessage();
+		$DBerr = 'Error connecting to db: '.$exists->getMessage().'
+		Using connect string: '.$dsn;
 	} else {
 		$db->setFetchMode(MDB2_FETCHMODE_ASSOC);
 		$sql = "SELECT lockoutActive lo from DBInfo";
