@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+	/*
 
 import org.restlet.Context;  
 import org.restlet.data.Form;
@@ -33,6 +34,7 @@ public class CorpusResource extends BaseResource {
 
 	private Corpus corpus = null;
 
+	/*
 	public CorpusResource(Context context, Request request, Response response) {  
 		super(context, request, response);  
 
@@ -61,7 +63,8 @@ public class CorpusResource extends BaseResource {
     /**
      * Handle DELETE requests.
      */
-    @Override
+ 	/*
+   @Override
     public void removeRepresentations() throws ResourceException {
         if (corpus == null) {
     		System.out.println(myClass+" DELETE called for non-existent corpus");
@@ -100,6 +103,7 @@ public class CorpusResource extends BaseResource {
     /**
      * Handle PUT requests.
      */
+	/*
     @Override
     public void storeRepresentation(Representation entity)
             throws ResourceException {
@@ -122,5 +126,6 @@ public class CorpusResource extends BaseResource {
             getResponse().setStatus(Status.SUCCESS_CREATED);
     	}
     }
+	*/
 
 }

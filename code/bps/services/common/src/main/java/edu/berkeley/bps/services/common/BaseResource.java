@@ -7,14 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.restlet.Context;  
-import org.restlet.data.MediaType;
-import org.restlet.data.Request;  
-import org.restlet.data.Response;  
-import org.restlet.data.Status;
-import org.restlet.resource.DomRepresentation;
-import org.restlet.resource.Representation;
-import org.restlet.resource.Resource;  
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -23,19 +15,13 @@ import org.w3c.dom.Element;
  * all resources. Currently empty, but will centralize info on DB connections. 
  *  
  */  
-public abstract class BaseResource extends Resource {  
+public abstract class BaseResource {  
 
 	private String connectionUrl = null;
 	
-	public BaseResource(Context context, Request request, Response response) {  
-		super(context, request, response);  
-		
-        String host = context.getParameters().getFirstValue("bps.db.host");
-        String dbName = context.getParameters().getFirstValue("bps.db.dbname");
-        String dbUser = context.getParameters().getFirstValue("bps.db.dbuser");
-        String dbPass = context.getParameters().getFirstValue("bps.db.dbpass");
-        connectionUrl = "jdbc:mysql://"+host+"/"+dbName+"?user="+dbUser+"&password="+dbPass;
-	}  
+	public BaseResource() {
+        connectionUrl = BPSServletContextListener.getDBUrl();
+	} 
 	
 	protected Connection openConnection() {
 		return openConnection(true);
@@ -96,7 +82,6 @@ public abstract class BaseResource extends Resource {
      *            the error message.
      * @param errorCode
      *            the error code.
-     */
     protected Representation generateErrorRepresentation(String errorMessage, Status status,
             Response response) {
         // Generate the output representation
@@ -124,5 +109,6 @@ public abstract class BaseResource extends Resource {
         }
         return null;
     }
+     */
 
 }
