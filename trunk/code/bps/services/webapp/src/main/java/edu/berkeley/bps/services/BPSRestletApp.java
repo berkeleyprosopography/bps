@@ -2,10 +2,11 @@ package edu.berkeley.bps.services;
 
 import edu.berkeley.bps.services.corpus.CorporaResource;
 import edu.berkeley.bps.services.corpus.CorpusResource;
+public class BPSRestletApp {   }
+/*
 import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.Router;
-  
 public class BPSRestletApp extends Application {  
   
 	public BPSRestletApp() {
@@ -15,7 +16,8 @@ public class BPSRestletApp extends Application {
     /** 
      * Creates a root Restlet that will receive all incoming calls. 
      */  
-    @Override  
+    /*
+		@Override  
     public Restlet createRoot() {  
         // Create a router Restlet that routes each call to a  
         // new instance of HelloWorldResource.  
@@ -32,4 +34,5 @@ public class BPSRestletApp extends Application {
         return router;  
     }  
 }  
+  */
 

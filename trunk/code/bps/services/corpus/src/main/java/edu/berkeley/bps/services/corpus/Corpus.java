@@ -9,11 +9,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -31,6 +36,7 @@ import org.w3c.dom.NodeList;
  * 5) Deal with the next steps in Document, Name, NameFamilyLink, NameRoleActivity.
  */
 
+@XmlRootElement(name="corpus")
 public class Corpus {
 	private final static String myClass = "Corpus";
 	private static int	nextID = 1;
@@ -38,6 +44,7 @@ public class Corpus {
 	private int			id;
 	private String		name;
 	private String		description;
+	private int			ownerId;
 	private TimeSpan	defaultDocTimeSpan = null;
 	// TODO Link to a User instance from bps.services.user.main
 	//private User		owner;
@@ -59,7 +66,7 @@ public class Corpus {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(Corpus.nextID++, null, null, null);
+		this(Corpus.nextID++, null, null, -1, null);
 	}
 
 	/**
@@ -68,7 +75,7 @@ public class Corpus {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus( String name, String description, TimeSpan defaultDocTimeSpan ) {
-		this(Corpus.nextID++, name, description, defaultDocTimeSpan);
+		this(Corpus.nextID++, name, description, -1, defaultDocTimeSpan);
 	}
 
 	/**
@@ -78,41 +85,38 @@ public class Corpus {
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 */
-	public Corpus(int id, String name, String description, TimeSpan defaultDocTimeSpan) {
+	public Corpus(int id, String name, String description, 
+			int ownerId, TimeSpan defaultDocTimeSpan) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
+		this.ownerId = ownerId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
 		documents = new HashMap<Integer, Document>();
 		activities = new HashMap<String, Activity>();
 		activityRoles = new HashMap<String, ActivityRole>();
 	}
 	
-	public static Corpus FindByID(Connection dbConn, int id) {
-		final String myName = ".FindByID: ";
-		final String SELECT_BY_ID = "SELECT id, name, description FROM corpus WHERE id = ?";
+	public static Corpus FindByID(Connection dbConn, int id)
+		throws SQLException {
+		final String SELECT_BY_ID = "SELECT id, name, description, owner_id FROM corpus WHERE id = ?";
 		Corpus corpus = null;
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
-			stmt.setInt(1, id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-									rs.getString("description"), null); 
-			}
-			rs.close();
-			stmt.close();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-			throw new RuntimeException( tmp );
+		PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+		stmt.setInt(1, id);
+		ResultSet rs = stmt.executeQuery();
+		if(rs.next()){
+			// TODO get the owner id too
+			corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
+								rs.getString("description"), rs.getInt("owner_id"), null); 
 		}
+		rs.close();
+		stmt.close();
 		return corpus;
 	}
 	
 	public static Corpus FindByName(Connection dbConn, String name) {
 		final String myName = ".FindByName: ";
-		final String SELECT_BY_NAME = "SELECT id, name, description FROM corpus WHERE name = ?";
+		final String SELECT_BY_NAME = "SELECT id, name, description, owner_id  FROM corpus WHERE name = ?";
 		Corpus corpus = null;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
@@ -121,7 +125,7 @@ public class Corpus {
 			if(rs.next()){
 				if(rs.next()){
 					corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-										rs.getString("description"), null); 
+										rs.getString("description"), rs.getInt("owner_id"), null); 
 				}
 			}
 			rs.close();
@@ -132,6 +136,33 @@ public class Corpus {
 			throw new RuntimeException( tmp );
 		}
 		return corpus;
+	}
+	
+	public void CreateAndPersist(Connection dbConn) {
+		final String myName = ".CreateAndPersist: ";
+		final String INSERT_STMT = 
+			"INSERT INTO corpus(name, description, owner_id, creation_time) VALUES(?,?,?,now())";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
+												Statement.RETURN_GENERATED_KEYS);
+			stmt.setString(1, name);
+			stmt.setString(2, description);
+			stmt.setInt(3, ownerId);
+			int nRows = stmt.executeUpdate();
+			if(nRows==1){
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()){
+					id = rs.getInt(1); 
+				}
+				rs.close();
+			}
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+        			Response.status(
+        				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
 	}
 	
 	public static Corpus CreateAndPersist(Connection dbConn, 
@@ -150,7 +181,7 @@ public class Corpus {
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
 				if(rs.next()){
-					corpus = new Corpus(rs.getInt(1), name, description, defaultDocTimeSpan); 
+					corpus = new Corpus(rs.getInt(1), name, description, owner_id, defaultDocTimeSpan); 
 				}
 				rs.close();
 			}
@@ -232,6 +263,7 @@ public class Corpus {
 	    return newCorpus;
 	}
 
+	@XmlElement
 	public int getId() {
 		return id;
 	}
@@ -240,6 +272,7 @@ public class Corpus {
 		this.id = id;
 	}
 
+	@XmlElement
 	public String getName() {
 		return name;
 	}
@@ -248,12 +281,22 @@ public class Corpus {
 		this.name = name;
 	}
 
+	@XmlElement
 	public String getDescription() {
 		return description;
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	@XmlElement
+	public int getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(int ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public void addDocument( Document newDoc ) {
@@ -353,6 +396,7 @@ public class Corpus {
 	/**
 	 * @return the defaultDocTimeSpan
 	 */
+	@XmlTransient
 	public TimeSpan getDefaultDocTimeSpan() {
 		return defaultDocTimeSpan;
 	}
