@@ -1,6 +1,6 @@
 1) Check out all the source to your local environment.
-2) Get a slice, and install Apache and Tomcat. Ensure that php, PEAR, and MDB2 
-   are installed.
+2) Get a slice, and install Apache and Tomcat. Ensure that php, PEAR, MDB2,
+   and HTTP/Request2 (which requires Net_URL2) are installed.
 3) Install mod_jk, and configure it to forward bps services calls to Tomcat. 
    For older Tomcat, you may be able to use the auto-config feature of Tomcat
    to do this. For recent (6.x) versions of Tomcat, you need to remember to
