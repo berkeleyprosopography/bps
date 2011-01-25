@@ -1,0 +1,21 @@
+1) Check out all the source to your local environment.
+2) Get a slice, and install Apache and Tomcat. Ensure that php, PEAR, and MDB2 
+   are installed.
+3) Install mod_jk, and configure it to forward bps services calls to Tomcat. 
+   For older Tomcat, you may be able to use the auto-config feature of Tomcat
+   to do this. For recent (6.x) versions of Tomcat, you need to remember to
+   put your JkMount directives in the configuration for your VirtualHost.
+   If you are only using the default VirtualHost, then edit
+    /etc/apache2/sites-available/default
+   to add the JkMount directives. 
+4) Copy the content under .../trunk/webcontent to the web root. 
+   This should be changed in fugure to build another war that is expanded
+   and served by Apache
+5) Adjust the .../trunk/webcontent/config.php file to point to your db, etc.
+6) Adjust the paths in .../trunk/webcontent/config.php and 
+   .../trunk/webcontent/libs/env.php to reflect the installation directories.
+7) Currently must adjust the web.xml file and rebuild to set the data source. 
+   May be able to specify a Context for the web app that overrides the 
+   default param values. Try this. See also:
+   http://tomcat.apache.org/tomcat-6.0-doc/jndi-resources-howto.html#JDBC_Data_Sources
+8) 
