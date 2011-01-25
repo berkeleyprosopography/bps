@@ -13,6 +13,8 @@
 /* Include Files *********************/
 require_once("../../libs/env.php");
 require_once("../admin/authUtils.php");
+// require_once("HTTP/Request2.php");
+require_once "../../libs/RESTClient.php";
 /*************************************/
 
 // If the user isn't logged in, send to the login page.
@@ -272,10 +274,24 @@ function getCorpora(){
 $corpora = getCorpora();
 if($corpora){
 	$t->assign('corpora', $corpora);
+	$rest = new RESTclient();
+	//$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
+	$url = "http://173.255.212.10/bps.services.webapp/corpora/";
+	$rest->createRequest($url,"GET");
+	// Enable this after editing the resource to allow both.
+	// $rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServCorpOutput = $rest->getResponse();
+	} else {
+		$ServCorpOutput = $rest->getError();
+	}
 }
+
 
 if($opmsg!="")
 	$t->assign('opmsg', $opmsg);
+else if($ServCorpOutput != "")
+	$t->assign('opmsg', $ServCorpOutput);
 
 $t->display('corpora.tpl');
 

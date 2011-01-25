@@ -10,6 +10,7 @@ class RESTClient {
 	private $password = "";
 	private $response = "";
 	private $responseBody = "";
+	private $errorBody = "";
 	private $req = null;
 
 	public function __construct($root_url = "", $user_name = "", $password = "") {
@@ -32,47 +33,61 @@ class RESTClient {
 
 		switch($method) {
 		case "GET":
-			$this->req->setMethod(HTTP_REQUEST_METHOD_GET);
+			$this->req->setMethod(HTTP_Request2::METHOD_GET);
 			break;
 		case "POST":
-			$this->req->setMethod(HTTP_REQUEST_METHOD_POST);
+			$this->req->setMethod(HTTP_Request2::METHOD_POST);
 			if ($arr != null) {
 				$this->req->addPostParameter($arr);
 			}
 			break;
 		case "PUT":
-			$this->req->setMethod(HTTP_REQUEST_METHOD_PUT);
+			$this->req->setMethod(HTTP_Request2::METHOD_PUT);
 			// to-do
 			break;
 		case "DELETE":
-			$this->req->setMethod(HTTP_REQUEST_METHOD_DELETE);
+			$this->req->setMethod(HTTP_Request2::METHOD_DELETE);
 			// to-do
 			break;
 		}
 	}
 
+	public function setJSONMode() {
+		$this->setHeader('Accept', 'application/json');
+	}
+
+	public function setHeader($header, $value) {
+		if($this->req != null) {
+			$this->req->setHeader($header, $value);
+		}
+	}
+	
 	public function sendRequest() {
 
-		//FIXME need to handler errors more gracefully.
 		try {
 			$this->response = $this->req->send();
 			if (200 == $this->response->getStatus()) {
 				$this->responseBody = $this->response->getBody();
 			} else {
-				echo 'Unexpected HTTP status: ' . $response->getStatus() . ' ' .
-					$response->getReasonPhrase();
-				die();
+				$this->errorBody = 'Unexpected HTTP status: ' . $this->response->getStatus() . ' ' .
+					$this->response->getReasonPhrase();
+				return false;
 			}
 		} catch (HTTP_Request2_Exception $e) {
-			echo 'Error: ' . $e->getMessage();
-			die();
+			$this->errorBody = 'Error: ' . $e->getMessage();
+			return false;
 		}
+		return true;
 	}
 
 	public function getResponse() {
 		return $this->responseBody;
 	}
 
-}
-?>
+	public function getError() {
+		return $this->errorBody;
+	}
 
+}
+
+?>
