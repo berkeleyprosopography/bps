@@ -275,8 +275,7 @@ $corpora = getCorpora();
 if($corpora){
 	$t->assign('corpora', $corpora);
 	$rest = new RESTclient();
-	//$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
-	$url = "http://173.255.212.10/bps.services.webapp/corpora/";
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
 	$rest->createRequest($url,"GET");
 	// Enable this after editing the resource to allow both.
 	// $rest->setJSONMode();
