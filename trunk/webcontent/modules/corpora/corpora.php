@@ -90,7 +90,7 @@ function addCorpus() {
 		alert( "Cannot add corpus - no http obj!\n Please advise BPS support." );
 		return;
 	}
-	var url = "/bps.services.webapp/services/corpora";
+	var url = "'.$CFG->svcsbase.'/corpora";
 	var args = "owner="+curr_user_id+"&name="+name+"&description="+desc;
 	//alert( "Preparing request: POST: "+url+"?"+args );
 	xmlhttp.open("POST", url, true);
@@ -123,7 +123,7 @@ function deleteCorpus(id) {
 		alert( "Cannot delete corpus - no http obj!\n Please advise BPS support." );
 		return;
 	}
-	var url = "/bps.services.webapp/services/corpora/"+id;
+	var url = "'.$CFG->svcsbase.'/corpora/"+id;
 	//alert( "Preparing request: DELETE: "+url);
 	xmlhttp.open("DELETE", url, true);
 	xmlhttp.setRequestHeader("Content-Type",

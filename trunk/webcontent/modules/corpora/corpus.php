@@ -70,7 +70,7 @@ function updateCorpus(corpusID) {
 		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
 		return;
 	}
-	var url = "/bps.services.webapp/services/corpora/"+corpusID;
+	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID;
 	var args = "description="+desc;
 	//alert( "Preparing request: PUT: "+url+"?"+args );
 	xmlhttp.open("PUT", url, true);
@@ -129,6 +129,8 @@ function checkValues( e, name, desc, limit ) {
 $t->assign("script_block", $script_block);
 
 function getCorpus($id){
+	// Replace with get using RESTClient, requesting JSON, then use
+	// json_decode and continue.
 	global $db;
 	// Get all the corpora, with doc counts, and order by when added
 	$sql = 	'	SELECT c.name, c.description FROM corpus c WHERE c.id=?';

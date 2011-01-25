@@ -28,7 +28,7 @@ unset($CFG);  // Ignore this line
 //=========================================================================
 // 1. DATABASE SETUP
 //=========================================================================
-// First, you need to configure the database where all Delphi data       //
+// First, you need to configure the database where all BPS data          //
 // will be stored.  This database must already have been created         //
 // and a username/password created to access it.                         //
 //                                                                       //
@@ -48,8 +48,8 @@ $CFG->prefix    = '';        // Prefix to use for all table names (not working y
 //=========================================================================
 // 2. WEB SITE LOCATION
 //=========================================================================
-// Now you need to tell Delphi where it is located. Specify the full
-// web address to where Delphi has been installed.  If your web site
+// Now you need to tell BPS where it is located. Specify the full
+// web address to where BPS has been installed.  If your web site
 // is accessible via multiple URLs then choose the most natural one.
 //
 // Do not include a trailing slash!
@@ -58,13 +58,22 @@ $CFG->wwwroot   = 'http://'.$_SERVER['SERVER_NAME'];
 
 
 //=========================================================================
-// 2.5 SHORT URL BASE
+// 2.1 SHORT URL BASE
 //=========================================================================
-// shortbase allows delphi to construct short URLs in conjunction with Apace rewite rules.
+// shortbase allows BPS to construct short URLs in conjunction with Apache rewite rules.
+//
+
+$CFG->shortbase   = '/';
+
+//=========================================================================
+// 2.2 SERVICES URL BASE
+//=========================================================================
+// svcsbase allows BPS to construct calls to services provided by Tomcat, JBoss, etc.
+// This must map the JkMount point declared for the VirtualHost.
 //
 // Do not include a trailing slash!
 
-$CFG->shortbase   = '/';
+$CFG->svcsbase   = '/bps.services.webapp';
 
 //=========================================================================
 // 3. SERVER FILES LOCATION
