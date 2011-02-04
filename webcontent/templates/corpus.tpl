@@ -35,7 +35,7 @@
 						</td>
 						<td class="corpus" width="100px">
 							<input disabled id="U_{$corpus.id}" type="button"
-								onclick="updateCorpus('{$corpus.id}')" value=" Update " />
+								onclick="updateCorpus('{$corpus.id}','{$corpus.name}')" value=" Update " />
 						</td>
 					{/if}
 					</tr>
