@@ -42,6 +42,7 @@ $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/corpus.js"></script>
 <script>
 
 // The ready state change callback method that waits for a response.
@@ -58,7 +59,8 @@ function updateCorpusRSC() {
 	}
 }
 
-function updateCorpus(corpusID) {
+
+function updateCorpus(corpusID, name) {
 	// Could change cursor and disable button until get response
 	var descTextEl = document.getElementById("D_"+corpusID);
 	var desc = descTextEl.value;
@@ -71,11 +73,11 @@ function updateCorpus(corpusID) {
 		return;
 	}
 	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID;
-	var args = "description="+desc;
+	var args = prepareCorpusXML(corpusID, name, desc,"");
 	//alert( "Preparing request: PUT: "+url+"?"+args );
 	xmlhttp.open("PUT", url, true);
 	xmlhttp.setRequestHeader("Content-Type",
-														"application/x-www-form-urlencoded" );
+														"application/xml" );
 	xmlhttp.onreadystatechange=updateCorpusRSC;
 	xmlhttp.send(args);
 	//window.status = "request sent: POST: "+url+"?"+args;
@@ -105,24 +107,6 @@ function limitChars( field, maxlimit ) {
   }
 	return true;
 }
-
-function checkValues( e, name, desc, limit ) {
-	if( name.value.length < 4 ) {
-    alert( "Corpus name must be at least 4 characters in length." );
-		e.returnValue = false;
-		if( e.preventDefault )
-			e.preventDefault();
-    return false;
-  }
-	if( !limitChars( desc, limit ) ) {
-		e.returnValue = false;
-		if( e.preventDefault )
-			e.preventDefault();
-    return false;
-  }
-	return true;
-}
-
 
 </script>';
 

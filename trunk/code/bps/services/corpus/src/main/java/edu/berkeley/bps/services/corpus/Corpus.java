@@ -16,6 +16,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -36,15 +38,24 @@ import org.w3c.dom.NodeList;
  * 5) Deal with the next steps in Document, Name, NameFamilyLink, NameRoleActivity.
  */
 
+@XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="corpus")
 public class Corpus {
 	private final static String myClass = "Corpus";
+	
+	private final static String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
+
 	private static int	nextID = 1;
 
+	@XmlElement
 	private int			id;
+	@XmlElement
 	private String		name;
+	@XmlElement
 	private String		description;
+	@XmlElement
 	private int			ownerId;
+
 	private TimeSpan	defaultDocTimeSpan = null;
 	// TODO Link to a User instance from bps.services.user.main
 	//private User		owner;
@@ -97,6 +108,49 @@ public class Corpus {
 		activityRoles = new HashMap<String, ActivityRole>();
 	}
 	
+	public static boolean Exists(Connection dbConn, int id) {
+		boolean exists = false;
+		final String SELECT_BY_ID = "SELECT name FROM corpus WHERE id = ?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+			stmt.setInt(1, id);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				if(rs.getString("name")!=null)
+					exists = true;
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			// Just absorb it
+			String tmp = myClass+"NameUsed: Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+		}
+		return exists;
+	}
+
+	public static boolean NameUsed(Connection dbConn, String name) {
+		boolean exists = false;
+		final String SELECT_BY_NAME = "SELECT id FROM corpus WHERE name = ?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
+			stmt.setString(1, name);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				if(rs.getInt("id")>0)
+					exists = true;
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			// Just absorb it
+			String tmp = myClass+"NameUsed: Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+		}
+
+		return exists;
+	}
+
 	public static Corpus FindByID(Connection dbConn, int id)
 		throws SQLException {
 		final String SELECT_BY_ID = "SELECT id, name, description, owner_id FROM corpus WHERE id = ?";
@@ -211,11 +265,11 @@ public class Corpus {
 	}
 	
 	public void deletePersistence(Connection dbConn) {
-		final String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
 			stmt.setInt(1, id);
 			stmt.executeUpdate();
+			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
 			System.err.println(tmp);
@@ -223,6 +277,19 @@ public class Corpus {
 		}
 	}
 	
+	public static void DeletePersistence(Connection dbConn, int id) {
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
+			stmt.setInt(1, id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+	}
+
 	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
 			TimeSpan defaultDocTimeSpan, Connection dbConn)
 		throws XPathExpressionException {
@@ -263,7 +330,6 @@ public class Corpus {
 	    return newCorpus;
 	}
 
-	@XmlElement
 	public int getId() {
 		return id;
 	}
@@ -272,7 +338,6 @@ public class Corpus {
 		this.id = id;
 	}
 
-	@XmlElement
 	public String getName() {
 		return name;
 	}
@@ -281,7 +346,6 @@ public class Corpus {
 		this.name = name;
 	}
 
-	@XmlElement
 	public String getDescription() {
 		return description;
 	}
@@ -290,7 +354,6 @@ public class Corpus {
 		this.description = description;
 	}
 
-	@XmlElement
 	public int getOwnerId() {
 		return ownerId;
 	}

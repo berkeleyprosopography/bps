@@ -62,6 +62,7 @@ $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/corpus.js"></script>
 <script>
 
 var curr_user_id = '.$_SESSION['id'].';
@@ -93,11 +94,11 @@ function addCorpus() {
 		return;
 	}
 	var url = "'.$CFG->svcsbase.'/corpora";
-	var args = "owner="+curr_user_id+"&name="+name+"&description="+desc;
+	//var args = "owner="+curr_user_id+"&name="+name+"&description="+desc;
+	var args = prepareCorpusXML("", name, desc, curr_user_id);
 	//alert( "Preparing request: POST: "+url+"?"+args );
 	xmlhttp.open("POST", url, true);
-	xmlhttp.setRequestHeader("Content-Type",
-														"application/x-www-form-urlencoded" );
+	xmlhttp.setRequestHeader("Content-Type","application/xml" );
 	xmlhttp.onreadystatechange=addCorpusRSC;
 	xmlhttp.send(args);
 	//window.status = "request sent: POST: "+url+"?"+args;
@@ -145,34 +146,6 @@ function enableElement( elID ) {
 	el.disabled = false;
 	//window.status = "Element ["+elID+"] enabled.";
 }
-
-function limitChars( field, maxlimit ) {
-  if ( field.value.length > maxlimit )
-  {
-    field.value = field.value.substring( 0, maxlimit-1 );
-    alert( "Description can only be 255 characters in length." );
-    return false;
-  }
-	return true;
-}
-
-function checkValues( e, name, desc, limit ) {
-	if( name.value.length < 4 ) {
-    alert( "Corpus name must be at least 4 characters in length." );
-		e.returnValue = false;
-		if( e.preventDefault )
-			e.preventDefault();
-    return false;
-  }
-	if( !limitChars( desc, limit ) ) {
-		e.returnValue = false;
-		if( e.preventDefault )
-			e.preventDefault();
-    return false;
-  }
-	return true;
-}
-
 
 </script>';
 

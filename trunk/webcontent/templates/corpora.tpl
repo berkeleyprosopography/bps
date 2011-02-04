@@ -47,7 +47,7 @@
 	<div style="height:20px"></div>
 	{if isset($canAddCorpus) }
 	<div class="form_row">
-	<form method="post" onsubmit="checkValues(event, this.corpname, this.desc, 255);">
+	<form method="post">
 		<table class="form_row" order="0" cellspacing="0" cellpadding="4px">
 			<tr>
 				<td class="title" colspan="3">Add a New Corpus</td>
@@ -61,11 +61,13 @@
 			<tr>
 				<td class="2" width="200px"><input type="text" id="newCorpusName" name="corpname" maxlength="40"></td>
 				<td class="corpusdesc" width="320px"><textarea id="newCorpusDesc" name="desc" rows="2" cols="40" 
-				       onkeypress="limitChars(this,255);"
-							 onblur="limitChars(this,255);"
-							 onfocus="limitChars(this,255);"></textarea></td>
+				       onkeypress="limitChars('Description',this,255);"
+							 onblur="limitChars('Description',this,255);"
+							 onfocus="limitChars('Description',this,255);"></textarea></td>
 				<td class="corpus" width="80px">
-					<input id="addCorpButton" type="button" onclick="addCorpus()" value=" Add " />
+					<input id="addCorpButton" type="button" 
+						onclick="if(checkCorpusValues(event, 'newCorpusName', 'newCorpusDesc', 255)) addCorpus();" 
+						value=" Add " />
 				</td>
 			</tr>
 		</table>

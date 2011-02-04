@@ -9,10 +9,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import org.jboss.resteasy.annotations.providers.jaxb.Wrapped;
@@ -30,60 +32,10 @@ public class CorporaResource extends BaseResource {
 	
 	private static final String myClass = "CorporaResource";
 
-    /**
-     * Handle POST requests: create a new item.
-    @Override
-    public void acceptRepresentation(Representation entity)
-            throws ResourceException {
-        // Parse the given representation and retrieve pairs of
-        // "name=value" tokens.
-    	String mediaTypeName = entity.getMediaType().getName();
-        Form form = new Form(entity);
-        String corpusName = form.getFirstValue("name");
-        String corpusDescription = form.getFirstValue("description");
-        String corpusOwnerStr = form.getFirstValue("owner");
-        Response response = getResponse();
-        try {
-        	if(corpusName==null||corpusName.length()==0)
-        		throw new IllegalArgumentException("Missing value for corpus name");
-        	if(corpusOwnerStr==null||corpusOwnerStr.length()==0)
-        		throw new IllegalArgumentException("Missing value for corpus owner id");
-        	int corpusOwner;
-        	try {
-        		corpusOwner = Integer.parseInt(corpusOwnerStr);
-        	} catch( NumberFormatException nfe ) {
-        		throw new IllegalArgumentException("Illegal (non integer) value for corpus owner id");
-        	}
-        	Connection dbConn = openConnection(false);
-
-	        // Check that the item is not already registered.
-	        if (Corpus.FindByName(dbConn, corpusName)!=null) {
-	        	generateErrorRepresentation(
-	                    "A corpus with the name '" + corpusName + "' already exists.", 
-	                    	Status.CLIENT_ERROR_BAD_REQUEST, response );
-	        } else {
-	            // Register the new item
-	        	Corpus corpus = Corpus.CreateAndPersist(dbConn, corpusName, corpusDescription, corpusOwner, null);
-	            // Set the response's status and entity
-	            response.setStatus(Status.SUCCESS_CREATED);
-	            Representation rep = new StringRepresentation("Corpus created",
-	                    MediaType.TEXT_PLAIN);
-	            // Indicates where is located the new resource.
-	            rep.setIdentifier(getRequest().getResourceRef().getIdentifier()
-	                    + "/" + corpus.getId());
-	            response.setEntity(rep);
-	        }
-        } catch(Exception e) {
-        	generateErrorRepresentation(
-                    "Problem creating corpus\n"+e.getLocalizedMessage(), 
-                    	Status.CONNECTOR_ERROR_INTERNAL, response );
-        }
-    }
-     */
-
-    /**
+	/**
      * Returns a listing of all corpora.
-     */
+	 * @return Full (shallow) details of all corpora
+	 */
 	@GET
 	@Produces("application/xml")
 	@Wrapped(element="corpora")
@@ -114,16 +66,24 @@ public class CorporaResource extends BaseResource {
         return corpusList;
     }
 
-    /**
-     * Returns a listing of a single corpus.
-     */
+	/**
+     * Returns details for a given corpus.
+	 * @param id the id of the corpus of interest
+	 * @return
+	 */
 	@GET
 	@Produces("application/xml")
 	@Path("{id}")
-	public Corpus getCorpus(int id) {
+	public Corpus getCorpus(@PathParam("id")int id) {
         try {
 	        Connection dbConn = openConnection(false);
 			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+            	throw new WebApplicationException( 
+            			Response.status(
+            				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+				
+			}
 			return corpus;
 		} catch(SQLException se) {
 			String tmp = myClass+".getCorpus(): Problem querying DB.\n"+ se.getLocalizedMessage();
@@ -134,13 +94,18 @@ public class CorporaResource extends BaseResource {
         }
     }
 
+    /**
+     * Creates a new corpus.
+     * @param corpus the representation of the new corpus
+     * @return Response, with the path (and so id) of the newly created corpus
+     */
     @POST
 	@Consumes("application/xml")
     public Response createCorpus(Corpus corpus){
     	Connection dbConn = openConnection(false);
 
         // Check that the item is not already registered.
-        if (Corpus.FindByName(dbConn, corpus.getName())!=null) {
+        if (Corpus.NameUsed(dbConn, corpus.getName())) {
             String tmp = "A corpus with the name '" + corpus.getName() + "' already exists.";
         	throw new WebApplicationException( 
         			Response.status(
@@ -154,6 +119,11 @@ public class CorporaResource extends BaseResource {
         return response;
 	}
 
+    /**
+     * Creates a new corpus.
+     * @param form the representation of the new corpus as form data
+     * @return Response, with the path (and so id) of the newly created corpus
+     */
     @POST
     @Consumes("application/x-www-form-urlencoded")
     public Response createCorpus(MultivaluedMap<String, String> form) {
@@ -194,6 +164,66 @@ public class CorporaResource extends BaseResource {
         path.path("" + corpus.getId());
         Response response = Response.created(path.build()).build();
         return response;
+    }
+
+    /**
+     * Updates an existing corpus
+	 * @param id the id of the corpus of interest
+     * @param corpus the representation of the new corpus
+     * @return Response, with the path (and so id) of the newly created corpus
+     */
+    @PUT
+	@Consumes("application/xml")
+	@Path("{id}")
+    public Response updateCorpus(
+    		@PathParam("id") int id, Corpus corpus){
+        try {
+	        Connection dbConn = openConnection(false);
+            if(!Corpus.Exists(dbConn, id)) {
+            	throw new WebApplicationException( 
+            			Response.status(
+            				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+            }
+            corpus.persist(dbConn);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".updateCorpus(): Problem updating DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+        // Set the response's status and entity
+        UriBuilder path = UriBuilder.fromResource(Corpus.class);
+        path.path("" + id);
+        Response response = Response.ok(path.build().toString()).build();
+        return response;
+	}
+
+	/**
+     * Deletes a given corpus.
+	 * @param id the id of the corpus to delete
+	 * @return
+	 */
+	@DELETE
+	@Produces("application/xml")
+	@Path("{id}")
+	public Response deleteCorpus(@PathParam("id") int id) {
+        try {
+	        Connection dbConn = openConnection(false);
+            if(!Corpus.Exists(dbConn, id)) {
+            	throw new WebApplicationException( 
+            			Response.status(
+            				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+            }
+            Corpus.DeletePersistence(dbConn,id);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+        return Response.ok().build();
     }
 
     
