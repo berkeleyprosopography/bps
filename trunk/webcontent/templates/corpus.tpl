@@ -11,6 +11,7 @@
 		<table border="0" cellspacing="0" cellpadding="5px">
 			<tr>
 				 <td class="title 2" width="200px">Corpus Name</td>
+				 <td class="title corpusndocs" width="80px"># Docs</td>
 				 <td class="title" width="320px">Description</td>
 				{if isset($canUpdateCorpus) }
 				 <td class="title" width="100px">&nbsp;</td>
@@ -23,6 +24,7 @@
 				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
 					<tr>
 						<td class="corpus corpusname 2" width="200px">{$corpus.name}</td>
+						<td class="corpus corpusndocs" width="80px">{$corpus.nDocs}</td>
 					{if !isset($canUpdateCorpus) }
 						<td class="corpus corpusdesc 2" width="320px">
 							{$corpus.description}

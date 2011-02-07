@@ -12,8 +12,8 @@
 			<table border="0" cellspacing="0" cellpadding="5px">
 				<tr>
 					 <td class="title 2" width="200px">Corpus Name</td>
-					 <td class="title" width="320px">Description</td>
 					 <td class="title corpusndocs" width="80px"># Docs</td>
+					 <td class="title" width="320px">Description</td>
 					{if isset($canDeleteCorpus) }
 					 <td class="title" width="100px">&nbsp;</td>
 					{/if}
@@ -28,10 +28,10 @@
 						<td class="corpus corpusname 2" width="200px">
 						  <a href="corpus?id={$corpora[corpus].id}">{$corpora[corpus].name}</a>
 						</td>
+						<td class="corpus corpusndocs" width="80px">{$corpora[corpus].nDocs}</td>
 						<td class="corpus corpusdesc 2" width="320px">
 							{$corpora[corpus].description}
 						</td>
-						<td class="corpus corpusndocs" width="80px">{$corpora[corpus].nDocs}</td>
 					{if isset($canDeleteCorpus) }
 						<td class="corpus" width="100px">
 							<input id="deleteCorpButton_{$corpora[corpus].id}" type="button" value="Delete Corpus"
