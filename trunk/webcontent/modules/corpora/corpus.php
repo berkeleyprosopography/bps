@@ -3,6 +3,7 @@
 /* Include Files *********************/
 require_once("../../libs/env.php");
 require_once("../admin/authUtils.php");
+require_once "../../libs/RESTClient.php";
 /*************************************/
 
 // If the user isn't logged in, send to the login page.
@@ -112,35 +113,40 @@ function limitChars( field, maxlimit ) {
 
 $t->assign("script_block", $script_block);
 
-function getCorpus($id){
-	// Replace with get using RESTClient, requesting JSON, then use
-	// json_decode and continue.
-	global $db;
-	// Get all the corpora, with doc counts, and order by when added
-	$sql = 	'	SELECT c.name, c.description FROM corpus c WHERE c.id=?';
-	$stmt = $db->prepare($sql, array('integer'), MDB2_PREPARE_RESULT);
-	$res =& $stmt->execute($id);
-	if (PEAR::isError($res)) {
-		// FIXME when debugged, comment this out and just return false
-    die( 'Error in sql ['.$sql.']to getCorpora: '.$res->getMessage());
-		// return false;
+$opmsg = false;
+
+function getCorpus($CFG,$id){
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id;
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServCorpOutput = $rest->getResponse();
+		$result = json_decode($ServCorpOutput, true);
+		$corpObj = &$result['corpus'];
+		$corpus = array(	'id' => $corpObj['id'], 'name' => $corpObj['name'], 
+					'nDocs' => '-', 'description' => $corpObj['description']);
+		unset($corpObj);
+		return $corpus;
+	} else if($rest->getStatus() == 404) {
+		$opmsg = "Bad or illegal corpus specifier. ";
+	} else {
+		$opmsg = $rest->getError();
 	}
-	$corpus = false;
-	if ($row = $res->fetchRow()) {
-		$corpus = array( 'id' => $id, 'name' => $row['name'], 'description' => $row['description']);
-	}
-	// Free the result
-	$res->free();
-	$stmt->free();
-	return $corpus;
+	return false;
 }
 
 if(!isset($_GET['id'])) {
 	$errmsg = "Missing corpus specifier. ";
 } else {
-	$corpus = getCorpus($_GET['id']);
+	$corpus = getCorpus($CFG,$_GET['id']);
 	if($corpus){
 		$t->assign('corpus', $corpus);
+	} else if($opmsg){
+		$errmsg = "Problem getting Corpus details: ".$opmsg;
 	} else {
 		$errmsg = "Bad or illegal corpus specifier. ";
 	}

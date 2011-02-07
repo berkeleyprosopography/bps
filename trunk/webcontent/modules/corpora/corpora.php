@@ -216,54 +216,35 @@ else if(isset($_POST['add'])){
 GET ALL CORPORA IN SYSTEM
 **********************************/
 
-function getCorpora(){
-	global $db;
-	// Get all the corpora, with doc counts, and order by when added
-	$sql = 	'	SELECT c.id, c.name, c.description, count(*) nDocs, d.id docid'
-				 .' FROM corpus c LEFT JOIN document d ON d.corpus_id=c.id GROUP BY c.id'
-				 .' ORDER BY c.creation_time';
-	$res =& $db->query($sql);
-	if (PEAR::isError($res)) {
-		// FIXME when debugged, comment this out and just return false
-    die( 'Error in sql ['.$sql.']to getCorpora: '.$res->getMessage());
-		// return false;
-	}
+$rest = new RESTclient();
+$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
+$rest->createRequest($url,"GET");
+// Get the results in JSON for easier manipulation
+$rest->setJSONMode();
+if($rest->sendRequest()) {
+	$ServCorpOutput = $rest->getResponse();
+	$results = json_decode($ServCorpOutput, true);
 	$corpora = array();
-	while ($row = $res->fetchRow()) {
-		$nDocs = 0 + $row['nDocs'];
-		if(( $nDocs == 1 ) && empty($row['docid'])) {
-			$nDocs = 0;
-		}
-		$corpus = array(	'id' => $row['id'], 'name' => $row['name'], 
-						'nDocs' => $nDocs, 'description' => $row['description']);
-		
+	foreach($results as &$result) {
+		$corpObj = &$result['corpus'];
+		$corpus = array(	'id' => $corpObj['id'], 'name' => $corpObj['name'], 
+					'nDocs' => '-', 'description' => $corpObj['description']);
 		array_push($corpora, $corpus);
+		// Supposed to help with efficiency (dangling refs?)
+		unset($result);
+		unset($corpObj);
 	}
-	// Free the result
-	$res->free();
-	return $corpora;
+} else {
+	$opmsg = $rest->getError();
 }
 
-$corpora = getCorpora();
-if($corpora){
+if($corpora)
 	$t->assign('corpora', $corpora);
-	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
-	$rest->createRequest($url,"GET");
-	// Enable this after editing the resource to allow both.
-	// $rest->setJSONMode();
-	if($rest->sendRequest()) {
-		$ServCorpOutput = $rest->getResponse();
-	} else {
-		$ServCorpOutput = $rest->getError();
-	}
-}
-
+else if($ServCorpOutput != "")
+	$t->assign('opmsg', $ServCorpOutput);
 
 if($opmsg!="")
 	$t->assign('opmsg', $opmsg);
-else if($ServCorpOutput != "")
-	$t->assign('opmsg', $ServCorpOutput);
 
 $t->display('corpora.tpl');
 
