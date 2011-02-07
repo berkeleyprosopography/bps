@@ -40,29 +40,8 @@ public class CorporaResource extends BaseResource {
 	@Produces({"application/xml", "application/json"})
 	@Wrapped(element="corpora")
 	public List<Corpus> getAll() {
-		// TODO Add pagination support to the BaseResource
-		final String SELECT_ALL = "SELECT id, name, description, owner_id FROM corpus";
-        // Generate the right representation according to its media type.
-		ArrayList<Corpus> corpusList = new ArrayList<Corpus>();
-        try {
-	        Connection dbConn = openConnection(false);
-
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
-			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
-				Corpus corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-						rs.getString("description"), rs.getInt("owner_id"), null);
-				corpusList.add(corpus);
-			}
-			rs.close();
-			stmt.close();
-		} catch(SQLException se) {
-			String tmp = myClass+".getAll(): Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-        	throw new WebApplicationException( 
-        			Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                    "Problem creating corpus\n"+se.getLocalizedMessage()).build());
-        }
+		Connection dbConn = openConnection(false);
+		List<Corpus> corpusList = Corpus.ListAll(dbConn);
         return corpusList;
     }
 

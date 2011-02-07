@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 import javax.ws.rs.WebApplicationException;
@@ -63,15 +65,17 @@ public class Corpus {
 	/**
 	 * The documents in the corpus
 	 */
-	private HashMap<Integer, Document> documents;
+	private HashMap<Integer, Document> documents = null;
+	
+	private int fetchedDocumentCount = 0; 
 	/**
 	 * The named activities (not instances) seen in this corpus
 	 */
-	private HashMap<String, Activity> activities;
+	private HashMap<String, Activity> activities = null;
 	/**
 	 * The named roles in activities (not instances) for this corpus
 	 */
-	private HashMap<String, ActivityRole> activityRoles;
+	private HashMap<String, ActivityRole> activityRoles = null;
 
 	/**
 	 * Create a new empty corpus.
@@ -103,9 +107,18 @@ public class Corpus {
 		this.description = description;
 		this.ownerId = ownerId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
-		documents = new HashMap<Integer, Document>();
-		activities = new HashMap<String, Activity>();
-		activityRoles = new HashMap<String, ActivityRole>();
+	}
+	
+	private void initMaps() {
+		if(documents == null) {
+			documents = new HashMap<Integer, Document>();
+		}
+		if(activities == null) {
+			activities = new HashMap<String, Activity>();
+		}
+		if(activityRoles == null) {
+			activityRoles = new HashMap<String, ActivityRole>();
+		}
 	}
 	
 	public static boolean Exists(Connection dbConn, int id) {
@@ -123,7 +136,7 @@ public class Corpus {
 			stmt.close();
 		} catch(SQLException se) {
 			// Just absorb it
-			String tmp = myClass+"NameUsed: Problem querying DB.\n"+ se.getMessage();
+			String tmp = myClass+"Exists: Problem querying DB.\n"+ se.getMessage();
 			System.out.println(tmp);
 		}
 		return exists;
@@ -153,15 +166,21 @@ public class Corpus {
 
 	public static Corpus FindByID(Connection dbConn, int id)
 		throws SQLException {
-		final String SELECT_BY_ID = "SELECT id, name, description, owner_id FROM corpus WHERE id = ?";
+		final String SELECT_BY_ID = 
+			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
+			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
+			+" WHERE c.id = ?"
+			+" GROUP BY c.id";
+		//"SELECT id, name, description, owner_id FROM corpus WHERE id = ?";
 		Corpus corpus = null;
 		PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
 		stmt.setInt(1, id);
 		ResultSet rs = stmt.executeQuery();
 		if(rs.next()){
-			// TODO get the owner id too
 			corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-								rs.getString("description"), rs.getInt("owner_id"), null); 
+								rs.getString("description"), rs.getInt("owner_id"), null);
+			corpus.fetchedDocumentCount = 
+				(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
 		}
 		rs.close();
 		stmt.close();
@@ -170,17 +189,22 @@ public class Corpus {
 	
 	public static Corpus FindByName(Connection dbConn, String name) {
 		final String myName = ".FindByName: ";
-		final String SELECT_BY_NAME = "SELECT id, name, description, owner_id  FROM corpus WHERE name = ?";
+		final String SELECT_BY_NAME = 
+			//"SELECT id, name, description, owner_id  FROM corpus WHERE name = ?";
+			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
+			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
+			+" WHERE c.name = ?"
+			+" GROUP BY c.id";
 		Corpus corpus = null;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
 			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
-				if(rs.next()){
-					corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-										rs.getString("description"), rs.getInt("owner_id"), null); 
-				}
+				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
+									rs.getString("description"), rs.getInt("owner_id"), null); 
+				corpus.fetchedDocumentCount = 
+					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
 			}
 			rs.close();
 			stmt.close();
@@ -190,6 +214,37 @@ public class Corpus {
 			throw new RuntimeException( tmp );
 		}
 		return corpus;
+	}
+	
+	public static List<Corpus> ListAll(Connection dbConn) {
+		// TODO Add pagination support
+		final String SELECT_ALL = 
+			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
+			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
+			+" GROUP BY c.id";
+		// Generate the right representation according to its media type.
+		ArrayList<Corpus> corpusList = new ArrayList<Corpus>();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				Corpus corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
+						rs.getString("description"), rs.getInt("owner_id"), null);
+				// If no docId, count should actually be 0, not 1
+				corpus.fetchedDocumentCount = 
+					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
+				corpusList.add(corpus);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".ListAll(): Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+							"Problem creating corpus\n"+se.getLocalizedMessage()).build());
+		}
+		return corpusList;
 	}
 	
 	public void CreateAndPersist(Connection dbConn) {
@@ -362,11 +417,48 @@ public class Corpus {
 		this.ownerId = ownerId;
 	}
 
+	@XmlElement(name="ndocs")
+	public int getNDocuments() {
+		int nDocs = 0;
+		if(documents != null) {
+			nDocs = documents.size();
+		} else {
+			nDocs = fetchedDocumentCount;
+		}
+		return nDocs;
+	}
+	
+	private void fetchDocumentCount(Connection dbConn) {
+		final String SELECT_N_DOCS = 
+			"SELECT count(*) nDocs FROM document WHERE corpus_id = ?";
+		int nDocs = 0;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_N_DOCS);
+			stmt.setInt(1, id);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				fetchedDocumentCount = rs.getInt("nDocs");
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			// Just absorb it
+			String tmp = myClass+"getNDocuments: Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+		}
+	}
+	
+	public void loadDocuments(Connection dbConn) {
+		throw new RuntimeException("Not Yet Implemented");
+	}
+
 	public void addDocument( Document newDoc ) {
+		initMaps();
 		documents.put(newDoc.getId(), newDoc);
 	}
 
 	public Activity findOrCreateActivity(String name) {
+		initMaps();
 		Activity instance = activities.get(name);
 		if(instance == null) {
 			instance = new Activity(name);
@@ -376,6 +468,7 @@ public class Corpus {
 	}
 
 	public ActivityRole findOrCreateActivityRole(String name) {
+		initMaps();
 		ActivityRole instance = activityRoles.get(name);
 		if(instance == null) {
 			instance = new ActivityRole(name);
@@ -393,6 +486,7 @@ public class Corpus {
 			String nameFamilyLinksFilename,
 			String activityRolesFilename,
 			String nameRoleActivitiesFilename ) {
+		initMaps();
     	System.out.print("Generating Documents (and NameRoleActivityDocs) SQL...");
 		SQLUtils.generateDocumentsSQL(documentsFilename,
 				nameRoleActivitiesFilename, nameFamilyLinksFilename, documents);

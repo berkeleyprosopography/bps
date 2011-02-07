@@ -33,6 +33,7 @@ td.corpusname { font-weight:bold; }
 td.corpusdesc p { font-weight:bold; }
 td.corpusX { border-bottom: 1px solid black; }
 td.corpusdesc textarea { font-family: Arial, Helvetica, sans-serif; padding:2px;}
+td.corpusndocs { text-align:center; padding-right:10px;}
 form.form_row  { padding:0px; margin:2px;}
 div.form_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
 </style>";
@@ -128,7 +129,7 @@ function getCorpus($CFG,$id){
 		$result = json_decode($ServCorpOutput, true);
 		$corpObj = &$result['corpus'];
 		$corpus = array(	'id' => $corpObj['id'], 'name' => $corpObj['name'], 
-					'nDocs' => '-', 'description' => $corpObj['description']);
+					'nDocs' => $corpObj['ndocs'], 'description' => $corpObj['description']);
 		unset($corpObj);
 		return $corpus;
 	} else if($rest->getStatus() == 404) {

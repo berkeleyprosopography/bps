@@ -49,7 +49,7 @@ td.title { border-bottom: 2px solid black; font-weight:bold; text-align:left;
 td.corpus_label { font-weight:bold; color:#61615f; }
 td.corpusname { font-weight:bold; }
 td.corpusdesc p { font-weight:bold; }
-td.corpusndocs { text-align:right; padding-right:10px;}
+td.corpusndocs { text-align:center; padding-right:10px;}
 td.corpusX { border-bottom: 1px solid black; }
 td.corpusdesc textarea { font-family: Arial, Helvetica, sans-serif; padding:2px;}
 form.form_row  { padding:0px; margin:2px;}
@@ -228,7 +228,7 @@ if($rest->sendRequest()) {
 	foreach($results as &$result) {
 		$corpObj = &$result['corpus'];
 		$corpus = array(	'id' => $corpObj['id'], 'name' => $corpObj['name'], 
-					'nDocs' => '-', 'description' => $corpObj['description']);
+					'nDocs' => $corpObj['ndocs'], 'description' => $corpObj['description']);
 		array_push($corpora, $corpus);
 		// Supposed to help with efficiency (dangling refs?)
 		unset($result);
