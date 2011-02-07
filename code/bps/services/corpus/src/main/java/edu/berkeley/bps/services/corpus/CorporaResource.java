@@ -37,7 +37,7 @@ public class CorporaResource extends BaseResource {
 	 * @return Full (shallow) details of all corpora
 	 */
 	@GET
-	@Produces("application/xml")
+	@Produces({"application/xml", "application/json"})
 	@Wrapped(element="corpora")
 	public List<Corpus> getAll() {
 		// TODO Add pagination support to the BaseResource
@@ -72,7 +72,7 @@ public class CorporaResource extends BaseResource {
 	 * @return
 	 */
 	@GET
-	@Produces("application/xml")
+	@Produces({"application/xml", "application/json"})
 	@Path("{id}")
 	public Corpus getCorpus(@PathParam("id")int id) {
         try {

@@ -84,6 +84,10 @@ class RESTClient {
 		return $this->responseBody;
 	}
 
+	public function getStatus() {
+		return $this->response->getStatus();
+	}
+
 	public function getError() {
 		return $this->errorBody;
 	}
