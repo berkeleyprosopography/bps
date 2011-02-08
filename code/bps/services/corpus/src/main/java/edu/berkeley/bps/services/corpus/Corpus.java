@@ -81,7 +81,7 @@ public class Corpus {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(Corpus.nextID++, null, null, -1, null);
+		this(0, null, null, -1, null);
 	}
 
 	/**
@@ -121,6 +121,14 @@ public class Corpus {
 		}
 	}
 	
+	private void clearMaps() {
+		initMaps();
+		documents.clear();
+		activities.clear();
+		activityRoles.clear();
+	}
+	
+	
 	public static boolean Exists(Connection dbConn, int id) {
 		boolean exists = false;
 		final String SELECT_BY_ID = "SELECT name FROM corpus WHERE id = ?";
@@ -136,7 +144,7 @@ public class Corpus {
 			stmt.close();
 		} catch(SQLException se) {
 			// Just absorb it
-			String tmp = myClass+"Exists: Problem querying DB.\n"+ se.getMessage();
+			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
 			System.out.println(tmp);
 		}
 		return exists;
@@ -157,40 +165,44 @@ public class Corpus {
 			stmt.close();
 		} catch(SQLException se) {
 			// Just absorb it
-			String tmp = myClass+"NameUsed: Problem querying DB.\n"+ se.getMessage();
+			String tmp = myClass+".NameUsed: Problem querying DB.\n"+ se.getMessage();
 			System.out.println(tmp);
 		}
 
 		return exists;
 	}
 
-	public static Corpus FindByID(Connection dbConn, int id)
-		throws SQLException {
+	public static Corpus FindByID(Connection dbConn, int id) {
+		final String myName = ".FindByID: ";
 		final String SELECT_BY_ID = 
 			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
 			+" WHERE c.id = ?"
 			+" GROUP BY c.id";
-		//"SELECT id, name, description, owner_id FROM corpus WHERE id = ?";
 		Corpus corpus = null;
-		PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
-		stmt.setInt(1, id);
-		ResultSet rs = stmt.executeQuery();
-		if(rs.next()){
-			corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-								rs.getString("description"), rs.getInt("owner_id"), null);
-			corpus.fetchedDocumentCount = 
-				(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+			stmt.setInt(1, id);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
+									rs.getString("description"), rs.getInt("owner_id"), null);
+				corpus.fetchedDocumentCount = 
+					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
 		}
-		rs.close();
-		stmt.close();
 		return corpus;
 	}
 	
 	public static Corpus FindByName(Connection dbConn, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
-			//"SELECT id, name, description, owner_id  FROM corpus WHERE name = ?";
 			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
 			+" WHERE c.name = ?"
@@ -373,7 +385,7 @@ public class Corpus {
 					int nDocs = docNodes.getLength();
 					for( int iDoc = 0; iDoc < nDocs; iDoc++) {
 					    Element teiEl = (Element)docNodes.item(iDoc);
-					    Document document = Document.CreateFromTEI(teiEl, true, newCorpus, dbConn);
+					    Document document = Document.CreateAndPersistFromTEI(teiEl, true, newCorpus, dbConn);
 					    newCorpus.addDocument(document);
 					}
 				}
@@ -383,6 +395,56 @@ public class Corpus {
 	    	throw xpe;
 	    }
 	    return newCorpus;
+	}
+
+	/**
+	 * Deletes all current documents, and then rebuilds corpus from TEI
+	 * @param docNode The TEI document to load this corpus from
+	 * @param deepCreate If TRUE, will create documents as well.
+	 * @param dbConn Connection for persistence
+	 * @return count of documents created
+	 * @throws XPathExpressionException
+	 */
+	public int loadFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
+			Connection dbConn)
+		throws XPathExpressionException {
+		String name = "unknown";
+		String description = null;
+	    XPath xpath = XPathFactory.newInstance().newXPath();
+	    // Clear all current documents
+    	deleteDocuments(dbConn);
+	    
+	    try {
+	        // XPath Query to get to the corpus title
+		    XPathExpression expr = xpath.compile("//teiHeader/fileDesc/titleStmt/title");
+		    Element titleEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
+		    if(titleEl!=null)
+		    	name = titleEl.getTextContent().replaceAll("[\\s]+", " ");
+		    expr = xpath.compile("//teiHeader/fileDesc/sourceDesc/p");
+		    Element descEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
+		    if(descEl!=null)
+		    	description = descEl.getTextContent().replaceAll("[\\s]+", " ");
+		    if(deepCreate) {
+		    	// Find the TEI nodes and create a document for each one
+		    	NodeList docNodes = docNode.getElementsByTagName( "TEI" );
+				if( docNodes.getLength() < 1 ) {  // Must define at least one.
+					System.err.println("Corpus:CreateFromTEI: Corpus file has no TEI elements!");
+				} else {
+					// For each info element, need to get all the fields.
+					int nDocs = docNodes.getLength();
+					for( int iDoc = 0; iDoc < nDocs; iDoc++) {
+					    Element teiEl = (Element)docNodes.item(iDoc);
+					    Document document = Document.CreateAndPersistFromTEI(teiEl, true, this, dbConn);
+					    addDocument(document);
+					}
+				}
+		    }
+		    persist(dbConn);
+	    } catch (XPathExpressionException xpe) {
+	    	// debug complaint
+	    	throw xpe;
+	    }
+	    return documents.size();
 	}
 
 	public int getId() {
@@ -443,7 +505,7 @@ public class Corpus {
 			stmt.close();
 		} catch(SQLException se) {
 			// Just absorb it
-			String tmp = myClass+"getNDocuments: Problem querying DB.\n"+ se.getMessage();
+			String tmp = myClass+".getNDocuments: Problem querying DB.\n"+ se.getMessage();
 			System.out.println(tmp);
 		}
 	}
@@ -456,8 +518,28 @@ public class Corpus {
 		initMaps();
 		documents.put(newDoc.getId(), newDoc);
 	}
+	
+	public void deleteDocuments(Connection dbConn) {
+		final String DELETE_DOCS = 
+			"DELETE FROM document WHERE corpus_id = ?";
+	    clearMaps();
+	    if(dbConn!=null) {
+			try {
+				PreparedStatement stmt = dbConn.prepareStatement(DELETE_DOCS);
+				stmt.setInt(1, id);
+				stmt.executeUpdate();
+				stmt.close();
+			} catch(SQLException se) {
+				// Just absorb it
+				String tmp = myClass+".deleteDocuments: Problem querying DB.\n"+ se.getMessage();
+				System.out.println(tmp);
+			}
+	    }
+	}
 
 	public Activity findOrCreateActivity(String name) {
+		throw new RuntimeException("NYI");
+		/*
 		initMaps();
 		Activity instance = activities.get(name);
 		if(instance == null) {
@@ -465,6 +547,7 @@ public class Corpus {
 			activities.put(name, instance);
 		}
 		return instance;
+		*/
 	}
 
 	public ActivityRole findOrCreateActivityRole(String name) {

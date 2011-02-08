@@ -64,8 +64,8 @@ public class CorporaResource extends BaseResource {
 				
 			}
 			return corpus;
-		} catch(SQLException se) {
-			String tmp = myClass+".getCorpus(): Problem querying DB.\n"+ se.getLocalizedMessage();
+		} catch(Exception e) {
+			String tmp = myClass+".getCorpus(): Problem getting Corpus.\n"+ e.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -90,12 +90,20 @@ public class CorporaResource extends BaseResource {
         			Response.status(
         				Response.Status.BAD_REQUEST).entity(tmp).build());
         } 
-        // Persist the new item, and get an id for it
-    	corpus.CreateAndPersist(dbConn);
-        UriBuilder path = UriBuilder.fromResource(Corpus.class);
-        path.path("" + corpus.getId());
-        Response response = Response.created(path.build()).build();
-        return response;
+        try {
+	        // Persist the new item, and get an id for it
+	    	corpus.CreateAndPersist(dbConn);
+	        UriBuilder path = UriBuilder.fromResource(Corpus.class);
+	        path.path("" + corpus.getId());
+	        Response response = Response.created(path.build()).build();
+	        return response;
+		} catch(Exception e) {
+			String tmp = myClass+".createCorpus(): Problem creating Corpus.\n"+ e.getLocalizedMessage();
+			System.out.println(tmp);
+	    	throw new WebApplicationException( 
+				Response.status(
+					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+	    }
 	}
 
     /**
@@ -136,13 +144,21 @@ public class CorporaResource extends BaseResource {
         			Response.status(
         				Response.Status.BAD_REQUEST).entity(tmp).build());
         }
-        // Register the new item
-    	Corpus corpus = Corpus.CreateAndPersist(dbConn, corpusName, corpusDescription, corpusOwner, null);
-        // Set the response's status and entity
-        UriBuilder path = UriBuilder.fromResource(Corpus.class);
-        path.path("" + corpus.getId());
-        Response response = Response.created(path.build()).build();
-        return response;
+        try {
+        	// Register the new item
+        	Corpus corpus = Corpus.CreateAndPersist(dbConn, corpusName, corpusDescription, corpusOwner, null);
+        	// Set the response's status and entity
+        	UriBuilder path = UriBuilder.fromResource(Corpus.class);
+        	path.path("" + corpus.getId());
+        	Response response = Response.created(path.build()).build();
+        	return response;
+        } catch(Exception e) {
+        	String tmp = myClass+".createCorpus(): Problem creating Corpus.\n"+ e.getLocalizedMessage();
+        	System.out.println(tmp);
+        	throw new WebApplicationException( 
+        			Response.status(
+        					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
     }
 
     /**
@@ -195,6 +211,65 @@ public class CorporaResource extends BaseResource {
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
             }
             Corpus.DeletePersistence(dbConn,id);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+        return Response.ok().build();
+    }
+
+	/**
+     * Gets documents associated with a given corpus.
+	 * @param id the id of the corpus
+	 * @return
+	 */
+	@GET
+	@Produces({"application/xml", "application/json"})
+	@Wrapped(element="documents")
+	@Path("{id}/documents")
+	public List<Document> getCorpusDocs(@PathParam("id") int id) {
+		List<Document> docList = null;
+        try {
+	        Connection dbConn = openConnection(false);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+            	throw new WebApplicationException( 
+            			Response.status(
+            				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+				
+			}
+	        docList = Document.ListAllInCorpus(dbConn, corpus);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+        return docList;
+    }
+
+	/**
+     * Deletes documents associated with a given corpus.
+	 * @param id the id of the corpus
+	 * @return
+	 */
+	@DELETE
+	@Produces("application/xml")
+	@Path("{id}/documents")
+	public Response deleteCorpusDocs(@PathParam("id") int id) {
+        try {
+	        Connection dbConn = openConnection(false);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+            	throw new WebApplicationException( 
+            			Response.status(
+            				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+            }
+            corpus.deleteDocuments(dbConn);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
