@@ -8,7 +8,7 @@
 		<p>No corpus specified!</p>
 	{else}
 		<p>&nbsp;</p>
-		<table border="0" cellspacing="0" cellpadding="5px">
+		<table border="0" cellspacing="0" cellpadding="5px" width="100%">
 			<tr>
 				 <td class="title 2" width="200px">Corpus Name</td>
 				 <td class="title corpusndocs" width="80px"># Docs</td>
@@ -21,7 +21,7 @@
 		<div class="form_row">
 			<form class="form_row" method="post">
 				<input type="hidden" name="id" value="{$corpus.id}" />
-				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
+				<table class="form_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
 						<td class="corpus corpusname 2" width="200px">{$corpus.name}</td>
 						<td class="corpus corpusndocs" width="80px">{$corpus.nDocs}</td>
@@ -44,6 +44,23 @@
 				</table>
 			</form>
 		</div>
+		{if !empty($documents)}
+			<div class="docs_row">
+				<h2>Documents in Corpus</h2>
+				<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
+					<tr>
+						<td class="title" width="200px">Alt. ID</td>
+					</tr>
+					{section name=doc loop=$documents}
+						<tr>
+							<td class="document" style="padding-top:6px" width="200px">
+								{$documents[doc].alt_id}
+							</td>
+						</tr>
+					{/section}
+				</table>
+			</div>
+		{/if}
 		<p>&nbsp;</p>
 		<h3>Upload a TEI Corpus file to verify Names and Dates:</h3>
 		<div class="form_row">
@@ -55,7 +72,7 @@
 					<tr height="40px">
 						<td class="corpus corpusname 2" width="200px">Select TEI file to upload:</td>
 						<td colspan="2" class="corpus corpusdesc 2" >
-							<input name="teifile" type="file" size="44" style="padding:10px" />
+							<input name="teifile" type="file" size="44"  />
 							&nbsp;<input type="submit" value="Upload File" />
 						</td>
 					</tr>

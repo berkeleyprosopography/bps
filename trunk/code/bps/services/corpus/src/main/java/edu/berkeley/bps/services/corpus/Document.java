@@ -3,9 +3,17 @@ package edu.berkeley.bps.services.corpus;
 import edu.berkeley.bps.services.common.LinkTypes;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -20,15 +28,24 @@ import org.w3c.dom.NodeList;
  * @author pschmitz
  *
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(name="document")
 public class Document {
+	private final static String myClass = "Document";
 	private static int	nextID = 1;
 
+	@XmlElement
 	private int			id;				// Unique numeric id
 	private Corpus		corpus;			// Each doc exists in a corpus
+	@XmlElement
 	private String		alt_id;			// Secondary identifier string
+	@XmlElement
 	private String		sourceURL;		// TEI source for this document - may be relative
+	@XmlElement
 	private String		xml_id;			// Element within source (for compound files).
+	@XmlElement
 	private String		notes;			// Any notes on document
+	@XmlElement
 	private String		date_str;		// Date string from document
 	private long		date_norm;		// Normalized date
 
@@ -94,6 +111,63 @@ public class Document {
 	private Document() {
 		this(Document.nextID++, null, null, null, null, null, null, 0);
 	}
+	
+	public static Document FindByID(Connection dbConn, Corpus corpus, int docId) {
+		final String SELECT_BY_ID = 
+			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
+			+" FROM document WHERE id = ? and corpus_id = ?";
+		Document document = null;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+			stmt.setInt(1, docId);
+			stmt.setInt(2, corpus.getId());
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				document = new Document(rs.getInt("id"), corpus, rs.getString("alt_id"), 
+						rs.getString("sourceURL"), rs.getString("xml_id"),
+						rs.getString("notes"), rs.getString("date_str"), 0);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".FindByID: Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return document;
+	}
+
+	public static List<Document> ListAllInCorpus(Connection dbConn, Corpus corpus) {
+		final String SELECT_BY_CORPUS_ID = 
+			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
+			+" FROM document WHERE corpus_id = ?";
+		int corpus_id = 0;
+		if(corpus==null || (corpus_id=corpus.getId())<=0) {
+			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
+			System.out.println(tmp);
+			throw new IllegalArgumentException( tmp );
+		}
+		ArrayList<Document> docList = new ArrayList<Document>();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_CORPUS_ID);
+			stmt.setInt(1, corpus_id);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				Document document = new Document(rs.getInt("id"), corpus, rs.getString("alt_id"), 
+						rs.getString("sourceURL"), rs.getString("xml_id"),
+						rs.getString("notes"), rs.getString("date_str"), 0);
+				docList.add(document);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return docList;
+	}
+	
 
 	/**
 	 * @param teiNode The XML node for this Document
@@ -102,9 +176,13 @@ public class Document {
 	 * @return new Document
 	 * @throws XPathExpressionException
 	 */
-	public static Document CreateFromTEI(Element teiNode, boolean deepCreate, Corpus corpus,
+	public static Document CreateAndPersistFromTEI(Element teiNode, boolean deepCreate, Corpus corpus,
 			Connection dbConn)
 		throws XPathExpressionException {
+		final String myName = ".CreateAndPersistFromTEI: ";
+		final String INSERT_STMT = 
+			"INSERT INTO document(corpus_id,alt_id,date_str,date_norm,creation_time)"
+			+" VALUES(?,?,?,?,now())";
 		String alt_id = "unknown";
 		//String notes = null;
 	    XPath xpath = XPathFactory.newInstance().newXPath();
@@ -119,7 +197,28 @@ public class Document {
 		    // If no date, use the corpus midpoint date.
 		    String date = null;
 		    long date_norm = corpus.getDefaultDocTimeSpan().getCenterPoint();
-		    newDoc = new Document(corpus, alt_id, date, date_norm);
+		    try {
+		    	PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
+		    			Statement.RETURN_GENERATED_KEYS);
+		    	stmt.setInt(1, corpus.getId());
+		    	stmt.setString(2, alt_id);
+		    	stmt.setString(3, date);
+		    	stmt.setLong(3, date_norm);
+		    	int nRows = stmt.executeUpdate();
+		    	if(nRows==1){
+		    		ResultSet rs = stmt.getGeneratedKeys();
+		    		if(rs.next()){
+		    			newDoc = new Document(rs.getInt(1), corpus, alt_id, 
+		    					null, null, null, date, date_norm);
+		    		}
+		    		rs.close();
+		    	}
+		    } catch(SQLException se) {
+		    	String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+		    	System.out.println(tmp);
+		    	throw new RuntimeException( tmp );
+		    }
+		    
 		    Activity unkActivity = corpus.findOrCreateActivity("Unknown");
 		    // TODO - this is all corpus specific, and needs to go elsewhere!!!
 		    ActivityRole principal = corpus.findOrCreateActivityRole("Principal");

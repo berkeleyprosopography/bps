@@ -36,6 +36,8 @@ td.corpusdesc textarea { font-family: Arial, Helvetica, sans-serif; padding:2px;
 td.corpusndocs { text-align:center; padding-right:10px;}
 form.form_row  { padding:0px; margin:2px;}
 div.form_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
+div.docs_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
+td.document { font-weight:bold; }
 </style>";
 
 $t->assign("style_block", $style_block);
@@ -140,12 +142,47 @@ function getCorpus($CFG,$id){
 	return false;
 }
 
+function getCorpusDocs($CFG,$id){
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id."/documents";
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServCorpDocsOutput = $rest->getResponse();
+		$results = json_decode($ServCorpDocsOutput, true);
+		$documents = array();
+		foreach($results as &$result) {
+			$docObj = &$result['document'];
+			$document = array(	'id' => $docObj['id'], 'alt_id' => $docObj['alt_id'], 
+				'notes' => $docObj['notes'], 'sourceURL' => $docObj['sourceURL'],
+				'xml_id' => $docObj['xml_id'], 'date_str' => $docObj['date_str']
+			);
+			array_push($documents, $document);
+			// Supposed to help with efficiency (dangling refs?)
+			unset($result);
+			unset($docObj);
+		}
+		return $documents;
+	}
+	$opmsg = $rest->getError();
+	return false;
+}
+
 if(!isset($_GET['id'])) {
 	$errmsg = "Missing corpus specifier. ";
 } else {
 	$corpus = getCorpus($CFG,$_GET['id']);
 	if($corpus){
 		$t->assign('corpus', $corpus);
+		$docs = getCorpusDocs($CFG,$_GET['id']);
+		if($docs) {
+			$t->assign('documents', $docs);
+		} else if($opmsg){
+			$errmsg = "Problem getting Corpus documents: ".$opmsg;
+		}
 	} else if($opmsg){
 		$errmsg = "Problem getting Corpus details: ".$opmsg;
 	} else {
