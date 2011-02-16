@@ -38,7 +38,7 @@ CREATE TABLE `document` (
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
--- Activities may be 1:1 in some corpora, but not in general.
+-- Activities are tied to corpora, although there may be overlap
 -- These are the basis for establish social networks.
 -- Some are symmetric (e.g., 'co-owned') and others directed (e.g., 'sold', 'inherited').
 -- None are defined explicitly in the DB definition, but are rather configured
@@ -46,7 +46,8 @@ SHOW WARNINGS;
 -- Activities can be nested, if there is a non-null parent.
 DROP TABLE IF EXISTS `activity`;
 CREATE TABLE `activity` (
-  `id`             int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
+  `id`             INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
+  `corpus_id`      INT(10) UNSIGNED NOT NULL,
   `name`           VARCHAR(255) NOT NULL,
   `description`    text NULL,
   `parent_id`      INT(10) UNSIGNED default NULL,
@@ -66,6 +67,7 @@ SHOW WARNINGS;
 DROP TABLE IF EXISTS `act_role`;
 CREATE TABLE `act_role` (
   `id`             int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
+  `corpus_id`      INT(10) UNSIGNED NOT NULL,
   `name`           VARCHAR(255) NOT NULL,
   `description`    text NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',

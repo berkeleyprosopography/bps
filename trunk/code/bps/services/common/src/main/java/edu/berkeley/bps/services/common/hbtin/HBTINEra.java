@@ -34,39 +34,33 @@ public class HBTINEra implements Era {
 		return eraStore.get(eraName);
 	}
 
-	@Override
 	public Date getDate(int year, int doy) throws IllegalArgumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Date getDate(int year, int month, int day)
 			throws IllegalArgumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Date getDate(int year, String month, int day)
 			throws IllegalArgumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Date getEndDate() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Date getStartDate() {
 		// TODO Auto-generated method stub
 		return null;
