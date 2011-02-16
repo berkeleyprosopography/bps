@@ -21,7 +21,6 @@ import edu.berkeley.bps.services.common.time.TimeSpan;
 @XmlRootElement(name="activity")
 public class Activity {
 	private final static String myClass = "Activity";
-	private final static String DELETE_STMT = "DELETE FROM activity WHERE id=? and corpus_id=?";
 	private static int	nextID = 1;
 
 	@XmlElement
@@ -134,6 +133,29 @@ public class Activity {
 		return newId;
 	}
 	
+	public void persist(Connection dbConn) {
+		final String myName = ".persist: ";
+		// Note that we do not update the corpus_id - moving them is not allowed 
+		final String UPDATE_STMT = 
+			"UPDATE activity SET name=?, description=?, parent_id=? WHERE id=?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+			stmt.setString(1, name);
+			stmt.setString(2, description);
+			if(parent==null) {
+				stmt.setNull(3, java.sql.Types.INTEGER);
+			} else {
+				stmt.setInt(3, parent.getId());
+			}
+			stmt.setInt(4, id);
+			stmt.executeUpdate();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+	}
+	
 	public static List<Activity> ListAllInCorpus(Connection dbConn, Corpus corpus) {
 		// TODO Add pagination support
 		// TODO rebuild parent structures from DB
@@ -233,33 +255,12 @@ public class Activity {
 		return activity;
 	}
 	
-	public void persist(Connection dbConn) {
-		final String myName = ".persist: ";
-		final String UPDATE_STMT = 
-			"UPDATE activity SET name=?, description=?, parent_id=? WHERE id=?";
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
-			stmt.setString(1, name);
-			stmt.setString(2, description);
-			if(parent==null) {
-				stmt.setNull(3, java.sql.Types.INTEGER);
-			} else {
-				stmt.setInt(3, parent.getId());
-			}
-			stmt.setInt(4, id);
-			stmt.executeUpdate();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-			throw new RuntimeException( tmp );
-		}
-	}
-	
 	public void deletePersistence(Connection dbConn) {
 		DeletePersistence(dbConn, corpus, id);
 	}
 	
 	public static void DeletePersistence(Connection dbConn, Corpus corpus, int id) {
+		final String DELETE_STMT = "DELETE FROM activity WHERE id=? and corpus_id=?";
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
 			stmt.setInt(1, id);
