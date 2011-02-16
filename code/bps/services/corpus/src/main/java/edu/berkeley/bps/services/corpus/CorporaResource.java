@@ -245,7 +245,7 @@ public class CorporaResource extends BaseResource {
 			}
 	        docList = Document.ListAllInCorpus(dbConn, corpus);
 		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".getCorpusDocs(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -273,7 +273,7 @@ public class CorporaResource extends BaseResource {
             }
             corpus.deleteDocuments(dbConn);
 		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".deleteCorpusDocs(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -281,6 +281,10 @@ public class CorporaResource extends BaseResource {
         }
         return Response.ok().build();
     }
+	
+/*********************************************************************************
+ * Begin Activity Sub-resource declarations
+ *********************************************************************************/
 
 	/**
      * Returns a listing of all activities.
@@ -290,7 +294,7 @@ public class CorporaResource extends BaseResource {
 	@Produces({"application/xml", "application/json"})
 	@Path("{id}/activities")
 	@Wrapped(element="activities")
-	public List<Activity> getCorpusActivities(@Context ServletContext srvc, @PathParam("id") int id) {
+	public List<Activity> getActivities(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<Activity> activityList = null;
         try {
 	        Connection dbConn = getConnection(srvc);
@@ -303,7 +307,7 @@ public class CorporaResource extends BaseResource {
 			}
 			activityList = Activity.ListAllInCorpus(dbConn, corpus);
 		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".getActivities(ServletContext, int)(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -339,7 +343,7 @@ public class CorporaResource extends BaseResource {
 				
 			}
 		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".getActivity(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -420,7 +424,7 @@ public class CorporaResource extends BaseResource {
     		activity.setCorpus(corpus);	// Ensure we have proper linkage
             activity.persist(dbConn);
 		} catch(RuntimeException re) {
-			String tmp = myClass+".updateCorpus(): Problem updating DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".updateActivity(): Problem updating DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -459,7 +463,7 @@ public class CorporaResource extends BaseResource {
             }
             Activity.DeletePersistence(dbConn, corpus, id);
 		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".deleteActivity(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -467,4 +471,194 @@ public class CorporaResource extends BaseResource {
         }
         return Response.ok().build();
     }
+	
+/*********************************************************************************
+ * Begin ActivityRole Sub-resource declarations
+ *********************************************************************************/
+
+	/**
+	 * Returns a listing of all activityRoles.
+	 * @return Full (shallow) details of all activityRoles
+	 */
+	@GET
+	@Produces({"application/xml", "application/json"})
+	@Path("{id}/activityRoles")
+	@Wrapped(element="activityRoles")
+	public List<ActivityRole> getActivityRoles(@Context ServletContext srvc, @PathParam("id") int id) {
+		List<ActivityRole> activityList = null;
+		try {
+			Connection dbConn = getConnection(srvc);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+
+			}
+			activityList = ActivityRole.ListAllInCorpus(dbConn, corpus);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".getActivityRoles(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return activityList;
+	}
+
+	/**
+	 * Returns an ActivityRole SubResource for a given activityRole
+	 * @return ActivityRoleResource for the given id
+	 */
+	@GET
+	@Produces({"application/xml", "application/json"})
+	@Path("{id}/activityRoles/{aid}")
+	public ActivityRole getActivityRole(@Context ServletContext srvc, 
+			@PathParam("id") int id, @PathParam("aid") int aid) {
+		ActivityRole activityRole = null;
+		try {
+			Connection dbConn = getConnection(srvc);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+
+			}
+			activityRole = ActivityRole.FindByID(dbConn, corpus, aid);
+			if(activityRole==null) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+aid).build());
+
+			}
+		} catch(RuntimeException re) {
+			String tmp = myClass+".getActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return activityRole;
+	}
+
+	/**
+	 * Creates a new activityRole.
+	 * @param activityRole the representation of the new activityRole
+	 * @return Response, with the path (and so id) of the newly created activityRole
+	 */
+	@POST
+	@Consumes("application/xml")
+	@Path("{id}/activityRoles")
+	public Response createActivityRole(@Context ServletContext srvc, 
+			@PathParam("id") int id, ActivityRole activityRole){
+		Connection dbConn = getConnection(srvc);
+
+		try {
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+
+			}
+			// Check that the item is not already registered.
+			if (ActivityRole.FindByName(dbConn, corpus, activityRole.getName())!=null) {
+				String tmp = "An activityRole with the name '" + activityRole.getName() + "' already exists.";
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.BAD_REQUEST).entity(tmp).build());
+			} 
+			activityRole.setCorpus(corpus);
+			// Persist the new item, and get an id for it
+			activityRole.CreateAndPersist(dbConn);
+			UriBuilder path = UriBuilder.fromResource(CorporaResource.class);
+			path.path(id + "/activityRoles/" + activityRole.getId());
+			Response response = Response.created(path.build()).build();
+			return response;
+		} catch(Exception e) {
+			String tmp = myClass+".createActivityRole(): Problem creating ActivityRole.\n"+ e.getLocalizedMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+	}
+
+
+	/**
+	 * Updates an existing activityRole
+	 * @param id the id of the activityRole of interest
+	 * @param activityRole the representation of the new activityRole
+	 * @return Response, with the path (and so id) of the newly created activityRole
+	 */
+	@PUT
+	@Consumes("application/xml")
+	@Path("{id}/activityRoles/{aid}")
+	public Response updateActivityRole(@Context ServletContext srvc, 
+			@PathParam("id") int id, @PathParam("id") int aid, ActivityRole activityRole){
+		try {
+			Connection dbConn = getConnection(srvc);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+
+			}
+			if(!ActivityRole.Exists(dbConn, corpus, id)) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
+			}
+			activityRole.setCorpus(corpus);	// Ensure we have proper linkage
+			activityRole.persist(dbConn);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".updateActivityRole(): Problem updating DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		// Set the response's status and entity
+		UriBuilder path = UriBuilder.fromResource(CorporaResource.class);
+		path.path(id + "/activityRoles/" + aid);
+		Response response = Response.ok(path.build().toString()).build();
+		return response;
+	}
+
+	/**
+	 * Deletes a given activityRole.
+	 * @param id the id of the activityRole to delete
+	 * @return
+	 */
+	@DELETE
+	@Produces("application/xml")
+	@Path("{id}/activityRoles/{aid}")
+	public Response deleteActivityRole(@Context ServletContext srvc, 
+			@PathParam("id") int id, @PathParam("aid") int aid) {
+		try {
+			Connection dbConn = getConnection(srvc);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+
+			}
+			if(!ActivityRole.Exists(dbConn, corpus, id)) {
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
+			}
+			ActivityRole.DeletePersistence(dbConn, corpus, id);
+		} catch(RuntimeException re) {
+			String tmp = myClass+".deleteActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return Response.ok().build();
+	}
 }

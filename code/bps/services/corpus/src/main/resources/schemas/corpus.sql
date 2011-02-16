@@ -55,7 +55,9 @@ CREATE TABLE `activity` (
   `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
 	CONSTRAINT `act_ibfk_1` FOREIGN KEY (`parent_id`)
-      REFERENCES `activity` (`id`)
+      REFERENCES `activity` (`id`),
+	CONSTRAINT `act_ibfk_2` FOREIGN KEY (`corpus_id`)
+      REFERENCES `corpus` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
@@ -72,7 +74,9 @@ CREATE TABLE `act_role` (
   `description`    text NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
-        on update CURRENT_TIMESTAMP
+        on update CURRENT_TIMESTAMP,
+	CONSTRAINT `act_role_ibfk_1` FOREIGN KEY (`corpus_id`)
+      REFERENCES `corpus` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
