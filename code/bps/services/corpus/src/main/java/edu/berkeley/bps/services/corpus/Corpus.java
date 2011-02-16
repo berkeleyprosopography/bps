@@ -1,5 +1,6 @@
 package edu.berkeley.bps.services.corpus;
 
+import edu.berkeley.bps.services.common.ServiceContext;
 import edu.berkeley.bps.services.common.time.*;
 
 import java.sql.Connection;
@@ -8,8 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -42,32 +43,26 @@ import org.w3c.dom.NodeList;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="corpus")
-public class Corpus {
-	private final static String myClass = "Corpus";
+public class Corpus extends CachedEntity {
+	final static String myClass = "Corpus";
 	
 	private final static String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
 
 	private static int	nextID = 1;
 
-	@XmlElement
-	private int			id;
-	@XmlElement
-	private String		name;
-	@XmlElement
-	private String		description;
-	@XmlElement
-	private int			ownerId;
+	@XmlElement String		description;
+	@XmlElement int			ownerId;
+	
+	private static String myTablename = "corpus";
 
 	private TimeSpan	defaultDocTimeSpan = null;
 	// TODO Link to a User instance from bps.services.user.main
 	//private User		owner;
 
-	/**
-	 * The documents in the corpus
-	 */
-	private HashMap<Integer, Document> documents = null;
 	
-	private int fetchedDocumentCount = 0; 
+	HashMap<Integer, Document> documents = null;
+	
+	int fetchedDocumentCount = 0; 
 	/**
 	 * The named activities (not instances) seen in this corpus
 	 */
@@ -109,20 +104,44 @@ public class Corpus {
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
 	}
 	
-	private void initMaps() {
-		if(documents == null) {
-			documents = new HashMap<Integer, Document>();
+	private static void initMaps(ServiceContext sc) {
+		HashMap<String, Object> nameMap = new HashMap<String, Object>();
+		HashMap<Integer, Object> idMap = new HashMap<Integer, Object>();
+
+		{
+			Connection dbConn = sc.getConnection(false);
+			List<Corpus> corpora = ListAll(dbConn);
+			for(Corpus corpus:corpora) {
+				String name = corpus.getName();
+				if(name!=null&&!name.isEmpty())
+					nameMap.put(name, corpus);
+				idMap.put(corpus.getId(), corpus);
+				corpus.documents = new HashMap<Integer, Document>();
+				List<Document> docList = Document.ListAllInCorpus(dbConn, corpus);
+				for(Document doc:docList) {
+					corpus.documents.put(doc.getId(), doc);
+				}
+				corpus.activities = new HashMap<String, Activity>();
+				List<Activity> activities = Activity.ListAllInCorpus(dbConn, corpus);
+				for(Activity act:activities) {
+					corpus.activities.put(act.getName(), act);
+				}
+				corpus.activityRoles = new HashMap<String, ActivityRole>();
+				List<ActivityRole> activityRoles = ActivityRole.ListAllInCorpus(dbConn, corpus);
+				for(ActivityRole actRole:activityRoles) {
+					corpus.activityRoles.put(actRole.getName(), actRole);
+				}
+			}
+			setNameMap(sc, myClass, nameMap);
+			setIdMap(sc, myClass, idMap);
 		}
-		if(activities == null) {
-			activities = new HashMap<String, Activity>();
-		}
-		if(activityRoles == null) {
-			activityRoles = new HashMap<String, ActivityRole>();
-		}
+		
+		/**
+		 * The documents in the corpus
+		 */
 	}
 	
 	private void clearMaps() {
-		initMaps();
 		documents.clear();
 		activities.clear();
 		activityRoles.clear();
@@ -130,46 +149,11 @@ public class Corpus {
 	
 	
 	public static boolean Exists(Connection dbConn, int id) {
-		boolean exists = false;
-		final String SELECT_BY_ID = "SELECT name FROM corpus WHERE id = ?";
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
-			stmt.setInt(1, id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				if(rs.getString("name")!=null)
-					exists = true;
-			}
-			rs.close();
-			stmt.close();
-		} catch(SQLException se) {
-			// Just absorb it
-			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-		}
-		return exists;
+		return CachedEntity.Exists(dbConn, myTablename, id);
 	}
 
 	public static boolean NameUsed(Connection dbConn, String name) {
-		boolean exists = false;
-		final String SELECT_BY_NAME = "SELECT id FROM corpus WHERE name = ?";
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
-			stmt.setString(1, name);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				if(rs.getInt("id")>0)
-					exists = true;
-			}
-			rs.close();
-			stmt.close();
-		} catch(SQLException se) {
-			// Just absorb it
-			String tmp = myClass+".NameUsed: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-		}
-
-		return exists;
+		return CachedEntity.NameUsed(dbConn, myTablename, name);
 	}
 
 	public static Corpus FindByID(Connection dbConn, int id) {
@@ -199,7 +183,7 @@ public class Corpus {
 		}
 		return corpus;
 	}
-	
+
 	public static Corpus FindByName(Connection dbConn, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
@@ -227,7 +211,7 @@ public class Corpus {
 		}
 		return corpus;
 	}
-	
+
 	public static List<Corpus> ListAll(Connection dbConn) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
@@ -257,7 +241,7 @@ public class Corpus {
 							"Problem creating corpus\n"+se.getLocalizedMessage()).build());
 		}
 		return corpusList;
-	}
+	}	
 	
 	public void CreateAndPersist(Connection dbConn) {
 		final String myName = ".CreateAndPersist: ";
@@ -280,12 +264,12 @@ public class Corpus {
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
 			System.out.println(tmp);
-        	throw new WebApplicationException( 
-        			Response.status(
-        				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+	    	throw new WebApplicationException( 
+	    			Response.status(
+	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		}
 	}
-	
+
 	public static Corpus CreateAndPersist(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
 		final String myName = ".CreateAndPersist: ";
@@ -447,22 +431,6 @@ public class Corpus {
 	    return documents.size();
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -515,14 +483,13 @@ public class Corpus {
 	}
 
 	public void addDocument( Document newDoc ) {
-		initMaps();
+		//initMaps();
 		documents.put(newDoc.getId(), newDoc);
 	}
 	
 	public void deleteDocuments(Connection dbConn) {
 		final String DELETE_DOCS = 
 			"DELETE FROM document WHERE corpus_id = ?";
-	    clearMaps();
 	    if(dbConn!=null) {
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(DELETE_DOCS);
@@ -535,6 +502,8 @@ public class Corpus {
 				System.out.println(tmp);
 			}
 	    }
+		if(documents!=null)
+			documents.clear();
 	}
 
 	public Activity findOrCreateActivity(String name) {
@@ -551,10 +520,10 @@ public class Corpus {
 	}
 
 	public ActivityRole findOrCreateActivityRole(String name) {
-		initMaps();
+		//initMaps();
 		ActivityRole instance = activityRoles.get(name);
 		if(instance == null) {
-			instance = new ActivityRole(name);
+			instance = new ActivityRole(this, name);
 			activityRoles.put(name, instance);
 		}
 		return instance;
@@ -569,7 +538,7 @@ public class Corpus {
 			String nameFamilyLinksFilename,
 			String activityRolesFilename,
 			String nameRoleActivitiesFilename ) {
-		initMaps();
+		//initMaps();
     	System.out.print("Generating Documents (and NameRoleActivityDocs) SQL...");
 		SQLUtils.generateDocumentsSQL(documentsFilename,
 				nameRoleActivitiesFilename, nameFamilyLinksFilename, documents);

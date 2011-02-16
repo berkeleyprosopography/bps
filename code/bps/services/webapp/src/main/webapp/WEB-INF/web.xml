@@ -37,7 +37,7 @@
 	</listener>
 	<listener>
 		<listener-class>
-       edu.berkeley.bps.services.common.BPSServletContextListener
+       edu.berkeley.bps.services.webapp.BPSServletContextListener
 		</listener-class>
 	</listener>
 	<servlet>
