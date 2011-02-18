@@ -9,9 +9,9 @@ import edu.berkeley.bps.services.corpus.Corpus;
 
 public class CorpusContentHandler extends StackedContentHandler {
 	protected static String[] namepath = 
-		{"teiHeader","fileDesc","titleStmt","title"};
+		{"teiCorpus","teiHeader","fileDesc","titleStmt","title"};
 	protected static String[] descpath = 
-		{"teiHeader","fileDesc","titleStmt","title"};
+		{"teiCorpus","teiHeader","fileDesc","sourceDesc","p"};
 	
 	Corpus corpus;
 

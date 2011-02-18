@@ -29,6 +29,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 		super(parser, previous);
 		this.corpus = corpus;
 		document = new Document(corpus);
+		corpus.addDocument(document);
 		// TODO set the activity to be "Unknown" with FindOrAdd...
 		activity = null;
 	}
@@ -36,15 +37,14 @@ public class DocumentContentHandler extends StackedContentHandler {
 	public void startElement(String namespaceURI, String localName, String qName, 
 			Attributes attrList) {
 		super.startElement(namespaceURI, localName, qName, attrList);
-		if(pathMatches(TEI_Constants.ALT_ID_PATH)
-				&& TEI_Constants.ALT_ID_PATH_TYPE_ATTR.equalsIgnoreCase(
-						attrList.getValue(namespaceURI, "type"))) {
-			onAltIDElement = true;
+		if(pathMatches(TEI_Constants.ALT_ID_PATH)){
+			String type = attrList.getValue("", "type");  
+			onAltIDElement = (TEI_Constants.ALT_ID_PATH_TYPE_ATTR.equalsIgnoreCase(type));
 		} else if(localName.equals("text")) {
 			// This may have to be more flexible, saving the stack size
 			// and then clear this when we see endEl with text for saved stack size
-			if("transliteration".equalsIgnoreCase(
-					attrList.getValue(namespaceURI, "type"))) {
+			String type = attrList.getValue("", "type");  
+			if("transliteration".equalsIgnoreCase(type)) {
 				inText_transliteration = true;
 			} else {
 				inText_transliteration = false;
@@ -59,15 +59,18 @@ public class DocumentContentHandler extends StackedContentHandler {
 				onBack = true;
 				inWitnesses = false;
 			} else if(localName.equals("div")) {
-				if(onBack && "witnesses".equalsIgnoreCase(
-							attrList.getValue(namespaceURI, "subtype"))) {
-				inWitnesses = true;
+				if(onBack){
+					String subtype = attrList.getValue("", "subtype");  
+					if("witnesses".equalsIgnoreCase(subtype))
+						inWitnesses = true;
 				}
 			} else if(localName.equals("persName")) {
 				if(inBody) {
+					boolean fFoundAPrinciple = true;
 					// Create a persNameHandler with the Principle Role,
 					// Passing in the activity (unknown) on this doc
 				} else if(inWitnesses) {
+					boolean fFoundAWitness = true;
 					// Create a persNameHandler with the Witness Role,
 					// Passing in the activity (unknown) on this doc
 				}

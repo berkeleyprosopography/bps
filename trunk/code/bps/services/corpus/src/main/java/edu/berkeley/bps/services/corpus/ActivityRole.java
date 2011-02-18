@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="actrole")
 public class ActivityRole {
 	private final static String myClass = "Activity";
+	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
 	@XmlElement
 	private int			id;
@@ -32,7 +33,7 @@ public class ActivityRole {
 	 * Create a new empty ActivityRole.
 	 */
 	public ActivityRole() {
-		this(CachedEntity.UNSET_ID_VALUE, null, null, null);
+		this(ActivityRole.nextId--, null, null, null);
 	}
 
 	/**
@@ -40,7 +41,7 @@ public class ActivityRole {
 	 * @param name A shorthand name for use in UI, etc.
 	 */
 	public ActivityRole( Corpus corpus, String name ) {
-		this(CachedEntity.UNSET_ID_VALUE, corpus, name, null);
+		this(ActivityRole.nextId--, corpus, name, null);
 	}
 
 	/**
@@ -49,7 +50,7 @@ public class ActivityRole {
 	 * @param description Any description useful to users.
 	 */
 	public ActivityRole( Corpus corpus, String name, String description ) {
-		this(CachedEntity.UNSET_ID_VALUE, corpus, name, description);
+		this(ActivityRole.nextId--, corpus, name, description);
 	}
 
 	/**
