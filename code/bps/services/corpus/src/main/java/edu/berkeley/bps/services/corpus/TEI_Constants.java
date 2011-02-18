@@ -25,7 +25,11 @@ public class TEI_Constants {
 	public static final String TYPE_CLAN = "clan";
 	public static final String TYPE_SPOUSE = "spouse";
 
-	public static final String XPATH_ALT_ID ="./teiHeader/fileDesc/titleStmt/title/name[@type='cdlicat:id_text']";
+	public static final String XPATH_ALT_ID =
+		"./teiHeader/fileDesc/titleStmt/title/name[@type='cdlicat:id_text']";
+	public static final String[] ALT_ID_PATH =
+		{".","teiHeader","fileDesc","titleStmt","title","name"};
+	public static final String ALT_ID_PATH_TYPE_ATTR = "cdlicat:id_text";
 	public static final String XPATH_PRINCIPAL_PERSNAMES =
 		"./text[@type='transliteration']/body//persName";
 	public static final String XPATH_WITNESS_PERSNAMES =
