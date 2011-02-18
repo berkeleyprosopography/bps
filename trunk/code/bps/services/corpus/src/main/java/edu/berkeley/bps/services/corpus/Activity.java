@@ -21,7 +21,6 @@ import edu.berkeley.bps.services.common.time.TimeSpan;
 @XmlRootElement(name="activity")
 public class Activity {
 	private final static String myClass = "Activity";
-	private static int	nextID = 1;
 
 	@XmlElement
 	private int			id;
@@ -35,7 +34,7 @@ public class Activity {
 	private ArrayList<Activity>	children;
 
 	public Activity() {
-		this(0,null,null,null,null);
+		this(CachedEntity.UNSET_ID_VALUE,null,null,null,null);
 	}
 
 	/**
@@ -138,6 +137,9 @@ public class Activity {
 		// Note that we do not update the corpus_id - moving them is not allowed 
 		final String UPDATE_STMT = 
 			"UPDATE activity SET name=?, description=?, parent_id=? WHERE id=?";
+		if(id==CachedEntity.UNSET_ID_VALUE) {
+			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) activity!");
+		}
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 			stmt.setString(1, name);
