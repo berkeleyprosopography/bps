@@ -46,10 +46,6 @@ import org.w3c.dom.NodeList;
 public class Corpus extends CachedEntity {
 	final static String myClass = "Corpus";
 	
-	private final static String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
-
-	private static int	nextID = 1;
-
 	@XmlElement String		description;
 	@XmlElement int			ownerId;
 	
@@ -76,7 +72,7 @@ public class Corpus extends CachedEntity {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(0, null, null, -1, null);
+		this(UNSET_ID_VALUE, null, null, -1, null);
 	}
 
 	/**
@@ -85,7 +81,7 @@ public class Corpus extends CachedEntity {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus( String name, String description, TimeSpan defaultDocTimeSpan ) {
-		this(Corpus.nextID++, name, description, -1, defaultDocTimeSpan);
+		this(UNSET_ID_VALUE, name, description, -1, defaultDocTimeSpan);
 	}
 
 	/**
@@ -302,6 +298,9 @@ public class Corpus extends CachedEntity {
 		final String myName = ".persist: ";
 		final String UPDATE_STMT = 
 			"UPDATE corpus SET name=?, description=? WHERE id=?";
+		if(id==UNSET_ID_VALUE) {
+			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) corpus!");
+		}
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 			stmt.setString(1, name);
@@ -316,19 +315,11 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public void deletePersistence(Connection dbConn) {
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
-			stmt.setInt(1, id);
-			stmt.executeUpdate();
-			stmt.close();
-		} catch(SQLException se) {
-			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
-			throw new RuntimeException( tmp );
-		}
+		DeletePersistence(dbConn, id);
 	}
 	
 	public static void DeletePersistence(Connection dbConn, int id) {
+		final String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
 			stmt.setInt(1, id);

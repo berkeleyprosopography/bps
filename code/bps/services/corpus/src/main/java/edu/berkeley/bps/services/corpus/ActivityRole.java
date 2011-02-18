@@ -19,7 +19,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="actrole")
 public class ActivityRole {
 	private final static String myClass = "Activity";
-	private static int	nextID = 1;
 
 	@XmlElement
 	private int			id;
@@ -33,7 +32,7 @@ public class ActivityRole {
 	 * Create a new empty ActivityRole.
 	 */
 	public ActivityRole() {
-		this(ActivityRole.nextID++, null, null, null);
+		this(CachedEntity.UNSET_ID_VALUE, null, null, null);
 	}
 
 	/**
@@ -41,7 +40,7 @@ public class ActivityRole {
 	 * @param name A shorthand name for use in UI, etc.
 	 */
 	public ActivityRole( Corpus corpus, String name ) {
-		this(ActivityRole.nextID++, corpus, name, null);
+		this(CachedEntity.UNSET_ID_VALUE, corpus, name, null);
 	}
 
 	/**
@@ -50,7 +49,7 @@ public class ActivityRole {
 	 * @param description Any description useful to users.
 	 */
 	public ActivityRole( Corpus corpus, String name, String description ) {
-		this(ActivityRole.nextID++, corpus, name, description);
+		this(CachedEntity.UNSET_ID_VALUE, corpus, name, description);
 	}
 
 	/**
@@ -172,6 +171,9 @@ public class ActivityRole {
 		// Note that we do not update the corpus_id - moving them is not allowed 
 		final String UPDATE_STMT = 
 			"UPDATE act_role SET name=?, description=?, WHERE id=?";
+		if(id==CachedEntity.UNSET_ID_VALUE) {
+			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) activityRole!");
+		}
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 			stmt.setString(1, name);

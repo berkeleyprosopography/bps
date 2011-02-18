@@ -16,6 +16,8 @@ import edu.berkeley.bps.services.common.ServiceContext;
 @XmlAccessorType(XmlAccessType.NONE)
 public class CachedEntity {
 
+	public static final int UNSET_ID_VALUE = -1;
+	
 	@XmlElement
 	protected int id;
 	@XmlElement
