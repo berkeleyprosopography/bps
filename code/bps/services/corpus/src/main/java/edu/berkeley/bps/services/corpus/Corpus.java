@@ -54,7 +54,10 @@ public class Corpus extends CachedEntity {
 	private TimeSpan	defaultDocTimeSpan = null;
 	// TODO Link to a User instance from bps.services.user.main
 	//private User		owner;
-
+	
+	// Not multi-instance safe, but these should
+	// only be used until docs are persisted.
+	private static int nextId = UNSET_ID_VALUE;	// temp IDs before we serialize
 	
 	HashMap<Integer, Document> documents = null;
 	
@@ -72,7 +75,7 @@ public class Corpus extends CachedEntity {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(UNSET_ID_VALUE, null, null, -1, null);
+		this(Corpus.nextId--, null, null, -1, null);
 	}
 
 	/**
@@ -81,7 +84,7 @@ public class Corpus extends CachedEntity {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus( String name, String description, TimeSpan defaultDocTimeSpan ) {
-		this(UNSET_ID_VALUE, name, description, -1, defaultDocTimeSpan);
+		this(Corpus.nextId--, name, description, -1, defaultDocTimeSpan);
 	}
 
 	/**
@@ -98,6 +101,9 @@ public class Corpus extends CachedEntity {
 		this.description = description;
 		this.ownerId = ownerId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
+		documents = new HashMap<Integer, Document>();
+		activities = new HashMap<String, Activity>();
+		activityRoles = new HashMap<String, ActivityRole>();
 	}
 	
 	private static void initMaps(ServiceContext sc) {
@@ -112,17 +118,20 @@ public class Corpus extends CachedEntity {
 				if(name!=null&&!name.isEmpty())
 					nameMap.put(name, corpus);
 				idMap.put(corpus.getId(), corpus);
-				corpus.documents = new HashMap<Integer, Document>();
+				// Handle Documents Map
+				corpus.documents.clear();
 				List<Document> docList = Document.ListAllInCorpus(dbConn, corpus);
 				for(Document doc:docList) {
 					corpus.documents.put(doc.getId(), doc);
 				}
-				corpus.activities = new HashMap<String, Activity>();
+				// Handle Activities Map
+				corpus.activities.clear();
 				List<Activity> activities = Activity.ListAllInCorpus(dbConn, corpus);
 				for(Activity act:activities) {
 					corpus.activities.put(act.getName(), act);
 				}
-				corpus.activityRoles = new HashMap<String, ActivityRole>();
+				// Handle Activity Roles Map
+				corpus.activityRoles.clear();
 				List<ActivityRole> activityRoles = ActivityRole.ListAllInCorpus(dbConn, corpus);
 				for(ActivityRole actRole:activityRoles) {
 					corpus.activityRoles.put(actRole.getName(), actRole);
@@ -298,7 +307,7 @@ public class Corpus extends CachedEntity {
 		final String myName = ".persist: ";
 		final String UPDATE_STMT = 
 			"UPDATE corpus SET name=?, description=? WHERE id=?";
-		if(id==UNSET_ID_VALUE) {
+		if(id<=UNSET_ID_VALUE) {
 			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) corpus!");
 		}
 		try {
@@ -449,6 +458,16 @@ public class Corpus extends CachedEntity {
 		return nDocs;
 	}
 	
+	public List<Document> getDocuments() {
+		ArrayList<Document> list; 
+		if(documents != null) {
+			list = new ArrayList<Document>(documents.values());
+		} else {
+			list = new ArrayList<Document>();
+		}
+		return list;
+	}
+	
 	private void fetchDocumentCount(Connection dbConn) {
 		final String SELECT_N_DOCS = 
 			"SELECT count(*) nDocs FROM document WHERE corpus_id = ?";
@@ -474,7 +493,6 @@ public class Corpus extends CachedEntity {
 	}
 
 	public void addDocument( Document newDoc ) {
-		//initMaps();
 		documents.put(newDoc.getId(), newDoc);
 	}
 	

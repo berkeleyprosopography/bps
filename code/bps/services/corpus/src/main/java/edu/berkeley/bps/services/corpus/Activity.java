@@ -21,6 +21,7 @@ import edu.berkeley.bps.services.common.time.TimeSpan;
 @XmlRootElement(name="activity")
 public class Activity {
 	private final static String myClass = "Activity";
+	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
 	@XmlElement
 	private int			id;
@@ -34,7 +35,7 @@ public class Activity {
 	private ArrayList<Activity>	children;
 
 	public Activity() {
-		this(CachedEntity.UNSET_ID_VALUE,null,null,null,null);
+		this(Activity.nextId--,null,null,null,null);
 	}
 
 	/**

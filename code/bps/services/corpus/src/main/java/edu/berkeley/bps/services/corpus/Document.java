@@ -32,6 +32,7 @@ import org.w3c.dom.NodeList;
 @XmlRootElement(name="document")
 public class Document {
 	private final static String myClass = "Document";
+	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
 	@XmlElement
 	private int			id;				// Unique numeric id
@@ -85,7 +86,7 @@ public class Document {
 	 */
 	public Document(Corpus corpus, String alt_id, String sourceURL, String xml_id,
 			String notes, String date_str, long date_norm) {
-		this(CachedEntity.UNSET_ID_VALUE, corpus, alt_id, sourceURL, xml_id,
+		this(Document.nextId--, corpus, alt_id, sourceURL, xml_id,
 				notes, date_str, date_norm);
 	}
 
@@ -94,21 +95,21 @@ public class Document {
 	 * @param alt_id Secondary identifier string
 	 */
 	public Document(Corpus corpus, String alt_id, String date, long date_norm) {
-		this(CachedEntity.UNSET_ID_VALUE, corpus, alt_id, null, null, null, date, date_norm);
+		this(Document.nextId--, corpus, alt_id, null, null, null, date, date_norm);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
 	public Document(Corpus corpus) {
-		this(CachedEntity.UNSET_ID_VALUE, corpus, null, null, null, null, null, 0);
+		this(Document.nextId--, corpus, null, null, null, null, null, 0);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
 	private Document() {
-		this(CachedEntity.UNSET_ID_VALUE, null, null, null, null, null, null, 0);
+		this(Document.nextId--, null, null, null, null, null, null, 0);
 	}
 	
 	public static Document FindByID(Connection dbConn, Corpus corpus, int docId) {
