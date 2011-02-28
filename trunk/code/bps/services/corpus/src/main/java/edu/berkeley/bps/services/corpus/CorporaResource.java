@@ -2,6 +2,13 @@ package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.BaseResource;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,12 +25,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.QueryParam;
+
 import org.jboss.resteasy.annotations.providers.jaxb.Wrapped;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * Resource that manages a list of items.
@@ -221,6 +237,116 @@ public class CorporaResource extends BaseResource {
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
         }
         return Response.ok().build();
+    }
+	/**
+     * Loads documents from a TEI file
+	 * @param id the id of the corpus
+	 * @return
+	 */
+	@GET
+	@Produces("text/html")
+	@Path("{id}/tei")
+	public StreamingOutput getTEI(
+			@Context ServletContext srvc, 
+			@PathParam("id") int id,
+			@QueryParam("file") String teipath) {
+    	String defaultTEIPath = "/WEB-INF/resources/files/corpus.xml";
+        try {
+        	final InputStream xmls;
+			if (teipath != null && !teipath.isEmpty()) {
+				xmls = new FileInputStream(teipath);
+			} else {
+	        	xmls = srvc.getResourceAsStream(defaultTEIPath);
+	        	if(xmls==null) {
+	        		throw new RuntimeException("Cannot open resource: "+defaultTEIPath);
+	        	}
+			}
+        	return transformTEI(srvc, xmls);
+		} catch(WebApplicationException wae) {
+			throw wae;
+        } catch (FileNotFoundException fnfe) {
+			String tmp = myClass+".loadTEI(): Bad file param: \n"+ fnfe.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		} catch(Exception e) {
+			String tmp = myClass+".getTEI(): Problem getting TEI.\n"+ e.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+    }
+
+	/**
+     * Loads documents from a TEI file
+	 * @param id the id of the corpus
+	 * @return
+	 */
+	@PUT
+	@Produces("application/xml")
+	@Path("{id}/tei")
+	public StreamingOutput loadTEI(
+			@Context ServletContext srvc, 
+			@PathParam("id") int id,
+			@QueryParam("file") String teipath) {
+        try {
+        	final InputStream xmls = new FileInputStream(teipath);
+        	return transformTEI(srvc, xmls);
+		} catch(WebApplicationException wae) {
+			throw wae;
+        } catch (FileNotFoundException fnfe) {
+			String tmp = myClass+".loadTEI(): Bad file param: \n"+ fnfe.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+    }
+
+	public StreamingOutput transformTEI(
+			ServletContext srvc, 
+			InputStream teiStream) {
+    	String xslpath = "/WEB-INF/resources/files/BPSTEINames.xsl";
+        try {
+        	final InputStream xmls = teiStream;
+        	final InputStream xsls = srvc.getResourceAsStream(xslpath);
+        	if(xsls==null) {
+        		throw new RuntimeException("Cannot open resource: "+xslpath);
+        	}
+        	TransformerFactory tFactory = TransformerFactory.newInstance();
+        	final Transformer transformer = 
+        		tFactory.newTransformer(
+        				new StreamSource(xsls));
+        	return new StreamingOutput() {
+        		public void write(OutputStream output) throws IOException, WebApplicationException {
+                	try {
+						transformer.transform(
+						        new StreamSource(xmls), 
+						        new StreamResult(output));
+                    } catch (TransformerException tce) {
+            			String tmp = myClass+".getTEI(): Problem transforming TEI.\n"+ tce.getLocalizedMessage();
+            			System.out.println(tmp);
+                    	throw new WebApplicationException( 
+                			Response.status(
+                				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+					}
+                }
+        	};
+        } catch (TransformerConfigurationException tce) {
+			String tmp = myClass+".getTEI(): Problem transforming TEI.\n"+ tce.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		} catch(Exception e) {
+			String tmp = myClass+".getTEI(): Problem getting TEI.\n"+ e.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
     }
 
 	/**

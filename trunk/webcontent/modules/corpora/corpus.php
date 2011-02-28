@@ -177,6 +177,12 @@ if(!isset($_GET['id'])) {
 	$corpus = getCorpus($CFG,$_GET['id']);
 	if($corpus){
 		$t->assign('corpus', $corpus);
+		$corp_file = $CFG->corpusdir.'/'.$_GET['id'].'/tei/corpus.xml';
+		if(file_exists($corp_file)) {
+			$t->assign('corpus_file', $corp_file);
+			$xslt_loc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$_GET['id'].'/tei?file='.$corp_file;
+			$t->assign('xslt_loc', $xslt_loc);
+		}
 		$docs = getCorpusDocs($CFG,$_GET['id']);
 		if($docs) {
 			$t->assign('documents', $docs);
