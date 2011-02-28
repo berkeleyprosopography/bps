@@ -46,7 +46,7 @@
 		</div>
 		<p>&nbsp;</p>
 		{if isset($corpus_file) }
-		<p>Corpus file uploaded. <a href="{$xslt_loc}">Click here to verify basic tei data.</a></p>
+		<p>Corpus file uploaded. <a href="{$teisummaryloc}">Click here to verify basic tei data.</a></p>
 		{/if}
 		<h3>Upload a {if isset($corpus_file) }<i>new</i> {/if}TEI Corpus file:</h3>
 		<div class="form_row">

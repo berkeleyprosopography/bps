@@ -245,59 +245,33 @@ public class CorporaResource extends BaseResource {
 	 */
 	@GET
 	@Produces("text/html")
-	@Path("{id}/tei")
-	public StreamingOutput getTEI(
+	@Path("{id}/teisummary")
+	public StreamingOutput getTEISummary(
 			@Context ServletContext srvc, 
-			@PathParam("id") int id,
-			@QueryParam("file") String teipath) {
-    	String defaultTEIPath = "/WEB-INF/resources/files/corpus.xml";
+			@PathParam("id") int id) {
         try {
         	final InputStream xmls;
+        	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
 			if (teipath != null && !teipath.isEmpty()) {
 				xmls = new FileInputStream(teipath);
 			} else {
-	        	xmls = srvc.getResourceAsStream(defaultTEIPath);
-	        	if(xmls==null) {
-	        		throw new RuntimeException("Cannot open resource: "+defaultTEIPath);
-	        	}
+				String tmp = myClass+".getTEISummary(): No corpus file uploaded.";
+				System.out.println(tmp);
+	        	throw new WebApplicationException( 
+	    			Response.status(
+	    				Response.Status.BAD_REQUEST).entity(tmp).build());
 			}
         	return transformTEI(srvc, xmls);
 		} catch(WebApplicationException wae) {
 			throw wae;
         } catch (FileNotFoundException fnfe) {
-			String tmp = myClass+".loadTEI(): Bad file param: \n"+ fnfe.getLocalizedMessage();
+			String tmp = myClass+".getTEISummary(): Bad file param: \n"+ fnfe.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		} catch(Exception e) {
-			String tmp = myClass+".getTEI(): Problem getting TEI.\n"+ e.getLocalizedMessage();
-			System.out.println(tmp);
-        	throw new WebApplicationException( 
-    			Response.status(
-    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
-		}
-    }
-
-	/**
-     * Loads documents from a TEI file
-	 * @param id the id of the corpus
-	 * @return
-	 */
-	@PUT
-	@Produces("application/xml")
-	@Path("{id}/tei")
-	public StreamingOutput loadTEI(
-			@Context ServletContext srvc, 
-			@PathParam("id") int id,
-			@QueryParam("file") String teipath) {
-        try {
-        	final InputStream xmls = new FileInputStream(teipath);
-        	return transformTEI(srvc, xmls);
-		} catch(WebApplicationException wae) {
-			throw wae;
-        } catch (FileNotFoundException fnfe) {
-			String tmp = myClass+".loadTEI(): Bad file param: \n"+ fnfe.getLocalizedMessage();
+			String tmp = myClass+".getTEISummary(): Problem getting TEI.\n"+ e.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
