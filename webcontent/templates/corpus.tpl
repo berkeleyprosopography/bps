@@ -44,6 +44,28 @@
 				</table>
 			</form>
 		</div>
+		<p>&nbsp;</p>
+		{if isset($corpus_file) }
+		<p>Corpus file uploaded. <a href="{$xslt_loc}">Click here to verify basic tei data.</a></p>
+		{/if}
+		<h3>Upload a {if isset($corpus_file) }<i>new</i> {/if}TEI Corpus file:</h3>
+		<div class="form_row">
+			<form enctype="multipart/form-data" action="../../api/uploadTEI.php" method="POST">
+				<!-- MAX_FILE_SIZE must precede the file input field -->
+				<input type="hidden" name="id" value="{$corpus.id}" />
+				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesize}" />
+				<!-- Name of input element determines name in $_FILES array -->
+				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
+					<tr height="40px">
+						<td class="corpus corpusname 2" width="200px">Select TEI file to upload:</td>
+						<td colspan="2" class="corpus corpusdesc 2" >
+							<input name="teifile" type="file" size="44"  />
+							&nbsp;<input type="submit" value="Upload File" />
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
 		{if !empty($documents)}
 			<div class="docs_row">
 				<h2>Documents in Corpus</h2>
@@ -61,24 +83,6 @@
 				</table>
 			</div>
 		{/if}
-		<p>&nbsp;</p>
-		<h3>Upload a TEI Corpus file to verify Names and Dates:</h3>
-		<div class="form_row">
-			<form enctype="multipart/form-data" action="../../api/teiNamesAndDates.php" method="POST">
-				<!-- MAX_FILE_SIZE must precede the file input field -->
-				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesize}" />
-				<!-- Name of input element determines name in $_FILES array -->
-				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
-					<tr height="40px">
-						<td class="corpus corpusname 2" width="200px">Select TEI file to upload:</td>
-						<td colspan="2" class="corpus corpusdesc 2" >
-							<input name="teifile" type="file" size="44"  />
-							&nbsp;<input type="submit" value="Upload File" />
-						</td>
-					</tr>
-				</table>
-			</form>
-		</div>
 	{/if}
 	<p>&nbsp;</p>
 	{if isset($opmsg) }

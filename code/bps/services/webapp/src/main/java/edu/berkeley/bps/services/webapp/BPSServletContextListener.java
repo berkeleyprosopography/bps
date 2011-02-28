@@ -23,6 +23,9 @@ public class BPSServletContextListener
 			System.out.println("BPS DBURL: "+dburl);
 			ServiceContext sc = new ServiceContext(dburl);
 			context.setAttribute(ServiceContext.label, sc);
+			// Ensure we are using Saxon for XSLT
+			System.setProperty("javax.xml.transform.TransformerFactory",
+								"net.sf.saxon.TransformerFactoryImpl");
 		}
   }
 

@@ -94,7 +94,22 @@ $CFG->dirroot           = '/var/www';
 // Specify an email address to recieve messages from the contact form
 //
 
-$CFG->contactEmail          = "bps_feedback@lists.berkeley.edu";
+$CFG->contactEmail      = "bps_feedback@lists.berkeley.edu";
+
+//=========================================================================
+// 5. CORPUS FILE DIRECTORY
+//=========================================================================
+// Here, specify the full OS directory path to the root directory
+// for corpus files (which will be stored by ID underneath). 
+// Make sure the upper/lower case is correct.  Some examples:
+//
+//    $CFG->corpusdir = 'c:\bps\corpora';    // Windows
+//    $CFG->corpusdir = '/var/bps/corpora';     // Linux
+//
+// Do not include a trailing slash!
+
+
+$CFG->corpusdir       = "/var/bps/corpora";
 
 
 //=========================================================================
