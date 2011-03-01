@@ -11,9 +11,9 @@ public class PersonLink<O> extends Object {
 	private O fromObj;
 	private Person person;
 	private double weight;
-	private LinkTypes type;
+	private LinkTypes.Values type;
 
-	public PersonLink(O fromObj, Person linkTo, double weight, LinkTypes linkType) {
+	public PersonLink(O fromObj, Person linkTo, double weight, LinkTypes.Values linkType) {
 		if(fromObj==null)
 			throw new IllegalArgumentException("PersonLink must link from valid object");
 		if(linkTo==null)
@@ -68,7 +68,7 @@ public class PersonLink<O> extends Object {
 	/**
 	 * @return the type
 	 */
-	public LinkTypes getType() {
+	public LinkTypes.Values getType() {
 		return type;
 	}
 }

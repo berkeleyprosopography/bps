@@ -6,6 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 /**
  * @author pschmitz
@@ -18,7 +24,7 @@ import java.sql.Types;
 
 public class Name {
 	private final static String myClass = "Name";
-	private static int	nextID = 1;
+	private static int	nextID = -1;
 	
 	public static final String NAME_TYPE_PERSON = "person";
 	public static final String NAME_TYPE_CLAN = "clan";
@@ -61,7 +67,7 @@ public class Name {
 	 * Create a new empty name.
 	 */
 	private Name() {
-		this(Name.nextID++, 0, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
+		this(Name.nextID--, 0, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
 	}
 
 	/**
@@ -70,7 +76,7 @@ public class Name {
 	 * @param description Any description useful to users.
 	 */
 	public Name( String name ) {
-		this(Name.nextID++, 0, name, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
+		this(Name.nextID--, 0, name, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
 	}
 
 	/**
@@ -227,6 +233,68 @@ public class Name {
 		return false;
 	}
 
+	public static List<Name> ListAllInCorpus(Connection dbConn, Corpus corpus) {
+		// When we select them, we need to order by normal. 
+		// Assume null normal values sort first, and that there are no chains.
+		final String SELECT_BY_CORPUS_ID = 
+			"SELECT `id`, `name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id`"
+			+ "FROM `name` WHERE `corpus_id`=? ORDER BY normal";
+		int corpus_id = 0;
+		if(corpus==null || (corpus_id=corpus.getId())<=0) {
+			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
+			System.out.println(tmp);
+			throw new IllegalArgumentException( tmp );
+		}
+		ArrayList<Name> nameList = new ArrayList<Name>();
+		HashMap<Integer, Name> nameMap = new HashMap<Integer, Name>();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_CORPUS_ID);
+			stmt.setInt(1, corpus_id);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				Name newName = new Name(rs.getInt("id"), rs.getInt("corpus_id"), 
+						rs.getString("name"), rs.getString("nametype"), 
+						rs.getString("gender"), rs.getString("notes"), null);
+				int normalId = rs.getInt("normal");
+				if(normalId != 0) {
+					Name normal = nameMap.get(normalId);
+					if(normal==null) {
+						throw new RuntimeException(myClass+".ListAllInCorpus:"
+							+" Internal error: Could not find normal form of name in map!");
+					}
+					newName.setNormal(normal);
+				}
+				nameList.add(newName);
+				nameMap.put(newName.id, newName);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return nameList;
+	}
+	
+	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
+		final String DELETE_ALL = 
+			"DELETE FROM `name` WHERE corpus_id=?";
+		int corpus_id = corpus.getId();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_ALL);
+			stmt.setInt(1, corpus_id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+							"Problem deleting documents\n"+se.getLocalizedMessage()).build());
+		}
+	}
+	
 	/**
 	 * Creates a new Name entity, persists to the DB store, and sets the created ID. 
 	 * @param dbConn an open JDCB connection
@@ -241,11 +309,30 @@ public class Name {
 	public static Name CreateAndPersist(Connection dbConn, int corpusId,
 			String name, String nametype, String gender, String notes, Name normal) {
 		final String myName = ".CreateAndPersist: ";
+		int newId = persistNew(dbConn, corpusId, name, nametype, gender, notes, normal);
+		Name newName = new Name(newId, corpusId, name, nametype, gender, notes, normal); 
+		return newName;
+	}
+	
+	/**
+	 * Persists a new Name entity to the DB store, and returns the created ID. 
+	 * @param dbConn an open JDCB connection
+	 * @param corpusId 0 if a generic Name, else set to a linked corpus
+	 * @param name The name form
+	 * @param nametype One of NAME_TYPE_PERSON or NAME_TYPE_CLAN
+	 * @param gender One of GENDER_MALE, GENDER_FEMALE, or GENDER_UNKNOWN
+	 * @param notes Any notes on form, etc.
+	 * @param normal The normal form of this name, if 'name' is not the normal form. 
+	 * @return
+	 */
+	public static int persistNew(Connection dbConn, int corpusId,
+			String name, String nametype, String gender, String notes, Name normal) {
+		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO `name`(`name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id`,creation_time)"
 			+" VALUES(?,?,?,?,?,?,now())";
 			
-		Name newName = null;
+		int newId = 0;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
 												Statement.RETURN_GENERATED_KEYS);
@@ -263,8 +350,7 @@ public class Name {
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
 				if(rs.next()){
-					newName = new Name(rs.getInt(1), corpusId, name, 
-									nametype, gender, notes, normal); 
+					newId = rs.getInt(1); 
 				}
 				rs.close();
 			}
@@ -273,7 +359,38 @@ public class Name {
 			System.out.println(tmp);
 			throw new RuntimeException( tmp );
 		}
-		return newName;
+		return newId;
+	}
+	
+	public void persist(Connection dbConn) {
+		final String myName = ".persist: ";
+		if(id<=CachedEntity.UNSET_ID_VALUE) {
+			id = persistNew(dbConn, corpusId, name, nametype, gender, notes, normal);
+		} else {
+			final String UPDATE_STMT = 
+				"UPDATE `name`"
+				+ " SET `name`=?,`nametype`=?,`gender`=?,`notes`=?,`normal`=?,`corpus_id`=?"
+				+ " WHERE id=?";
+			try {
+				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+				stmt.setString(1, name);
+				stmt.setString(2, nametype);
+				stmt.setString(3, gender);
+				stmt.setString(4, notes);
+				if(normal==null) {
+					stmt.setNull(5, Types.INTEGER);
+				} else {
+					stmt.setInt(5, normal.id);
+				}
+				stmt.setInt(6, corpusId);
+				stmt.setInt(7, id);
+				stmt.executeUpdate();
+			} catch(SQLException se) {
+				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+				System.out.println(tmp);
+				throw new RuntimeException( tmp );
+			}
+		}
 	}
 	
 	/**
@@ -363,33 +480,6 @@ public class Name {
 		return toFind;
 	}
 
-	public void persist(Connection dbConn) {
-		final String myName = ".persist: ";
-		final String UPDATE_STMT = 
-			"UPDATE `name`"
-			+ " SET `name`=?,`nametype`=?,`gender`=?,`notes`=?,`normal`=?,`corpus_id`=?"
-			+ " WHERE id=?";
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
-			stmt.setString(1, name);
-			stmt.setString(2, nametype);
-			stmt.setString(3, gender);
-			stmt.setString(4, notes);
-			if(normal==null) {
-				stmt.setNull(5, Types.INTEGER);
-			} else {
-				stmt.setInt(5, normal.id);
-			}
-			stmt.setInt(6, corpusId);
-			stmt.setInt(7, id);
-			stmt.executeUpdate();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-			throw new RuntimeException( tmp );
-		}
-	}
-	
 	public void deletePersistence(Connection dbConn) {
 		final String DELETE_STMT = "DELETE FROM `name` WHERE id=?";
 		try {

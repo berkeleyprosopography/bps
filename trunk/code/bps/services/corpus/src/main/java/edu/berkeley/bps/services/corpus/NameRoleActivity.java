@@ -164,9 +164,9 @@ public class NameRoleActivity {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public void addNameFamilyLink(Name name, LinkTypes linkType, String xmlID) {
+	public void addNameFamilyLink(Name name, LinkTypes.Values linkType, String xmlID) {
 		initNameFamilyLinks();
-		nameFamilyLinks.add(new NameFamilyLink(name, linkType, xmlID));
+		nameFamilyLinks.add(new NameFamilyLink(this, name, linkType, xmlID));
 	}
 
 	/**
@@ -189,38 +189,38 @@ public class NameRoleActivity {
 	 * @return a declared Father if there is one
 	 */
 	public Name getFatherName() {
-		return findFamilyLinkNameByType(LinkTypes.LINK_TO_FATHER);
+		return findFamilyLinkNameByType(LinkTypes.Values.LINK_TO_FATHER);
 	}
 
 	/**
 	 * @return a declared Clan if there is one
 	 */
 	public Name getClanName() {
-		return findFamilyLinkNameByType(LinkTypes.LINK_TO_CLAN);
+		return findFamilyLinkNameByType(LinkTypes.Values.LINK_TO_CLAN);
 	}
 
 	/**
 	 * @return a declared GrandFather if there is one
 	 */
 	public Name getGrandFatherName() {
-		return findFamilyLinkNameByType(LinkTypes.LINK_TO_GRANDFATHER);
+		return findFamilyLinkNameByType(LinkTypes.Values.LINK_TO_GRANDFATHER);
 	}
 
 	/**
 	 * @return any declared ancestors
 	 */
 	public List<Name> getAncestorNames() {
-		return findFamilyLinkNamesByType(LinkTypes.LINK_TO_ANCESTOR);
+		return findFamilyLinkNamesByType(LinkTypes.Values.LINK_TO_ANCESTOR);
 	}
 
 	/**
 	 * @param linkType one of LinkTypes.LINK_TO_*
 	 * @return name of the first family link matching linkType
 	 */
-	public Name findFamilyLinkNameByType(LinkTypes linkType) {
+	public Name findFamilyLinkNameByType(LinkTypes.Values linkType) {
 		for(NameFamilyLink nfl:nameFamilyLinks) {
 			if(nfl.getLinkType()==linkType)
-				return nfl.getName();
+				return nfl.getLinkToName();
 		}
 		return null;
 	}
@@ -229,14 +229,14 @@ public class NameRoleActivity {
 	 * @param linkType one of NameFamilyLink.LINK_TO_*
 	 * @return array of names for family links matching linkType
 	 */
-	public ArrayList<Name> findFamilyLinkNamesByType(LinkTypes linkType) {
+	public ArrayList<Name> findFamilyLinkNamesByType(LinkTypes.Values linkType) {
 		ArrayList<Name> list = null;
 		for(NameFamilyLink nfl:nameFamilyLinks) {
 			if(nfl.getLinkType()==linkType) {
 				if(list==null) {
 					list = new ArrayList<Name>();
 				}
-				list.add(nfl.getName());
+				list.add(nfl.getLinkToName());
 			}
 		}
 		return list;

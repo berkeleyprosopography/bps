@@ -49,7 +49,7 @@ $script_block = '
 <script type="text/javascript" src="/scripts/corpus.js"></script>
 <script>
 
-// The ready state change callback method that waits for a response.
+// The ready state change callback method for update.
 function updateCorpusRSC() {
   if (xmlhttp.readyState==4) {
 		if( xmlhttp.status == 200 ) {
@@ -85,17 +85,47 @@ function updateCorpus(corpusID, name) {
 	xmlhttp.onreadystatechange=updateCorpusRSC;
 	xmlhttp.send(args);
 	//window.status = "request sent: POST: "+url+"?"+args;
-	var el = document.getElementById("U_"+corpusID);
-	el.disabled = true;
+	enableElement( "U_"+corpusID, false );
+}
+
+// The ready state change callback method for the processTEI method
+function processTEIRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Corpus rebuilt.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to rebuild corpus.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	enableElement( "processTEIBtn", true );
+	}
+}
+
+
+function processTEI(corpusID) {
+	if( !xmlhttp ) {
+		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/tei";
+	alert( "Preparing request: PUT: "+url);
+	xmlhttp.open("PUT", url, true);
+	//xmlhttp.setRequestHeader("Content-Type",
+	//													"application/xml" );
+	xmlhttp.onreadystatechange=processTEIRSC;
+	xmlhttp.send(null);
+	//window.status = "request sent: PUT: "+url+"?"+args;
+	enableElement( "processTEIBtn", false );
 }
 
 // This should go into a utils.js - how to include?
-function enableElement( elID ) {
-	//alert( "enableElement" );
+function enableElement( elID, sense ) {
 	var el = document.getElementById(elID);
-	el.disabled = false;
-	//window.status = "Element ["+elID+"] enabled.";
+	el.disabled = !sense;
 }
+
 
 function setStatusP(str) {
 	var el = document.getElementById("statusP");
@@ -180,7 +210,9 @@ if(!isset($_GET['id'])) {
 		$corp_file = $CFG->corpusdir.'/'.$_GET['id'].'/tei/corpus.xml';
 		if(file_exists($corp_file)) {
 			$t->assign('corpus_file', $corp_file);
-			$teisummaryloc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$_GET['id'].'/teisummary';
+			$teiloc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$_GET['id'].'/tei';
+			$t->assign('teiloc', $teiloc);
+			$teisummaryloc = $teiloc.'/summary';
 			$t->assign('teisummaryloc', $teisummaryloc);
 		}
 		$docs = getCorpusDocs($CFG,$_GET['id']);

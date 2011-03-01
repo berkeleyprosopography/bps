@@ -10,6 +10,8 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -112,6 +114,77 @@ public class Document {
 		this(Document.nextId--, null, null, null, null, null, null, 0);
 	}
 	
+	public void CreateAndPersist(Connection dbConn) {
+		final String myName = ".CreateAndPersist: ";
+		id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
+				notes, date_str, date_norm);
+	}
+		
+	public void persist(Connection dbConn) {
+		final String myName = ".persist: ";
+		if(id <= CachedEntity.UNSET_ID_VALUE) {
+			id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
+					notes, date_str, date_norm);
+		} else {
+			// Note that we do not update the corpus_id - moving them is not allowed 
+			final String UPDATE_STMT = 
+				"UPDATE document SET alt_id=?, sourceURL=?, xml_id=?, notes=?, "
+				+"date_str=?, date_norm=? WHERE id=?";
+			try {
+				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+				stmt.setString(1, alt_id);
+				stmt.setString(2, sourceURL);
+				stmt.setString(3, xml_id);
+				stmt.setString(4, notes);
+				stmt.setString(5, date_str);
+				stmt.setLong(6, date_norm);
+				stmt.setInt(7, id);
+				stmt.executeUpdate();
+			} catch(SQLException se) {
+				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+				System.out.println(tmp);
+				throw new RuntimeException( tmp );
+			}
+			
+		}
+	}
+		
+	private static int persistNew(Connection dbConn, 
+			int corpus_id, String alt_id, String sourceURL, String xml_id, 
+			String notes, String date_str, long date_norm ) {
+		final String myName = ".persistNew: ";
+		final String INSERT_STMT = 
+			"INSERT INTO document(corpus_id, alt_id, sourceURL, xml_id, notes, date_str, date_norm, creation_time)"
+			+ " VALUES(?,?,?,?,?,?,?,now())";
+		int newId = 0;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
+												Statement.RETURN_GENERATED_KEYS);
+			stmt.setInt(1, corpus_id);
+			stmt.setString(2, alt_id);
+			stmt.setString(3, sourceURL);
+			stmt.setString(4, xml_id);
+			stmt.setString(5, notes);
+			stmt.setString(6, date_str);
+			stmt.setLong(7, date_norm);
+			int nRows = stmt.executeUpdate();
+			if(nRows==1){
+				ResultSet rs = stmt.getGeneratedKeys();
+				if(rs.next()){
+					newId = rs.getInt(1); 
+				}
+				rs.close();
+			}
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+	    	throw new WebApplicationException( 
+	    			Response.status(
+	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return newId;
+	}
+
 	public static Document FindByID(Connection dbConn, Corpus corpus, int docId) {
 		final String SELECT_BY_ID = 
 			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
@@ -315,13 +388,13 @@ public class Document {
 						        	addNameRoleActivity(nra);
 					        	}
 					        	// Deal with patronyms - add a family link
-					        	LinkTypes linkType;
+					        	LinkTypes.Values linkType;
 					        	if(patronymsLinked == 0) {
-					        		linkType = LinkTypes.LINK_TO_FATHER;
+					        		linkType = LinkTypes.Values.LINK_TO_FATHER;
 					        	} else  if(patronymsLinked == 1) {
-					        		linkType = LinkTypes.LINK_TO_GRANDFATHER;
+					        		linkType = LinkTypes.Values.LINK_TO_GRANDFATHER;
 					        	} else {
-					        		linkType = LinkTypes.LINK_TO_ANCESTOR;
+					        		linkType = LinkTypes.Values.LINK_TO_ANCESTOR;
 					        	}
 					        	nra.addNameFamilyLink(nameInstance, linkType, fnXMLID);
 					        	patronymsLinked++;
@@ -386,11 +459,11 @@ public class Document {
 				        	generateParseError(addNameEl, "Multiple clan name declarations.");
 				        } else if(isClan){
 				        	// add clan name
-				        	nra.addNameFamilyLink(nameInstance, LinkTypes.LINK_TO_CLAN, fnXMLID);
+				        	nra.addNameFamilyLink(nameInstance, LinkTypes.Values.LINK_TO_CLAN, fnXMLID);
 				        	fFoundClanName = true;
 				        } else if(isSpouse){
 				        	// add clan name
-				        	nra.addNameFamilyLink(nameInstance, LinkTypes.LINK_TO_CLAN, fnXMLID);
+				        	nra.addNameFamilyLink(nameInstance, LinkTypes.Values.LINK_TO_CLAN, fnXMLID);
 				        	fFoundClanName = true;
 				        }
 			        }
@@ -401,6 +474,26 @@ public class Document {
 	    	throw xpe;
 	    }
 	}
+	
+	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
+		final String DELETE_ALL = 
+			"DELETE FROM document WHERE corpus_id=?";
+		int corpus_id = corpus.getId();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_ALL);
+			stmt.setInt(1, corpus_id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+							"Problem deleting documents\n"+se.getLocalizedMessage()).build());
+		}
+	}
+	
+
 
 	/**
 	 * @return the id

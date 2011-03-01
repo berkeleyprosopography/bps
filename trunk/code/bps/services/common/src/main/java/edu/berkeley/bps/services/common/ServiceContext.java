@@ -9,6 +9,8 @@ import java.util.HashMap;
 
 public class ServiceContext {
 	public static final String label = "ServiceContext";
+	
+	// TODO Really need to test and handle dropped connections
 	private Connection dbConn = null;
 	private String connectionUrl = null;
 	

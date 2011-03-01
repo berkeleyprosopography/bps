@@ -32,7 +32,7 @@
 					{else}
 						<td class="corpus corpusdesc 2" width="320px">
 							<textarea id="D_{$corpus.id}" cols="40" rows="2"
-								onkeyup="enableElement('U_{$corpus.id}');setStatusP('')"
+								onkeyup="enableElement('U_{$corpus.id}',true);setStatusP('')"
 								>{$corpus.description}</textarea>
 						</td>
 						<td class="corpus" width="100px">
@@ -46,7 +46,14 @@
 		</div>
 		<p>&nbsp;</p>
 		{if isset($corpus_file) }
-		<p>Corpus file uploaded. <a href="{$teisummaryloc}">Click here to verify basic tei data.</a></p>
+		<p>Corpus file uploaded. 
+			<strong>
+			  <a href="{$teiloc}">View tei</a>&nbsp;&nbsp;
+			  <a href="{$teisummaryloc}">Validate and view summary.</a>&nbsp;&nbsp;
+			</strong>
+		  <input id="processTEIBtn" type="button"
+								onclick="processTEI('{$corpus.id}')" value="  Rebuild corpus from TEI  " />
+		</p>
 		{/if}
 		<h3>Upload a {if isset($corpus_file) }<i>new</i> {/if}TEI Corpus file:</h3>
 		<div class="form_row">
@@ -66,9 +73,11 @@
 				</table>
 			</form>
 		</div>
-		{if !empty($documents)}
 			<div class="docs_row">
-				<h2>Documents in Corpus</h2>
+				{if empty($documents)}
+				<h2><i>No</i> Documents (yet) in Corpus</h2>
+				{else}
+				<h2>{$documents|@count} Documents in Corpus:</h2>
 				<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
 						<td class="title" width="200px">Alt. ID</td>
@@ -81,8 +90,8 @@
 						</tr>
 					{/section}
 				</table>
+				{/if}
 			</div>
-		{/if}
 	{/if}
 	<p>&nbsp;</p>
 	{if isset($opmsg) }

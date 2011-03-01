@@ -247,7 +247,7 @@ public class Corpus extends CachedEntity {
 		}
 		return corpusList;
 	}	
-	
+	/*
 	public void CreateAndPersist(Connection dbConn) {
 		final String myName = ".CreateAndPersist: ";
 		final String INSERT_STMT = 
@@ -274,13 +274,22 @@ public class Corpus extends CachedEntity {
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		}
 	}
+	*/
 
 	public static Corpus CreateAndPersist(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
 		final String myName = ".CreateAndPersist: ";
+		int id = persistNew(dbConn, name, description, owner_id, defaultDocTimeSpan);
+		Corpus corpus = new Corpus(id, name, description, owner_id, defaultDocTimeSpan);
+		return corpus;
+	}
+	
+	private static int persistNew(Connection dbConn, 
+			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
+		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO corpus(name, description, owner_id, creation_time) VALUES(?,?,?,now())";
-		Corpus corpus = null;
+		int newId = 0;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
 												Statement.RETURN_GENERATED_KEYS);
@@ -291,7 +300,7 @@ public class Corpus extends CachedEntity {
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
 				if(rs.next()){
-					corpus = new Corpus(rs.getInt(1), name, description, owner_id, defaultDocTimeSpan); 
+					newId = rs.getInt(1); 
 				}
 				rs.close();
 			}
@@ -300,27 +309,53 @@ public class Corpus extends CachedEntity {
 			System.out.println(tmp);
 			throw new RuntimeException( tmp );
 		}
-		return corpus;
+		return newId;
 	}
+
 	
 	public void persist(Connection dbConn) {
 		final String myName = ".persist: ";
-		final String UPDATE_STMT = 
-			"UPDATE corpus SET name=?, description=? WHERE id=?";
 		if(id<=UNSET_ID_VALUE) {
-			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) corpus!");
+			id = persistNew(dbConn, name, description, ownerId, defaultDocTimeSpan);
+		} else {
+			final String UPDATE_STMT = 
+				"UPDATE corpus SET name=?, description=? WHERE id=?";
+			try {
+				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+				stmt.setString(1, name);
+				stmt.setString(2, description);
+				stmt.setInt(3, id);
+				stmt.executeUpdate();
+			} catch(SQLException se) {
+				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+				System.out.println(tmp);
+				throw new RuntimeException( tmp );
+			}
 		}
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
-			stmt.setString(1, name);
-			stmt.setString(2, description);
-			stmt.setInt(3, id);
-			stmt.executeUpdate();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-			throw new RuntimeException( tmp );
+	}
+	
+	public void persistActivities(Connection dbConn) {
+		for(Activity activity:activities.values()) {
+			activity.persist(dbConn);
 		}
+	}
+	
+	public void persistActivityRoles(Connection dbConn) {
+		for(ActivityRole activityRole:activityRoles.values()) {
+			activityRole.persist(dbConn);
+		}
+	}
+	
+	public void persistDocuments(Connection dbConn) {
+		for(Document doc:documents.values()) {
+			doc.persist(dbConn);
+		}
+	}
+	
+	public void persistAttachedEntities(Connection dbConn) {
+		persistActivities(dbConn);
+		persistActivityRoles(dbConn);
+		persistDocuments(dbConn);
 	}
 	
 	public void deletePersistence(Connection dbConn) {
@@ -497,22 +532,21 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public void deleteDocuments(Connection dbConn) {
-		final String DELETE_DOCS = 
-			"DELETE FROM document WHERE corpus_id = ?";
-	    if(dbConn!=null) {
-			try {
-				PreparedStatement stmt = dbConn.prepareStatement(DELETE_DOCS);
-				stmt.setInt(1, id);
-				stmt.executeUpdate();
-				stmt.close();
-			} catch(SQLException se) {
-				// Just absorb it
-				String tmp = myClass+".deleteDocuments: Problem querying DB.\n"+ se.getMessage();
-				System.out.println(tmp);
-			}
-	    }
+		Document.DeleteAllInCorpus(dbConn, this);
 		if(documents!=null)
 			documents.clear();
+	}
+
+	public void deleteActivities(Connection dbConn) {
+		Activity.DeleteAllInCorpus(dbConn, this);
+		if(activities!=null)
+			activities.clear();
+	}
+
+	public void deleteActivityRoles(Connection dbConn) {
+		ActivityRole.DeleteAllInCorpus(dbConn, this);
+		if(activityRoles!=null)
+			activityRoles.clear();
 	}
 
 	public Activity findOrCreateActivity(String name) {
