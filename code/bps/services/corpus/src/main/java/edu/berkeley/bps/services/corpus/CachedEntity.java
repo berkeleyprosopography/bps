@@ -19,9 +19,9 @@ public class CachedEntity {
 	public static final int UNSET_ID_VALUE = -1;
 	
 	@XmlElement
-	protected int id;
+	protected int id = -1;
 	@XmlElement
-	protected String name;
+	protected String name = null;
 
 	protected static final String NAME_MAP_SUFFIX = ".NameMap";
 	protected static final String ID_MAP_SUFFIX = ".IdMap";

@@ -1,6 +1,7 @@
 package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.BaseResource;
+import edu.berkeley.bps.services.corpus.sax.CorpusParser;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -110,7 +111,9 @@ public class CorporaResource extends BaseResource {
         } 
         try {
 	        // Persist the new item, and get an id for it
-	    	corpus.CreateAndPersist(dbConn);
+        	// Ensure this is recognized as new
+        	corpus.setId(CachedEntity.UNSET_ID_VALUE);
+	    	corpus.persist(dbConn);
 	        UriBuilder path = UriBuilder.fromResource(CorporaResource.class);
 	        path.path("" + corpus.getId());
 	        Response response = Response.created(path.build()).build();
@@ -238,24 +241,69 @@ public class CorporaResource extends BaseResource {
         }
         return Response.ok().build();
     }
+	
 	/**
-     * Loads documents from a TEI file
+     * Runs XSLT transform of uploaded corpus document to provide summary info.
 	 * @param id the id of the corpus
-	 * @return
+	 * @return HTML output of XSLT summary transform
 	 */
 	@GET
-	@Produces("text/html")
-	@Path("{id}/teisummary")
-	public StreamingOutput getTEISummary(
+	@Produces("application/xml")
+	@Path("{id}/tei")
+	public Response getTEI(
 			@Context ServletContext srvc, 
 			@PathParam("id") int id) {
+		final String myName = ".getTEI(): ";
         try {
         	final InputStream xmls;
         	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
 			if (teipath != null && !teipath.isEmpty()) {
 				xmls = new FileInputStream(teipath);
 			} else {
-				String tmp = myClass+".getTEISummary(): No corpus file uploaded.";
+				String tmp = myClass+myName+"No corpus file uploaded.";
+				System.out.println(tmp);
+	        	throw new WebApplicationException( 
+	    			Response.status(
+	    				Response.Status.BAD_REQUEST).entity(tmp).build());
+			}
+			Response response = Response.ok(xmls).build();
+	        return response;
+	    } catch(WebApplicationException wae) {
+			throw wae;
+        } catch (FileNotFoundException fnfe) {
+			String tmp = myClass+myName+"Could not open corpus file: \n"+ fnfe.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		} catch(Exception e) {
+			String tmp = myClass+myName+".Problem getting TEI.\n"+ e.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+    }
+
+	/**
+     * Runs XSLT transform of uploaded corpus document to provide summary info.
+	 * @param id the id of the corpus
+	 * @return HTML output of XSLT summary transform
+	 */
+	@GET
+	@Produces("text/html")
+	@Path("{id}/tei/summary")
+	public StreamingOutput getTEISummary(
+			@Context ServletContext srvc, 
+			@PathParam("id") int id) {
+		final String myName = ".getTEISummary(): ";
+        try {
+        	final InputStream xmls;
+        	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
+			if (teipath != null && !teipath.isEmpty()) {
+				xmls = new FileInputStream(teipath);
+			} else {
+				String tmp = myClass+myName+"No corpus file uploaded.";
 				System.out.println(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
@@ -265,13 +313,13 @@ public class CorporaResource extends BaseResource {
 		} catch(WebApplicationException wae) {
 			throw wae;
         } catch (FileNotFoundException fnfe) {
-			String tmp = myClass+".getTEISummary(): Bad file param: \n"+ fnfe.getLocalizedMessage();
+			String tmp = myClass+myName+"Could not open corpus file: \n"+ fnfe.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		} catch(Exception e) {
-			String tmp = myClass+".getTEISummary(): Problem getting TEI.\n"+ e.getLocalizedMessage();
+			String tmp = myClass+myName+".Problem getting TEI.\n"+ e.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -316,6 +364,49 @@ public class CorporaResource extends BaseResource {
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		} catch(Exception e) {
 			String tmp = myClass+".getTEI(): Problem getting TEI.\n"+ e.getLocalizedMessage();
+			System.out.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+    }
+
+	/**
+     * Runs XSLT transform of uploaded corpus document to provide summary info.
+	 * @param id the id of the corpus
+	 * @return HTML output of XSLT summary transform
+	 */
+	@PUT
+	@Path("{id}/tei")
+	public Response rebuildFromTEI(
+			@Context ServletContext srvc, 
+			@PathParam("id") int id) {
+		final String myName = ".rebuildFromTEI(): ";
+        try {
+        	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
+	        Connection dbConn = getConnection(srvc);
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
+            	throw new WebApplicationException( 
+            			Response.status(
+            				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
+				
+			}
+			// Clear out the existing documents, Names, etc. 
+            corpus.deleteDocuments(dbConn);
+            corpus.deleteActivities(dbConn);
+            corpus.deleteActivityRoles(dbConn);
+            CorpusParser.buildFromTEI(corpus, teipath);
+            // Persist updated corpus (description, etc.)
+            corpus.persist(dbConn);
+            corpus.persistDocuments(dbConn);
+            // Persist all the new documents
+	        Response response = Response.ok().build();
+	        return response;
+		} catch(WebApplicationException wae) {
+			throw wae;
+		} catch(Exception e) {
+			String tmp = myClass+myName+"Problem parsing TEI.\n"+ e.getLocalizedMessage();
 			System.out.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(

@@ -170,21 +170,22 @@ public class ActivityRole {
 	public void persist(Connection dbConn) {
 		final String myName = ".persist: ";
 		// Note that we do not update the corpus_id - moving them is not allowed 
-		final String UPDATE_STMT = 
-			"UPDATE act_role SET name=?, description=?, WHERE id=?";
-		if(id==CachedEntity.UNSET_ID_VALUE) {
-			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) activityRole!");
-		}
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
-			stmt.setString(1, name);
-			stmt.setString(2, description);
-			stmt.setInt(3, id);
-			stmt.executeUpdate();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-			throw new RuntimeException( tmp );
+		if(id<=CachedEntity.UNSET_ID_VALUE) {
+			id = persistNew(dbConn, corpus.getId(), name, description);
+		} else {
+			final String UPDATE_STMT = 
+				"UPDATE act_role SET name=?, description=?, WHERE id=?";
+			try {
+				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+				stmt.setString(1, name);
+				stmt.setString(2, description);
+				stmt.setInt(3, id);
+				stmt.executeUpdate();
+			} catch(SQLException se) {
+				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+				System.out.println(tmp);
+				throw new RuntimeException( tmp );
+			}
 		}
 	}
 	
@@ -306,6 +307,24 @@ public class ActivityRole {
 		}
 	}
 
+	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
+		final String DELETE_ALL = 
+			"DELETE FROM act_role WHERE corpus_id=?";
+		int corpus_id = corpus.getId();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_ALL);
+			stmt.setInt(1, corpus_id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+							"Problem deleting activityRoles\n"+se.getLocalizedMessage()).build());
+		}
+	}
+	
 	/**
 	 * @return Name.
 	 */

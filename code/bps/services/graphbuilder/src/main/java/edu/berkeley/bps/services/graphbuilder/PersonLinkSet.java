@@ -14,10 +14,10 @@ import java.util.ArrayList;
 public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 
 	private O fromObj = null;
-	private LinkTypes linkType = null;
+	private LinkTypes.Values linkType = null;
 	private double summedWeight;
 
-	public PersonLinkSet(O fromObj, LinkTypes linkType) {
+	public PersonLinkSet(O fromObj, LinkTypes.Values linkType) {
 		if(fromObj== null)
 			throw new IllegalArgumentException("Must specify link base (fromObj).");
 		this.fromObj = fromObj;

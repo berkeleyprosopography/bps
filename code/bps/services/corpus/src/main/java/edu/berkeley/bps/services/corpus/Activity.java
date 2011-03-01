@@ -135,27 +135,28 @@ public class Activity {
 	
 	public void persist(Connection dbConn) {
 		final String myName = ".persist: ";
-		// Note that we do not update the corpus_id - moving them is not allowed 
-		final String UPDATE_STMT = 
-			"UPDATE activity SET name=?, description=?, parent_id=? WHERE id=?";
-		if(id==CachedEntity.UNSET_ID_VALUE) {
-			throw new RuntimeException(myClass+myName+"Attempt to UPDATE new (unpersisted) activity!");
-		}
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
-			stmt.setString(1, name);
-			stmt.setString(2, description);
-			if(parent==null) {
-				stmt.setNull(3, java.sql.Types.INTEGER);
-			} else {
-				stmt.setInt(3, parent.getId());
+		if(id<=CachedEntity.UNSET_ID_VALUE) {
+			id = persistNew(dbConn, corpus.getId(), name, description, parent);
+		} else {
+			// Note that we do not update the corpus_id - moving them is not allowed 
+			final String UPDATE_STMT = 
+				"UPDATE activity SET name=?, description=?, parent_id=? WHERE id=?";
+			try {
+				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+				stmt.setString(1, name);
+				stmt.setString(2, description);
+				if(parent==null) {
+					stmt.setNull(3, java.sql.Types.INTEGER);
+				} else {
+					stmt.setInt(3, parent.getId());
+				}
+				stmt.setInt(4, id);
+				stmt.executeUpdate();
+			} catch(SQLException se) {
+				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+				System.out.println(tmp);
+				throw new RuntimeException( tmp );
 			}
-			stmt.setInt(4, id);
-			stmt.executeUpdate();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
-			throw new RuntimeException( tmp );
 		}
 	}
 	
@@ -185,6 +186,24 @@ public class Activity {
 							"Problem creating activity\n"+se.getLocalizedMessage()).build());
 		}
 		return activityList;
+	}
+	
+	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
+		final String DELETE_ALL = 
+			"DELETE FROM activity WHERE corpus_id=?";
+		int corpus_id = corpus.getId();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_ALL);
+			stmt.setInt(1, corpus_id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
+			System.out.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+							"Problem deleting activities\n"+se.getLocalizedMessage()).build());
+		}
 	}
 	
 	public static boolean Exists(Connection dbConn, Corpus corpus, int id) {
