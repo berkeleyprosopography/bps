@@ -110,13 +110,10 @@ function processTEI(corpusID) {
 		return;
 	}
 	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/tei";
-	alert( "Preparing request: PUT: "+url);
+	//alert( "Preparing request: PUT: "+url);
 	xmlhttp.open("PUT", url, true);
-	//xmlhttp.setRequestHeader("Content-Type",
-	//													"application/xml" );
 	xmlhttp.onreadystatechange=processTEIRSC;
 	xmlhttp.send(null);
-	//window.status = "request sent: PUT: "+url+"?"+args;
 	enableElement( "processTEIBtn", false );
 }
 
