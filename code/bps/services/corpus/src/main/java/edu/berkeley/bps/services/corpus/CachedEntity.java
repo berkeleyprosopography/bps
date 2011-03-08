@@ -17,6 +17,8 @@ import edu.berkeley.bps.services.common.ServiceContext;
 public class CachedEntity {
 
 	public static final int UNSET_ID_VALUE = -1;
+	public static final boolean SHALLOW_PERSIST = true;
+	public static final boolean DEEP_PERSIST = false;
 	
 	@XmlElement
 	protected int id = -1;
@@ -46,7 +48,7 @@ public class CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 		}
 		return exists;
 	}
@@ -66,7 +68,7 @@ public class CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".NameUsed: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 		}
 	
 		return exists;

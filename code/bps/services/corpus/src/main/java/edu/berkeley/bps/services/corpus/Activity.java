@@ -53,8 +53,8 @@ public class Activity {
 	}
 
 	/**
-	 * @see Activity( String name, String description, Activity parent )
 	 * @param id
+	 * @param corpus The owning corpus for this name
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 * @param parent Broader activity that this specializes.
@@ -67,16 +67,28 @@ public class Activity {
 		this.parent = parent;
 		if(parent!=null)
 			parent.addChild(this);
+		System.err.println("Activity.ctor, created: "+this.toString());
 	}
 
 	/**
-	 * @see Activity( String name, String description, Activity parent )
+	 * @see Activity(int id, Corpus corpus, String name, String description, Activity parent)
 	 * @param id
+	 * @param corpus The owning corpus for this name
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 */
 	public Activity(int id, Corpus corpus, String name, String description) {
 		this(id, corpus, name, description, null);
+	}
+
+	/**
+	 * @see Activity(int id, Corpus corpus, String name, String description, Activity parent)
+	 * @param corpus The owning corpus for this name
+	 * @param name A shorthand name for use in UI, etc.
+	 * @param description Any description useful to users.
+	 */
+	public Activity(Corpus corpus, String name) {
+		this(Activity.nextId--, corpus, name, null, null);
 	}
 
 	public void CreateAndPersist(Connection dbConn) {
@@ -125,7 +137,7 @@ public class Activity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -154,7 +166,7 @@ public class Activity {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.out.println(tmp);
+				System.err.println(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -180,7 +192,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAll(): Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating activity\n"+se.getLocalizedMessage()).build());
@@ -199,7 +211,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting activities\n"+se.getLocalizedMessage()).build());
@@ -224,7 +236,7 @@ public class Activity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 		}
 		return exists;
 	}
@@ -247,7 +259,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return activity;
@@ -271,7 +283,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return activity;
@@ -385,7 +397,10 @@ public class Activity {
 	 * @return Name.
 	 */
 	public String toString() {
-		return "{"+((name==null)?"(null)":name)+"}";
+		return "{id:"+id
+		+", name:"+((name==null)?"(null)":name)
+		+", corpus:"+((corpus==null)?"(null)":corpus.getId())
+		+"}";
 	}
 
 	/**

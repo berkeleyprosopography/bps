@@ -1,14 +1,17 @@
 package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.LinkTypes;
+import edu.berkeley.bps.services.common.hbtin.HBTIN_Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -120,12 +123,13 @@ public class Document {
 				notes, date_str, date_norm);
 	}
 		
-	public void persist(Connection dbConn) {
+	public void persist(Connection dbConn, boolean shallow) {
 		final String myName = ".persist: ";
 		if(id <= CachedEntity.UNSET_ID_VALUE) {
 			id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
 					notes, date_str, date_norm);
 		} else {
+			System.err.println("Document: "+id+"("+alt_id+") updating.");
 			// Note that we do not update the corpus_id - moving them is not allowed 
 			final String UPDATE_STMT = 
 				"UPDATE document SET alt_id=?, sourceURL=?, xml_id=?, notes=?, "
@@ -142,16 +146,18 @@ public class Document {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.out.println(tmp);
+				System.err.println(tmp);
 				throw new RuntimeException( tmp );
 			}
-			
 		}
+		if(shallow==CachedEntity.DEEP_PERSIST)
+			persistAttachedEntities(dbConn);
 	}
 		
 	private static int persistNew(Connection dbConn, 
 			int corpus_id, String alt_id, String sourceURL, String xml_id, 
 			String notes, String date_str, long date_norm ) {
+		System.err.println("Document: ("+alt_id+") persisting new.");
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO document(corpus_id, alt_id, sourceURL, xml_id, notes, date_str, date_norm, creation_time)"
@@ -177,7 +183,7 @@ public class Document {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 	    	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -185,6 +191,27 @@ public class Document {
 		return newId;
 	}
 
+	protected void persistNRADs(Connection dbConn) {
+		for(NameRoleActivity nrad:nameRoleActivities) {
+			nrad.persist(dbConn);
+		}
+	}
+	
+	protected void initAttachedEntityMaps(Connection dbConn) {
+		// If this is a proper corpus from the DB, then set up the 
+		// attached elements as hashmaps
+		if(id<=0)
+			return;
+		// Handle NameRoleActivities List
+		nameRoleActivities.addAll( 
+			NameRoleActivity.ListAllInDocument(dbConn, this));
+	}
+	
+	public void persistAttachedEntities(Connection dbConn) {
+		System.err.println("Document: "+id+"("+alt_id+") persisting NRADS");
+		persistNRADs(dbConn);
+	}
+	
 	public static Document FindByID(Connection dbConn, Corpus corpus, int docId) {
 		final String SELECT_BY_ID = 
 			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
@@ -204,7 +231,32 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".FindByID: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return document;
+	}
+
+	public static Document FindByAltID(Connection dbConn, Corpus corpus, String altId) {
+		final String SELECT_BY_ALT_ID = 
+			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
+			+" FROM document WHERE alt_id = ? and corpus_id = ?";
+		Document document = null;
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ALT_ID);
+			stmt.setString(1, altId);
+			stmt.setInt(2, corpus.getId());
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				document = new Document(rs.getInt("id"), corpus, rs.getString("alt_id"), 
+						rs.getString("sourceURL"), rs.getString("xml_id"),
+						rs.getString("notes"), rs.getString("date_str"), 0);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".FindByID: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return document;
@@ -217,7 +269,7 @@ public class Document {
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
 			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new IllegalArgumentException( tmp );
 		}
 		ArrayList<Document> docList = new ArrayList<Document>();
@@ -235,7 +287,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return docList;
@@ -288,14 +340,14 @@ public class Document {
 		    	}
 		    } catch(SQLException se) {
 		    	String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-		    	System.out.println(tmp);
+		    	System.err.println(tmp);
 		    	throw new RuntimeException( tmp );
 		    }
 		    
-		    Activity unkActivity = corpus.findOrCreateActivity("Unknown");
+		    Activity unkActivity = corpus.findOrCreateActivity(HBTIN_Constants.ACTIVITY_UNKNOWN, dbConn);
 		    // TODO - this is all corpus specific, and needs to go elsewhere!!!
-		    ActivityRole principal = corpus.findOrCreateActivityRole("Principal");
-		    ActivityRole witness = corpus.findOrCreateActivityRole("Witness");
+		    ActivityRole principal = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_PRINCIPLE, dbConn);
+		    ActivityRole witness = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_WITNESS, dbConn);
 		    List<String> missingNames = new ArrayList<String>(2);
 		    missingNames.add("xxx");
 		    missingNames.add("NUMMI");
@@ -486,7 +538,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting documents\n"+se.getLocalizedMessage()).build());
@@ -514,6 +566,14 @@ public class Document {
 	 */
 	public Corpus getCorpus() {
 		return corpus;
+	}
+
+	@XmlElement(name="inCorpus")
+	/**
+	 * @return the id of the corpus
+	 */
+	public int getCorpusId() {
+		return (corpus==null)?0:corpus.getId();
 	}
 
 	/**
@@ -619,13 +679,14 @@ public class Document {
 	 */
 	public void addNameRoleActivity(Name name, ActivityRole role,
 			Activity activity, String xmlID) {
-		nameRoleActivities.add(new NameRoleActivity(name, role, activity, xmlID, this));
+		addNameRoleActivity(new NameRoleActivity(name, role, activity, xmlID, this));
 	}
 
 	/**
 	 * @return the nameRoleActivities
 	 */
-	public ArrayList<NameRoleActivity> getNameRoleActivities() {
+	public List<NameRoleActivity> getNameRoleActivities() {
+		Collections.sort(nameRoleActivities);
 		return nameRoleActivities;
 	}
 

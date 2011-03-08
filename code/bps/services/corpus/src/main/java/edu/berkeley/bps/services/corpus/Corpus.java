@@ -65,11 +65,20 @@ public class Corpus extends CachedEntity {
 	/**
 	 * The named activities (not instances) seen in this corpus
 	 */
-	private HashMap<String, Activity> activities = null;
+	private HashMap<String, Activity> activitiesByName = null;
+	private HashMap<Integer, Activity> activitiesById = null;
+
 	/**
 	 * The named roles in activities (not instances) for this corpus
 	 */
-	private HashMap<String, ActivityRole> activityRoles = null;
+	private HashMap<String, ActivityRole> activityRolesByName = null;
+	private HashMap<Integer, ActivityRole> activityRolesById = null;
+	
+	/**
+	 * The names seen in this corpus
+	 */
+	private HashMap<String, Name> namesByName = null;
+	private HashMap<Integer, Name> namesById = null;
 
 	/**
 	 * Create a new empty corpus.
@@ -102,54 +111,82 @@ public class Corpus extends CachedEntity {
 		this.ownerId = ownerId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
 		documents = new HashMap<Integer, Document>();
-		activities = new HashMap<String, Activity>();
-		activityRoles = new HashMap<String, ActivityRole>();
+		activitiesByName = new HashMap<String, Activity>();
+		activitiesById = new HashMap<Integer, Activity>();
+		activityRolesByName = new HashMap<String, ActivityRole>();
+		activityRolesById = new HashMap<Integer, ActivityRole>();
+		namesByName = new HashMap<String, Name>();
+		namesById = new HashMap<Integer, Name>();
 	}
 	
 	private static void initMaps(ServiceContext sc) {
 		HashMap<String, Object> nameMap = new HashMap<String, Object>();
 		HashMap<Integer, Object> idMap = new HashMap<Integer, Object>();
 
-		{
-			Connection dbConn = sc.getConnection(false);
-			List<Corpus> corpora = ListAll(dbConn);
-			for(Corpus corpus:corpora) {
-				String name = corpus.getName();
-				if(name!=null&&!name.isEmpty())
-					nameMap.put(name, corpus);
-				idMap.put(corpus.getId(), corpus);
-				// Handle Documents Map
-				corpus.documents.clear();
-				List<Document> docList = Document.ListAllInCorpus(dbConn, corpus);
-				for(Document doc:docList) {
-					corpus.documents.put(doc.getId(), doc);
-				}
-				// Handle Activities Map
-				corpus.activities.clear();
-				List<Activity> activities = Activity.ListAllInCorpus(dbConn, corpus);
-				for(Activity act:activities) {
-					corpus.activities.put(act.getName(), act);
-				}
-				// Handle Activity Roles Map
-				corpus.activityRoles.clear();
-				List<ActivityRole> activityRoles = ActivityRole.ListAllInCorpus(dbConn, corpus);
-				for(ActivityRole actRole:activityRoles) {
-					corpus.activityRoles.put(actRole.getName(), actRole);
-				}
-			}
-			setNameMap(sc, myClass, nameMap);
-			setIdMap(sc, myClass, idMap);
+		Connection dbConn = sc.getConnection(false);
+		List<Corpus> corpora = ListAll(dbConn);
+		for(Corpus corpus:corpora) {
+			String name = corpus.getName();
+			if(name!=null&&!name.isEmpty())
+				nameMap.put(name, corpus);
+			idMap.put(corpus.getId(), corpus);
+			corpus.initAttachedEntityMaps(dbConn);
 		}
-		
-		/**
-		 * The documents in the corpus
-		 */
+		setNameMap(sc, myClass, nameMap);
+		setIdMap(sc, myClass, idMap);
+	}
+	
+	protected void initAttachedEntityMaps(Connection dbConn) {
+		// If this is a proper corpus from the DB, then set up the 
+		// attached elements as hashmaps
+		if(id<=0)
+			return;
+		System.err.println("Corpus.initAttachedEntityMaps() called...");
+		// Handle Activities Map
+		activitiesByName.clear();
+		activitiesById.clear();
+		List<Activity> activitiesList = Activity.ListAllInCorpus(dbConn, this);
+		for(Activity act:activitiesList) {
+			activitiesByName.put(act.getName(), act);
+			activitiesById.put(act.getId(), act);
+		}
+		System.err.println("Corpus.initAEMaps() Built activities list. Count: "+activitiesByName.size());
+		// Handle Activity Roles Map
+		activityRolesByName.clear();
+		activityRolesById.clear();
+		List<ActivityRole> activityRolesList = ActivityRole.ListAllInCorpus(dbConn, this);
+		for(ActivityRole actRole:activityRolesList) {
+			activityRolesByName.put(actRole.getName(), actRole);
+			activityRolesById.put(actRole.getId(), actRole);
+		}
+		System.err.println("Corpus.initAEMaps() Built roles list. Count: "+activityRolesByName.size());
+		// Handle Names Maps
+		namesByName.clear();
+		namesById.clear();
+		List<Name> namesList = Name.ListAllInCorpus(dbConn, this);
+		for(Name name:namesList) {
+			namesByName.put(name.getName(), name);
+			namesById.put(name.getId(), name);
+		}
+		System.err.println("Corpus.initAEMaps() Built names list. Count: "+namesByName.size());
+		// Handle Documents Map
+		documents.clear();
+		List<Document> docList = Document.ListAllInCorpus(dbConn, this);
+		for(Document doc:docList) {
+			documents.put(doc.getId(), doc);
+			doc.initAttachedEntityMaps(dbConn);
+		}
+		System.err.println("Corpus.initAEMaps() Built doc list. Count: "+documents.size());
 	}
 	
 	private void clearMaps() {
 		documents.clear();
-		activities.clear();
-		activityRoles.clear();
+		activitiesByName.clear();
+		activitiesById.clear();
+		activityRolesByName.clear();
+		activityRolesById.clear();
+		namesByName.clear();
+		namesById.clear();
 	}
 	
 	
@@ -178,12 +215,13 @@ public class Corpus extends CachedEntity {
 									rs.getString("description"), rs.getInt("owner_id"), null);
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
+				corpus.initAttachedEntityMaps(dbConn);
 			}
 			rs.close();
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return corpus;
@@ -206,12 +244,13 @@ public class Corpus extends CachedEntity {
 									rs.getString("description"), rs.getInt("owner_id"), null); 
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
+				corpus.initAttachedEntityMaps(dbConn);
 			}
 			rs.close();
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return corpus;
@@ -240,7 +279,7 @@ public class Corpus extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAll(): Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating corpus\n"+se.getLocalizedMessage()).build());
@@ -268,7 +307,7 @@ public class Corpus extends CachedEntity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 	    	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -278,7 +317,7 @@ public class Corpus extends CachedEntity {
 
 	public static Corpus CreateAndPersist(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
-		final String myName = ".CreateAndPersist: ";
+		//final String myName = ".CreateAndPersist: ";
 		int id = persistNew(dbConn, name, description, owner_id, defaultDocTimeSpan);
 		Corpus corpus = new Corpus(id, name, description, owner_id, defaultDocTimeSpan);
 		return corpus;
@@ -306,14 +345,14 @@ public class Corpus extends CachedEntity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return newId;
 	}
 
 	
-	public void persist(Connection dbConn) {
+	public void persist(Connection dbConn, boolean shallow) {
 		final String myName = ".persist: ";
 		if(id<=UNSET_ID_VALUE) {
 			id = persistNew(dbConn, name, description, ownerId, defaultDocTimeSpan);
@@ -328,31 +367,62 @@ public class Corpus extends CachedEntity {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.out.println(tmp);
+				System.err.println(tmp);
 				throw new RuntimeException( tmp );
+			}
+		}
+		if(shallow==CachedEntity.DEEP_PERSIST)
+			persistAttachedEntities(dbConn);
+	}
+	
+	protected void persistNames(Connection dbConn) {
+		// Since the maps are parallel, we only iterate over one
+		for(Name name:namesByName.values()) {
+			boolean fResetId = (name.getId()<=CachedEntity.UNSET_ID_VALUE);
+			if(fResetId) {
+				namesById.remove(name.getId());
+			}
+			name.persist(dbConn);
+			if(fResetId) {
+				namesById.put(name.getId(), name);
+			}
+		}
+	}
+
+	protected void persistActivities(Connection dbConn) {
+		for(Activity activity:activitiesByName.values()) {
+			boolean fResetId = (activity.getId()<=CachedEntity.UNSET_ID_VALUE);
+			if(fResetId) {
+				activitiesById.remove(activity.getId());
+			}
+			activity.persist(dbConn);
+			if(fResetId) {
+				activitiesById.put(activity.getId(), activity);
 			}
 		}
 	}
 	
-	public void persistActivities(Connection dbConn) {
-		for(Activity activity:activities.values()) {
-			activity.persist(dbConn);
-		}
-	}
-	
-	public void persistActivityRoles(Connection dbConn) {
-		for(ActivityRole activityRole:activityRoles.values()) {
+	protected void persistActivityRoles(Connection dbConn) {
+		for(ActivityRole activityRole:activityRolesByName.values()) {
+			boolean fResetId = (activityRole.getId()<=CachedEntity.UNSET_ID_VALUE);
+			if(fResetId) {
+				activityRolesById.remove(activityRole.getId());
+			}
 			activityRole.persist(dbConn);
+			if(fResetId) {
+				activityRolesById.put(activityRole.getId(), activityRole);
+			}
 		}
 	}
 	
-	public void persistDocuments(Connection dbConn) {
+	protected void persistDocuments(Connection dbConn) {
 		for(Document doc:documents.values()) {
-			doc.persist(dbConn);
+			doc.persist(dbConn, CachedEntity.DEEP_PERSIST);
 		}
 	}
 	
 	public void persistAttachedEntities(Connection dbConn) {
+		persistNames(dbConn);
 		persistActivities(dbConn);
 		persistActivityRoles(dbConn);
 		persistDocuments(dbConn);
@@ -376,6 +446,7 @@ public class Corpus extends CachedEntity {
 		}
 	}
 
+	/*
 	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
 			TimeSpan defaultDocTimeSpan, Connection dbConn)
 		throws XPathExpressionException {
@@ -415,6 +486,7 @@ public class Corpus extends CachedEntity {
 	    }
 	    return newCorpus;
 	}
+	*/
 
 	/**
 	 * Deletes all current documents, and then rebuilds corpus from TEI
@@ -424,6 +496,7 @@ public class Corpus extends CachedEntity {
 	 * @return count of documents created
 	 * @throws XPathExpressionException
 	 */
+	/*
 	public int loadFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
 			Connection dbConn)
 		throws XPathExpressionException {
@@ -465,6 +538,7 @@ public class Corpus extends CachedEntity {
 	    }
 	    return documents.size();
 	}
+	*/
 
 	public String getDescription() {
 		return description;
@@ -494,15 +568,32 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public List<Document> getDocuments() {
-		ArrayList<Document> list; 
-		if(documents != null) {
-			list = new ArrayList<Document>(documents.values());
-		} else {
-			list = new ArrayList<Document>();
-		}
+		ArrayList<Document> list = new ArrayList<Document>(documents.values());
 		return list;
 	}
 	
+	public Document getDocument(int docId) {
+		Document doc = documents.get(docId);
+		return doc;
+	}
+	
+	public List<Activity> getActivities() {
+		ArrayList<Activity> list = new ArrayList<Activity>(activitiesByName.values());
+		return list;
+	}
+	
+	public List<ActivityRole> getActivityRoles() {
+		ArrayList<ActivityRole> list = 
+			new ArrayList<ActivityRole>(activityRolesByName.values());
+		return list;
+	}
+	
+	public List<Name> getNames() {
+		ArrayList<Name> list = new ArrayList<Name>(namesByName.values());
+		return list;
+	}
+	
+	/*
 	private void fetchDocumentCount(Connection dbConn) {
 		final String SELECT_N_DOCS = 
 			"SELECT count(*) nDocs FROM document WHERE corpus_id = ?";
@@ -519,9 +610,10 @@ public class Corpus extends CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".getNDocuments: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 		}
 	}
+	*/
 	
 	public void loadDocuments(Connection dbConn) {
 		throw new RuntimeException("Not Yet Implemented");
@@ -539,36 +631,111 @@ public class Corpus extends CachedEntity {
 
 	public void deleteActivities(Connection dbConn) {
 		Activity.DeleteAllInCorpus(dbConn, this);
-		if(activities!=null)
-			activities.clear();
+		if(activitiesByName!=null)
+			activitiesByName.clear();
+		if(activitiesById!=null)
+			activitiesById.clear();
+	}
+
+	public void deleteNames(Connection dbConn) {
+		Name.DeleteAllInCorpus(dbConn, this);
+		if(namesByName!=null)
+			namesByName.clear();
+		if(namesById!=null)
+			namesById.clear();
 	}
 
 	public void deleteActivityRoles(Connection dbConn) {
 		ActivityRole.DeleteAllInCorpus(dbConn, this);
-		if(activityRoles!=null)
-			activityRoles.clear();
+		if(activityRolesByName!=null)
+			activityRolesByName.clear();
+		if(activityRolesById!=null)
+			activityRolesById.clear();
 	}
 
-	public Activity findOrCreateActivity(String name) {
-		throw new RuntimeException("NYI");
-		/*
-		initMaps();
-		Activity instance = activities.get(name);
+	public Name findOrCreateName(String name, Connection dbConn) {
+		Name instance = namesByName.get(name);
 		if(instance == null) {
-			instance = new Activity(name);
-			activities.put(name, instance);
+			instance = Name.CreateAndPersist(dbConn, id, name, 
+					Name.NAME_TYPE_PERSON, Name.GENDER_UNKNOWN, null, null);
+			addName(instance);
 		}
 		return instance;
-		*/
+	}
+	
+	public void addName(Name toAdd) {
+		if(namesByName.get(toAdd.getName())!=null)
+			throw new RuntimeException("Corpus.addName: duplicate (name).");
+		if(namesById.get(toAdd.getId())!=null)
+			throw new RuntimeException("Corpus.addName: duplicate (id).");
+		namesByName.put(toAdd.getName(), toAdd);
+		namesById.put(toAdd.getId(), toAdd);
 	}
 
-	public ActivityRole findOrCreateActivityRole(String name) {
-		//initMaps();
-		ActivityRole instance = activityRoles.get(name);
+	public Name findName(String name) {
+		Name instance = namesByName.get(name);
+		return instance;
+	}
+
+	public Name findName(int nid) {
+		Name instance = namesById.get(nid);
+		return instance;
+	}
+
+	public Activity findOrCreateActivity(String name, Connection dbConn) {
+		Activity instance = activitiesByName.get(name);
 		if(instance == null) {
-			instance = new ActivityRole(this, name);
-			activityRoles.put(name, instance);
+			instance = Activity.CreateAndPersist(dbConn, this, name, null);
+			addActivity(instance);
 		}
+		return instance;
+	}
+
+	public void addActivity(Activity toAdd) {
+		if(activitiesByName.get(toAdd.getName())!=null)
+			throw new RuntimeException("Corpus.addActivity: duplicate (name).");
+		if(activitiesById.get(toAdd.getId())!=null)
+			throw new RuntimeException("Corpus.addActivity: duplicate (id).");
+		activitiesByName.put(toAdd.getName(), toAdd);
+		activitiesById.put(toAdd.getId(), toAdd);
+	}
+
+	public Activity findActivity(String name) {
+		Activity instance = activitiesByName.get(name);
+		return instance;
+	}
+
+	public Activity findActivity(int aid) {
+		Activity instance = activitiesById.get(aid);
+		return instance;
+	}
+
+	public ActivityRole findOrCreateActivityRole(String name, Connection dbConn) {
+		ActivityRole instance = activityRolesByName.get(name);
+		if(instance == null) {
+			instance = ActivityRole.CreateAndPersist(dbConn, this, name, null);
+			instance.persist(dbConn);
+			addActivityRole(instance);
+		}
+		return instance;
+	}
+
+	public void addActivityRole(ActivityRole toAdd) {
+		if(activityRolesByName.get(toAdd.getName())!=null)
+			throw new RuntimeException("addActivityRole: duplicate (name).");
+		if(activityRolesById.get(toAdd.getId())!=null)
+			throw new RuntimeException("addActivityRole: duplicate (id).");
+		activityRolesByName.put(toAdd.getName(), toAdd);
+		activityRolesById.put(toAdd.getId(), toAdd);
+	}
+
+	public ActivityRole findActivityRole(String name) {
+		ActivityRole instance = activityRolesByName.get(name);
+		return instance;
+	}
+
+	public ActivityRole findActivityRole(int arid) {
+		ActivityRole instance = activityRolesById.get(arid);
 		return instance;
 	}
 
@@ -587,10 +754,10 @@ public class Corpus extends CachedEntity {
 				nameRoleActivitiesFilename, nameFamilyLinksFilename, documents);
     	System.out.println("Done.");
     	System.out.print("Generating Activities SQL...");
-		SQLUtils.generateActivitiesSQL(activitiesFilename, activities);
+		SQLUtils.generateActivitiesSQL(activitiesFilename, activitiesByName);
     	System.out.println("Done.");
     	System.out.print("Generating ActivityRoles SQL...");
-		SQLUtils.generateActivityRolesSQL(activityRolesFilename, activityRoles);
+		SQLUtils.generateActivityRolesSQL(activityRolesFilename, activityRolesByName);
     	System.out.println("Done.");
     	System.out.println("Done.");
 	}

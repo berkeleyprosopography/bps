@@ -12,6 +12,10 @@ import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author pschmitz
@@ -22,9 +26,11 @@ import javax.ws.rs.core.Response;
 // Finish alignment to schema, then write persist, and a CreateAndPersist factory method,
 // which also handles setting the id correctly.
 
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(name="name")
 public class Name {
 	private final static String myClass = "Name";
-	private static int	nextID = -1;
+	private static int	nextID = CachedEntity.UNSET_ID_VALUE;
 	
 	public static final String NAME_TYPE_PERSON = "person";
 	public static final String NAME_TYPE_CLAN = "clan";
@@ -36,26 +42,32 @@ public class Name {
 	/**
 	 * The internal DB id, or could be a UUID
 	 */
+	@XmlElement
 	private int			id;
 	/**
 	 * The associated corpus, if non-zero. If 0, indicates no corpus link
 	 */
+	@XmlElement
 	private int			corpusId;
 	/**
 	 * The form of this name
 	 */
+	@XmlElement
 	private String		name;
 	/**
 	 * The type of this name
 	 */
+	@XmlElement
 	private String		nametype;
 	/**
 	 * The gender of this name
 	 */
+	@XmlElement
 	private String		gender;
 	/**
 	 * Any notes about this form
 	 */
+	@XmlElement
 	private String		notes;
 	/**
 	 * If this is not the normalized form, then normal is a reference to the normalized form.
@@ -75,8 +87,8 @@ public class Name {
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 */
-	public Name( String name ) {
-		this(Name.nextID--, 0, name, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
+	public Name( String name, Corpus corpus) {
+		this(Name.nextID--, corpus.getId(), name, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
 	}
 
 	/**
@@ -162,6 +174,13 @@ public class Name {
 	}
 
 	/**
+	 * @return the normal
+	 */
+	@XmlElement(name="normal")
+	public int getNormalId() {
+		return (normal==null)?0:normal.id;
+	}
+	/**
 	 * @return the nametype
 	 */
 	public String getNameType() {
@@ -242,7 +261,7 @@ public class Name {
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
 			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new IllegalArgumentException( tmp );
 		}
 		ArrayList<Name> nameList = new ArrayList<Name>();
@@ -271,7 +290,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return nameList;
@@ -288,7 +307,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting documents\n"+se.getLocalizedMessage()).build());
@@ -356,7 +375,7 @@ public class Name {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return newId;
@@ -387,7 +406,7 @@ public class Name {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.out.println(tmp);
+				System.err.println(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -432,10 +451,33 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return toFind;
+	}
+
+	public static boolean Exists(Connection dbConn, Corpus corpus, int id) {
+		boolean exists = false;
+		final String SELECT_BY_ID = 
+			"SELECT `name` FROM name WHERE id = ? and corpus_id = ?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+			stmt.setInt(1, id);
+			stmt.setInt(2, corpus.getId());
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				if(rs.getString("name")!=null)
+					exists = true;
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			// Just absorb it
+			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+		}
+		return exists;
 	}
 
 	/**
@@ -474,23 +516,28 @@ public class Name {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return toFind;
 	}
 
 	public void deletePersistence(Connection dbConn) {
-		final String DELETE_STMT = "DELETE FROM `name` WHERE id=?";
+		DeletePersistence(dbConn, corpusId, id);
+	}
+	
+	public static void DeletePersistence(Connection dbConn, int corpus_id, int id) {
+		final String DELETE_STMT = "DELETE FROM name WHERE id=? and corpus_id=?";
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
 			stmt.setInt(1, id);
+			stmt.setInt(2, corpus_id);
 			stmt.executeUpdate();
+			stmt.close();
 		} catch(SQLException se) {
-			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
+			String tmp = myClass+".DeletePersistence: Problem querying DB.\n"+ se.getMessage();
 			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}
-	
 }
