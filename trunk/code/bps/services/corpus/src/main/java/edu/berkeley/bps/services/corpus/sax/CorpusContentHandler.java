@@ -1,5 +1,7 @@
 package edu.berkeley.bps.services.corpus.sax;
 
+import java.sql.Connection;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
@@ -13,12 +15,14 @@ public class CorpusContentHandler extends StackedContentHandler {
 	protected static String[] descpath = 
 		{"teiCorpus","teiHeader","fileDesc","sourceDesc","p"};
 	
-	Corpus corpus;
+	protected Corpus corpus;
+	protected Connection dbConn;
 
-	public CorpusContentHandler(Corpus corpus, 
+	public CorpusContentHandler(Connection dbConn, Corpus corpus, 
 			XMLReader parser, ContentHandler previous) {
 		super(parser, previous);
 		this.corpus = corpus;
+		this.dbConn = dbConn;
 	}
 	
 	public void endElement(String namespaceURI, String localName, String qName) {
@@ -36,7 +40,7 @@ public class CorpusContentHandler extends StackedContentHandler {
 		// Do not call super, if we are passing this off elsewhere
 		if(localName.equals("TEI")) {
 			DocumentContentHandler docCH = 
-				new DocumentContentHandler(corpus,parser,this);
+				new DocumentContentHandler(dbConn, corpus,parser,this);
 			// Pretend docCH was already set when we started this element
 			docCH.startElement(namespaceURI, localName, qName, attrList);
 			parser.setContentHandler(docCH);

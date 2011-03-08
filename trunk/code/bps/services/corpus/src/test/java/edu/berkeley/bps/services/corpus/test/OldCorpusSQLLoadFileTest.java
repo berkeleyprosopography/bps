@@ -23,6 +23,7 @@ public class OldCorpusSQLLoadFileTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		/*
 		int i = 0;
 		String arg;
 		String corpusFile = null;
@@ -96,6 +97,7 @@ public class OldCorpusSQLLoadFileTest {
         	System.err.println(e);
             e.printStackTrace();
         }
+        */
 	}
 
 }

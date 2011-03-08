@@ -2,6 +2,7 @@ package edu.berkeley.bps.services.common.sax;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.Locator;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -13,6 +14,7 @@ public class StackedContentHandler extends DefaultHandler implements
 	protected StringStack elPath;				// Keep track of path in this context
 	protected XMLReader parser;
 	protected ContentHandler previous;
+	protected Locator locator = null;
 
 	public StackedContentHandler(XMLReader parser, ContentHandler previous) {
 		super();
@@ -46,22 +48,42 @@ public class StackedContentHandler extends DefaultHandler implements
 		return parser;
 	}
 
+	@Override
 	public void startElement(String namespaceURI, String localName, String qName, 
 			Attributes attrList) {
 		accumulator.setLength(0);
 		elPath.push(localName);
 	}
 
+	@Override
 	public void endElement(String namespaceURI, String localName, String qName) {
-		if(!localName.equalsIgnoreCase(elPath.pop())) {
-			throw new RuntimeException("StackedContentHandler.endElement name does not match stack!");
+		String popped = elPath.pop();
+		if(!localName.equalsIgnoreCase(popped)) {
+			String err = "StackedContentHandler.endElement name does not match stack!"
+				+"\nExpecting: "+localName+" popped: "+popped
+				+" at: "+generateErrorContext();
+			throw new RuntimeException(err);
 		}
 		if(elPath.isEmpty()) {
 			pop();
 		}
 	}
 
+	@Override
 	public void endDocument() {
 		throw new RuntimeException("StackedContentHandler.endDocument reached without popping stack!");
+	}
+	
+	@Override
+	public void setDocumentLocator(Locator locator) {
+		this.locator = locator;
+	}
+	
+	protected String generateErrorContext() {
+		if(locator!=null) {
+			return "Line["+locator.getLineNumber()+"] Col["+locator.getColumnNumber()+"]";
+		} else {
+			return "(No location info)";
+		}
 	}
 }

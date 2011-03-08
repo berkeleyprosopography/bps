@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.jboss.resteasy.annotations.cache.Cache;
+
 import edu.berkeley.bps.services.common.LinkTypes;
 
 /**
@@ -16,7 +18,7 @@ import edu.berkeley.bps.services.common.LinkTypes;
  */
 public class NameFamilyLink {
 	private final static String myClass = "NameFamilyLink";
-	private static int	nextID = -1;
+	private static int	nextID = CachedEntity.UNSET_ID_VALUE;
 
 	private int					id;
 	private NameRoleActivity	owner_nrad;
@@ -114,7 +116,7 @@ public class NameFamilyLink {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.out.println(tmp);
+			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return newId;
@@ -139,7 +141,7 @@ public class NameFamilyLink {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.out.println(tmp);
+				System.err.println(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}

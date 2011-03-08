@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author pschmitz
@@ -131,7 +132,7 @@ public class SQLUtils {
 
 	public static void generateNameRoleActivityDocumentsSQL(
 			Writer nraWriter, Writer nflWriter, int docID,
-			ArrayList<NameRoleActivity> nameRoleActivities) {
+			List<NameRoleActivity> nameRoleActivities) {
 		for( NameRoleActivity nra:nameRoleActivities ) {
 			try {
 				// Generate another row in the documents table
