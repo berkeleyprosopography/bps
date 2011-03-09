@@ -80,13 +80,20 @@
 				<h2>{$documents|@count} Documents in Corpus:</h2>
 				<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
-						<td class="title" width="200px">Alt. ID</td>
+						<td class="title" width="200px">Document</td>
+						<td class="title" width="200px">Publication</td>
+						<td class="title" width="400px">Notes</td>
+						<td class="title" width="100px">Date</td>
+						<td class="title" width="200px">XML ID</td>
 					</tr>
 					{section name=doc loop=$documents}
 						<tr>
-							<td class="document" style="padding-top:6px" width="200px">
-								{$documents[doc].alt_id}
-							</td>
+							<td class="document" style="padding-top:6px">
+								<a href="/document?cid={$corpus.id}&did={$documents[doc].id}">{$documents[doc].alt_id}</a></td>
+							<td class="document" style="padding-top:6px">&nbsp; </td>
+							<td class="document" style="padding-top:6px">{$documents[doc].notes}</td>
+							<td class="document" style="padding-top:6px">{$documents[doc].date_str}</td>
+							<td class="document" style="padding-top:6px">{$documents[doc].xml_id}</td>
 						</tr>
 					{/section}
 				</table>
