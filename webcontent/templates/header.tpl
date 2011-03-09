@@ -2,8 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!--
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 Would be nice to have a shortcut icon
 <link rel="shortcut icon" href="/media/favicon.ico" type="image/vnd.microsoft.icon">
 -->

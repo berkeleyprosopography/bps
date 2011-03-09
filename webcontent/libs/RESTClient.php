@@ -53,7 +53,7 @@ class RESTClient {
 	}
 
 	public function setJSONMode() {
-		$this->setHeader('Accept', 'application/json');
+		$this->setHeader('Accept', 'application/json;charset=UTF-8, application/json');
 	}
 
 	public function setHeader($header, $value) {
