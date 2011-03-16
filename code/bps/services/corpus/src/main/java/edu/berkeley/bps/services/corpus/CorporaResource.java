@@ -516,7 +516,7 @@ public class CorporaResource extends BaseResource {
 	 * @return
 	 */
 	@GET
-	@Produces({"application/xml", "application/json"})
+	@Produces({"application/xml;charset=UTF-8", "application/json;charset=UTF-8"})
 	@Wrapped(element="nrads")
 	@Path("{id}/documents/{docspec}/nrads")
 	public List<NameRoleActivity> getDocumentNRADs(
