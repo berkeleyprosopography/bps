@@ -1,5 +1,7 @@
 {include file="header.tpl"}
 
+	<p class="nav-right"><a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a></p>
+
 	<h1>Document Details</h1>
 {if isset($errmsg) }
 	<h2>{$errmsg}</h2>
@@ -7,7 +9,6 @@
 	{if !isset($document) }
 		<p>No document specified!</p>
 	{else}
-		<p>&nbsp;</p>
 		<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 			<tr>
 				<td class="title" width="200px">Document</td>
@@ -62,4 +63,6 @@
 	{/if}
 	<p>&nbsp;</p>
 {/if}
+	<p class="nav-left"><a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a></p>
+
 {include file="footer.tpl"}

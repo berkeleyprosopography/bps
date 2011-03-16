@@ -29,6 +29,7 @@ td.title { border-bottom: 2px solid black; font-weight:bold; text-align:left;
 		font-style:italic; color:#777777; }
 div.nrads_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
 td.document, td.nrad { font-weight:bold; }
+p.nav-right { float:right; padding-top:10px;}
 </style>";
 
 $t->assign("style_block", $style_block);
@@ -113,6 +114,7 @@ if(!(isset($_GET['cid'])&&isset($_GET['did']))) {
 } else {
 	$document = getDocInfo($CFG,$_GET['cid'],$_GET['did']);
 	if($document){
+		$t->assign('corpusID', $_GET['cid']);
 		$t->assign('document', $document);
 		$nrads = getDocNRADs($CFG,$_GET['cid'],$_GET['did']);
 		if($nrads) {
