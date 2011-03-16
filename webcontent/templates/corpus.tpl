@@ -46,16 +46,18 @@
 		</div>
 		<p>&nbsp;</p>
 		{if isset($corpus_file) }
-		<p>Corpus file uploaded. 
-			<strong>
+		<p><strong>
+			Corpus file has been uploaded. 
 			  <a href="{$teiloc}">View tei</a>&nbsp;&nbsp;
 			  <a href="{$teisummaryloc}">Validate and view summary.</a>&nbsp;&nbsp;
 			</strong>
-		  <input id="processTEIBtn" type="button"
+			{if isset($canUpdateCorpus) }
+				<input id="processTEIBtn" type="button"
 								onclick="processTEI('{$corpus.id}')" value="  Rebuild corpus from TEI  " />
+			{/if}
 		</p>
 		{/if}
-		<h3>Upload a {if isset($corpus_file) }<i>new</i> {/if}TEI Corpus file:</h3>
+		{if isset($canUpdateCorpus) }
 		<div class="form_row">
 			<form enctype="multipart/form-data" action="../../api/uploadTEI.php" method="POST">
 				<!-- MAX_FILE_SIZE must precede the file input field -->
@@ -64,15 +66,17 @@
 				<!-- Name of input element determines name in $_FILES array -->
 				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
 					<tr height="40px">
-						<td class="corpus corpusname 2" width="200px">Select TEI file to upload:</td>
+						<td class="corpus corpusname 2" width="200px">
+						   Upload a {if isset($corpus_file)}<i>new</i> {/if}TEI Corpus file:</td>
 						<td colspan="2" class="corpus corpusdesc 2" >
-							<input name="teifile" type="file" size="44"  />
+							<input name="teifile" type="file" size="44" />
 							&nbsp;<input type="submit" value="Upload File" />
 						</td>
 					</tr>
 				</table>
 			</form>
 		</div>
+		{/if}
 			<div class="docs_row">
 				{if empty($documents)}
 				<h2><i>No</i> Documents (yet) in Corpus</h2>
