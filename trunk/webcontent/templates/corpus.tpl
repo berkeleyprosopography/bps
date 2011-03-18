@@ -62,7 +62,7 @@
 			<form enctype="multipart/form-data" action="../../api/uploadTEI.php" method="POST">
 				<!-- MAX_FILE_SIZE must precede the file input field -->
 				<input type="hidden" name="id" value="{$corpus.id}" />
-				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesize}" />
+				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesizeTEI}" />
 				<!-- Name of input element determines name in $_FILES array -->
 				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
 					<tr height="40px">
@@ -70,6 +70,31 @@
 						   Upload a {if isset($corpus_file)}<i>new</i> {/if}TEI Corpus file:</td>
 						<td colspan="2" class="corpus corpusdesc 2" >
 							<input name="teifile" type="file" size="44" />
+							&nbsp;<input type="submit" value="Upload File" />
+						</td>
+					</tr>
+				</table>
+			</form>
+			{if isset($dates_file) }
+			<p><strong>
+				Corpus Dates file has been uploaded. 
+				</strong>
+					<input id="processDatesBtn" type="button"
+									onclick="processDates('{$corpus.id}')" 
+									value="  Process Dates assertions  " />
+			</p>
+			{/if}
+			<form enctype="multipart/form-data" action="../../api/uploadDatesAssertions.php" method="POST">
+				<!-- MAX_FILE_SIZE must precede the file input field -->
+				<input type="hidden" name="id" value="{$corpus.id}" />
+				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesizeAssertions}" />
+				<!-- Name of input element determines name in $_FILES array -->
+				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
+					<tr height="40px">
+						<td class="corpus corpusname 2" width="200px">
+						   Upload a {if isset($dates_file)}<i>new</i> {/if}Corpus Dates file:</td>
+						<td colspan="2" class="corpus corpusdesc 2" >
+							<input name="datesfile" type="file" size="44" />
 							&nbsp;<input type="submit" value="Upload File" />
 						</td>
 					</tr>
