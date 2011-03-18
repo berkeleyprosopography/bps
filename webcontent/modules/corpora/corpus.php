@@ -15,9 +15,12 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 }
 
 $t->assign('page_title', 'Corpus Details'.$CFG->page_title_default);
-$maxK = 10000;
-$maxfilesize = $maxK * 1024;
-$t->assign('maxfilesize', $maxfilesize);
+$maxKTEI = 10000;
+$maxKAssertions = 1000;
+$maxfilesizeTEI = $maxKTEI * 1024;
+$t->assign('maxfilesizeTEI', $maxfilesizeTEI);
+$maxfilesizeAssertions = $maxKAssertions * 1024;
+$t->assign('maxfilesizeAssertions', $maxfilesizeAssertions);
 
 $canUpdateCorpus = false;
 if(currUserHasPerm( 'CorpusUpdate' )) {
@@ -211,6 +214,10 @@ if(!isset($_GET['id'])) {
 			$t->assign('teiloc', $teiloc);
 			$teisummaryloc = $teiloc.'/summary';
 			$t->assign('teisummaryloc', $teisummaryloc);
+		}
+		$dates_file = $CFG->corpusdir.'/'.$_GET['id'].'/assertions/dates.xml';
+		if(file_exists($dates_file)) {
+			$t->assign('dates_file', $dates_file);
 		}
 		$docs = getCorpusDocs($CFG,$_GET['id']);
 		if($docs) {
