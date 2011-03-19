@@ -13,6 +13,7 @@ public class ServiceContext {
 	// TODO Really need to test and handle dropped connections
 	private Connection dbConn = null;
 	private String connectionUrl = null;
+	private int SECONDS_TO_WAIT_FOR_VALID_CONNECTION = 3;
 	
 	private HashMap<String, Object> properties = new HashMap<String, Object>(); 
 	
@@ -25,8 +26,16 @@ public class ServiceContext {
 	  closeConnection();
 	} 
 	
+	public Connection getConnection() {
+		return getConnection(false);
+	}
+	
 	public Connection getConnection(boolean fOnlyIfAvailable) {
 		if(dbConn==null) {
+			openConnection();
+		}
+		if(!checkConnection()) {
+			closeConnection();
 			openConnection();
 		}
 		if(fOnlyIfAvailable && (dbConn != null) && !isAvailable()) {
@@ -80,9 +89,11 @@ public class ServiceContext {
 			System.out.println(tmp);
 			throw new RuntimeException( tmp );
 		}
+		boolean valid = false;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			dbConn = DriverManager.getConnection(connectionUrl);
+			valid = dbConn.isValid(SECONDS_TO_WAIT_FOR_VALID_CONNECTION);
 		} catch ( ClassNotFoundException cnfe ) {
 			String tmp = myName+"Cannot load the SQLServerDriver class.";
 			System.out.println(tmp+"\n"+cnfe.getMessage());
@@ -97,11 +108,29 @@ public class ServiceContext {
 			System.out.println(tmp);
 			throw new RuntimeException( tmp );
 		}
+		if(!valid) {
+			String tmp = myName+"Problem connecting to DB. URL: "
+			+"\n"+connectionUrl+"\nConnection succeeded, but DB not valid";
+			System.out.println(tmp);
+			throw new RuntimeException( tmp );
+		}
 	}
 	
 
 	protected void closeConnection() {
 		if (dbConn != null) try { dbConn.close(); dbConn=null;} catch(Exception e) {}
+	}
+
+	protected boolean checkConnection() {
+		final String myName = ".checkConnection: ";
+		try { 
+			if (dbConn == null)
+				return dbConn.isValid(3);
+		} catch (SQLException se) {
+			String tmp = myName+"Problem connecting to DB. \n"+ se.getMessage();
+			System.out.println(tmp);
+		}
+		return false;
 	}
 
 

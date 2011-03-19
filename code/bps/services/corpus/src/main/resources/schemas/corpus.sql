@@ -29,7 +29,7 @@ CREATE TABLE `document` (
   `xml_id`        VARCHAR(255) NULL,
   `notes`         text NULL,
   `date_str`      VARCHAR(255) NULL,
-  `date_norm`     INT(8) NULL,
+  `date_norm`     BIGINT(8) NULL,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
