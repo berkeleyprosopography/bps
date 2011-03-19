@@ -14,11 +14,11 @@ import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
+//import javax.xml.xpath.XPath;
+//import javax.xml.xpath.XPathConstants;
+//import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+//import javax.xml.xpath.XPathFactory;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+//import org.w3c.dom.NodeList;
 
 
 /* TODO Next steps:
@@ -59,7 +59,8 @@ public class Corpus extends CachedEntity {
 	// only be used until docs are persisted.
 	private static int nextId = UNSET_ID_VALUE;	// temp IDs before we serialize
 	
-	HashMap<Integer, Document> documents = null;
+	private HashMap<Integer, Document> documentsById = null;
+	private HashMap<String, Document> documentsByAltId = null;
 	
 	int fetchedDocumentCount = 0; 
 	/**
@@ -110,7 +111,8 @@ public class Corpus extends CachedEntity {
 		this.description = description;
 		this.ownerId = ownerId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
-		documents = new HashMap<Integer, Document>();
+		documentsById = new HashMap<Integer, Document>();
+		documentsByAltId = new HashMap<String, Document>();
 		activitiesByName = new HashMap<String, Activity>();
 		activitiesById = new HashMap<Integer, Activity>();
 		activityRolesByName = new HashMap<String, ActivityRole>();
@@ -170,17 +172,23 @@ public class Corpus extends CachedEntity {
 		}
 		System.err.println("Corpus.initAEMaps() Built names list. Count: "+namesByName.size());
 		// Handle Documents Map
-		documents.clear();
+		documentsById.clear();
+		documentsByAltId.clear();
 		List<Document> docList = Document.ListAllInCorpus(dbConn, this);
 		for(Document doc:docList) {
-			documents.put(doc.getId(), doc);
+			documentsById.put(doc.getId(), doc);
 			doc.initAttachedEntityMaps(dbConn);
+			String altId = doc.getAlt_id();
+			if(altId!=null&&!altId.isEmpty()) {
+				documentsByAltId.put(altId, doc);
+			}
 		}
-		System.err.println("Corpus.initAEMaps() Built doc list. Count: "+documents.size());
+		System.err.println("Corpus.initAEMaps() Built doc list. Count: "+documentsById.size());
 	}
 	
 	private void clearMaps() {
-		documents.clear();
+		documentsById.clear();
+		documentsByAltId.clear();
 		activitiesByName.clear();
 		activitiesById.clear();
 		activityRolesByName.clear();
@@ -416,7 +424,7 @@ public class Corpus extends CachedEntity {
 	}
 	
 	protected void persistDocuments(Connection dbConn) {
-		for(Document doc:documents.values()) {
+		for(Document doc:documentsById.values()) {
 			doc.persist(dbConn, CachedEntity.DEEP_PERSIST);
 		}
 	}
@@ -559,8 +567,8 @@ public class Corpus extends CachedEntity {
 	@XmlElement(name="ndocs")
 	public int getNDocuments() {
 		int nDocs = 0;
-		if(documents != null) {
-			nDocs = documents.size();
+		if(documentsById != null) {
+			nDocs = documentsById.size();
 		} else {
 			nDocs = fetchedDocumentCount;
 		}
@@ -568,12 +576,17 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public List<Document> getDocuments() {
-		ArrayList<Document> list = new ArrayList<Document>(documents.values());
+		ArrayList<Document> list = new ArrayList<Document>(documentsById.values());
 		return list;
 	}
 	
 	public Document getDocument(int docId) {
-		Document doc = documents.get(docId);
+		Document doc = documentsById.get(docId);
+		return doc;
+	}
+	
+	public Document getDocumentByAltId(String altId) {
+		Document doc = documentsByAltId.get(altId);
 		return doc;
 	}
 	
@@ -620,13 +633,20 @@ public class Corpus extends CachedEntity {
 	}
 
 	public void addDocument( Document newDoc ) {
-		documents.put(newDoc.getId(), newDoc);
+		documentsById.put(newDoc.getId(), newDoc);
+		String altId = newDoc.getAlt_id();
+		if(altId!=null&&!altId.isEmpty()) {
+			documentsByAltId.put(altId, newDoc);
+		}
+
 	}
 	
 	public void deleteDocuments(Connection dbConn) {
 		Document.DeleteAllInCorpus(dbConn, this);
-		if(documents!=null)
-			documents.clear();
+		if(documentsById!=null)
+			documentsById.clear();
+		if(documentsByAltId!=null)
+			documentsByAltId.clear();
 	}
 
 	public void deleteActivities(Connection dbConn) {
@@ -751,7 +771,7 @@ public class Corpus extends CachedEntity {
 		//initMaps();
     	System.out.print("Generating Documents (and NameRoleActivityDocs) SQL...");
 		SQLUtils.generateDocumentsSQL(documentsFilename,
-				nameRoleActivitiesFilename, nameFamilyLinksFilename, documents);
+				nameRoleActivitiesFilename, nameFamilyLinksFilename, documentsById);
     	System.out.println("Done.");
     	System.out.print("Generating Activities SQL...");
 		SQLUtils.generateActivitiesSQL(activitiesFilename, activitiesByName);

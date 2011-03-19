@@ -97,7 +97,8 @@ function processTEIRSC() {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
 			setStatusP("Corpus rebuilt.");
-	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			//alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			window.location.reload();
 		} else {
 			alert( "Error encountered when trying to rebuild corpus.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
@@ -120,6 +121,37 @@ function processTEI(corpusID) {
 	enableElement( "processTEIBtn", false );
 }
 
+// The ready state change callback method for the processDates method
+function processDatesRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Date Assertions processed.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			window.location.reload();
+		} else {
+			alert( "Error encountered when trying to process date assertions.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	enableElement( "processDatesBtn", true );
+	}
+}
+
+
+function processDates(corpusID) {
+	if( !xmlhttp ) {
+		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/dates";
+	//alert( "Preparing request: PUT: "+url);
+	xmlhttp.open("PUT", url, true);
+	xmlhttp.onreadystatechange=processDatesRSC;
+	xmlhttp.send(null);
+	enableElement( "processDatesBtn", false );
+}
+
+//
 // This should go into a utils.js - how to include?
 function enableElement( elID, sense ) {
 	var el = document.getElementById(elID);
