@@ -69,7 +69,7 @@ public class Activity {
 			parent.addChild(this);
 		System.err.println("Activity.ctor, created: "+this.toString());
 	}
-
+	
 	/**
 	 * @see Activity(int id, Corpus corpus, String name, String description, Activity parent)
 	 * @param id
@@ -79,6 +79,16 @@ public class Activity {
 	 */
 	public Activity(int id, Corpus corpus, String name, String description) {
 		this(id, corpus, name, description, null);
+	}
+
+	public Activity cloneInCorpus(Connection dbConn, Corpus newCorpus) {
+		final String myName = ".cloneInCorpus: ";
+		if(parent!=null) {
+			String tmp = myClass+myName+"Cannot clone Activity with parent (NYI).\n";
+			System.err.println(tmp);
+			throw new RuntimeException(tmp);
+		}
+		return CreateAndPersist(dbConn, newCorpus, name, description, null);
 	}
 
 	/**

@@ -109,6 +109,17 @@ public class Name {
 		this.normal = normal;
 	}
 	
+	public Name cloneInCorpus(Connection dbConn, Corpus newCorpus) {
+		final String myName = ".cloneInCorpus: ";
+		if(normal!=null) {
+			String tmp = myClass+myName+"Cannot clone Name with normal form (NYI).\n";
+			System.err.println(tmp);
+			throw new RuntimeException(tmp);
+		}
+		return CreateAndPersist(dbConn, newCorpus.getId(),
+				name, nametype, gender, notes, null);
+	}
+
 	/**
 	 * @return the id
 	 */

@@ -46,9 +46,15 @@ import org.w3c.dom.Element;
 @XmlRootElement(name="corpus")
 public class Corpus extends CachedEntity {
 	final static String myClass = "Corpus";
+	public final static int NO_WKSP_ID = 0;
 	
-	@XmlElement String		description;
-	@XmlElement int			ownerId;
+	@XmlElement 
+	String		description;
+	@XmlElement 
+	int			ownerId;
+	
+	// This is not exposed directly, but only by way of the queries.
+	int			wkspId;
 	
 	private static String myTablename = "corpus";
 
@@ -86,7 +92,7 @@ public class Corpus extends CachedEntity {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(Corpus.nextId--, null, null, -1, null);
+		this(Corpus.nextId--, null, null, -1, NO_WKSP_ID, null);
 	}
 
 	/**
@@ -95,7 +101,7 @@ public class Corpus extends CachedEntity {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus( String name, String description, TimeSpan defaultDocTimeSpan ) {
-		this(Corpus.nextId--, name, description, -1, defaultDocTimeSpan);
+		this(Corpus.nextId--, name, description, -1, NO_WKSP_ID, defaultDocTimeSpan);
 	}
 
 	/**
@@ -106,11 +112,12 @@ public class Corpus extends CachedEntity {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus(int id, String name, String description, 
-			int ownerId, TimeSpan defaultDocTimeSpan) {
+			int ownerId, int wkspId, TimeSpan defaultDocTimeSpan) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.ownerId = ownerId;
+		this.wkspId = wkspId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
 		documentsById = new HashMap<Integer, Document>();
 		documentsByAltId = new HashMap<String, Document>();
@@ -120,6 +127,40 @@ public class Corpus extends CachedEntity {
 		activityRolesById = new HashMap<Integer, ActivityRole>();
 		namesByName = new HashMap<String, Name>();
 		namesById = new HashMap<Integer, Name>();
+	}
+	
+	public Corpus cloneInWorkspace(Connection dbConn, 
+			int inWkspId, int wkspOwnerId) {
+		final String myName = ".cloneInWorkspace: ";
+		if(this.wkspId!=NO_WKSP_ID) {
+			String tmp = myClass+myName+
+				"Cannot clone a workspace-owned Corpus.\n";
+			System.err.println(tmp);
+			throw new RuntimeException(tmp);
+		}
+		Corpus newCorpus = CreateAndPersist(dbConn, 
+				name, description, wkspOwnerId,
+				inWkspId, defaultDocTimeSpan);
+		// Clone Activities, and build maps
+		for(Activity act:activitiesById.values()) {
+			Activity clone = act.cloneInCorpus(dbConn,newCorpus);
+			newCorpus.activitiesById.put(clone.getId(), clone);
+			newCorpus.activitiesByName.put(clone.getName(), clone);
+		}
+		// Clone Roles, and build maps
+		for(ActivityRole actRole:activityRolesById.values()) {
+			ActivityRole clone = actRole.cloneInCorpus(dbConn,newCorpus);
+			newCorpus.activityRolesById.put(clone.getId(), clone);
+			newCorpus.activityRolesByName.put(clone.getName(), clone);
+		}
+		// Clone Names, and build maps
+		for(Name nameItem:namesById.values()) {
+			Name clone = nameItem.cloneInCorpus(dbConn,newCorpus);
+			newCorpus.namesById.put(clone.getId(), clone);
+			newCorpus.namesByName.put(clone.getName(), clone);
+		}
+		// Clone Documents, and build maps
+		return newCorpus;
 	}
 	
 	private static void initMaps(ServiceContext sc) {
@@ -210,7 +251,7 @@ public class Corpus extends CachedEntity {
 	public static Corpus FindByID(Connection dbConn, int id) {
 		final String myName = ".FindByID: ";
 		final String SELECT_BY_ID = 
-			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
+			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
 			+" WHERE c.id = ?"
 			+" GROUP BY c.id";
@@ -221,7 +262,8 @@ public class Corpus extends CachedEntity {
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
 				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-									rs.getString("description"), rs.getInt("owner_id"), null);
+							rs.getString("description"), 
+							rs.getInt("owner_id"), rs.getInt("wksp_id"), null);
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
 				corpus.initAttachedEntityMaps(dbConn);
@@ -241,7 +283,7 @@ public class Corpus extends CachedEntity {
 		final String SELECT_BY_NAME = 
 			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
-			+" WHERE c.name = ?"
+			+" WHERE c.name = ? AND c.wksp_id=" + NO_WKSP_ID
 			+" GROUP BY c.id";
 		Corpus corpus = null;
 		try {
@@ -250,7 +292,8 @@ public class Corpus extends CachedEntity {
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
 				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-									rs.getString("description"), rs.getInt("owner_id"), null); 
+							rs.getString("description"), 
+							rs.getInt("owner_id"), NO_WKSP_ID, null); 
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
 				corpus.initAttachedEntityMaps(dbConn);
@@ -266,19 +309,26 @@ public class Corpus extends CachedEntity {
 	}
 
 	public static List<Corpus> ListAll(Connection dbConn) {
+		return ListAll(dbConn, 0);
+	}
+	
+	public static List<Corpus> ListAll(Connection dbConn, int wkspId) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
-			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
+			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
+			+" WHERE c.wksp_id=?"
 			+" GROUP BY c.id";
 		// Generate the right representation according to its media type.
 		ArrayList<Corpus> corpusList = new ArrayList<Corpus>();
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
+			stmt.setInt(1, wkspId);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				Corpus corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-						rs.getString("description"), rs.getInt("owner_id"), null);
+						rs.getString("description"), rs.getInt("owner_id"), 
+						wkspId, null);
 				// If no docId, count should actually be 0, not 1
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
@@ -326,15 +376,22 @@ public class Corpus extends CachedEntity {
 
 	public static Corpus CreateAndPersist(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
-		//final String myName = ".CreateAndPersist: ";
+		return CreateAndPersist(dbConn, 
+				name, description, owner_id, NO_WKSP_ID, defaultDocTimeSpan);
+	}
+	
+	protected static Corpus CreateAndPersist(Connection dbConn, 
+			String name, String description, int owner_id, int wksp_id, TimeSpan defaultDocTimeSpan) {
 		int id = persistNew(dbConn, name, description, owner_id, defaultDocTimeSpan);
-		Corpus corpus = new Corpus(id, name, description, owner_id, defaultDocTimeSpan);
+		Corpus corpus = new Corpus(id, name, description, 
+									owner_id, wksp_id, defaultDocTimeSpan);
 		return corpus;
 	}
 	
 	private static int persistNew(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
 		final String myName = ".persistNew: ";
+		// Note that wksp_id defaults to NULL/0
 		final String INSERT_STMT = 
 			"INSERT INTO corpus(name, description, owner_id, creation_time) VALUES(?,?,?,now())";
 		int newId = 0;
@@ -438,10 +495,11 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public void deletePersistence(Connection dbConn) {
+		deleteAttachedEntities(dbConn);
 		DeletePersistence(dbConn, id);
 	}
 	
-	public static void DeletePersistence(Connection dbConn, int id) {
+	private static void DeletePersistence(Connection dbConn, int id) {
 		final String DELETE_STMT = "DELETE FROM corpus WHERE id=?";
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
@@ -665,6 +723,17 @@ public class Corpus extends CachedEntity {
 		if(altId!=null&&!altId.isEmpty()) {
 			documentsByAltId.put(altId, newDoc);
 		}
+
+	}
+	
+	public void deleteAttachedEntities(Connection dbConn) {
+		// Clear out the existing documents, Names, etc. 
+        deleteDocuments(dbConn);
+        // This is probably not necessary, but is cheap
+        deleteActivities(dbConn);
+        // This is probably not necessary, but is cheap
+        deleteActivityRoles(dbConn);
+        deleteNames(dbConn);
 
 	}
 	

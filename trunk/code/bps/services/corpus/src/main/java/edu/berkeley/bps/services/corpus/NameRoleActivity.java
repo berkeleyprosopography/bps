@@ -93,6 +93,19 @@ public class NameRoleActivity
 		this.resetCompKey();
 	}
 	
+	public NameRoleActivity cloneInDocument(Connection dbConn, Document inDoc) {
+		Corpus corpus = inDoc.getCorpus();
+		Name nameClone = corpus.findName(name.getName());
+		ActivityRole roleClone = corpus.findActivityRole(role.getName());
+		Activity activityClone = corpus.findActivity(activity.getName());
+		NameRoleActivity clone = 
+			new NameRoleActivity(nameClone, roleClone, activityClone,
+					xmlID, inDoc);
+		clone.persist(dbConn);
+		// TODO clone all the name-family links
+		return clone;
+	}
+	
 	private void resetCompKey() {
 		compKey[0] = (activity==null)?0:activity.getId();
 		compKey[1] = (role==null)?0:role.getId();
@@ -457,6 +470,27 @@ public class NameRoleActivity
 			throw new RuntimeException( tmp );
 		}
 		return nradList;
+	}
+	
+	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
+		final String DELETE_ALL = 
+			"DELETE name_role_activity_doc FROM name_role_activity_doc "
+			+" INNER JOIN document d"
+			+" ON name_role_activity_doc.document_id = d.id"
+			+" WHERE d.corpus_id=?";
+		int corpus_id = corpus.getId();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_ALL);
+			stmt.setInt(1, corpus_id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new WebApplicationException( 
+					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+							"Problem deleting nrads\n"+se.getLocalizedMessage()).build());
+		}
 	}
 	
 	/**

@@ -9,11 +9,14 @@ CREATE TABLE `corpus` (
   `name`          VARCHAR(255) NOT NULL,
   `description`   text NULL,
   `owner_id`      INT(10) UNSIGNED NOT NULL,
+  `wksp_id`       INT(10) UNSIGNED NULL,
   `creation_time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`      timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
-	CONSTRAINT `corp_ibfk_1` FOREIGN KEY (`owner_id`)
-      REFERENCES `user` (`id`)
+    CONSTRAINT `corp_ibfk_1` FOREIGN KEY (`owner_id`)
+      REFERENCES `user` (`id`),
+	CONSTRAINT `corp_ibfk_2` FOREIGN KEY (`wksp_id`)
+      REFERENCES `workspace` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 

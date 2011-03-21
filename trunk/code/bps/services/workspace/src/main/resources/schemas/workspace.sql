@@ -14,7 +14,7 @@ CREATE TABLE `workspace` (
         on update CURRENT_TIMESTAMP,
 	CONSTRAINT `wksp_ibfk_1` FOREIGN KEY (`owner_id`)
       REFERENCES `user` (`id`)
-))ENGINE=MyIsam;
+)ENGINE=MyIsam;
 SHOW WARNINGS;
 
 -- Define the configuration parameter table

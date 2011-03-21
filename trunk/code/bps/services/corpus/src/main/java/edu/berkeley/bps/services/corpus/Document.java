@@ -81,6 +81,20 @@ public class Document {
 		this.date_norm = date_norm;
 		this.nameRoleActivities = new ArrayList<NameRoleActivity>();
 	}
+	
+	public Document cloneInCorpus(Connection dbConn, Corpus newCorpus) {
+		Document newDoc = new Document(
+				Document.nextId--,
+				newCorpus,
+				alt_id, sourceURL, xml_id, notes, date_str, date_norm);
+		newDoc.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
+		// Clone the NRAD list
+		for(NameRoleActivity nrad:nameRoleActivities) {
+			NameRoleActivity clone = nrad.cloneInDocument(dbConn, newDoc);
+			newDoc.nameRoleActivities.add(clone);
+		}
+		return newDoc;
+	}
 
 	/**
 	 * Create a new Document, and synthesize an ID.
@@ -538,6 +552,7 @@ public class Document {
 		final String DELETE_ALL = 
 			"DELETE FROM document WHERE corpus_id=?";
 		int corpus_id = corpus.getId();
+		NameRoleActivity.DeleteAllInCorpus(dbConn, corpus);
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(DELETE_ALL);
 			stmt.setInt(1, corpus_id);
