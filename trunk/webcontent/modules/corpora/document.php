@@ -46,6 +46,29 @@ function getDocNRADsUrl($CFG,$cid,$did){
 	return getDocUrl($CFG,$cid,$did)."/nrads";
 }
 
+function getCorpusMediaDocDate($CFG,$id){
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id;
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServCorpOutput = $rest->getResponse();
+		$result = json_decode($ServCorpOutput, true);
+		$corpObj = &$result['corpus'];
+		$corpusMDD = $corpObj['medianDocDate'];
+		unset($corpObj);
+		return $corpusMDD;
+	} else if($rest->getStatus() == 404) {
+		$opmsg = "Bad or illegal corpus specifier. ";
+	} else {
+		$opmsg = $rest->getError();
+	}
+	return false;
+}
+
 function getDocInfo($CFG,$corpid,$docid){
 	global $opmsg;
 
@@ -58,9 +81,14 @@ function getDocInfo($CFG,$corpid,$docid){
 		$ServiceOutput = $rest->getResponse();
 		$result = json_decode($ServiceOutput, true);
 		$docObj = &$result['document'];
-		$document = array(	'id' => $docObj['id'], 'alt_id' => $docObj['alt_id'], 
-			'notes' => $docObj['notes'], 'sourceURL' => $docObj['sourceURL'],
-			'xml_id' => $docObj['xml_id'], 'date_str' => $docObj['date_str'] );
+		$document = array(
+			'id' => $docObj['id'],
+			'alt_id' => $docObj['alt_id'], 
+			'notes' => $docObj['notes'],
+			'sourceURL' => $docObj['sourceURL'],
+			'xml_id' => $docObj['xml_id'],
+			'date_norm' => $docObj['dateValue'],
+			'date_str' => $docObj['dateString'] );
 		unset($docObj);
 		return $document;
 	} else if($rest->getStatus() == 404) {
@@ -115,6 +143,9 @@ if(!(isset($_GET['cid'])&&isset($_GET['did']))) {
 	$document = getDocInfo($CFG,$_GET['cid'],$_GET['did']);
 	if($document){
 		$t->assign('corpusID', $_GET['cid']);
+		if($document['date_norm']==0) {
+			$document['date_str'] = '<em>('.getCorpusMediaDocDate($CFG,$_GET['cid']).'?)</em>';
+		}
 		$t->assign('document', $document);
 		$nrads = getDocNRADs($CFG,$_GET['cid'],$_GET['did']);
 		if($nrads) {
