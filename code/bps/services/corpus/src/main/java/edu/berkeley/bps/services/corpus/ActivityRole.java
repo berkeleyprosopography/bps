@@ -71,6 +71,10 @@ public class ActivityRole {
 		this.description = description;
 	}
 
+	public ActivityRole cloneInCorpus(Connection dbConn, Corpus newCorpus) {
+		return CreateAndPersist(dbConn, newCorpus, name, description);
+	}
+
 	/**
 	 * @return the id
 	 */

@@ -236,12 +236,13 @@ public class CorporaResource extends BaseResource {
 	public Response deleteCorpus(@Context ServletContext srvc, @PathParam("id") int id) {
         try {
     		Connection dbConn = getServiceContext(srvc).getConnection();
-            if(!Corpus.Exists(dbConn, id)) {
+			Corpus corpus = Corpus.FindByID(dbConn, id);
+			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
             }
-            Corpus.DeletePersistence(dbConn,id);
+            corpus.deletePersistence(dbConn);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
@@ -403,9 +404,7 @@ public class CorporaResource extends BaseResource {
 				
 			}
 			// Clear out the existing documents, Names, etc. 
-            corpus.deleteDocuments(dbConn);
-            corpus.deleteActivities(dbConn);
-            corpus.deleteActivityRoles(dbConn);
+            corpus.deleteAttachedEntities(dbConn);
             CorpusParser.buildFromTEI(dbConn, corpus, teipath);
             // Persist updated corpus (description, etc.)
             corpus.persist(dbConn, CachedEntity.DEEP_PERSIST);
