@@ -192,8 +192,12 @@ function getCorpus($CFG,$id){
 		$ServCorpOutput = $rest->getResponse();
 		$result = json_decode($ServCorpOutput, true);
 		$corpObj = &$result['corpus'];
-		$corpus = array(	'id' => $corpObj['id'], 'name' => $corpObj['name'], 
-					'nDocs' => $corpObj['ndocs'], 'description' => $corpObj['description']);
+		$corpus = array(
+			'id' => $corpObj['id'],
+			'name' => $corpObj['name'], 
+			'nDocs' => $corpObj['ndocs'],
+			'medianDocDate' => $corpObj['medianDocDate'],
+			'description' => $corpObj['description']);
 		unset($corpObj);
 		return $corpus;
 	} else if($rest->getStatus() == 404) {
@@ -204,7 +208,7 @@ function getCorpus($CFG,$id){
 	return false;
 }
 
-function getCorpusDocs($CFG,$id){
+function getCorpusDocs($CFG,$id,$medianDocDate) {
 	global $opmsg;
 
 	$rest = new RESTclient();
@@ -218,9 +222,10 @@ function getCorpusDocs($CFG,$id){
 		$documents = array();
 		foreach($results as &$result) {
 			$docObj = &$result['document'];
+			$docDate = ($docObj['dateString']==0)?$medianDocDate:$docObj['dateString'];
 			$document = array(	'id' => $docObj['id'], 'alt_id' => $docObj['alt_id'], 
 				'notes' => $docObj['notes'], 'sourceURL' => $docObj['sourceURL'],
-				'xml_id' => $docObj['xml_id'], 'date_str' => $docObj['date_str']
+				'xml_id' => $docObj['xml_id'], 'date_str' => $docDate
 			);
 			array_push($documents, $document);
 			// Supposed to help with efficiency (dangling refs?)
@@ -251,7 +256,7 @@ if(!isset($_GET['id'])) {
 		if(file_exists($dates_file)) {
 			$t->assign('dates_file', $dates_file);
 		}
-		$docs = getCorpusDocs($CFG,$_GET['id']);
+		$docs = getCorpusDocs($CFG,$_GET['id'], '<em>('.$corpus['medianDocDate'].'?)</em>');
 		if($docs) {
 			$t->assign('documents', $docs);
 		} else if($opmsg){

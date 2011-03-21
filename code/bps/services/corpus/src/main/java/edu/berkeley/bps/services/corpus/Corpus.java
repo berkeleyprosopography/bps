@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -573,6 +574,32 @@ public class Corpus extends CachedEntity {
 			nDocs = fetchedDocumentCount;
 		}
 		return nDocs;
+	}
+	
+	@XmlElement(name="medianDocDate")
+	public String getMedianDocumentDate() {
+		long medianDate = 0;
+		if(documentsById != null) {
+			ArrayList<Long> validDates = new ArrayList<Long>(documentsById.size());
+			for(Document doc:documentsById.values()) {
+				long docDate = doc.getDate_norm();
+				if(docDate != 0) {
+					validDates.add(docDate);
+				}
+			}
+			if(!validDates.isEmpty()) {
+				Collections.sort(validDates);
+				if (validDates.size() % 2 == 1) {
+					medianDate = validDates.get((validDates.size()+1)/2-1);
+				} else {
+					long lower = validDates.get(validDates.size()/2-1);
+					long upper = validDates.get(validDates.size()/2);
+					medianDate = (lower + upper) / 2L;
+			    }	
+			}
+		}
+		return (medianDate==0)?null:
+			TimeUtils.millisToSimpleYearString(medianDate);
 	}
 	
 	public List<Document> getDocuments() {

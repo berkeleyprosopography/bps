@@ -8,7 +8,8 @@ import java.util.GregorianCalendar;
 
 public class TimeUtils {
 	private static GregorianCalendar cal = new GregorianCalendar();
-	private static SimpleDateFormat simpleYearFormatter = new SimpleDateFormat("yyyy GG");
+	private static SimpleDateFormat simpleYearFormatter = new SimpleDateFormat("y GG");
+	private static StringBuilder out = new StringBuilder(8);
 
 	public static final long DAY_IN_MILLIS = 24L*60L*60L*1000L;
 	public static final long APPROX_YEAR_IN_MILLIS = (long)(365.25*(DAY_IN_MILLIS));
@@ -46,7 +47,14 @@ public class TimeUtils {
 	 * @return standard formatted string for millisecond date value
 	 */
 	public static String millisToSimpleYearString(long millis) {
-		return simpleYearFormatter.format(new Date(millis));
+		cal.clear();
+		cal.setTimeInMillis(millis);
+		int year = cal.get(Calendar.YEAR);
+		int era = cal.get(Calendar.ERA);
+		out.setLength(0);
+		out.append(year);
+		out.append((era==GregorianCalendar.BC)?" BCE":" CE");
+		return out.toString();
 	}
 
 	/**

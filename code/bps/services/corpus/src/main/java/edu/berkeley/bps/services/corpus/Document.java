@@ -2,6 +2,7 @@ package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.LinkTypes;
 import edu.berkeley.bps.services.common.hbtin.HBTIN_Constants;
+import edu.berkeley.bps.services.common.time.TimeUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,8 +51,9 @@ public class Document {
 	private String		xml_id;			// Element within source (for compound files).
 	@XmlElement
 	private String		notes;			// Any notes on document
-	@XmlElement
+	@XmlElement(name="dateAsEntered")
 	private String		date_str;		// Date string from document
+	@XmlElement(name="dateValue")
 	private long		date_norm;		// Normalized date
 
 	private ArrayList<NameRoleActivity> nameRoleActivities;
@@ -264,7 +266,7 @@ public class Document {
 
 	public static List<Document> ListAllInCorpus(Connection dbConn, Corpus corpus) {
 		final String SELECT_BY_CORPUS_ID = 
-			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
+			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str, date_norm"
 			+" FROM document WHERE corpus_id = ?";
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
@@ -278,9 +280,14 @@ public class Document {
 			stmt.setInt(1, corpus_id);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				Document document = new Document(rs.getInt("id"), corpus, rs.getString("alt_id"), 
-						rs.getString("sourceURL"), rs.getString("xml_id"),
-						rs.getString("notes"), rs.getString("date_str"), 0);
+				Document document = 
+					new Document(rs.getInt("id"), corpus, 
+						rs.getString("alt_id"), 
+						rs.getString("sourceURL"), 
+						rs.getString("xml_id"),
+						rs.getString("notes"), 
+						rs.getString("date_str"), 
+						rs.getLong("date_norm"));
 				docList.add(document);
 			}
 			rs.close();
@@ -659,6 +666,16 @@ public class Document {
 	public long getDate_norm() {
 		return date_norm;
 	}
+	
+	/**
+	 * @return the date_norm
+	 */
+	@XmlElement(name="dateString")
+	public String getDate_normAsStr() {
+		return (date_norm==0)?null:
+			TimeUtils.millisToSimpleYearString(date_norm);
+	}
+
 
 	/**
 	 * @param date_norm the date_norm to set
