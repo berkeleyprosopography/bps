@@ -5,7 +5,7 @@
 -- Define the main workspace table
 DROP TABLE IF EXISTS `workspace`;
 CREATE TABLE `workspace` (
-  `id`            INT(10) UNSIGNED PRIMARY KEY NOT NULL,
+  `id`            INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
   `name`          VARCHAR(255) NOT NULL default 'My Workspace',
   `description`   text NULL,
   `owner_id`      INT(10) UNSIGNED NOT NULL,

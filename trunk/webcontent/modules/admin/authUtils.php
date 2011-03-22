@@ -4,6 +4,12 @@
 // Caller must include.
 /*************************************/
 
+function getCurrUser() {
+	if( isset($_SESSION['id']) )
+		return $_SESSION['id'];
+	return false;
+}
+
 function currUserHasPerm( $perm ) {
 	if( isset($_SESSION['id']) )
 		return userHasPerm( $_SESSION['id'], $perm );
