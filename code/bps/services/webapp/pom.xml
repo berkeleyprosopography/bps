@@ -29,6 +29,7 @@
 		</repository>
 	</repositories>
 	<build>
+		<!-- Rename to bps-services -->
 		<finalName>bps.services.webapp</finalName>
 		<pluginManagement>
 			<plugins>

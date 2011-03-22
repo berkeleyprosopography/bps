@@ -47,7 +47,7 @@ Would be nice to have a shortcut icon
 			<div id="navBarLinks">
 				<a class="navLink" href="/">Home</a>
 				<a class="navLink" href="/corpora/">Corpora</a>
-				<a class="navLink" href="">Workspaces</a>
+				<a class="navLink" href="/workspace">Workspace</a>
 			</div>
 			<!--
 			<div id="navBarSearchBox">
