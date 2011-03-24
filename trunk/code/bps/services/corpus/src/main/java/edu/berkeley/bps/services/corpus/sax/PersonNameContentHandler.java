@@ -108,7 +108,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 			names.add(fnName);
 			// TODO add name family links to all proceeding names
 		}
-		if((type&T_PRIMARY)!=0) {
+		if((type&T_PRIMARY)!=0 || type==T_MISSING) {
 			if(state!=S_INIT) {
 				generateParseWarning(xmlid, 
 						"Found multiple primary names in person declaration");

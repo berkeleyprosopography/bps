@@ -29,6 +29,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -52,10 +53,20 @@ public class CorporaResource extends BaseResource {
 	@GET
 	@Produces({"application/xml", "application/json"})
 	@Wrapped(element="corpora")
-	public List<Corpus> getAll(@Context ServletContext srvc) {
+	public List<Corpus> getAll(@Context ServletContext srvc,
+			@Context UriInfo ui) {
 		try {
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			String wkspParam = queryParams.getFirst("wksp");
+			// Default to the "no workspace" value of 0 to get the unattached corpora
+			int wksp_id = Corpus.NO_WKSP_ID;
+			if(wkspParam != null) {
+				try {
+					wksp_id = Integer.parseInt(wkspParam);
+				} catch( NumberFormatException nfe) {}
+			}
 			Connection dbConn = getServiceContext(srvc).getConnection();
-			List<Corpus> corpusList = Corpus.ListAll(dbConn);
+			List<Corpus> corpusList = Corpus.ListAll(dbConn, wksp_id);
 			return corpusList;
 		} catch(WebApplicationException wae) {
 			throw wae;
@@ -210,6 +221,7 @@ public class CorporaResource extends BaseResource {
             }
             // Since all we're changing is the corpus fields, no need
             // to persist all the docs, etc.
+			corpus.setId(id);		// Enforce payload and resource coherence
 	    	corpus.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateCorpus(): Problem updating DB.\n"+ re.getLocalizedMessage();
@@ -505,7 +517,8 @@ public class CorporaResource extends BaseResource {
     		Connection dbConn = getServiceContext(srvc).getConnection();
 	        document = getDocument(dbConn, id, docspec);
 		} catch(RuntimeException re) {
-			String tmp = myClass+".getDocument(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".getDocument("+docspec
+				+"): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
         	throw new WebApplicationException( 
     			Response.status(
@@ -751,11 +764,12 @@ public class CorporaResource extends BaseResource {
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 				
 			}
-            if(!Activity.Exists(dbConn, corpus, id)) {
+            if(!Activity.Exists(dbConn, corpus, aid)) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No activity found with id: "+id).build());
             }
+            activity.setId(aid);		// Enforce payload and resource coherence
     		activity.setCorpus(corpus);	// Ensure we have proper linkage
             activity.persist(dbConn);
 		} catch(RuntimeException re) {
@@ -947,11 +961,12 @@ public class CorporaResource extends BaseResource {
 								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 
 			}
-			if(!ActivityRole.Exists(dbConn, corpus, id)) {
+			if(!ActivityRole.Exists(dbConn, corpus, aid)) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
 			}
+			activityRole.setId(aid);		// Enforce payload and resource coherence
 			activityRole.setCorpus(corpus);	// Ensure we have proper linkage
 			activityRole.persist(dbConn);
 		} catch(RuntimeException re) {
@@ -1135,7 +1150,7 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("nid") int nid, Name name){
 		try {
 			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(dbConn, nid);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1147,6 +1162,7 @@ public class CorporaResource extends BaseResource {
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
 			}
+			name.setId(nid);		// Enforce payload and resource coherence
 			name.setCorpusId(id);	// Ensure we have proper linkage
 			name.persist(dbConn);
 		} catch(RuntimeException re) {

@@ -71,6 +71,18 @@ public class WorkspaceResource extends BaseResource {
 		return user_id;
 	}
 
+	private Workspace getWorkspace(Connection dbConn, int wkspId) {
+		Workspace workspace = Workspace.FindByID(dbConn, wkspId);
+		if(workspace==null) {
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.NOT_FOUND).entity(
+    						"No workspace found with id: "+wkspId).build());
+			
+		}
+		return workspace;
+	}
+	
 	/**
      * Returns a listing of all workspaces.
 	 * @return Full (shallow) details of all workspaces
@@ -109,15 +121,7 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id")int id) {
         try {
 			Connection dbConn = getServiceContext(srvc).getConnection();
-			Workspace workspace = Workspace.FindByID(dbConn, id);
-			if(workspace==null) {
-            	throw new WebApplicationException( 
-        			Response.status(
-        				Response.Status.NOT_FOUND).entity(
-        						"No workspace found with id: "+id).build());
-				
-			}
-			return workspace;
+			return getWorkspace(dbConn, id);
 		} catch(WebApplicationException wae) {
 			throw wae;
 		} catch(Exception e) {
@@ -180,6 +184,7 @@ public class WorkspaceResource extends BaseResource {
             }
             // Since all we're changing is the corpus fields, no need
             // to persist all the docs, etc.
+            workspace.setId(id);	// ID must match
             workspace.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
             // Set the response's status and entity
             UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
@@ -206,12 +211,7 @@ public class WorkspaceResource extends BaseResource {
 	public Response deleteWorkspace(@Context ServletContext srvc, @PathParam("id") int id) {
         try {
     		Connection dbConn = getServiceContext(srvc).getConnection();
-			Workspace workspace = Workspace.FindByID(dbConn, id);
-			if(workspace==null) {
-            	throw new WebApplicationException( 
-            			Response.status(
-            				Response.Status.NOT_FOUND).entity("No workspace found with id: "+id).build());
-            }
+			Workspace workspace = getWorkspace(dbConn, id);
 			workspace.deletePersistence(dbConn);
 	        return Response.ok().build();
 		} catch(RuntimeException re) {
@@ -222,18 +222,101 @@ public class WorkspaceResource extends BaseResource {
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
         }
     }
+	
+	private Corpus parsePayloadToGetCorpus(Connection dbConn, String payload) {
+    	int corpusID = Integer.parseInt(payload);
+		Corpus corpus = Corpus.FindByID(dbConn, corpusID);
+		if(corpus==null) {
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.NOT_FOUND).entity(
+   						"No corpus found with id: "+corpusID).build());
+		}
+		return corpus;
+	}
+	
+	private static final boolean MATCH_EXISTING_CORPUS = true;
+	private static final boolean ADD_NEW_CORPUS = false;
+	
+	private Response addFromCorpusInt(ServletContext srvc, 
+    		int wkspId, String payload, boolean mustMatchExisting) {
+        try {
+    		Connection dbConn = getServiceContext(srvc).getConnection();
+    		// Do the import corpus into workspace.
+    		// For now, if there is a corpus, blow it and all resources away.
+    		// Also blow away all synthesized resources like Persons, Clans, etc. 
+    		// Response should just be okay or failure
+			Workspace workspace = getWorkspace(dbConn, wkspId);
+			Corpus corpusToAdd = parsePayloadToGetCorpus(dbConn, payload);
+			if(mustMatchExisting
+					&& (corpusToAdd.getId()!=workspace.getBuiltFromCorpus())) {
+				String tmp = myClass+".refreshFromCorpus(): Unknown Corpus specifier in payload: "
+				+payload;
+				System.err.println(tmp);
+		    	throw new WebApplicationException( 
+					Response.status(
+						Response.Status.BAD_REQUEST).entity(tmp).build());
 
+			}
+			int wkspOwnerId = workspace.getOwner_id();
+			Corpus newCorpus = corpusToAdd.cloneForWorkspace(dbConn, wkspId, wkspOwnerId);
+			// setCorpus() will clear out all existing resources.
+			workspace.setCorpus(dbConn, newCorpus);
+			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
+			path.path(wkspId + "/corpora/");
+            Response response = Response.ok(path.build().toString()).build();
+	        return response;
+		} catch(WebApplicationException wae) {
+			throw wae;
+		} catch(NumberFormatException nfe) {
+			String tmp = myClass+".addFromCorpus(): Illegal Corpus specifier in payload: "
+			+payload+ nfe.getLocalizedMessage();
+			System.err.println(tmp);
+	    	throw new WebApplicationException( 
+				Response.status(
+					Response.Status.BAD_REQUEST).entity(tmp).build());
+		} catch(Exception e) {
+			String tmp = myClass+".addFromCorpus(): Problem adding Corpus\n"+ e.getLocalizedMessage();
+			System.err.println(tmp);
+	    	throw new WebApplicationException( 
+				Response.status(
+					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+	    }
+	}
+
+    /**
+     * Creates a new activity.
+     * @param activity the representation of the new activity
+     * @return Response, with the path (and so id) of the newly created activity
+     */
+    @POST
+	@Consumes("text/plain")
+	@Path("{id}/corpora")
+    public Response addFromCorpus(@Context ServletContext srvc, 
+    		@PathParam("id") int wkspId, String payload){
+    	return addFromCorpusInt( srvc, wkspId, payload, ADD_NEW_CORPUS);
+	}
+
+
+    /**
+     * Updates an existing activity
+	 * @param id the id of the activity of interest
+     * @param activity the representation of the new activity
+     * @return Response, with the path (and so id) of the newly created activity
+     */
+    @PUT
+	@Consumes("text/plain")
+	@Path("{id}/corpora")
+    public Response refreshFromCorpus(@Context ServletContext srvc, 
+    		@PathParam("id") int wkspId, String payload) {
+    	return addFromCorpusInt( srvc, wkspId, payload, MATCH_EXISTING_CORPUS);
+	}
+	
 	private final static boolean FAIL_ON_NO_CORPUS = true;
 	private final static boolean NO_CORPUS_OKAY = false;
 	private Corpus getWorkspaceCorpus(Connection dbConn, int wkspId,
 			boolean fFailOnNoCorpus) {
-		Workspace workspace = Workspace.FindByID(dbConn, wkspId);
-		if(workspace==null) {
-        	throw new WebApplicationException( 
-			Response.status(
-				Response.Status.NOT_FOUND).entity(
-						"No workspace found with id: "+wkspId).build());
-		}
+		Workspace workspace = getWorkspace(dbConn, wkspId);
 		// Need to get the corpus for this workspace, and fetch its documents
 		Corpus corpus = workspace.getCorpus();
 		if(fFailOnNoCorpus && corpus == null) {
@@ -477,7 +560,7 @@ public class WorkspaceResource extends BaseResource {
 	 * @param id the id of the activity of interest
      * @param activity the representation of the new activity
      * @return Response, with the path (and so id) of the newly created activity
-     */
+	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
     @PUT
 	@Consumes("application/xml")
 	@Path("{id}/activities/{aid}")
@@ -486,11 +569,12 @@ public class WorkspaceResource extends BaseResource {
         try {
     		Connection dbConn = getServiceContext(srvc).getConnection();
 			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-            if(!Activity.Exists(dbConn, corpus, id)) {
+            if(!Activity.Exists(dbConn, corpus, aid)) {
             	throw new WebApplicationException( 
             			Response.status(
-            				Response.Status.NOT_FOUND).entity("No activity found with id: "+id).build());
+            				Response.Status.NOT_FOUND).entity("No activity found with id: "+aid).build());
             }
+            activity.setId(aid);		// Enforce payload and resource coherence
     		activity.setCorpus(corpus);	// Ensure we have proper linkage
             activity.persist(dbConn);
 	        // Set the response's status and entity
@@ -506,12 +590,13 @@ public class WorkspaceResource extends BaseResource {
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
         }
 	}
+     */
 
 	/**
      * Deletes a given activity.
 	 * @param id the id of the activity to delete
 	 * @return
-	 */
+	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
 	@DELETE
 	@Produces("application/xml")
 	@Path("{id}/activities/{aid}")
@@ -535,6 +620,7 @@ public class WorkspaceResource extends BaseResource {
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
         }
     }
+	 */
 	
 /*********************************************************************************
  * Begin ActivityRole Sub-resource declarations
@@ -645,7 +731,7 @@ public class WorkspaceResource extends BaseResource {
 	 * @param id the id of the activityRole of interest
 	 * @param activityRole the representation of the new activityRole
 	 * @return Response, with the path (and so id) of the newly created activityRole
-	 */
+	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
 	@PUT
 	@Consumes("application/xml")
 	@Path("{id}/activityRoles/{aid}")
@@ -654,11 +740,12 @@ public class WorkspaceResource extends BaseResource {
 		try {
 			Connection dbConn = getServiceContext(srvc).getConnection();
 			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-			if(!ActivityRole.Exists(dbConn, corpus, id)) {
+			if(!ActivityRole.Exists(dbConn, corpus, aid)) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
 			}
+			activityRole.setId(aid);		// Enforce payload and resource coherence
 			activityRole.setCorpus(corpus);	// Ensure we have proper linkage
 			activityRole.persist(dbConn);
 			// Set the response's status and entity
@@ -674,12 +761,13 @@ public class WorkspaceResource extends BaseResource {
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		}
 	}
+	 */
 
 	/**
 	 * Deletes a given activityRole.
 	 * @param id the id of the activityRole to delete
 	 * @return
-	 */
+	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
 	@DELETE
 	@Produces("application/xml")
 	@Path("{id}/activityRoles/{aid}")
@@ -703,6 +791,7 @@ public class WorkspaceResource extends BaseResource {
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		}
 	}
+	 */
 	
 /*********************************************************************************
  * Begin Name Sub-resource declarations
@@ -813,7 +902,7 @@ public class WorkspaceResource extends BaseResource {
 	 * @param id the id of the activityRole of interest
 	 * @param name the representation of the new Name
 	 * @return Response, with the path (and so id) of the updated name
-	 */
+	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
 	@PUT
 	@Consumes("application/xml")
 	@Path("{id}/names/{nid}")
@@ -822,11 +911,12 @@ public class WorkspaceResource extends BaseResource {
 		try {
 			Connection dbConn = getServiceContext(srvc).getConnection();
 			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-			if(!Name.Exists(dbConn, corpus, id)) {
+			if(!Name.Exists(dbConn, corpus, nid)) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
 			}
+			name.setId(nid);		// Enforce payload and resource coherence
 			name.setCorpusId(id);	// Ensure we have proper linkage
 			name.persist(dbConn);
 			// Set the response's status and entity
@@ -835,19 +925,20 @@ public class WorkspaceResource extends BaseResource {
 			Response response = Response.ok(path.build().toString()).build();
 			return response;
 		} catch(RuntimeException re) {
-			String tmp = myClass+".updateActivityRole(): Problem updating DB.\n"+ re.getLocalizedMessage();
+			String tmp = myClass+".updateName(): Problem updating DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		}
 	}
+	 */
 
 	/**
-	 * Deletes a given activityRole.
-	 * @param id the id of the activityRole to delete
+	 * Deletes a given name.
+	 * @param id the id of the name to delete
 	 * @return
-	 */
+	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
 	@DELETE
 	@Produces("application/xml")
 	@Path("{id}/names/{nid}")
@@ -871,4 +962,5 @@ public class WorkspaceResource extends BaseResource {
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		}
 	}
+	 */
 }

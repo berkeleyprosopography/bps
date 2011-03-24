@@ -5,7 +5,7 @@
 	<h2>{$errmsg}</h2>
 {else}
 	{if !isset($workspace) }
-		<p>No corpus specified!</p>
+		<p>No workspace specified!</p>
 	{else}
 		<p>&nbsp;</p>
 		<div class="form_row">
@@ -13,7 +13,7 @@
 				<input type="hidden" name="id" value="{$workspace.id}" />
 				<table class="form_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
-						 <td class="title 2" width="200px">Corpus Name</td>
+						 <td class="title 2" width="200px">Workspace Name</td>
 						 <td class="title workspacendocs" width="80px"># Docs</td>
 						 <td class="title" width="320px">Description</td>
 						 <td class="title" width="100px">&nbsp;</td>
@@ -36,7 +36,7 @@
 		</div>
 		<p>&nbsp;</p>
 		<div class="docs_row">
-			{if empty($workspace.importedCorpus)}
+			{if empty($workspace.importedCorpusName)}
 				<h2><i>No</i> Corpus (yet) imported into Workspace</h2>
 				{if isset($corpora)}
 					<p>Select a corpus to import into your workspace.</p>
@@ -59,16 +59,31 @@
 									<td class="corpus corpusdesc 2" width="320px">{$corpora[corpus].description}</td>
 									<td class="corpus" width="100px">
 										<input id="importCorpButton_{$corpora[corpus].id}" type="button" value="Import Corpus"
-													onclick="importCorpus({$corpora[corpus].id})" />
+													onclick="workspaceSetCorpus({$workspace.id}, {$corpora[corpus].id},false)" />
 									</td>
 								</tr>
 							</table>
 						</form>
 						</div>
 					{/section}
+					<p id="buildingP"></p>
 				{/if}
 			{else}
-			<h2>Corpus: {$workspace.importedCorpus} imported into Workspace</h2>
+			<table>
+				<tr>
+					<td>
+						<h2>Corpus: "{$workspace.importedCorpusName}" imported into Workspace</h2>
+					</td>
+					<td width="20px">
+					</td>
+					<td>
+						<input id="importCorpButton_{$workspace.importedCorpusId}" type="button" value="Rebuild from Corpus"
+									onclick="workspaceSetCorpus({$workspace.id}, {$workspace.importedCorpusId},true)" />
+					</td>
+				</tr>
+			</table>
+					<p id="buildingP"></p>
+
 				{if empty($documents)}
 					<h2><i>No</i> Documents (yet) in Workspace</h2>
 				{else}
@@ -84,7 +99,7 @@
 						{section name=doc loop=$documents}
 							<tr>
 								<td class="document" style="padding-top:6px">
-									<a href="/document?cid={$workspace.id}&did={$documents[doc].id}">{$documents[doc].alt_id}</a></td>
+									<a href="/workspace/document?wid={$workspace.id}&did={$documents[doc].id}">{$documents[doc].alt_id}</a></td>
 								<td class="document" style="padding-top:6px">&nbsp; </td>
 								<td class="document" style="padding-top:6px">{$documents[doc].notes}</td>
 								<td class="document" style="padding-top:6px">{$documents[doc].date_str}</td>
