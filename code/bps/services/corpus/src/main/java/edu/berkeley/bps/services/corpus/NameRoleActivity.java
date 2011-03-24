@@ -95,9 +95,9 @@ public class NameRoleActivity
 	
 	public NameRoleActivity cloneInDocument(Connection dbConn, Document inDoc) {
 		Corpus corpus = inDoc.getCorpus();
-		Name nameClone = corpus.findName(name.getName());
-		ActivityRole roleClone = corpus.findActivityRole(role.getName());
-		Activity activityClone = corpus.findActivity(activity.getName());
+		Name nameClone = (name==null)?null:corpus.findName(name.getName());
+		ActivityRole roleClone = (role==null)?null:corpus.findActivityRole(role.getName());
+		Activity activityClone = (activity==null)?null:corpus.findActivity(activity.getName());
 		NameRoleActivity clone = 
 			new NameRoleActivity(nameClone, roleClone, activityClone,
 					xmlID, inDoc);

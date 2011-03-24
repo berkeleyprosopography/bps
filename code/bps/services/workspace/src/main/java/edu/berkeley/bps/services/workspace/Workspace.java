@@ -18,6 +18,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * @author pschmitz
+ *
+ */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="workspace")
 public class Workspace {
@@ -50,6 +54,7 @@ public class Workspace {
 		this.name = name;
 		this.description = description;
 		this.owner_id = owner_id;
+		this.corpus = null;
 		System.err.println("Workspace.ctor, created: "+this.toString());
 	}
 
@@ -117,6 +122,11 @@ public class Workspace {
 				throw new RuntimeException( tmp );
 			}
 		}
+		if(shallow==CachedEntity.DEEP_PERSIST)
+			persistAttachedEntities(dbConn);
+	}
+	
+	public void persistAttachedEntities(Connection dbConn) {
 	}
 	
 	public static List<Workspace> ListAllForUser(Connection dbConn, int user_id) {
@@ -133,6 +143,7 @@ public class Workspace {
 						rs.getString("name"), 
 						rs.getString("description"),
 						user_id);
+				workspace.findAndLoadCorpus(dbConn);
 				wkspList.add(workspace);
 			}
 			rs.close();
@@ -184,6 +195,7 @@ public class Workspace {
 						rs.getString("name"), 
 						rs.getString("description"), 
 						rs.getInt("owner_id"));
+				workspace.findAndLoadCorpus(dbConn);
 			}
 			rs.close();
 			stmt.close();
@@ -193,6 +205,36 @@ public class Workspace {
 			throw new RuntimeException( tmp );
 		}
 		return workspace;
+	}
+	
+	private void findAndLoadCorpus(Connection dbConn) {
+		final String myName = ".findAndLoadCorpus: ";
+		final String SELECT_BY_WKSPID = 
+			"SELECT id FROM corpus WHERE wksp_id=?";
+		if(corpus!=null) {
+			String tmp = myClass+myName+"Corpus already set for workspace:"+id;
+			System.err.println(tmp);
+			return;
+		}
+		if(this.id<=0) {
+			String tmp = myClass+myName+"Cannot load corpus for unpersisted new workspace:"+id;
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_WKSPID);
+			stmt.setInt(1, this.id);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				corpus = Corpus.FindByID(dbConn, rs.getInt("id"));
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
 	}
 	
 	public static Workspace FindByName(Connection dbConn, int user_id, String name) {
@@ -208,6 +250,7 @@ public class Workspace {
 			if(rs.next()){
 				workspace = new Workspace(rs.getInt("id"), rs.getString("name"), 
 									rs.getString("description"), user_id); 
+				workspace.findAndLoadCorpus(dbConn);
 			}
 			rs.close();
 			stmt.close();
@@ -220,6 +263,7 @@ public class Workspace {
 	}
 	
 	public void deletePersistence(Connection dbConn) {
+		deleteAttachedEntities(dbConn);
 		DeletePersistence(dbConn, id);
 	}
 	
@@ -236,7 +280,10 @@ public class Workspace {
 			throw new RuntimeException( tmp );
 		}
 	}
-
+	
+	public void deleteAttachedEntities(Connection dbConn) {
+	}
+	
 	/**
 	 * @return the id
 	 */
@@ -279,16 +326,57 @@ public class Workspace {
 		this.description = description;
 	}
 
+	/**
+	 * @return current local corpus
+	 */
 	public Corpus getCorpus() {
 		return corpus;
 	}
 
-	public void setCorpus(Corpus corpus) {
-		this.corpus = corpus;
+	/**
+	 * Clears all existing resources associated with the corpus, and then
+	 * sets the new corpus.
+	 * @param corpus the new corpus to use
+	 */
+	public void setCorpus(Connection dbConn, Corpus newCorpus) {
+		final String myName = ".setCorpus: ";
+		// Delete any existing corpus clone and all of its attachedEntities
+		if(this.corpus!=null && newCorpus!=null
+				&& this.corpus.getId()==newCorpus.getId() ) {
+			String tmp = myClass+myName+
+				"newCorpus same as current - ignoring setCorpus() call.";
+			System.err.println(tmp);
+			return;	// Do not update if the same corpus
+		}
+		if(newCorpus!=null 
+			&& newCorpus.getCloneOfId()<=0) { 
+			String tmp = myClass+myName+"newCorpus must be a clone";
+			System.err.println(tmp);
+			throw new RuntimeException(tmp);
+		}
+				
+		if(this.corpus!=null)
+			this.corpus.deletePersistence(dbConn);
+		this.corpus = newCorpus;
 	}
 	
-	@XmlElement(name="importedCorpus")
-	public String getImportedCorpus() {
+	/**
+	 * @return the builtFromCorpus
+	 */
+	@XmlElement(name="builtFromCorpus")
+	public int getBuiltFromCorpus() {
+		return (corpus==null)?0:corpus.getCloneOfId();
+	}
+
+	/**
+	 * @return the owner_id
+	 */
+	public int getOwner_id() {
+		return owner_id;
+	}
+
+	@XmlElement(name="importedCorpusName")
+	public String getImportedCorpusName() {
 		if(corpus!=null) {
 			return corpus.getName();
 		} else {

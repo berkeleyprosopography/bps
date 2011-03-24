@@ -1,8 +1,16 @@
 {include file="header.tpl"}
 
-	<p class="nav-right"><a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a></p>
+	<p class="nav-right">
+	{if isset($corpusID) }
+		<a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a>
+		</p>
+		<h1>Corpus Document Details</h1>
+	{elseif isset($workspaceID) }
+		<a href="/workspace?id={$workspaceID}">Return to Workspace details</a>
+		</p>
+		<h1>Workspace Document Details</h1>
+	{/if}
 
-	<h1>Document Details</h1>
 {if isset($errmsg) }
 	<h2>{$errmsg}</h2>
 {else}
@@ -63,6 +71,12 @@
 	{/if}
 	<p>&nbsp;</p>
 {/if}
-	<p class="nav-left"><a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a></p>
+	<p class="nav-right">
+	{if isset($corpusID) }
+		<a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a>
+	{elseif isset($workspaceID) }
+		<a href="/workspace?id={$workspaceID}">Return to Workspace details</a>
+	{/if}
+	</p>
 
 {include file="footer.tpl"}

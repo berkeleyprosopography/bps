@@ -47,14 +47,15 @@ import org.w3c.dom.Element;
 public class Corpus extends CachedEntity {
 	final static String myClass = "Corpus";
 	public final static int NO_WKSP_ID = 0;
+	public final static int NO_CLONE_ID = 0;
 	
 	@XmlElement 
 	String		description;
 	@XmlElement 
 	int			ownerId;
 	
-	// This is not exposed directly, but only by way of the queries.
 	int			wkspId;
+	int			cloneOfId;
 	
 	private static String myTablename = "corpus";
 
@@ -92,7 +93,7 @@ public class Corpus extends CachedEntity {
 	 * Create a new empty corpus.
 	 */
 	public Corpus() {
-		this(Corpus.nextId--, null, null, -1, NO_WKSP_ID, null);
+		this(Corpus.nextId--, null, null, -1, NO_WKSP_ID, NO_CLONE_ID, null);
 	}
 
 	/**
@@ -101,7 +102,8 @@ public class Corpus extends CachedEntity {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus( String name, String description, TimeSpan defaultDocTimeSpan ) {
-		this(Corpus.nextId--, name, description, -1, NO_WKSP_ID, defaultDocTimeSpan);
+		this(Corpus.nextId--, name, description, -1, 
+				NO_WKSP_ID, NO_CLONE_ID, defaultDocTimeSpan);
 	}
 
 	/**
@@ -112,12 +114,13 @@ public class Corpus extends CachedEntity {
 	 * @param description Any description useful to users.
 	 */
 	public Corpus(int id, String name, String description, 
-			int ownerId, int wkspId, TimeSpan defaultDocTimeSpan) {
+			int ownerId, int wkspId, int cloneOfId, TimeSpan defaultDocTimeSpan) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.ownerId = ownerId;
 		this.wkspId = wkspId;
+		this.cloneOfId = cloneOfId;
 		this.defaultDocTimeSpan = defaultDocTimeSpan;
 		documentsById = new HashMap<Integer, Document>();
 		documentsByAltId = new HashMap<String, Document>();
@@ -129,7 +132,7 @@ public class Corpus extends CachedEntity {
 		namesById = new HashMap<Integer, Name>();
 	}
 	
-	public Corpus cloneInWorkspace(Connection dbConn, 
+	public Corpus cloneForWorkspace(Connection dbConn, 
 			int inWkspId, int wkspOwnerId) {
 		final String myName = ".cloneInWorkspace: ";
 		if(this.wkspId!=NO_WKSP_ID) {
@@ -140,26 +143,45 @@ public class Corpus extends CachedEntity {
 		}
 		Corpus newCorpus = CreateAndPersist(dbConn, 
 				name, description, wkspOwnerId,
-				inWkspId, defaultDocTimeSpan);
+				inWkspId, id, defaultDocTimeSpan);
+		// For each of the attached entities, we clone and preserve the 
+		// same ordering of id values. This is important for some sorts
 		// Clone Activities, and build maps
-		for(Activity act:activitiesById.values()) {
+		ArrayList<Integer> idList = new ArrayList<Integer>(activitiesById.keySet());
+		Collections.sort(idList);
+		for(int id:idList) {
+			Activity act = activitiesById.get(id);
 			Activity clone = act.cloneInCorpus(dbConn,newCorpus);
 			newCorpus.activitiesById.put(clone.getId(), clone);
 			newCorpus.activitiesByName.put(clone.getName(), clone);
 		}
 		// Clone Roles, and build maps
-		for(ActivityRole actRole:activityRolesById.values()) {
+		idList = new ArrayList<Integer>(activityRolesById.keySet());
+		Collections.sort(idList);
+		for(int id:idList) {
+			ActivityRole actRole = activityRolesById.get(id);
 			ActivityRole clone = actRole.cloneInCorpus(dbConn,newCorpus);
 			newCorpus.activityRolesById.put(clone.getId(), clone);
 			newCorpus.activityRolesByName.put(clone.getName(), clone);
 		}
 		// Clone Names, and build maps
-		for(Name nameItem:namesById.values()) {
+		idList = new ArrayList<Integer>(namesById.keySet());
+		Collections.sort(idList);
+		for(int id:idList) {
+			Name nameItem = namesById.get(id);
 			Name clone = nameItem.cloneInCorpus(dbConn,newCorpus);
 			newCorpus.namesById.put(clone.getId(), clone);
 			newCorpus.namesByName.put(clone.getName(), clone);
 		}
 		// Clone Documents, and build maps
+		idList = new ArrayList<Integer>(documentsById.keySet());
+		Collections.sort(idList);
+		for(int id:idList) {
+			Document doc = documentsById.get(id);
+			Document clone = doc.cloneInCorpus(dbConn,newCorpus);
+			newCorpus.documentsById.put(clone.getId(), clone);
+			newCorpus.documentsByAltId.put(clone.getAlt_id(), clone);
+		}
 		return newCorpus;
 	}
 	
@@ -251,7 +273,7 @@ public class Corpus extends CachedEntity {
 	public static Corpus FindByID(Connection dbConn, int id) {
 		final String myName = ".FindByID: ";
 		final String SELECT_BY_ID = 
-			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, count(*) nDocs, d.id docId"
+			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, c.clone_of_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
 			+" WHERE c.id = ?"
 			+" GROUP BY c.id";
@@ -263,7 +285,8 @@ public class Corpus extends CachedEntity {
 			if(rs.next()){
 				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
 							rs.getString("description"), 
-							rs.getInt("owner_id"), rs.getInt("wksp_id"), null);
+							rs.getInt("owner_id"), rs.getInt("wksp_id"), 
+							rs.getInt("clone_of_id"), null);
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
 				corpus.initAttachedEntityMaps(dbConn);
@@ -281,7 +304,7 @@ public class Corpus extends CachedEntity {
 	public static Corpus FindByName(Connection dbConn, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
-			"SELECT c.id, c.name, c.description, c.owner_id, count(*) nDocs, d.id docId"
+			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, c.clone_of_id, count(*) nDocs, d.id docId"
 			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
 			+" WHERE c.name = ? AND c.wksp_id=" + NO_WKSP_ID
 			+" GROUP BY c.id";
@@ -293,7 +316,8 @@ public class Corpus extends CachedEntity {
 			if(rs.next()){
 				corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
 							rs.getString("description"), 
-							rs.getInt("owner_id"), NO_WKSP_ID, null); 
+							rs.getInt("owner_id"), rs.getInt("wksp_id"), 
+							rs.getInt("clone_of_id"), null);
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
 				corpus.initAttachedEntityMaps(dbConn);
@@ -315,20 +339,27 @@ public class Corpus extends CachedEntity {
 	public static List<Corpus> ListAll(Connection dbConn, int wkspId) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
-			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, count(*) nDocs, d.id docId"
-			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id"
-			+" WHERE c.wksp_id=?"
-			+" GROUP BY c.id";
+			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, c.clone_of_id, count(*) nDocs, d.id docId"
+			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id";
+		final String WHERE_WKSP = " WHERE c.wksp_id=?";
+		final String GROUP_BY = " GROUP BY c.id";
 		// Generate the right representation according to its media type.
 		ArrayList<Corpus> corpusList = new ArrayList<Corpus>();
 		try {
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
-			stmt.setInt(1, wkspId);
+			StringBuilder query = new StringBuilder(200);
+			query.append(SELECT_ALL);
+			if(wkspId>=0)	// wildcard case
+				query.append(WHERE_WKSP);
+			query.append(GROUP_BY);
+			PreparedStatement stmt = dbConn.prepareStatement(query.toString());
+			if(wkspId>=0)	// if not wildcard case
+				stmt.setInt(1, wkspId);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				Corpus corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
-						rs.getString("description"), rs.getInt("owner_id"), 
-						wkspId, null);
+						rs.getString("description"), 
+						rs.getInt("owner_id"), rs.getInt("wksp_id"), 
+						rs.getInt("clone_of_id"), null);
 				// If no docId, count should actually be 0, not 1
 				corpus.fetchedDocumentCount = 
 					(rs.getInt("docId")==0)?0:rs.getInt("nDocs");
@@ -377,23 +408,25 @@ public class Corpus extends CachedEntity {
 	public static Corpus CreateAndPersist(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
 		return CreateAndPersist(dbConn, 
-				name, description, owner_id, NO_WKSP_ID, defaultDocTimeSpan);
+				name, description, owner_id, NO_WKSP_ID, NO_CLONE_ID, defaultDocTimeSpan);
 	}
 	
 	protected static Corpus CreateAndPersist(Connection dbConn, 
-			String name, String description, int owner_id, int wksp_id, TimeSpan defaultDocTimeSpan) {
-		int id = persistNew(dbConn, name, description, owner_id, defaultDocTimeSpan);
+			String name, String description, int owner_id, int wksp_id, int clone_of_id, TimeSpan defaultDocTimeSpan) {
+		int id = persistNew(dbConn, name, description, owner_id, wksp_id, clone_of_id, defaultDocTimeSpan);
 		Corpus corpus = new Corpus(id, name, description, 
-									owner_id, wksp_id, defaultDocTimeSpan);
+									owner_id, wksp_id, clone_of_id, defaultDocTimeSpan);
 		return corpus;
 	}
 	
 	private static int persistNew(Connection dbConn, 
-			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
+			String name, String description, int owner_id, int wksp_id, int clone_of_id,
+			TimeSpan defaultDocTimeSpan) {
 		final String myName = ".persistNew: ";
 		// Note that wksp_id defaults to NULL/0
 		final String INSERT_STMT = 
-			"INSERT INTO corpus(name, description, owner_id, creation_time) VALUES(?,?,?,now())";
+			"INSERT INTO corpus(name, description, owner_id, wksp_id, clone_of_id, creation_time)"
+			+" VALUES(?,?,?,?,?,now())";
 		int newId = 0;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
@@ -401,6 +434,8 @@ public class Corpus extends CachedEntity {
 			stmt.setString(1, name);
 			stmt.setString(2, description);
 			stmt.setInt(3, owner_id);
+			stmt.setInt(4, wksp_id);
+			stmt.setInt(5, clone_of_id);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
@@ -421,7 +456,7 @@ public class Corpus extends CachedEntity {
 	public void persist(Connection dbConn, boolean shallow) {
 		final String myName = ".persist: ";
 		if(id<=UNSET_ID_VALUE) {
-			id = persistNew(dbConn, name, description, ownerId, defaultDocTimeSpan);
+			id = persistNew(dbConn, name, description, ownerId, wkspId, cloneOfId, defaultDocTimeSpan);
 		} else {
 			final String UPDATE_STMT = 
 				"UPDATE corpus SET name=?, description=? WHERE id=?";
@@ -623,12 +658,29 @@ public class Corpus extends CachedEntity {
 		this.ownerId = ownerId;
 	}
 
+	/**
+	 * @return the wkspId
+	 */
+	@XmlElement(name="wkspId")
+	public int getWkspId() {
+		return wkspId;
+	}
+
+	/**
+	 * @return the cloneOfId
+	 */
+	@XmlElement(name="cloneOfId")
+	public int getCloneOfId() {
+		return cloneOfId;
+	}
+
 	@XmlElement(name="ndocs")
 	public int getNDocuments() {
 		int nDocs = 0;
 		if(documentsById != null) {
 			nDocs = documentsById.size();
-		} else {
+		}
+		if(nDocs==0){
 			nDocs = fetchedDocumentCount;
 		}
 		return nDocs;
