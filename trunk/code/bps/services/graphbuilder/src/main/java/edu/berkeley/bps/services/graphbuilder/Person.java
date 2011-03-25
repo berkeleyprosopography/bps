@@ -3,7 +3,7 @@ package edu.berkeley.bps.services.graphbuilder;
 import java.util.List;
 import java.util.ArrayList;
 import edu.berkeley.bps.services.corpus.*;
-import edu.berkeley.bps.services.common.LinkTypes;
+import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.time.*;
 
 /*
@@ -38,7 +38,7 @@ public class Person {
 	private PersonLinkSet<Person>	fatherLinks = null;
 
 	protected NameRoleActivity nrad = null;
-	private LinkTypes.Values roleInNRAD = null;
+	private LinkType.Type roleInNRAD = null;
 	private TimeSpan activeTimeSpan = null;
 	// lifeTimeSpan should generally be a DerivedTimeSpan linked to activeTimeSpan.
 	private TimeSpan lifeTimeSpan = null;
@@ -48,12 +48,12 @@ public class Person {
 			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan) {
 		this(nrad.getName(), nrad.getFatherName(), nrad.getGrandFatherName(),
 				nrad.getAncestorNames(), activeTimeSpan, lifeTimeSpan,
-				nrad, LinkTypes.Values.LINK_TO_PERSON, displayName );
+				nrad, LinkType.Type.LINK_TO_PERSON, displayName );
 	}
 
 	public Person(Name forename, Name father, Name grandfather, List<Name> ancestors,
 			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan,
-			NameRoleActivity nrad, LinkTypes.Values roleInNRAD, String displayName ) {
+			NameRoleActivity nrad, LinkType.Type roleInNRAD, String displayName ) {
 		if(nrad==null)
 			throw new IllegalArgumentException("Person ctor must take valid NameRoleActivity.");
 		if(activeTimeSpan==null || lifeTimeSpan==null)
@@ -66,7 +66,7 @@ public class Person {
 		declaredFather = father;
 		declaredGrandFather = grandfather;
 		declaredAncestors = ancestors;
-		fatherLinks = new PersonLinkSet<Person>(this, LinkTypes.Values.LINK_TO_FATHER);
+		fatherLinks = new PersonLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
 		if(displayName!=null)
 			this.displayName = displayName;
 		else {
@@ -96,16 +96,16 @@ public class Person {
 			if(declaredAncestors.size()>1)
 				fathersAncestors = declaredAncestors.subList(1, declaredAncestors.size()-1);
 		}
-		LinkTypes.Values fatherRoleInNRAD;
+		LinkType.Type fatherRoleInNRAD;
 		switch(roleInNRAD) {
 		case LINK_TO_PERSON:
-			fatherRoleInNRAD = LinkTypes.Values.LINK_TO_FATHER; break;
+			fatherRoleInNRAD = LinkType.Type.LINK_TO_FATHER; break;
 		case LINK_TO_FATHER:
-			fatherRoleInNRAD = LinkTypes.Values.LINK_TO_GRANDFATHER; break;
+			fatherRoleInNRAD = LinkType.Type.LINK_TO_GRANDFATHER; break;
 		default:
 		//case LinkTypes.LINK_TO_GRANDFATHER:
 		//case LinkTypes.LINK_TO_ANCESTOR:
-			fatherRoleInNRAD = LinkTypes.Values.LINK_TO_ANCESTOR; break;
+			fatherRoleInNRAD = LinkType.Type.LINK_TO_ANCESTOR; break;
 		}
 		Person father = new Person(declaredFather, declaredGrandFather, fathersGF,
 				fathersAncestors, fatherActiveTimeSpan, fatherLifeTimeSpan,

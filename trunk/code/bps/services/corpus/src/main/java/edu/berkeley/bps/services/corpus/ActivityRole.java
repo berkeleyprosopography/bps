@@ -340,16 +340,4 @@ public class ActivityRole {
 		return "{"+((name==null)?"(null)":name)+"}";
 	}
 
-	/**
-	 * Produce SQL loadfile content for this instance
-	 * @param sep The separator to use between entries
-	 * @param nullStr The null indicator to use for missing entries
-	 * @return loadfile string with no line terminator or newline.
-	 */
-	public String toXMLLoadString(String sep, String nullStr ) {
-		return id+sep+
-			((name!=null)?'"'+name+'"':nullStr)+sep+
-			((description!=null)?'"'+description+'"':nullStr);
-	}
-
 }

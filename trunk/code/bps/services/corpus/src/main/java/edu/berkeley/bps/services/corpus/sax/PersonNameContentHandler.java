@@ -28,6 +28,8 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	protected static final int S_FOUND_PATRONYM = 2; 
 	protected static final int S_FOUND_CLAN = 3; 
 	protected int state = S_INIT;
+	// TODO rewrite to hold nrads for base, patronym, ancestors, clan, etc. 
+	// then can build up the links 
 
 	protected static final int T_MISSING = 0x0; 
 	protected static final int T_MASCULINE = 0x1; 

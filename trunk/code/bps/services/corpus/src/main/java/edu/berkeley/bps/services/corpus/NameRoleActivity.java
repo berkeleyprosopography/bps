@@ -3,7 +3,7 @@
  */
 package edu.berkeley.bps.services.corpus;
 
-import edu.berkeley.bps.services.common.LinkTypes;
+import edu.berkeley.bps.services.common.LinkType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -285,7 +285,7 @@ public class NameRoleActivity
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public void addNameFamilyLink(Name name, LinkTypes.Values linkType, String xmlID) {
+	public void addNameFamilyLink(Name name, LinkType.Type linkType, String xmlID) {
 		initNameFamilyLinks();
 		nameFamilyLinks.add(new NameFamilyLink(this, name, linkType, xmlID));
 	}
@@ -310,35 +310,35 @@ public class NameRoleActivity
 	 * @return a declared Father if there is one
 	 */
 	public Name getFatherName() {
-		return findFamilyLinkNameByType(LinkTypes.Values.LINK_TO_FATHER);
+		return findFamilyLinkNameByType(LinkType.Type.LINK_TO_FATHER);
 	}
 
 	/**
 	 * @return a declared Clan if there is one
 	 */
 	public Name getClanName() {
-		return findFamilyLinkNameByType(LinkTypes.Values.LINK_TO_CLAN);
+		return findFamilyLinkNameByType(LinkType.Type.LINK_TO_CLAN);
 	}
 
 	/**
 	 * @return a declared GrandFather if there is one
 	 */
 	public Name getGrandFatherName() {
-		return findFamilyLinkNameByType(LinkTypes.Values.LINK_TO_GRANDFATHER);
+		return findFamilyLinkNameByType(LinkType.Type.LINK_TO_GRANDFATHER);
 	}
 
 	/**
 	 * @return any declared ancestors
 	 */
 	public List<Name> getAncestorNames() {
-		return findFamilyLinkNamesByType(LinkTypes.Values.LINK_TO_ANCESTOR);
+		return findFamilyLinkNamesByType(LinkType.Type.LINK_TO_ANCESTOR);
 	}
 
 	/**
 	 * @param linkType one of LinkTypes.LINK_TO_*
 	 * @return name of the first family link matching linkType
 	 */
-	public Name findFamilyLinkNameByType(LinkTypes.Values linkType) {
+	public Name findFamilyLinkNameByType(LinkType.Type linkType) {
 		for(NameFamilyLink nfl:nameFamilyLinks) {
 			if(nfl.getLinkType()==linkType)
 				return nfl.getLinkToName();
@@ -350,7 +350,7 @@ public class NameRoleActivity
 	 * @param linkType one of NameFamilyLink.LINK_TO_*
 	 * @return array of names for family links matching linkType
 	 */
-	public ArrayList<Name> findFamilyLinkNamesByType(LinkTypes.Values linkType) {
+	public ArrayList<Name> findFamilyLinkNamesByType(LinkType.Type linkType) {
 		ArrayList<Name> list = null;
 		for(NameFamilyLink nfl:nameFamilyLinks) {
 			if(nfl.getLinkType()==linkType) {
@@ -499,22 +499,6 @@ public class NameRoleActivity
 	public String toString() {
 		return "{"+((name==null)?"?":name.getName())+","+((role==null)?"?":role.getName())
 				+","+((activity==null)?"?":activity.getName())+","+((xmlID==null)?"?":xmlID)+"}";
-	}
-
-	/**
-	 * Produce SQL loadfile content for this instance
-	 * @param sep The separator to use between entries
-	 * @param nullStr The null indicator to use for missing entries
-	 * @param docId The document in which this appears.
-	 * @return loadfile string with no line terminator or newline.
-	 */
-	public String toXMLLoadString(String sep, String nullStr ) {
-		if(!isValid())
-			throw new RuntimeException(
-					"Attempt to generate XML loadfile string for invalid NameRoleActivity.");
-		return id+sep+((name==null)?nullStr:name.getName())+sep+role.getId()+sep+
-				activity.getId()+sep+document.getId()+sep+
-				((xmlID!=null)?'"'+xmlID+'"':nullStr);
 	}
 
 	public Document getDocument() {

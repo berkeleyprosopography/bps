@@ -1,6 +1,6 @@
 package edu.berkeley.bps.services.graphbuilder;
 
-import edu.berkeley.bps.services.common.LinkTypes;
+import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.utils.Pair;
 import edu.berkeley.bps.services.common.utils.SortedQueue;
 import java.util.HashMap;
@@ -14,10 +14,10 @@ import java.util.ArrayList;
 public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 
 	private O fromObj = null;
-	private LinkTypes.Values linkType = null;
+	private LinkType.Type linkType = null;
 	private double summedWeight;
 
-	public PersonLinkSet(O fromObj, LinkTypes.Values linkType) {
+	public PersonLinkSet(O fromObj, LinkType.Type linkType) {
 		if(fromObj== null)
 			throw new IllegalArgumentException("Must specify link base (fromObj).");
 		this.fromObj = fromObj;

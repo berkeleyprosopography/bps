@@ -10,7 +10,7 @@ import java.sql.Statement;
 
 import org.jboss.resteasy.annotations.cache.Cache;
 
-import edu.berkeley.bps.services.common.LinkTypes;
+import edu.berkeley.bps.services.common.LinkType;
 
 /**
  * @author pschmitz
@@ -23,7 +23,7 @@ public class NameFamilyLink {
 	private int					id;
 	private NameRoleActivity	owner_nrad;
 	private Name				linkTo;
-	private LinkTypes.Values	linkType;
+	private LinkType.Type	linkType;
 	/**
 	 * The ID of the token associated with this in the owning document
 	 */
@@ -42,7 +42,7 @@ public class NameFamilyLink {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameFamilyLink(NameRoleActivity owner, Name linkTo, LinkTypes.Values linkType, String xmlID) {
+	public NameFamilyLink(NameRoleActivity owner, Name linkTo, LinkType.Type linkType, String xmlID) {
 		this(nextID--, owner, linkTo, linkType, xmlID);
 	}
 
@@ -54,7 +54,7 @@ public class NameFamilyLink {
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public NameFamilyLink(int id, NameRoleActivity owner, Name linkTo, LinkTypes.Values linkType, String xmlID) {
+	public NameFamilyLink(int id, NameRoleActivity owner, Name linkTo, LinkType.Type linkType, String xmlID) {
 		this.id = id;
 		this.owner_nrad = owner;
 		this.linkTo = linkTo;
@@ -74,7 +74,7 @@ public class NameFamilyLink {
 	 * @return
 	 */
 	public static NameFamilyLink CreateAndPersist(Connection dbConn, 
-			NameRoleActivity owner, Name linkTo, LinkTypes.Values linkType, String xmlID) {
+			NameRoleActivity owner, Name linkTo, LinkType.Type linkType, String xmlID) {
 		int newId = persistNew(dbConn, owner.getId(), linkTo.getId(), linkType, xmlID);
 		NameFamilyLink newNFL = new NameFamilyLink(newId, owner, linkTo, linkType, xmlID); 
 		return newNFL;
@@ -92,7 +92,7 @@ public class NameFamilyLink {
 	 * @return
 	 */
 	public static int persistNew(Connection dbConn, int nrad_id,
-			int name_id, LinkTypes.Values linkType, String xml_idref) {
+			int name_id, LinkType.Type linkType, String xml_idref) {
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO `familylink`(`nrad_id`,`name_id`,`link_type`,`xml_idref`,creation_time)"
@@ -104,7 +104,7 @@ public class NameFamilyLink {
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setInt(1, nrad_id);
 			stmt.setInt(2, name_id);
-			stmt.setString(3, LinkTypes.ValueToString(linkType));
+			stmt.setString(3, LinkType.ValueToString(linkType));
 			stmt.setString(4, xml_idref);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
@@ -135,7 +135,7 @@ public class NameFamilyLink {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setInt(1, owner_nrad.getId());
 				stmt.setInt(2, linkTo.getId());
-				stmt.setString(3, LinkTypes.ValueToString(linkType));
+				stmt.setString(3, LinkType.ValueToString(linkType));
 				stmt.setString(4, xmlID);
 				stmt.setInt(5, id);
 				stmt.executeUpdate();
@@ -177,14 +177,14 @@ public class NameFamilyLink {
 	/**
 	 * @return the linkType
 	 */
-	public LinkTypes.Values getLinkType() {
+	public LinkType.Type getLinkType() {
 		return linkType;
 	}
 
 	/**
 	 * @param linkType the linkType to set
 	 */
-	public void setLinkType(LinkTypes.Values linkType) {
+	public void setLinkType(LinkType.Type linkType) {
 		this.linkType = linkType;
 	}
 
@@ -215,21 +215,4 @@ public class NameFamilyLink {
 				+((xmlID==null)?"?":xmlID)+"}";
 	}
 
-	/**
-	 * Produce SQL loadfile content for this instance
-	 * @param sep The separator to use between entries
-	 * @param nullStr The null indicator to use for missing entries
-	 * @param nraID id of the base NameRoleActivity instance
-	 * @return loadfile string with no line terminator or newline.
-	 */
-	public String toXMLLoadString(int nraID, String sep, String nullStr ) {
-		if(!isValid())
-			throw new RuntimeException(
-			"Attempt to generate XML loadfile string for invalid NameFamilyLink.");
-		return id+sep+
-			nraID+sep+
-			((linkTo!=null)?linkTo.getId():nullStr)+sep+
-			linkType+sep+
-			((xmlID!=null)?'"'+xmlID+'"':nullStr);
-	}
 }

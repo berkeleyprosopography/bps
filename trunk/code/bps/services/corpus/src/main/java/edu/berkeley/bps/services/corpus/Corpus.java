@@ -15,19 +15,12 @@ import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-//import javax.xml.xpath.XPath;
-//import javax.xml.xpath.XPathConstants;
-//import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-//import javax.xml.xpath.XPathFactory;
+//import javax.xml.xpath.XPathExpressionException;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import org.w3c.dom.Element;
-//import org.w3c.dom.NodeList;
 
 
 /* TODO Next steps:
@@ -376,34 +369,6 @@ public class Corpus extends CachedEntity {
 		}
 		return corpusList;
 	}	
-	/*
-	public void CreateAndPersist(Connection dbConn) {
-		final String myName = ".CreateAndPersist: ";
-		final String INSERT_STMT = 
-			"INSERT INTO corpus(name, description, owner_id, creation_time) VALUES(?,?,?,now())";
-		try {
-			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
-												Statement.RETURN_GENERATED_KEYS);
-			stmt.setString(1, name);
-			stmt.setString(2, description);
-			stmt.setInt(3, ownerId);
-			int nRows = stmt.executeUpdate();
-			if(nRows==1){
-				ResultSet rs = stmt.getGeneratedKeys();
-				if(rs.next()){
-					id = rs.getInt(1); 
-				}
-				rs.close();
-			}
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
-	    	throw new WebApplicationException( 
-	    			Response.status(
-	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
-		}
-	}
-	*/
 
 	public static Corpus CreateAndPersist(Connection dbConn, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
@@ -547,100 +512,6 @@ public class Corpus extends CachedEntity {
 			throw new RuntimeException( tmp );
 		}
 	}
-
-	/*
-	public static Corpus CreateFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
-			TimeSpan defaultDocTimeSpan, Connection dbConn)
-		throws XPathExpressionException {
-		String name = "unknown";
-		String description = null;
-	    XPath xpath = XPathFactory.newInstance().newXPath();
-	    Corpus newCorpus = null;
-       // XPath Query to get to the corpus title
-	    try {
-		    XPathExpression expr = xpath.compile("//teiHeader/fileDesc/titleStmt/title");
-		    Element titleEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
-		    if(titleEl!=null)
-		    	name = titleEl.getTextContent().replaceAll("[\\s]+", " ");
-		    expr = xpath.compile("//teiHeader/fileDesc/sourceDesc/p");
-		    Element descEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
-		    if(descEl!=null)
-		    	description = descEl.getTextContent().replaceAll("[\\s]+", " ");
-		    newCorpus = new Corpus(name, description, defaultDocTimeSpan);
-		    if(deepCreate) {
-		    	// Find the TEI nodes and create a document for each one
-		    	NodeList docNodes = docNode.getElementsByTagName( "TEI" );
-				if( docNodes.getLength() < 1 ) {  // Must define at least one.
-					System.err.println("Corpus:CreateFromTEI: Corpus file has no TEI elements!");
-				} else {
-					// For each info element, need to get all the fields.
-					int nDocs = docNodes.getLength();
-					for( int iDoc = 0; iDoc < nDocs; iDoc++) {
-					    Element teiEl = (Element)docNodes.item(iDoc);
-					    Document document = Document.CreateAndPersistFromTEI(teiEl, true, newCorpus, dbConn);
-					    newCorpus.addDocument(document);
-					}
-				}
-		    }
-	    } catch (XPathExpressionException xpe) {
-	    	// debug complaint
-	    	throw xpe;
-	    }
-	    return newCorpus;
-	}
-	*/
-
-	/**
-	 * Deletes all current documents, and then rebuilds corpus from TEI
-	 * @param docNode The TEI document to load this corpus from
-	 * @param deepCreate If TRUE, will create documents as well.
-	 * @param dbConn Connection for persistence
-	 * @return count of documents created
-	 * @throws XPathExpressionException
-	 */
-	/*
-	public int loadFromTEI(org.w3c.dom.Document docNode, boolean deepCreate,
-			Connection dbConn)
-		throws XPathExpressionException {
-		String name = "unknown";
-		String description = null;
-	    XPath xpath = XPathFactory.newInstance().newXPath();
-	    // Clear all current documents
-    	deleteDocuments(dbConn);
-	    
-	    try {
-	        // XPath Query to get to the corpus title
-		    XPathExpression expr = xpath.compile("//teiHeader/fileDesc/titleStmt/title");
-		    Element titleEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
-		    if(titleEl!=null)
-		    	name = titleEl.getTextContent().replaceAll("[\\s]+", " ");
-		    expr = xpath.compile("//teiHeader/fileDesc/sourceDesc/p");
-		    Element descEl = (Element) expr.evaluate(docNode, XPathConstants.NODE);
-		    if(descEl!=null)
-		    	description = descEl.getTextContent().replaceAll("[\\s]+", " ");
-		    if(deepCreate) {
-		    	// Find the TEI nodes and create a document for each one
-		    	NodeList docNodes = docNode.getElementsByTagName( "TEI" );
-				if( docNodes.getLength() < 1 ) {  // Must define at least one.
-					System.err.println("Corpus:CreateFromTEI: Corpus file has no TEI elements!");
-				} else {
-					// For each info element, need to get all the fields.
-					int nDocs = docNodes.getLength();
-					for( int iDoc = 0; iDoc < nDocs; iDoc++) {
-					    Element teiEl = (Element)docNodes.item(iDoc);
-					    Document document = Document.CreateAndPersistFromTEI(teiEl, true, this, dbConn);
-					    addDocument(document);
-					}
-				}
-		    }
-		    persist(dbConn);
-	    } catch (XPathExpressionException xpe) {
-	    	// debug complaint
-	    	throw xpe;
-	    }
-	    return documents.size();
-	}
-	*/
 
 	public String getDescription() {
 		return description;
@@ -907,77 +778,11 @@ public class Corpus extends CachedEntity {
 		return instance;
 	}
 
-	// TODO move this to the SQL Utils class - it should not be here. Provide read accessors
-	// to the various maps as needed.
-	public void generateDependentSQL(
-			String documentsFilename,
-			String activitiesFilename,
-			String namesFilename,
-			String nameFamilyLinksFilename,
-			String activityRolesFilename,
-			String nameRoleActivitiesFilename ) {
-		//initMaps();
-    	System.out.print("Generating Documents (and NameRoleActivityDocs) SQL...");
-		SQLUtils.generateDocumentsSQL(documentsFilename,
-				nameRoleActivitiesFilename, nameFamilyLinksFilename, documentsById);
-    	System.out.println("Done.");
-    	System.out.print("Generating Activities SQL...");
-		SQLUtils.generateActivitiesSQL(activitiesFilename, activitiesByName);
-    	System.out.println("Done.");
-    	System.out.print("Generating ActivityRoles SQL...");
-		SQLUtils.generateActivityRolesSQL(activityRolesFilename, activityRolesByName);
-    	System.out.println("Done.");
-    	System.out.println("Done.");
-	}
-
 	/**
 	 * @return Name.
 	 */
 	public String toString() {
 		return "{"+((name==null)?"(null)":name)+"}";
-	}
-
-	/**
-	 * Produce SQL loadfile content for this instance
-	 * @param sep The separator to use between entries
-	 * @param nullStr The null indicator to use for missing entries
-	 * @return loadfile string with no line terminator or newline.
-	 */
-	public String toXMLLoadString(String sep, String nullStr ) {
-		return id+sep+
-			((name!=null)?'"'+name+'"':nullStr)+sep+
-			((description!=null)?'"'+description+'"':nullStr);
-	}
-	
-	public Element toXMLPayload(org.w3c.dom.Document doc, boolean includeDetails) {
-		return toXMLPayload(doc, id, name, description, null);
-	}
-	
-	public static Element toXMLPayload(org.w3c.dom.Document doc, 
-			int id, String name, String description, String owner ) {
-        Element corpusEl = doc.createElement("corpus");
-
-        if(id > 0) {
-        	Element eltId = doc.createElement("id");
-        	eltId.appendChild(doc.createTextNode(Integer.toString(id)));
-        	corpusEl.appendChild(eltId);
-        }
-        if(name != null) {
-        	Element eltName = doc.createElement("name");
-        	eltName.appendChild(doc.createTextNode(name));
-        	corpusEl.appendChild(eltName);
-        }
-        if(description != null) {
-        	Element eltDescription = doc.createElement("description");
-        	eltDescription.appendChild(doc.createTextNode(description));
-        	corpusEl.appendChild(eltDescription);
-        }
-        if(owner != null) {
-        	Element eltOwner = doc.createElement("owner");
-        	eltOwner.appendChild(doc.createTextNode(owner));
-        	corpusEl.appendChild(eltOwner);
-        }
-        return corpusEl;
 	}
 
 	/**
