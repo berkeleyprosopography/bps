@@ -7,6 +7,7 @@ import edu.berkeley.bps.services.common.LinkType;
  * @author pschmitz
  *
  */
+// TODO this is probably not right
 public class PersonLink<O> extends Object {
 	private O fromObj;
 	private Person person;

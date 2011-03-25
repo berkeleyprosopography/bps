@@ -20,65 +20,83 @@ import edu.berkeley.bps.services.common.time.*;
  *    Note: we do not link to grandfather, but only link to the father,
  *    		who in turn links to the grandfather?
  */
+/**
+ * @author pschmitz
+ *
+ */
 public class Person {
 	public static final int EQUAL = 0;
 	public static final int COMPAT_LESS_INFO = -1;
 	public static final int COMPAT_MORE_INFO = 1;
 	public static final int COMPATIBLE = Integer.MIN_VALUE;
 	public static final int INCOMPATIBLE = Integer.MAX_VALUE;
-	private String displayName = null;
+	private NameRoleActivity originalNRAD = null;
 	private Name declaredName = null;
 	private Name declaredFather = null;
 	private Name declaredGrandFather = null;
-	// TODO - rewrite to support an array of ancestors for more cases
-	private List<Name> declaredAncestors = null;
+	private String displayName = null;
+	private ArrayList<Name> declaredAncestors = null;
 	// TODO?? Do we need to model the clan and link to it? What if we are inferring
 	// it from various other rules?
 	private Name declaredClan = null;
+	// Note that we do not link beyond our fathers, since they should link 
+	// to their own fathers.
+	// TODO - this is probably wrong...
 	private PersonLinkSet<Person>	fatherLinks = null;
+	//private PersonLinkSet<Clan>		clanLinks = null;
 
-	protected NameRoleActivity nrad = null;
-	private LinkType.Type roleInNRAD = null;
+	//private LinkType.Type roleInNRAD = null;
 	private TimeSpan activeTimeSpan = null;
 	// lifeTimeSpan should generally be a DerivedTimeSpan linked to activeTimeSpan.
 	private TimeSpan lifeTimeSpan = null;
 
-
-	public Person(NameRoleActivity nrad, String displayName,
-			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan) {
-		this(nrad.getName(), nrad.getFatherName(), nrad.getGrandFatherName(),
-				nrad.getAncestorNames(), activeTimeSpan, lifeTimeSpan,
-				nrad, LinkType.Type.LINK_TO_PERSON, displayName );
-	}
-
-	public Person(Name forename, Name father, Name grandfather, List<Name> ancestors,
-			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan,
-			NameRoleActivity nrad, LinkType.Type roleInNRAD, String displayName ) {
-		if(nrad==null)
-			throw new IllegalArgumentException("Person ctor must take valid NameRoleActivity.");
+	public Person( NameRoleActivity nrad,
+			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan ) {
+		String fNameStr = null;
+		if((originalNRAD=nrad)==null 
+			|| (declaredName=originalNRAD.getName())==null 
+			|| (fNameStr=declaredName.getName())==null
+			||  fNameStr.isEmpty())
+			throw new IllegalArgumentException(
+					"Person ctor must have valid forename.");
 		if(activeTimeSpan==null || lifeTimeSpan==null)
-			throw new IllegalArgumentException("Person ctor must take valid active and life TimeSpans.");
-		this.nrad = nrad;
-		this.roleInNRAD = roleInNRAD;
+			throw new IllegalArgumentException(
+					"Person ctor must take valid active and life TimeSpans.");
 		this.activeTimeSpan = activeTimeSpan;
 		this.lifeTimeSpan = lifeTimeSpan;
-		declaredName = forename;
-		declaredFather = father;
-		declaredGrandFather = grandfather;
-		declaredAncestors = ancestors;
-		fatherLinks = new PersonLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
-		if(displayName!=null)
-			this.displayName = displayName;
-		else {
-			String suffix = nrad.getDocument().getAlt_id();
-			if(suffix==null) {
-				suffix = "Doc"+nrad.getDocument().getId();
+		NameRoleActivity nradFather=nrad.getFather();
+		declaredFather = (nradFather==null)?null:nradFather.getName();
+		String temp;
+		if((temp=declaredFather.getName())==null||temp.isEmpty())
+			declaredFather = null;
+		NameRoleActivity nradGrandFather =nrad.getGrandFather();
+		declaredGrandFather = (nradGrandFather==null)?null:nradGrandFather.getName();
+		if((temp=declaredGrandFather.getName())==null||temp.isEmpty())
+			declaredGrandFather = null;
+		List<NameRoleActivity> ancestorNRADs = nrad.getAncestors();
+		declaredAncestors = new ArrayList<Name>();
+		if(ancestorNRADs!=null) {
+			for(NameRoleActivity nradA:ancestorNRADs) {
+				Name ancName = nradA.getName();
+				if(ancName!=null 
+					&& ((temp=ancName.getName())!=null
+					&& !temp.isEmpty()))
+					declaredAncestors.add(ancName);
 			}
-			this.displayName = ((declaredName!=null)?declaredName:"(unknown)")
-								+"."+((suffix!=null)?suffix:nrad.getId());
 		}
+		fatherLinks = new PersonLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
 	}
 
+	/**
+	 * Must be called from Workspace context where the values for the 
+	 * generational offsets and standard deviations are known
+	 * @param activeTimeSpanOffset
+	 * @param lifeTimeSpanOffset
+	 * @param activeTimeSpanStdDev
+	 * @param lifeTimeSpanStdDev
+	 * @param addToFatherLinks
+	 * @return
+	 */
 	public Person createPersonForDeclaredFather(
 			long activeTimeSpanOffset, long lifeTimeSpanOffset,
 			double activeTimeSpanStdDev, double lifeTimeSpanStdDev,
@@ -89,13 +107,7 @@ public class Person {
 			new DerivedTimeSpan(activeTimeSpan, activeTimeSpanOffset, activeTimeSpanStdDev);
 		DerivedTimeSpan fatherLifeTimeSpan =
 			new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);
-		Name fathersGF = null;
-		List<Name> fathersAncestors = null;
-		if(declaredAncestors!=null&&!declaredAncestors.isEmpty()) {
-			fathersGF = declaredAncestors.get(0);
-			if(declaredAncestors.size()>1)
-				fathersAncestors = declaredAncestors.subList(1, declaredAncestors.size()-1);
-		}
+		/*
 		LinkType.Type fatherRoleInNRAD;
 		switch(roleInNRAD) {
 		case LINK_TO_PERSON:
@@ -107,13 +119,14 @@ public class Person {
 		//case LinkTypes.LINK_TO_ANCESTOR:
 			fatherRoleInNRAD = LinkType.Type.LINK_TO_ANCESTOR; break;
 		}
-		Person father = new Person(declaredFather, declaredGrandFather, fathersGF,
-				fathersAncestors, fatherActiveTimeSpan, fatherLifeTimeSpan,
-				nrad, fatherRoleInNRAD, displayName );
+		*/
+		Person father = new Person(originalNRAD.getFather(), 
+							fatherActiveTimeSpan, fatherLifeTimeSpan);
+		/*
 		if(addToFatherLinks) {
 			fatherLinks.addLink(father, 1.0);
 			fatherLinks.normalize();
-		}
+		}*/
 		return father;
 	}
 
@@ -145,7 +158,7 @@ public class Person {
 	}
 
 	public boolean declaredInSameDoc(Person other) {
-		return nrad.getDocument().equals(other.nrad.getDocument());
+		return originalNRAD.getDocument().equals(other.originalNRAD.getDocument());
 	}
 
 	/**

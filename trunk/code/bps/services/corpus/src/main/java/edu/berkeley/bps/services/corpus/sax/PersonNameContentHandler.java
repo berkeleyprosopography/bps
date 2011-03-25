@@ -30,6 +30,12 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	protected int state = S_INIT;
 	// TODO rewrite to hold nrads for base, patronym, ancestors, clan, etc. 
 	// then can build up the links 
+	// Note that when we add link for grandfather to the base, we must
+	// also link that as father to the father 
+	// Note that when we add links for ancestors to the base, we must
+	// add them to all father, grandfather, etc. 
+	// Note that when we add link for clan to the base, we must
+	// also link that as clan to the father, grandfather, etc.  
 
 	protected static final int T_MISSING = 0x0; 
 	protected static final int T_MASCULINE = 0x1; 
