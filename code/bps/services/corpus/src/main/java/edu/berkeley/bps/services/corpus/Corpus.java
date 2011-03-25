@@ -15,25 +15,12 @@ import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-//import javax.xml.xpath.XPathExpressionException;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-
-/* TODO Next steps:
- * 1) When we create a Corpus from scratch, we should set up the 
- *    docs, activities, etc. as emtpy hashmaps.
- * 2) When we create a Corpus from the DB, we should set up the 
- *    docs, activities, etc. as null pointers, and then
- *    fill them from the DB if they ask for them. This requires adding 
- *    getters on the doc lists, get by id, search, etc. 
- * 3) Need to add a flag to persist to DB or not, as we go.
- * 4) Need to rewrite findOrCreate[Name, Activity, ActivityRole] to persist.
- * 5) Deal with the next steps in Document, Name, NameFamilyLink, NameRoleActivity.
- */
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="corpus")

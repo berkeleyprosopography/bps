@@ -121,6 +121,7 @@ CREATE TABLE `name_role_activity_doc` (
   `act_role_id` int(10) unsigned NOT NULL,
   `activity_id` int(10) unsigned NOT NULL,
   `document_id` int(10) unsigned NOT NULL,
+  `displayname` VARCHAR(255) NOT NULL,
   `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
   INDEX `nrad_nrad_index` (`name_id`,`act_role_id`,`activity_id`,`document_id`),
   INDEX `nrad_r_index` (`act_role_id`),
@@ -143,15 +144,14 @@ SHOW WARNINGS;
 -- May have to change the link_type to be normalized and dynamic from corpus.
 DROP TABLE IF EXISTS `familylink`;
 CREATE TABLE `familylink` (
-  `id`          int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
-  `nrad_id`     int(10) unsigned NOT NULL,
-  `name_id`     int(10) unsigned NOT NULL,
-  `link_type`   ENUM ('father', 'grandfather', 'mother', 'ancestor', 'clan' ) NOT NULL DEFAULT 'father',
-  `xml_idref`   VARCHAR(255) NULL,   -- ref into XML for document.
-  INDEX `fl_nrad_index` (`nrad_id`),
-	CONSTRAINT `fl_ibfk_1` FOREIGN KEY (`nrad_id`)
+  `id`           int(10) unsigned PRIMARY KEY NOT NULL auto_increment,
+  `from_nrad_id` int(10) unsigned NOT NULL,
+  `to_nrad_id`   int(10) unsigned NOT NULL,
+  `link_type`    ENUM ('father', 'grandfather', 'mother', 'ancestor', 'clan' ) NOT NULL DEFAULT 'father',
+  INDEX `fl_nrad_index` (`from_nrad_id`),
+	CONSTRAINT `fl_ibfk_1` FOREIGN KEY (`from_nrad_id`)
       REFERENCES `name_role_activity_doc` (`id`),
-	CONSTRAINT `fl_ibfk_2` FOREIGN KEY (`name_id`)
-      REFERENCES `name` (`id`)
+	CONSTRAINT `fl_ibfk_2` FOREIGN KEY (`to_nrad_id`)
+      REFERENCES `name_role_activity_doc` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;

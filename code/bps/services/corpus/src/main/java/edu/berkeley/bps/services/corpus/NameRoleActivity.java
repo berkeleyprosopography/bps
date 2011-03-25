@@ -40,6 +40,10 @@ public class NameRoleActivity
 	private Activity		activity;
 	private Document		document;
 	
+	@XmlElement
+	private String			displayName;
+	
+	
 	private int[]			compKey = {0,0,0};
 	
 	/**
@@ -55,7 +59,7 @@ public class NameRoleActivity
 	 * Create a new empty instance.
 	 */
 	private NameRoleActivity() {
-		this(nextID--, null, null, null, null, null);
+		this(null, null, null, null, null, null);
 	}
 
 	/**
@@ -66,7 +70,19 @@ public class NameRoleActivity
 	 */
 	public NameRoleActivity(Name name, ActivityRole role,
 			Activity activity, String xmlID, Document document) {
-		this(nextID--, name, role, activity, xmlID, document);
+		this(name, role, activity, xmlID, document, null);
+	}
+
+	/**
+	 * @param name The Name involved in this instance
+	 * @param role The ActivityRole involved in this instance
+	 * @param activity The Activity involved in this instance
+	 * @param xmlID The ID of the token associated with this in the owning document
+	 */
+	public NameRoleActivity(Name name, ActivityRole role,
+			Activity activity, String xmlID, Document document,
+			String displayName ) {
+		this(nextID--, name, role, activity, xmlID, document, displayName);
 	}
 
 	/**
@@ -78,21 +94,48 @@ public class NameRoleActivity
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
 	private NameRoleActivity(int id, Name name, ActivityRole role,
-			Activity activity, String xmlID, Document document) {
+			Activity activity, String xmlID, Document document,
+			String displayName ) {
 		this.id = id;
 		this.name = name;
 		if(name==null)
 			this.normalName = null;
 		else if(null==(this.normalName = name.getNormal()))
 			this.normalName = name;
+		if(role==null)
+			throw new IllegalArgumentException(
+				"NameRoleActivity ctor must have valid role.");
+		if(activity==null)
+			throw new IllegalArgumentException(
+				"NameRoleActivity ctor must have valid activity.");
+		if(document==null)
+			throw new IllegalArgumentException(
+				"NameRoleActivity ctor must have valid document.");
+
 		this.role = role;
 		this.activity = activity;
 		this.xmlID = xmlID;
 		this.document = document;
 		this.nameFamilyLinks = null;
 		this.resetCompKey();
+		this.computeDisplayName(displayName);
 	}
 	
+	private void computeDisplayName(String displayNameIn) {
+		if(displayNameIn!=null)
+			displayName = displayNameIn;
+		else {
+			String suffix = document.getAlt_id();
+			if(suffix==null) {
+				suffix = "Unknown:doc"+document.getId();
+			}
+			String forename = (name==null)?null:name.getName();
+			displayName = ((forename!=null)?forename:"(unknown)")
+								+"["+suffix+"]";
+		}
+		
+	}
+
 	public NameRoleActivity cloneInDocument(Connection dbConn, Document inDoc) {
 		Corpus corpus = inDoc.getCorpus();
 		Name nameClone = (name==null)?null:corpus.findName(name.getName());
@@ -285,9 +328,9 @@ public class NameRoleActivity
 	 * @param linkType one of the LINK_TO_* constants defined in the class
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
-	public void addNameFamilyLink(Name name, LinkType.Type linkType, String xmlID) {
+	public void addNameFamilyLink(NameRoleActivity nrad, LinkType.Type linkType) {
 		initNameFamilyLinks();
-		nameFamilyLinks.add(new NameFamilyLink(this, name, linkType, xmlID));
+		nameFamilyLinks.add(new NameFamilyLink(this, nrad, linkType));
 	}
 
 	/**
@@ -309,28 +352,28 @@ public class NameRoleActivity
 	/**
 	 * @return a declared Father if there is one
 	 */
-	public Name getFatherName() {
+	public NameRoleActivity getFather() {
 		return findFamilyLinkNameByType(LinkType.Type.LINK_TO_FATHER);
 	}
 
 	/**
 	 * @return a declared Clan if there is one
 	 */
-	public Name getClanName() {
+	public NameRoleActivity getClan() {
 		return findFamilyLinkNameByType(LinkType.Type.LINK_TO_CLAN);
 	}
 
 	/**
 	 * @return a declared GrandFather if there is one
 	 */
-	public Name getGrandFatherName() {
+	public NameRoleActivity getGrandFather() {
 		return findFamilyLinkNameByType(LinkType.Type.LINK_TO_GRANDFATHER);
 	}
 
 	/**
 	 * @return any declared ancestors
 	 */
-	public List<Name> getAncestorNames() {
+	public List<NameRoleActivity> getAncestors() {
 		return findFamilyLinkNamesByType(LinkType.Type.LINK_TO_ANCESTOR);
 	}
 
@@ -338,10 +381,10 @@ public class NameRoleActivity
 	 * @param linkType one of LinkTypes.LINK_TO_*
 	 * @return name of the first family link matching linkType
 	 */
-	public Name findFamilyLinkNameByType(LinkType.Type linkType) {
+	public NameRoleActivity findFamilyLinkNameByType(LinkType.Type linkType) {
 		for(NameFamilyLink nfl:nameFamilyLinks) {
 			if(nfl.getLinkType()==linkType)
-				return nfl.getLinkToName();
+				return nfl.getLinkTo();
 		}
 		return null;
 	}
@@ -350,14 +393,14 @@ public class NameRoleActivity
 	 * @param linkType one of NameFamilyLink.LINK_TO_*
 	 * @return array of names for family links matching linkType
 	 */
-	public ArrayList<Name> findFamilyLinkNamesByType(LinkType.Type linkType) {
-		ArrayList<Name> list = null;
+	public ArrayList<NameRoleActivity> findFamilyLinkNamesByType(LinkType.Type linkType) {
+		ArrayList<NameRoleActivity> list = null;
 		for(NameFamilyLink nfl:nameFamilyLinks) {
 			if(nfl.getLinkType()==linkType) {
 				if(list==null) {
-					list = new ArrayList<Name>();
+					list = new ArrayList<NameRoleActivity>();
 				}
-				list.add(nfl.getLinkToName());
+				list.add(nfl.getLinkTo());
 			}
 		}
 		return list;
@@ -375,11 +418,11 @@ public class NameRoleActivity
 		int activityId = getActivityId();
 		int docId = getDocumentId();
 		if(id <= CachedEntity.UNSET_ID_VALUE) {
-			setId(persistNew(dbConn, nameId, roleId, activityId, docId, xmlID));
+			setId(persistNew(dbConn, nameId, roleId, activityId, docId, xmlID, displayName));
 		} else {
 			final String UPDATE_STMT = 
 				"UPDATE name_role_activity_doc SET"
-				+" name_id=?,act_role_id=?,activity_id=?,document_id=?,xml_idref=?"
+				+" name_id=?,act_role_id=?,activity_id=?,document_id=?,xml_idref=?,displayname=?"
 				+" WHERE id=?";
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
@@ -388,7 +431,8 @@ public class NameRoleActivity
 				stmt.setInt(3, activityId);
 				stmt.setInt(4, docId);
 				stmt.setString(5, xmlID);
-				stmt.setInt(6, id);
+				stmt.setString(6, displayName);
+				stmt.setInt(7, id);
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -401,12 +445,12 @@ public class NameRoleActivity
 		
 	private static int persistNew(Connection dbConn, 
 			int name_id, int act_role_id, int activity_id, int document_id,  
-			String xml_idref) {
+			String xml_idref, String displayName) {
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO name_role_activity_doc"
-			+ "(`name_id`,`act_role_id`,`activity_id`,`document_id`, `xml_idref`)"
-			+ " VALUES(?,?,?,?,?)";
+			+ "(`name_id`,`act_role_id`,`activity_id`,`document_id`, `xml_idref`, `displayname`)"
+			+ " VALUES(?,?,?,?,?,?)";
 		int newId = 0;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
@@ -416,6 +460,7 @@ public class NameRoleActivity
 			stmt.setInt(3, activity_id);
 			stmt.setInt(4, document_id);
 			stmt.setString(5, xml_idref);
+			stmt.setString(6, displayName);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
@@ -436,7 +481,7 @@ public class NameRoleActivity
 
 	public static List<NameRoleActivity> ListAllInDocument(Connection dbConn, Document document) {
 		final String SELECT_BY_DOC_ID = 
-			"SELECT id, name_id, act_role_id, activity_id, xml_idref"
+			"SELECT id, name_id, act_role_id, activity_id, xml_idref, displayname"
 			+" FROM name_role_activity_doc WHERE document_id = ?";
 		int doc_id = 0;
 		if(document==null || (doc_id=document.getId())<=0) {
@@ -455,11 +500,13 @@ public class NameRoleActivity
 				int act_role_id = rs.getInt("act_role_id");
 				int activity_id = rs.getInt("activity_id");
 				String xml_idref = rs.getString("xml_idref");
+				String displayname = rs.getString("displayname");
 				Name name = corpus.findName(name_id);
 				ActivityRole role = corpus.findActivityRole(act_role_id);
 				Activity activity = corpus.findActivity(activity_id);
 				NameRoleActivity nrad = new NameRoleActivity(
-						rs.getInt("id"), name, role, activity, xml_idref, document );
+						rs.getInt("id"), name, role, activity, 
+						xml_idref, document, displayname );
 				nradList.add(nrad);
 			}
 			rs.close();
