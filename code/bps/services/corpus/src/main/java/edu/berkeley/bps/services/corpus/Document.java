@@ -1,7 +1,5 @@
 package edu.berkeley.bps.services.corpus;
 
-import edu.berkeley.bps.services.common.LinkTypes;
-import edu.berkeley.bps.services.common.hbtin.HBTIN_Constants;
 import edu.berkeley.bps.services.common.time.TimeUtils;
 
 import java.sql.Connection;
@@ -12,7 +10,6 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.PriorityQueue;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -20,15 +17,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @author pschmitz
@@ -134,7 +122,7 @@ public class Document {
 	}
 	
 	public void CreateAndPersist(Connection dbConn) {
-		final String myName = ".CreateAndPersist: ";
+		//final String myName = ".CreateAndPersist: ";
 		id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
 				notes, date_str, date_norm);
 	}
@@ -314,240 +302,6 @@ public class Document {
 		return docList;
 	}
 	
-
-	/**
-	 * @param teiNode The XML node for this Document
-	 * @param deepCreate set to TRUE if this should also create Name, Activity, etc. instances
-	 * @param corpus must be non-null if deepCreate is TRUE. All other instances are added to corpus lists.
-	 * @return new Document
-	 * @throws XPathExpressionException
-	 */
-	public static Document CreateAndPersistFromTEI(Element teiNode, boolean deepCreate, Corpus corpus,
-			Connection dbConn)
-		throws XPathExpressionException {
-		final String myName = ".CreateAndPersistFromTEI: ";
-		final String INSERT_STMT = 
-			"INSERT INTO document(corpus_id,alt_id,date_str,date_norm,creation_time)"
-			+" VALUES(?,?,?,?,now())";
-		String alt_id = "unknown";
-		//String notes = null;
-	    XPath xpath = XPathFactory.newInstance().newXPath();
-	    Document newDoc = null;
-	    try {
-	        // XPath Query to get to the doc CDLI id
-		    XPathExpression expr = xpath.compile(TEI_Constants.XPATH_ALT_ID);
-		    Element nameEl = (Element) expr.evaluate(teiNode, XPathConstants.NODE);
-		    if(nameEl!=null)
-		    	alt_id = nameEl.getTextContent().replaceAll("[\\s]+", " ");
-		    // TODO Find the date, normalize, and pass it in.
-		    // If no date, use the corpus midpoint date.
-		    String date = null;
-		    long date_norm = corpus.getDefaultDocTimeSpan().getCenterPoint();
-		    try {
-		    	PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
-		    			Statement.RETURN_GENERATED_KEYS);
-		    	stmt.setInt(1, corpus.getId());
-		    	stmt.setString(2, alt_id);
-		    	stmt.setString(3, date);
-		    	stmt.setLong(3, date_norm);
-		    	int nRows = stmt.executeUpdate();
-		    	if(nRows==1){
-		    		ResultSet rs = stmt.getGeneratedKeys();
-		    		if(rs.next()){
-		    			newDoc = new Document(rs.getInt(1), corpus, alt_id, 
-		    					null, null, null, date, date_norm);
-		    		}
-		    		rs.close();
-		    	}
-		    } catch(SQLException se) {
-		    	String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-		    	System.err.println(tmp);
-		    	throw new RuntimeException( tmp );
-		    }
-		    
-		    Activity unkActivity = corpus.findOrCreateActivity(HBTIN_Constants.ACTIVITY_UNKNOWN, dbConn);
-		    // TODO - this is all corpus specific, and needs to go elsewhere!!!
-		    ActivityRole principal = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_PRINCIPLE, dbConn);
-		    ActivityRole witness = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_WITNESS, dbConn);
-		    List<String> missingNames = new ArrayList<String>(2);
-		    missingNames.add("xxx");
-		    missingNames.add("NUMMI");
-		    // INCOMPLETE
-				// List<Pattern> elides = new ArrayList<Pattern>(1);
-		    // elides.add("[\\d*]");
-		    
-		    if(deepCreate) {
-		    	// Find the principal persName nodes and create a nameRoleActivity for each one
-		    	newDoc.addNamesForActivity( dbConn, TEI_Constants.XPATH_PRINCIPAL_PERSNAMES,
-		    								teiNode, corpus, unkActivity, principal );
-		    	// Find the witness persName nodes and create a nameRoleActivity for each one
-		    	newDoc.addNamesForActivity( dbConn, TEI_Constants.XPATH_WITNESS_PERSNAMES,
-		    								teiNode, corpus, unkActivity, witness );
-		    }
-	    } catch (XPathExpressionException xpe) {
-	    	// debug complaint
-	    	throw xpe;
-	    }
-	    return newDoc;
-	}
-
-	protected void addNamesForActivity( Connection dbConn, 
-			String xpathSel, Node context, Corpus corpus,
-			Activity activity, ActivityRole defaultActRole )
-		throws XPathExpressionException {
-
-	    XPath xpath = XPathFactory.newInstance().newXPath();
-	    try {
-			XPathExpression expr = xpath.compile(xpathSel);
-		    NodeList nodes = (NodeList) expr.evaluate(context, XPathConstants.NODESET);
-		    int nNodes = nodes.getLength();
-		    for (int i=0; i < nNodes; i++) {
-	        	NameRoleActivity nra = null;
-		        Element persNameEl = (Element)nodes.item(i);
-		        // Get the forenames
-		        NodeList fnNodes = persNameEl.getElementsByTagName(TEI_Constants.FORENAME_EL);
-			    int nNames = fnNodes.getLength();
-		        if(nNames<1) {
-		        	//generateParseError(persNameEl, TEI_Constants.PERSNAME_EL+" has no "
-		        	//								+TEI_Constants.FORENAME_EL+" declarations.");
-		        	// Create an empty NRAD to represent this
-		        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
-		        	addNameRoleActivity(nra);
-		        } else {
-		        	int patronymsLinked = 0;
-				    for (int iN=0; iN < nNames; iN++) {
-				        Element foreNameEl = (Element)fnNodes.item(iN);
-				        String fnNameStr = foreNameEl.getAttribute("n").replaceAll("\\[.*\\]$", "");
-				        if(fnNameStr.length()<1) {
-				        	generateParseError(foreNameEl,
-				        			TEI_Constants.FORENAME_EL+" has no (or empty) value.");
-				        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
-				        	addNameRoleActivity(nra);
-				        } else {
-					        String fnType = foreNameEl.getAttribute(TEI_Constants.TYPE_ATTR);
-					        boolean isPatronym = fnType.equalsIgnoreCase(TEI_Constants.TYPE_PATRONYMIC);
-				        	String nameGender = Name.GENDER_UNKNOWN;
-					        if( isPatronym || fnType.equalsIgnoreCase(TEI_Constants.TYPE_GENDER_MASCULINE)) {
-					        	nameGender = Name.GENDER_MALE;
-					        } else if( fnType.equalsIgnoreCase(TEI_Constants.TYPE_GENDER_FEMININE)) {
-					        	nameGender = Name.GENDER_FEMALE;
-					        }
-				        	Name nameInstance = Name.FindByName(dbConn, fnNameStr, corpus.getId());
-				        	if(nameInstance != null ) {
-				        		if(nameInstance.getGender()!=nameGender) {
-						        	generateParseError(foreNameEl,
-						        		"Name: "+fnNameStr+" gender does not match previous instance - ignoring.");
-				        		}
-				        	} else {
-				        		nameInstance = Name.CreateAndPersist(dbConn, corpus.getId(),
-				        				fnNameStr, Name.NAME_TYPE_PERSON, nameGender, null, null);
-				        	}
-					        String fnXMLID = foreNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
-					        if(fnXMLID.length()<1)
-					        	fnXMLID = null;
-					        if(!isPatronym) {
-					        	if(nra!=null) {
-						        	generateParseError(foreNameEl, "Multiple foreNames encountered.");
-					        	} else {
-						        	nra = new NameRoleActivity(nameInstance, defaultActRole,
-						        			activity, fnXMLID, this);
-						        	addNameRoleActivity(nra);
-					        	}
-					        } else{
-					        	if(nra==null) {
-						        	//generateParseError(foreNameEl, "Patronym with no primary forename.");
-						        	// Create an empty NRAD to represent missing forename
-						        	nra = new NameRoleActivity(null, defaultActRole, activity, null, this);
-						        	addNameRoleActivity(nra);
-					        	}
-					        	// Deal with patronyms - add a family link
-					        	LinkTypes.Values linkType;
-					        	if(patronymsLinked == 0) {
-					        		linkType = LinkTypes.Values.LINK_TO_FATHER;
-					        	} else  if(patronymsLinked == 1) {
-					        		linkType = LinkTypes.Values.LINK_TO_GRANDFATHER;
-					        	} else {
-					        		linkType = LinkTypes.Values.LINK_TO_ANCESTOR;
-					        	}
-					        	nra.addNameFamilyLink(nameInstance, linkType, fnXMLID);
-					        	patronymsLinked++;
-					        }
-				        }
-				    }
-		        }
-		        // Get the clan names
-		        NodeList anNodes = persNameEl.getElementsByTagName(TEI_Constants.ADDNAME_EL);
-			    nNames = anNodes.getLength();
-			    boolean fFoundClanName = false;
-			    for (int iN=0; iN < nNames; iN++) {
-			        Element addNameEl = (Element)anNodes.item(iN);
-			        String anNameStr = addNameEl.getAttribute("n").replaceAll("\\[.*\\]$", "");
-			        if(anNameStr.length()<1) {
-			        	generateParseError(addNameEl, "Additional name empty.");
-			        } else {
-			        	String nameGender = Name.GENDER_UNKNOWN;
-				        String anTypeAttr = addNameEl.getAttribute(TEI_Constants.TYPE_ATTR);
-				        boolean isClan = false;
-				        boolean isSpouse = false;
-				        String nametype = null;
-				        if(anTypeAttr.equalsIgnoreCase(TEI_Constants.TYPE_CLAN)){
-				        	isClan = true;
-				        	nametype = Name.NAME_TYPE_CLAN;
-				        	nameGender = Name.GENDER_MALE;
-				        } else if(anTypeAttr.equalsIgnoreCase(TEI_Constants.TYPE_SPOUSE)){
-				        	isSpouse = true;
-				        	nametype = Name.NAME_TYPE_PERSON;
-				        	Name baseName = nra.getName();
-				        	if(baseName==null || baseName.getGender()==Name.GENDER_UNKNOWN) {
-				        		nameGender = Name.GENDER_UNKNOWN;
-				        	} else {
-				        		nameGender = ( baseName.getGender()==Name.GENDER_MALE )?
-				        				Name.GENDER_FEMALE:Name.GENDER_MALE;
-				        	}
-				        } else {
-				        	generateParseError(addNameEl, "Additional name must be a clan or spouse.");
-				        	continue;
-				        }
-
-			        	Name nameInstance = Name.FindByName(dbConn, anNameStr, corpus.getId());
-			        	if(nameInstance != null ) {
-			        		if(nameInstance.getGender()!=nameGender) {
-					        	generateParseError(addNameEl,
-					        		"Name: "+anNameStr+" gender does not match previous instance - ignoring.");
-			        		}
-			        		if(nameInstance.getNameType()!=nametype) {
-					        	generateParseError(addNameEl,
-					        		"Name: "+anNameStr+" nametype does not match previous instance - ignoring.");
-			        		}
-			        	} else {
-			        		nameInstance = Name.CreateAndPersist(dbConn, corpus.getId(),
-			        				anNameStr, nametype, nameGender, null, null);
-			        	}
-				        String fnXMLID = addNameEl.getAttribute(TEI_Constants.XMLID_ATTR);
-				        if(fnXMLID.length()<1)
-				        	fnXMLID = null;
-				        if(nra==null) {
-				        	generateParseError(addNameEl, "Additional name with no primary name.");
-				        } else if(fFoundClanName) {
-				        	generateParseError(addNameEl, "Multiple clan name declarations.");
-				        } else if(isClan){
-				        	// add clan name
-				        	nra.addNameFamilyLink(nameInstance, LinkTypes.Values.LINK_TO_CLAN, fnXMLID);
-				        	fFoundClanName = true;
-				        } else if(isSpouse){
-				        	// add clan name
-				        	nra.addNameFamilyLink(nameInstance, LinkTypes.Values.LINK_TO_CLAN, fnXMLID);
-				        	fFoundClanName = true;
-				        }
-			        }
-			    }
-		    }
-	    } catch (XPathExpressionException xpe) {
-	    	// debug complaint
-	    	throw xpe;
-	    }
-	}
-	
 	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
 		final String DELETE_ALL = 
 			"DELETE FROM document WHERE corpus_id=?";
@@ -566,8 +320,6 @@ public class Document {
 							"Problem deleting documents\n"+se.getLocalizedMessage()).build());
 		}
 	}
-	
-
 
 	/**
 	 * @return the id
@@ -734,33 +486,6 @@ public class Document {
 	 */
 	public boolean equals(Document other) {
 		return id==other.id;
-	}
-
-	private void generateParseError( Element node, String errorStr ) {
-		String nodeId = (node==null)?null:node.getAttribute(TEI_Constants.XMLID_ATTR);
-		String fullString = "Parse error in Document "+toString();
-		if(nodeId!=null) {
-			fullString += " on element: "+nodeId;
-		}
-		System.err.println(fullString);
-		System.err.println(errorStr);
-	}
-
-	/**
-	 * Produce SQL loadfile content for this instance
-	 * @param sep The separator to use between entries
-	 * @param nullStr The null indicator to use for missing entries
-	 * @return loadfile string with no line terminator or newline.
-	 */
-	public String toXMLLoadString(String sep, String nullStr ) {
-		return id+sep+
-			((corpus!=null)?corpus.getId():nullStr)+sep+
-			((alt_id!=null)?'"'+alt_id+'"':nullStr)+sep+
-			((sourceURL!=null)?'"'+sourceURL+'"':nullStr)+sep+
-			((xml_id!=null)?'"'+xml_id+'"':nullStr)+sep+
-			((notes!=null)?'"'+notes+'"':nullStr)+sep+
-			((date_str!=null)?'"'+date_str+'"':nullStr)+sep+
-			date_norm;
 	}
 
 }
