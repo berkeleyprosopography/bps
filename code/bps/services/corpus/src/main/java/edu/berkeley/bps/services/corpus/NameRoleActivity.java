@@ -149,9 +149,18 @@ public class NameRoleActivity
 			new NameRoleActivity(nameClone, roleClone, activityClone,
 					xmlID, inDoc);
 		clone.persist(dbConn);
-		// TODO clone all the name-family links
+		// Note: we clone all the name-family links in a second pass
 		return clone;
 	}
+	
+	public void cloneNFLs(NameRoleActivity clone, HashMap<Integer, NameRoleActivity> context) {
+		for(NameFamilyLink link:nameFamilyLinks) {
+			int linkToId = link.getLinkTo().getId();
+			NameRoleActivity linkTo = context.get(linkToId);
+			clone.addNameFamilyLink(linkTo, link.getLinkType());
+		}
+	}
+
 	
 	private void resetCompKey() {
 		compKey[0] = (activity==null)?0:activity.getId();
