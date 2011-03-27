@@ -143,7 +143,8 @@ public class PersonNameContentHandler extends StackedContentHandler {
 								Name.NAME_TYPE_PERSON, gender, dbConn);
 			}
 			if(isPrimaryOrMissing(type)) {
-				NameRoleActivity nra = new NameRoleActivity(name, activityRole, activity, null, document);
+				NameRoleActivity nra = 
+					new NameRoleActivity(name, activityRole, activity, xmlid, document);
 				if(state!=S_INIT) {
 					generateParseWarning(xmlid, 
 							"Found multiple primary names in person declaration");
@@ -169,7 +170,8 @@ public class PersonNameContentHandler extends StackedContentHandler {
 					}
 		        	document.addNameRoleActivity(nra);
 		        	// Now add a father role
-		        	father = new NameRoleActivity(name, fatherAR, activity, xmlid, document);
+		        	father = new NameRoleActivity(name, fatherAR, activity, 
+		        									xmlid, document);
 		        	document.addNameRoleActivity(father);
 		        	state = S_FOUND_PATRONYM;
 				} else if(state==S_FOUND_FORENAME) { // typical case
@@ -179,17 +181,21 @@ public class PersonNameContentHandler extends StackedContentHandler {
 							"\" is patronym although type is:"+type);
 					}
 		        	// Add a father role
-		        	father = new NameRoleActivity(name, fatherAR, activity, xmlid, document);
+		        	father = new NameRoleActivity(name, fatherAR, activity, 
+		        									xmlid, document);
 		        	document.addNameRoleActivity(father);
 		        	state = S_FOUND_PATRONYM;
 				} else if(state==S_FOUND_PATRONYM) { // extra patronym
 					if(type==T_GRANDFATHER) {
 			        	// Add a grandfather role
-			        	grandfather = new NameRoleActivity(name, grandfatherAR, activity, null, document);
+			        	grandfather = 
+			        		new NameRoleActivity(name, grandfatherAR, activity, 
+			        								xmlid, document);
 			        	document.addNameRoleActivity(grandfather);
 					} else {
 						NameRoleActivity ancestor =
-							new NameRoleActivity(name, ancestorAR, activity, xmlid, document);
+							new NameRoleActivity(name, ancestorAR, activity, 
+													xmlid, document);
 						ancestors.add(ancestor);
 			        	document.addNameRoleActivity(ancestor);
 			        	if(type!=T_ANCESTOR)
@@ -246,7 +252,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 						+" (not FOUND_CLAN) but clan not null!");
 			} else {
 				clan = new NameRoleActivity(name, clanAR, activity, 
-	    				null, document, null);
+	    				xmlid, document, null);
 	        	document.addNameRoleActivity(clan);
 			}
 	    	state = S_FOUND_CLAN;

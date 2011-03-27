@@ -125,7 +125,10 @@ public class NameRoleActivity
 		if(displayNameIn!=null)
 			displayName = displayNameIn;
 		else {
-			String suffix = document.getAlt_id();
+			String suffix = xmlID;
+			if(suffix==null) {
+				suffix = document.getAlt_id();
+			}
 			if(suffix==null) {
 				suffix = "Unknown:doc"+document.getId();
 			}
