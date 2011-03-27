@@ -98,12 +98,22 @@ public class Document {
 				Document.nextId--,
 				newCorpus,
 				alt_id, sourceURL, xml_id, notes, date_str, date_norm);
+		// Get doc id before we create the NRADs
 		newDoc.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
 		// Clone the NRAD list
+		// Maintain a map of old IDs to new NRAD instances, for cloning the NFLs
+		HashMap<Integer, NameRoleActivity> context = new HashMap<Integer, NameRoleActivity>();
+		Collections.sort(nameRoleActivities);
 		for(NameRoleActivity nrad:nameRoleActivities) {
 			NameRoleActivity clone = nrad.cloneInDocument(dbConn, newDoc);
 			newDoc.nameRoleActivities.add(clone);
+			context.put(nrad.getId(), clone);
 		}
+		for(NameRoleActivity nrad:nameRoleActivities) {
+			nrad.cloneNFLs(context.get(nrad.getId()), context);
+		}
+		// Now persist the NRADs and the NFLs
+		newDoc.persist(dbConn, CachedEntity.DEEP_PERSIST);
 		return newDoc;
 	}
 
