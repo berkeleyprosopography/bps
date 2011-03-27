@@ -7,6 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.jboss.resteasy.annotations.cache.Cache;
 
@@ -138,6 +141,47 @@ public class NameFamilyLink {
 			}
 		}
 	}
+	
+	public static List<NameFamilyLink> GetLinksForNRAD(Connection dbConn, 
+			NameRoleActivity linkFrom, HashMap<Integer, NameRoleActivity> context) {
+		final String SELECT_BY_FROM_ID = 
+			"SELECT id, to_nrad_id,link_type"
+			+" FROM familylink WHERE from_nrad_id = ?";
+		int nrad_id = 0;
+		if(linkFrom==null || (nrad_id=linkFrom.getId())<=0) {
+			String tmp = myClass+".ListAllForNRAD: Invalid nrad.\n";
+			System.err.println(tmp);
+			throw new IllegalArgumentException( tmp );
+		}
+		ArrayList<NameFamilyLink> nflList = new ArrayList<NameFamilyLink>();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_FROM_ID);
+			stmt.setInt(1, nrad_id);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				int id = rs.getInt("id");
+				int to_nrad_id = rs.getInt("to_nrad_id");
+				NameRoleActivity linkTo = context.get(to_nrad_id);
+				if(linkTo==null) {
+					throw new RuntimeException(myClass
+							+".ListAllForNRAD: Cannot find NRAD for id:"+to_nrad_id);
+				}
+				String link_type = rs.getString("link_type");
+				LinkType.Type linkType = LinkType.ValueFromString(link_type);
+				NameFamilyLink nfl = new NameFamilyLink(id, linkFrom, linkTo, linkType);
+				nflList.add(nfl);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".ListAllForNRAD: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+		return nflList;
+	}
+	
+	
 	/**
 	 * @return the id
 	 */

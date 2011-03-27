@@ -450,7 +450,7 @@ public class WorkspaceResource extends BaseResource {
         try {
     		Connection dbConn = getServiceContext(srvc).getConnection();
 	        Document document = getDocument(dbConn, id, docspec);
-	        nradList = document.getNameRoleActivities();
+	        nradList = document.getNameRoleActivities(true);
 	        return nradList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();

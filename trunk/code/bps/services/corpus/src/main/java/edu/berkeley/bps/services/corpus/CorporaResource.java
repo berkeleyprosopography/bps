@@ -603,7 +603,7 @@ public class CorporaResource extends BaseResource {
     		Connection dbConn = getServiceContext(srvc).getConnection();
 	        Document document = getDocument(dbConn, id, docspec);
 	        //docList = Document.ListAllInCorpus(dbConn, corpus);
-	        nradList = document.getNameRoleActivities();
+	        nradList = document.getNameRoleActivities(true);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
