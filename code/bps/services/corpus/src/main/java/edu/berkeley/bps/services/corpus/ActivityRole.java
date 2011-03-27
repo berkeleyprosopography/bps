@@ -34,6 +34,8 @@ public class ActivityRole {
 	private String		name;
 	@XmlElement
 	private String		description;
+	
+	private boolean		familyRole;
 
 	/**
 	 * Create a new empty ActivityRole.
@@ -71,6 +73,11 @@ public class ActivityRole {
 		this.name = name;
 		this.corpus = corpus;
 		this.description = description;
+		familyRole = (name.equals(FATHER_ROLE)
+		 || name.equals(MOTHER_ROLE)
+		 || name.equals(GRANDFATHER_ROLE)
+		 || name.equals(ANCESTOR_ROLE)
+		 || name.equals(CLAN_ROLE));
 	}
 
 	public ActivityRole cloneInCorpus(Connection dbConn, Corpus newCorpus) {
@@ -124,6 +131,10 @@ public class ActivityRole {
 	 */
 	public Corpus getCorpus() {
 		return corpus;
+	}
+	
+	public boolean isFamilyRole() {
+		return familyRole;
 	}
 
 	/**

@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -230,13 +231,19 @@ public class Document {
 	}
 	
 	protected void initAttachedEntityMaps(Connection dbConn) {
-		// If this is a proper corpus from the DB, then set up the 
-		// attached elements as hashmaps
 		if(id<=0)
 			return;
 		// Handle NameRoleActivities List
-		nameRoleActivities.addAll( 
-			NameRoleActivity.ListAllInDocument(dbConn, this));
+		List<NameRoleActivity> nrads = NameRoleActivity.ListAllInDocument(dbConn, this);
+		HashMap<Integer, NameRoleActivity> context = new HashMap<Integer, NameRoleActivity>();
+		for(NameRoleActivity nrad:nrads) {
+			// TO DO - maintain separate base, clan, and ALL lists.
+			nameRoleActivities.add(nrad);
+			context.put(nrad.getId(), nrad);
+		}
+		for(NameRoleActivity nrad:nrads) {
+			nrad.initAttachedEntityMaps(dbConn, context);
+		}
 	}
 	
 	public void persistAttachedEntities(Connection dbConn) {
@@ -496,11 +503,42 @@ public class Document {
 	}
 
 	/**
+	 */
+	/**
+	 * @param orderForFamily if true, sorts the base (non-family) roles, and
+	 * 							then appends the associated family nrads
+	 * 							for each base (non-family) role.
 	 * @return the nameRoleActivities
 	 */
-	public List<NameRoleActivity> getNameRoleActivities() {
+	public List<NameRoleActivity> getNameRoleActivities(boolean orderForFamily) {
 		Collections.sort(nameRoleActivities);
-		return nameRoleActivities;
+		if(!orderForFamily)
+			return nameRoleActivities;
+		
+		List<NameRoleActivity> familyList = new ArrayList<NameRoleActivity>();
+		for(NameRoleActivity nrad:nameRoleActivities) {
+			if(!nrad.getRole().isFamilyRole()) {
+				familyList.add(nrad);
+				NameRoleActivity father = nrad.getFather();
+				if(father!=null) {
+					familyList.add(father);
+					NameRoleActivity grandfather = nrad.getGrandFather();
+					if(grandfather!=null) {
+						familyList.add(grandfather);
+						List<NameRoleActivity> ancestors = nrad.getAncestors();
+						if(ancestors!=null) {
+							for(NameRoleActivity anc:ancestors)
+								familyList.add(anc);
+						}
+					}
+				}
+				NameRoleActivity clan = nrad.getClan();
+				if(clan!=null) {
+					familyList.add(clan);
+				}
+			}
+		}
+		return familyList;
 	}
 
 	/**

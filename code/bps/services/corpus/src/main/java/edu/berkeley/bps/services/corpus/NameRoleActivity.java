@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -435,6 +436,15 @@ public class NameRoleActivity
 		}
 	}
 		
+	protected void initAttachedEntityMaps(Connection dbConn, 
+										HashMap<Integer, NameRoleActivity> context) {
+		if(id<=0)
+			return;
+		// Get the NameFamilyLinks
+		nameFamilyLinks.addAll( 
+			NameFamilyLink.GetLinksForNRAD(dbConn, this, context));
+	}
+	
 	protected void persistAttachedEntities(Connection dbConn) {
 		persistFamilyLinks(dbConn);
 	}
@@ -514,7 +524,7 @@ public class NameRoleActivity
 			rs.close();
 			stmt.close();
 		} catch(SQLException se) {
-			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
+			String tmp = myClass+".ListAllInDocument: Problem querying DB.\n"+ se.getMessage();
 			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
