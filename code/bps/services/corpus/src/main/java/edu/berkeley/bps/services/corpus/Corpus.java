@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,6 +29,11 @@ public class Corpus extends CachedEntity {
 	final static String myClass = "Corpus";
 	public final static int NO_WKSP_ID = 0;
 	public final static int NO_CLONE_ID = 0;
+	public final static int ORDER_DOCS_BY_ALT_ID = 0;
+	public final static int ORDER_DOCS_BY_DATE = 1;
+	public static final String ORDER_DOCS_BY_ALT_ID_PARAM = "altId";
+	public static final String ORDER_DOCS_BY_DATE_PARAM = "date";
+
 	
 	@XmlElement 
 	String		description;
@@ -571,7 +577,15 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public List<Document> getDocuments() {
+		return getDocuments(ORDER_DOCS_BY_ALT_ID);
+	}
+	
+	public List<Document> getDocuments(int orderBy) {
 		ArrayList<Document> list = new ArrayList<Document>(documentsById.values());
+		Comparator<Document> c = orderBy==ORDER_DOCS_BY_ALT_ID?
+										new Document.AltIdComparator()
+										: new Document.DateComparator();
+		Collections.sort(list, c);
 		return list;
 	}
 	

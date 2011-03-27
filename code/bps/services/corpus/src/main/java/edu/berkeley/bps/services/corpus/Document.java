@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -45,7 +46,28 @@ public class Document {
 	private long		date_norm;		// Normalized date
 
 	private ArrayList<NameRoleActivity> nameRoleActivities;
-
+	
+	public static class AltIdComparator implements	Comparator<Document> {
+		public int compare(Document doc1, Document doc2) {
+			String altId1 = doc1.getAlt_id();
+			String altId2 = doc2.getAlt_id();
+			if(altId1==null) {
+				return(altId2==null)?0:-1;
+			} else if(altId2==null) {
+				return 1;
+			} else {
+				return altId1.compareTo(altId2);
+			}
+		}
+	}
+	
+	public static class DateComparator implements	Comparator<Document> {
+		public int compare(Document doc1, Document doc2) {
+			long diff = doc1.getDate_norm()-doc2.getDate_norm();
+			return diff==0?0:(diff<0?-1:1);
+		}
+	}
+	
 	/**
 	 * Ctor with all params - not generally used.
 	 * @see Document( String name, String description )

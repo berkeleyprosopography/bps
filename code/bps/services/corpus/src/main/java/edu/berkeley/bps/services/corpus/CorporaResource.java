@@ -45,7 +45,7 @@ import javax.xml.transform.stream.StreamSource;
 public class CorporaResource extends BaseResource {
 	
 	private static final String myClass = "CorporaResource";
-
+	
 	/**
      * Returns a listing of all corpora.
 	 * @return Full (shallow) details of all corpora
@@ -481,19 +481,36 @@ public class CorporaResource extends BaseResource {
 	@Produces({"application/xml", "application/json"})
 	@Wrapped(element="documents")
 	@Path("{id}/documents")
-	public List<Document> getDocuments(@Context ServletContext srvc, @PathParam("id") int id) {
+	public List<Document> getDocuments(
+			@Context ServletContext srvc, @Context UriInfo ui, 
+			@PathParam("id") int id) {
 		List<Document> docList = null;
         try {
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			// look for order-by setting
+			String orderByParam = queryParams.getFirst("o");
+			// Default to the "no workspace" value of 0 to get the unattached corpora
+			int orderBy;
+			if(orderByParam==null 
+					|| Corpus.ORDER_DOCS_BY_ALT_ID_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Corpus.ORDER_DOCS_BY_ALT_ID;
+			} else if(Corpus.ORDER_DOCS_BY_DATE_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Corpus.ORDER_DOCS_BY_DATE;
+			} else {
+            	throw new WebApplicationException( 
+        			Response.status(
+        				Response.Status.BAD_REQUEST).entity(
+        					"Unrecognized order spec: "+orderByParam).build());
+			}
     		Connection dbConn = getServiceContext(srvc).getConnection();
 			Corpus corpus = Corpus.FindByID(dbConn, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
-				
 			}
 	        //docList = Document.ListAllInCorpus(dbConn, corpus);
-	        docList = corpus.getDocuments();
+	        docList = corpus.getDocuments(orderBy);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocuments(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);

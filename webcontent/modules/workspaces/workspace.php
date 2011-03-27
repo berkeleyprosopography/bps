@@ -195,11 +195,13 @@ function getWorkspace($CFG,$user_id, $wkspid){
 	return false;
 }
 
-function getWorkspaceDocs($CFG,$id,$medianDocDate) {
+function getWorkspaceDocs($CFG,$id,$order,$medianDocDate) {
 	global $opmsg;
 
 	$rest = new RESTclient();
 	$url = $CFG->wwwroot.$CFG->svcsbase."/workspaces/".$id."/documents";
+	if(!empty($order))
+		$url .= "?o=".$order;
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -261,7 +263,7 @@ if(!isset($user_id)) {
 	$workspace = getWorkspace($CFG,$user_id, $_GET['wid']);
 	if($workspace && isset($workspace['importedCorpusId'])){
 		$workspace['nDocs'] = 0;
-		$docs = getWorkspaceDocs($CFG,$workspace['id'], '<em>('.$workspace['medianDocDate'].'?)</em>');
+		$docs = getWorkspaceDocs($CFG,$workspace['id'], $_GET['o'], '<em>('.$workspace['medianDocDate'].'?)</em>');
 		if($docs) {
 			$workspace['nDocs'] = count($docs);
 			$t->assign('documents', $docs);
