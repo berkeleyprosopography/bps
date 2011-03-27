@@ -679,12 +679,41 @@ public class Corpus extends CachedEntity {
 			activityRolesById.clear();
 	}
 
-	public Name findOrCreateName(String name, Connection dbConn) {
+	// This should really take more qualifiers, to ensure
+	// we do not conflate male/female or person/clan
+	public Name findOrCreateName(String name, int type,
+			int gender, Connection dbConn) {
 		Name instance = namesByName.get(name);
 		if(instance == null) {
 			instance = Name.CreateAndPersist(dbConn, id, name, 
-					Name.NAME_TYPE_PERSON, Name.GENDER_UNKNOWN, null, null);
+					type, gender, null, null);
 			addName(instance);
+		} else if( instance.getNameType()!=type) {
+			String tmp = myClass+".findOrCreateName("+name
+				+","+Name.NameTypeToString(type)
+				+") Found name match with inconsistent type:"
+				+instance.getNameTypeString();
+			System.err.println(tmp);
+			//throw new RuntimeException(tmp);
+		} else if( instance.getGender()!=gender) {
+			// Allow unknown to combine with known. 
+			if(gender == Name.GENDER_UNKNOWN) {
+				String tmp = myClass+".findOrCreateName("+name
+					+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+
+					instance.getGenderString();
+				System.err.println(tmp);
+			} else if(instance.getGender()==Name.GENDER_UNKNOWN) {
+				String tmp = myClass+".findOrCreateName("+name
+					+","+Name.GenderToString(gender)+") Assuming name match with unknown gender, and updating existing name.";
+				System.err.println(tmp);
+				instance.setGender(gender);
+			} else {
+				String tmp = myClass+".findOrCreateName("+name
+					+","+Name.GenderToString(gender)+") Found name match with conflicting gender:"+
+					instance.getGenderString();
+				System.err.println(tmp);
+				//throw new RuntimeException(tmp);
+			}
 		}
 		return instance;
 	}

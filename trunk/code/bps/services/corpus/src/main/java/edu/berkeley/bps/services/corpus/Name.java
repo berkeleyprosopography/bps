@@ -32,12 +32,17 @@ public class Name {
 	private final static String myClass = "Name";
 	private static int	nextID = CachedEntity.UNSET_ID_VALUE;
 	
-	public static final String NAME_TYPE_PERSON = "person";
-	public static final String NAME_TYPE_CLAN = "clan";
+	public static final int NAME_TYPE_PERSON = 0;
+	public static final String NAME_TYPE_PERSON_S = "person";
+	public static final int NAME_TYPE_CLAN = 1;
+	public static final String NAME_TYPE_CLAN_S = "clan";
 
-	public static final String GENDER_MALE = "male";
-	public static final String GENDER_FEMALE = "female";
-	public static final String GENDER_UNKNOWN = "unknown";
+	public static final int GENDER_UNKNOWN = 0;
+	public static final String GENDER_UNKNOWN_S = "unknown";
+	public static final int GENDER_MALE = 1;
+	public static final String GENDER_MALE_S = "male";
+	public static final int GENDER_FEMALE = 2;
+	public static final String GENDER_FEMALE_S = "female";
 
 	/**
 	 * The internal DB id, or could be a UUID
@@ -57,13 +62,11 @@ public class Name {
 	/**
 	 * The type of this name
 	 */
-	@XmlElement
-	private String		nametype;
+	private int		nametype;
 	/**
 	 * The gender of this name
 	 */
-	@XmlElement
-	private String		gender;
+	private int		gender;
 	/**
 	 * Any notes about this form
 	 */
@@ -91,6 +94,9 @@ public class Name {
 		this(Name.nextID--, corpus.getId(), name, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
 	}
 
+	public Name(int id, int corpusId, String name, String nametype, String gender, String notes, Name normal) {
+		this(id, corpusId, name, NameTypeStringToValue(nametype), GenderStringToValue(gender), notes, normal);
+	}
 	/**
 	 * Ctor with all params - not generally used.
 	 * @param id ID of the Name to be created. Must be unique.
@@ -98,7 +104,7 @@ public class Name {
 	 * @param notes Researcher notes about this name.
 	 * @param normal Reference to the normalized form (null if this is the normal form)
 	 */
-	public Name(int id, int corpusId, String name, String nametype, String gender, String notes, Name normal) {
+	public Name(int id, int corpusId, String name, int nametype, int gender, String notes, Name normal) {
 		super();
 		this.id = id;
 		this.corpusId = corpusId;
@@ -191,31 +197,75 @@ public class Name {
 	public int getNormalId() {
 		return (normal==null)?0:normal.id;
 	}
+
 	/**
 	 * @return the nametype
 	 */
-	public String getNameType() {
+	public int getNameType() {
 		return nametype;
+	}
+	
+	public static int NameTypeStringToValue(String type) {
+		if(NAME_TYPE_PERSON_S.equals(type))
+			return NAME_TYPE_PERSON; 
+		if(NAME_TYPE_CLAN_S.equals(type))
+			return NAME_TYPE_CLAN;
+		throw new IllegalArgumentException("Unknown NameType: "+type);
+	}
+	
+	public static String NameTypeToString(int type) {
+		return (type==NAME_TYPE_PERSON)?NAME_TYPE_PERSON_S:NAME_TYPE_CLAN_S;
+	}
+	
+	/**
+	 * @return the nametype string
+	 */
+	@XmlElement(name="nametype")
+	public String getNameTypeString() {
+		return NameTypeToString(nametype);
 	}
 
 	/**
 	 * @param nametype the nametype to set
 	 */
-	public void setNameType(String nametype) {
+	public void setNameType(int nametype) {
 		this.nametype = nametype;
 	}
 
 	/**
 	 * @return the gender
 	 */
-	public String getGender() {
+	public int getGender() {
 		return gender;
+	}
+
+	public static int GenderStringToValue(String gender) {
+		if(GENDER_UNKNOWN_S.equals(gender))
+			return GENDER_UNKNOWN; 
+		if(GENDER_MALE_S.equals(gender))
+			return GENDER_MALE;
+		if(GENDER_FEMALE_S.equals(gender))
+			return GENDER_FEMALE;
+		throw new IllegalArgumentException("Unknown Gender: "+gender);
+	}
+	
+	public static String GenderToString(int gender) {
+		return (gender==GENDER_UNKNOWN)?GENDER_UNKNOWN_S:
+				((gender==GENDER_MALE)?GENDER_MALE_S:GENDER_FEMALE_S);
+	}
+	
+	/**
+	 * @return the string
+	 */
+	@XmlElement(name="gender")
+	public String getGenderString() {
+		return GenderToString(gender);
 	}
 
 	/**
 	 * @param gender the gender to set
 	 */
-	public void setGender(String gender) {
+	public void setGender(int gender) {
 		this.gender = gender;
 	}
 
@@ -324,7 +374,7 @@ public class Name {
 	 * @return
 	 */
 	public static Name CreateAndPersist(Connection dbConn, int corpusId,
-			String name, String nametype, String gender, String notes, Name normal) {
+			String name, int nametype, int gender, String notes, Name normal) {
 		final String myName = ".CreateAndPersist: ";
 		int newId = persistNew(dbConn, corpusId, name, nametype, gender, notes, normal);
 		Name newName = new Name(newId, corpusId, name, nametype, gender, notes, normal); 
@@ -343,7 +393,7 @@ public class Name {
 	 * @return
 	 */
 	public static int persistNew(Connection dbConn, int corpusId,
-			String name, String nametype, String gender, String notes, Name normal) {
+			String name, int nametype, int gender, String notes, Name normal) {
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO `name`(`name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id`,creation_time)"
@@ -354,8 +404,8 @@ public class Name {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, name);
-			stmt.setString(2, nametype);
-			stmt.setString(3, gender);
+			stmt.setString(2, NameTypeToString(nametype));
+			stmt.setString(3, GenderToString(gender));
 			stmt.setString(4, notes);
 			if(normal==null) {
 				stmt.setNull(5, Types.INTEGER);
@@ -382,7 +432,9 @@ public class Name {
 	public void persist(Connection dbConn) {
 		final String myName = ".persist: ";
 		if(id<=CachedEntity.UNSET_ID_VALUE) {
-			id = persistNew(dbConn, corpusId, name, nametype, gender, notes, normal);
+			id = persistNew(dbConn, corpusId, name, 
+					nametype, gender, 
+					notes, normal);
 		} else {
 			final String UPDATE_STMT = 
 				"UPDATE `name`"
@@ -391,8 +443,8 @@ public class Name {
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setString(1, name);
-				stmt.setString(2, nametype);
-				stmt.setString(3, gender);
+				stmt.setString(2, NameTypeToString(nametype));
+				stmt.setString(3, GenderToString(gender));
 				stmt.setString(4, notes);
 				if(normal==null) {
 					stmt.setNull(5, Types.INTEGER);

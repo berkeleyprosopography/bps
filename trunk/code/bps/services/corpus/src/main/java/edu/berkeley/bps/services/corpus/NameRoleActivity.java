@@ -116,7 +116,7 @@ public class NameRoleActivity
 		this.activity = activity;
 		this.xmlID = xmlID;
 		this.document = document;
-		this.nameFamilyLinks = null;
+		this.nameFamilyLinks = new ArrayList<NameFamilyLink>();
 		this.resetCompKey();
 		this.computeDisplayName(displayName);
 	}
@@ -318,7 +318,6 @@ public class NameRoleActivity
 	}
 
 	public void addNameFamilyLink( NameFamilyLink nfl ) {
-		initNameFamilyLinks();
 		nameFamilyLinks.add(nfl);
 	}
 
@@ -329,17 +328,7 @@ public class NameRoleActivity
 	 * @param xmlID The ID of the token associated with this in the owning document
 	 */
 	public void addNameFamilyLink(NameRoleActivity nrad, LinkType.Type linkType) {
-		initNameFamilyLinks();
-		nameFamilyLinks.add(new NameFamilyLink(this, nrad, linkType));
-	}
-
-	/**
-	 * Init the nameFamilyLinks
-	 */
-	private void initNameFamilyLinks() {
-		if(null==nameFamilyLinks) {
-			nameFamilyLinks = new ArrayList<NameFamilyLink>();
-		}
+		addNameFamilyLink(new NameFamilyLink(this, nrad, linkType));
 	}
 
 	/**
@@ -443,6 +432,16 @@ public class NameRoleActivity
 		}
 	}
 		
+	protected void persistAttachedEntities(Connection dbConn) {
+		persistFamilyLinks(dbConn);
+	}
+	
+	protected void persistFamilyLinks(Connection dbConn) {
+		for(NameFamilyLink link:nameFamilyLinks) {
+			link.persist(dbConn);
+		}
+	}
+	
 	private static int persistNew(Connection dbConn, 
 			int name_id, int act_role_id, int activity_id, int document_id,  
 			String xml_idref, String displayName) {

@@ -96,12 +96,12 @@ public class LinkType {
 			typesByTypesMap.put(Type.LINK_TO_DAUGHTER, newLTInf);
 			
 			newLT = new LinkType(Type.LINK_TO_MOTHER, LINK_TO_MOTHER_S);
-			typesByNameMap.put(LINK_TO_FATHER_S, newLT);
+			typesByNameMap.put(LINK_TO_MOTHER_S, newLT);
 			typesByTypesMap.put(Type.LINK_TO_MOTHER, newLT);
 
 			newLT = new LinkType(Type.LINK_TO_SPOUSE, LINK_TO_SPOUSE_S);
 			typesByNameMap.put(LINK_TO_SPOUSE_S, newLT);
-			typesByTypesMap.put(Type.LINK_TO_FATHER, newLT);
+			typesByTypesMap.put(Type.LINK_TO_SPOUSE, newLT);
 			
 			newLT = new LinkType(Type.LINK_TO_GRANDFATHER, LINK_TO_GRANDFATHER_S);
 			typesByNameMap.put(LINK_TO_GRANDFATHER_S, newLT);
@@ -120,8 +120,8 @@ public class LinkType {
 			typesByTypesMap.put(Type.LINK_TO_CLAN, newLT);
 			
 			newLT = new LinkType(Type.LINK_TO_PERSON, LINK_TO_PERSON_S);
-			typesByNameMap.put(LINK_TO_FATHER_S, newLT);
-			typesByTypesMap.put(Type.LINK_TO_FATHER, newLT);
+			typesByNameMap.put(LINK_TO_PERSON_S, newLT);
+			typesByTypesMap.put(Type.LINK_TO_PERSON, newLT);
 
 		}
 	}

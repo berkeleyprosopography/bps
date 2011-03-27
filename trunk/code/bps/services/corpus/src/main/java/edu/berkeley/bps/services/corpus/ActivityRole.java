@@ -21,6 +21,8 @@ public class ActivityRole {
 	public static final String FATHER_ROLE = "Father";
 	public static final String MOTHER_ROLE = "Mother";
 	public static final String GRANDFATHER_ROLE = "Grandfather";
+	public static final String ANCESTOR_ROLE = "Ancestor";
+	public static final String CLAN_ROLE = "Clan";
 
 	private final static String myClass = "ActivityRole";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
