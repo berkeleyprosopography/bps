@@ -133,7 +133,7 @@ public class Document {
 			id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
 					notes, date_str, date_norm);
 		} else {
-			System.err.println("Document: "+id+"("+alt_id+") updating.");
+			//System.err.println("Document: "+id+"("+alt_id+") updating.");
 			// Note that we do not update the corpus_id - moving them is not allowed 
 			final String UPDATE_STMT = 
 				"UPDATE document SET alt_id=?, sourceURL=?, xml_id=?, notes=?, "
@@ -201,6 +201,12 @@ public class Document {
 		}
 	}
 	
+	protected void persistNRADAttachedEntities(Connection dbConn) {
+		for(NameRoleActivity nrad:nameRoleActivities) {
+			nrad.persistAttachedEntities(dbConn);
+		}
+	}
+	
 	protected void initAttachedEntityMaps(Connection dbConn) {
 		// If this is a proper corpus from the DB, then set up the 
 		// attached elements as hashmaps
@@ -212,8 +218,9 @@ public class Document {
 	}
 	
 	public void persistAttachedEntities(Connection dbConn) {
-		System.err.println("Document: "+id+"("+alt_id+") persisting NRADS");
+		//System.err.println("Document: "+id+"("+alt_id+") persisting NRADS");
 		persistNRADs(dbConn);
+		persistNRADAttachedEntities(dbConn);
 	}
 	
 	public static Document FindByID(Connection dbConn, Corpus corpus, int docId) {

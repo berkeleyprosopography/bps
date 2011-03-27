@@ -33,6 +33,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 	private boolean inWitnesses = false;
 	private boolean onAltIDElement = false;
 	private boolean foundAltIDElement = false;
+	private boolean notADocument = false;
 
 	public DocumentContentHandler(Connection dbConn, Corpus corpus, 
 			XMLReader parser, ContentHandler previous) {
@@ -40,7 +41,6 @@ public class DocumentContentHandler extends StackedContentHandler {
 		this.dbConn = dbConn;
 		this.corpus = corpus;
 		document = new Document(corpus);
-		corpus.addDocument(document);
 		activity = corpus.findOrCreateActivity(HBTIN_Constants.ACTIVITY_UNKNOWN, dbConn);
 		principleAR = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_PRINCIPLE, dbConn);
 		witnessAR = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_WITNESS, dbConn);
@@ -64,6 +64,9 @@ public class DocumentContentHandler extends StackedContentHandler {
 			String type = attrList.getValue("", "type");  
 			if("transliteration".equalsIgnoreCase(type)) {
 				inText_transliteration = true;
+			} else if("listNym".equalsIgnoreCase(type)
+					|| "listPerson".equalsIgnoreCase(type)) {
+				notADocument = true;
 			} else {
 				inText_transliteration = false;
 			}
@@ -117,8 +120,11 @@ public class DocumentContentHandler extends StackedContentHandler {
 	
 	@Override
 	public void pop() {
-		if(!foundAltIDElement)
-			System.err.println("No AltIDElement for document!");
+		if(!notADocument) {
+			corpus.addDocument(document);
+			if(!foundAltIDElement)
+				System.err.println("No AltIDElement for document!");
+		}
 		super.pop();
 	}
 	

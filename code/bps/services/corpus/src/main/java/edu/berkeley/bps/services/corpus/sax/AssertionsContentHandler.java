@@ -38,9 +38,9 @@ public class AssertionsContentHandler extends StackedContentHandler {
 		final String myName = ".startElement: ";
 		super.startElement(namespaceURI, localName, qName, attrList);
 		if(localName.equals("assertions")) {
-			System.out.println(myClass+myName+"Saw assertions wrapper");
+			//System.out.println(myClass+myName+"Saw assertions wrapper");
 		} else if(localName.equals("assert")) {
-			System.out.println(myClass+myName+"Saw assert element");
+			//System.out.println(myClass+myName+"Saw assert element");
 			docName = null;
 			dateString = null;
 		}
@@ -68,8 +68,8 @@ public class AssertionsContentHandler extends StackedContentHandler {
 			} else {
 				doc.setDate_str(dateString);
 				doc.setDate_norm(date_norm);
-				System.out.println(myClass+myName+"Set year: "+dateString+
-						" for document: "+docName);
+				//System.out.println(myClass+myName+"Set year: "+dateString+
+				//		" for document: "+docName);
 			}
 			// TODO move this to a handler for document dates. Allow this to take a handler
 			// for assert content. Later, can have a registry of handlers by resource and property

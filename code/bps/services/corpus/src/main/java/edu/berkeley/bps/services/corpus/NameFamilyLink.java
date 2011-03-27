@@ -97,7 +97,8 @@ public class NameFamilyLink {
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setInt(1, from_nrad_id);
 			stmt.setInt(2, to_nrad_id);
-			stmt.setString(3, LinkType.ValueToString(linkType));
+			String enumStr = LinkType.ValueToString(linkType);
+			stmt.setString(3, enumStr);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();

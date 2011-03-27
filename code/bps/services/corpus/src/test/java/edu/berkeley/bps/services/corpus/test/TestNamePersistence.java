@@ -16,8 +16,8 @@ import junit.framework.TestSuite;
 public class TestNamePersistence extends TestDBBase {
 	
 	private static final String TEST_NAME ="Mike";
-	private static final String TEST_NAME_TYPE = Name.NAME_TYPE_PERSON;
-	private static final String TEST_GENDER = Name.GENDER_MALE;
+	private static final int TEST_NAME_TYPE = Name.NAME_TYPE_PERSON;
+	private static final int TEST_GENDER = Name.GENDER_MALE;
 	private static final String TEST_NOTES = "Famous for his steam-shovel";
 	private static final int TEST_CORPUS = 0;
 	
