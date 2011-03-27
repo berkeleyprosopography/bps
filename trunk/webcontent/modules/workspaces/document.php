@@ -115,6 +115,7 @@ function getDocNRADs($CFG,$wid,$did){
 			$nradObj = &$result['nameRoleActivity'];
 			$nrad = array(	
 				'id' => $nradObj['id'],
+			  'xmlId' => $nradObj['xmlID'],
 			 	'nameId' => $nradObj['nameId'], 
 			 	'name' => $nradObj['name'], 
 			 	'normalNameId' => $nradObj['normalNameId'], 

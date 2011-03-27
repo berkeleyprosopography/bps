@@ -23,14 +23,12 @@
 				<td class="title" width="200px">Publication</td>
 				<td class="title" width="400px">Notes</td>
 				<td class="title" width="100px">Date</td>
-				<td class="title" width="200px">XML ID</td>
 			</tr>
 			<tr>
 				<td class="document" style="padding-top:6px">{$document.alt_id}</td>
 				<td class="document" style="padding-top:6px">&nbsp; </td>
 				<td class="document" style="padding-top:6px">{$document.notes}</td>
 				<td class="document" style="padding-top:6px">{$document.date_str}</td>
-				<td class="document" style="padding-top:6px">{$document.xml_id}</td>
 			</tr>
 		</table>
 		<div class="nrads_row">
@@ -42,8 +40,9 @@
 				<tr>
 					<td class="title" width="200px">Name</td>
 					<td class="title" width="200px">Normal Form</td>
-					<td class="title" width="200px">Role</td>
-					<td class="title" width="200px">Activity</td>
+					<td class="title" width="140px">Role</td>
+					<td class="title" width="140px">Activity</td>
+					<td class="title" width="140px">XML ID</td>
 				</tr>
 				{section name=nrad loop=$nrads}
 					<tr>
@@ -62,6 +61,9 @@
 						</td>
 						<td class="nrad" style="padding-top:6px">
 							{$nrads[nrad].activity}
+						</td>
+						<td class="nrad" style="padding-top:6px">
+							{$nrads[nrad].xmlId}
 						</td>
 					</tr>
 				{/section}
