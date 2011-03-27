@@ -208,11 +208,13 @@ function getCorpus($CFG,$id){
 	return false;
 }
 
-function getCorpusDocs($CFG,$id,$medianDocDate) {
+function getCorpusDocs($CFG,$id,$order,$medianDocDate) {
 	global $opmsg;
 
 	$rest = new RESTclient();
 	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id."/documents";
+	if(!empty($order))
+		$url .= "?o=".$order;
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -256,7 +258,7 @@ if(!isset($_GET['id'])) {
 		if(file_exists($dates_file)) {
 			$t->assign('dates_file', $dates_file);
 		}
-		$docs = getCorpusDocs($CFG,$_GET['id'], '<em>('.$corpus['medianDocDate'].'?)</em>');
+		$docs = getCorpusDocs($CFG,$_GET['id'], $_GET['o'], '<em>('.$corpus['medianDocDate'].'?)</em>');
 		if($docs) {
 			$t->assign('documents', $docs);
 		} else if($opmsg){

@@ -337,14 +337,32 @@ public class WorkspaceResource extends BaseResource {
 	@Produces({"application/xml", "application/json"})
 	@Wrapped(element="documents")
 	@Path("{id}/documents")
-	public List<Document> getDocuments(@Context ServletContext srvc, @PathParam("id") int id) {
+	public List<Document> getDocuments(
+			@Context ServletContext srvc, @Context UriInfo ui,
+			@PathParam("id") int id) {
 		List<Document> docList = null;
         try {
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			// look for order-by setting
+			String orderByParam = queryParams.getFirst("o");
+			// Default to the "no workspace" value of 0 to get the unattached corpora
+			int orderBy;
+			if(orderByParam==null 
+					|| Corpus.ORDER_DOCS_BY_ALT_ID_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Corpus.ORDER_DOCS_BY_ALT_ID;
+			} else if(Corpus.ORDER_DOCS_BY_DATE_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Corpus.ORDER_DOCS_BY_DATE;
+			} else {
+            	throw new WebApplicationException( 
+        			Response.status(
+        				Response.Status.BAD_REQUEST).entity(
+        					"Unrecognized order spec: "+orderByParam).build());
+			}
     		Connection dbConn = getServiceContext(srvc).getConnection();
 			// Need to get the corpus for this workspace, and fetch its documents
 			Corpus corpus = getWorkspaceCorpus(dbConn, id, NO_CORPUS_OKAY);
 			if(corpus!=null) {
-				docList = corpus.getDocuments();
+				docList = corpus.getDocuments(orderBy);
 			} else {
 				docList = new ArrayList<Document>();
 			}
