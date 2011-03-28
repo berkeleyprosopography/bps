@@ -1,6 +1,7 @@
 package edu.berkeley.bps.services.workspace;
 
 import edu.berkeley.bps.services.common.BaseResource;
+import edu.berkeley.bps.services.common.ServiceContext;
 import edu.berkeley.bps.services.corpus.Activity;
 import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.CachedEntity;
@@ -8,14 +9,6 @@ import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
-import edu.berkeley.bps.services.corpus.sax.AssertionsParser;
-import edu.berkeley.bps.services.corpus.sax.CorpusParser;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +28,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 /**
  * Resource that manages a list of items.
@@ -71,8 +57,8 @@ public class WorkspaceResource extends BaseResource {
 		return user_id;
 	}
 
-	private Workspace getWorkspace(Connection dbConn, int wkspId) {
-		Workspace workspace = Workspace.FindByID(dbConn, wkspId);
+	private Workspace getWorkspace(ServiceContext sc, int wkspId) {
+		Workspace workspace = Workspace.FindByID(sc, wkspId);
 		if(workspace==null) {
         	throw new WebApplicationException( 
     			Response.status(
@@ -95,8 +81,8 @@ public class WorkspaceResource extends BaseResource {
 			@Context UriInfo ui) {
 		try {
 			int user_id = getUserIdFromParams(ui);
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			List<Workspace> wkspList = Workspace.ListAllForUser(dbConn, user_id);
+			List<Workspace> wkspList = 
+				Workspace.ListAllForUser(getServiceContext(srvc), user_id);
 			return wkspList;
 		} catch(WebApplicationException wae) {
 			throw wae;
@@ -120,8 +106,7 @@ public class WorkspaceResource extends BaseResource {
 	public Workspace getWorkspace(@Context ServletContext srvc,
 			@PathParam("id")int id) {
         try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			return getWorkspace(dbConn, id);
+			return getWorkspace(getServiceContext(srvc), id);
 		} catch(WebApplicationException wae) {
 			throw wae;
 		} catch(Exception e) {
@@ -176,8 +161,8 @@ public class WorkspaceResource extends BaseResource {
     public Response updateWorkspace(@Context ServletContext srvc, 
     		@PathParam("id") int id, Workspace workspace){
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-            if(!Workspace.Exists(dbConn, id)) {
+        	ServiceContext sc = getServiceContext(srvc);
+            if(!Workspace.Exists(sc, id)) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No workspace found with id: "+id).build());
@@ -185,7 +170,7 @@ public class WorkspaceResource extends BaseResource {
             // Since all we're changing is the corpus fields, no need
             // to persist all the docs, etc.
             workspace.setId(id);	// ID must match
-            workspace.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
+            workspace.persist(sc.getConnection(), CachedEntity.SHALLOW_PERSIST);
             // Set the response's status and entity
             UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
             path.path("" + id);
@@ -210,9 +195,9 @@ public class WorkspaceResource extends BaseResource {
 	@Path("{id}")
 	public Response deleteWorkspace(@Context ServletContext srvc, @PathParam("id") int id) {
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Workspace workspace = getWorkspace(dbConn, id);
-			workspace.deletePersistence(dbConn);
+        	ServiceContext sc = getServiceContext(srvc);
+			Workspace workspace = getWorkspace(sc, id);
+			workspace.deletePersistence(sc.getConnection());
 	        return Response.ok().build();
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteWorkspace(): Problem querying DB.\n"+ re.getLocalizedMessage();
@@ -223,9 +208,9 @@ public class WorkspaceResource extends BaseResource {
         }
     }
 	
-	private Corpus parsePayloadToGetCorpus(Connection dbConn, String payload) {
+	private Corpus parsePayloadToGetCorpus(ServiceContext sc, String payload) {
     	int corpusID = Integer.parseInt(payload);
-		Corpus corpus = Corpus.FindByID(dbConn, corpusID);
+		Corpus corpus = Corpus.FindByID(sc, corpusID);
 		if(corpus==null) {
         	throw new WebApplicationException( 
     			Response.status(
@@ -241,13 +226,13 @@ public class WorkspaceResource extends BaseResource {
 	private Response addFromCorpusInt(ServletContext srvc, 
     		int wkspId, String payload, boolean mustMatchExisting) {
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
+        	ServiceContext sc = getServiceContext(srvc);
     		// Do the import corpus into workspace.
     		// For now, if there is a corpus, blow it and all resources away.
     		// Also blow away all synthesized resources like Persons, Clans, etc. 
     		// Response should just be okay or failure
-			Workspace workspace = getWorkspace(dbConn, wkspId);
-			Corpus corpusToAdd = parsePayloadToGetCorpus(dbConn, payload);
+			Workspace workspace = getWorkspace(sc, wkspId);
+			Corpus corpusToAdd = parsePayloadToGetCorpus(sc, payload);
 			if(mustMatchExisting
 					&& (corpusToAdd.getId()!=workspace.getBuiltFromCorpus())) {
 				String tmp = myClass+".refreshFromCorpus(): Unknown Corpus specifier in payload: "
@@ -259,9 +244,9 @@ public class WorkspaceResource extends BaseResource {
 
 			}
 			int wkspOwnerId = workspace.getOwner_id();
-			Corpus newCorpus = corpusToAdd.cloneForWorkspace(dbConn, wkspId, wkspOwnerId);
+			Corpus newCorpus = corpusToAdd.cloneForWorkspace(sc, wkspId, wkspOwnerId);
 			// setCorpus() will clear out all existing resources.
-			workspace.setCorpus(dbConn, newCorpus);
+			workspace.setCorpus(sc, newCorpus);
 			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
 			path.path(wkspId + "/corpora/");
             Response response = Response.ok(path.build().toString()).build();
@@ -314,9 +299,9 @@ public class WorkspaceResource extends BaseResource {
 	
 	private final static boolean FAIL_ON_NO_CORPUS = true;
 	private final static boolean NO_CORPUS_OKAY = false;
-	private Corpus getWorkspaceCorpus(Connection dbConn, int wkspId,
+	private Corpus getWorkspaceCorpus(ServiceContext sc, int wkspId,
 			boolean fFailOnNoCorpus) {
-		Workspace workspace = getWorkspace(dbConn, wkspId);
+		Workspace workspace = getWorkspace(sc, wkspId);
 		// Need to get the corpus for this workspace, and fetch its documents
 		Corpus corpus = workspace.getCorpus();
 		if(fFailOnNoCorpus && corpus == null) {
@@ -358,9 +343,8 @@ public class WorkspaceResource extends BaseResource {
         				Response.Status.BAD_REQUEST).entity(
         					"Unrecognized order spec: "+orderByParam).build());
 			}
-    		Connection dbConn = getServiceContext(srvc).getConnection();
 			// Need to get the corpus for this workspace, and fetch its documents
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, NO_CORPUS_OKAY);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, NO_CORPUS_OKAY);
 			if(corpus!=null) {
 				docList = corpus.getDocuments(orderBy);
 			} else {
@@ -386,8 +370,7 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("docspec") String docspec) {
 		Document document = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-	        document = getDocument(dbConn, id, docspec);
+	        document = getDocument(getServiceContext(srvc), id, docspec);
 	        return document;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocument(): Problem querying DB.\n"+ re.getLocalizedMessage();
@@ -401,11 +384,11 @@ public class WorkspaceResource extends BaseResource {
 	/**
 	 * @return Document for the given id
 	 */
-	protected Document getDocument(Connection dbConn, 
+	protected Document getDocument(ServiceContext sc, 
 			int wkspid, String docspec) {
 		Document document = null;
         try {
-			Corpus corpus = getWorkspaceCorpus(dbConn, wkspid, FAIL_ON_NO_CORPUS);
+			Corpus corpus = getWorkspaceCorpus(sc, wkspid, FAIL_ON_NO_CORPUS);
 			int did;
 			try {
 				did = Integer.parseInt(docspec);
@@ -416,7 +399,7 @@ public class WorkspaceResource extends BaseResource {
 				document = corpus.getDocument(did);
 			} else {
 				// TODO add a second map by alt_id to corpus
-				document = Document.FindByAltID(dbConn, corpus, docspec);
+				document = Document.FindByAltID(sc.getConnection(), corpus, docspec);
 			}
 			if(document==null) {
             	throw new WebApplicationException( 
@@ -448,8 +431,7 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("docspec") String docspec) {
 		List<NameRoleActivity> nradList = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-	        Document document = getDocument(dbConn, id, docspec);
+	        Document document = getDocument(getServiceContext(srvc), id, docspec);
 	        nradList = document.getNameRoleActivities(true);
 	        return nradList;
 		} catch(RuntimeException re) {
@@ -485,8 +467,7 @@ public class WorkspaceResource extends BaseResource {
 	public List<Activity> getActivities(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<Activity> activityList = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, NO_CORPUS_OKAY);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, NO_CORPUS_OKAY);
 			if(corpus != null) {
 				activityList = corpus.getActivities();
 			} else {
@@ -513,8 +494,7 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("aid") int aid) {
 		Activity activity = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, FAIL_ON_NO_CORPUS);
 			activity = corpus.findActivity(aid);
 			if(activity==null) {
             	throw new WebApplicationException( 
@@ -544,10 +524,10 @@ public class WorkspaceResource extends BaseResource {
     		@PathParam("id") int id, Activity activity){
 
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
+        	ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = getWorkspaceCorpus(sc, id, FAIL_ON_NO_CORPUS);
         	// Check that the item is not already registered.
-        	if (Activity.FindByName(dbConn, corpus, activity.getName())!=null) {
+        	if (Activity.FindByName(sc.getConnection(), corpus, activity.getName())!=null) {
         		String tmp = "An activity with the name '" + activity.getName() + "' already exists.";
         		throw new WebApplicationException( 
         				Response.status(
@@ -555,7 +535,7 @@ public class WorkspaceResource extends BaseResource {
         	} 
     		activity.setCorpus(corpus);
 	        // Persist the new item, and get an id for it
-        	activity.CreateAndPersist(dbConn);
+        	activity.CreateAndPersist(sc.getConnection());
         	corpus.addActivity(activity);
 	        UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
   			path.path(id + "/activities/" + activity.getId());
@@ -655,8 +635,7 @@ public class WorkspaceResource extends BaseResource {
 	public List<ActivityRole> getActivityRoles(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<ActivityRole> activityRoleList = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, NO_CORPUS_OKAY);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, NO_CORPUS_OKAY);
 			if(corpus!=null) {
 				activityRoleList = corpus.getActivityRoles();
 			} else {
@@ -683,8 +662,7 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("arid") int arid) {
 		ActivityRole activityRole = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, FAIL_ON_NO_CORPUS);
 			activityRole = corpus.findActivityRole(arid);
 			if(activityRole==null) {
 				throw new WebApplicationException( 
@@ -715,10 +693,10 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, ActivityRole activityRole){
 
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = getWorkspaceCorpus(sc, id, FAIL_ON_NO_CORPUS);
 			// Check that the item is not already registered.
-			if (ActivityRole.FindByName(dbConn, corpus, activityRole.getName())!=null) {
+			if (ActivityRole.FindByName(sc.getConnection(), corpus, activityRole.getName())!=null) {
 				String tmp = "An activityRole with the name '" + activityRole.getName() + "' already exists.";
 				throw new WebApplicationException( 
 						Response.status(
@@ -726,7 +704,7 @@ public class WorkspaceResource extends BaseResource {
 			} 
 			activityRole.setCorpus(corpus);
 			// Persist the new item, and get an id for it
-			activityRole.CreateAndPersist(dbConn);
+			activityRole.CreateAndPersist(sc.getConnection());
         	corpus.addActivityRole(activityRole);
 			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
 			path.path(id + "/activityRoles/" + activityRole.getId());
@@ -826,8 +804,7 @@ public class WorkspaceResource extends BaseResource {
 	public List<Name> getNames(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<Name> nameList = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, NO_CORPUS_OKAY);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, NO_CORPUS_OKAY);
 			if(corpus!=null) {
 				nameList = corpus.getNames();
 			} else {
@@ -854,8 +831,7 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("nid") int nid) {
 		Name name = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
+			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, FAIL_ON_NO_CORPUS);
 			name = corpus.findName(nid);
 			if(name==null) {
 				throw new WebApplicationException( 
@@ -885,8 +861,8 @@ public class WorkspaceResource extends BaseResource {
 			@PathParam("id") int id, Name name){
 
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = getWorkspaceCorpus(sc, id, FAIL_ON_NO_CORPUS);
 			// Check that the item is not already registered.
 			if (corpus.findName(name.getName())!=null) {
 				String tmp = "A name with the name '" + name.getName() + "' already exists.";
@@ -896,7 +872,7 @@ public class WorkspaceResource extends BaseResource {
 			} 
 			name.setCorpusId(corpus.getId());
 			// Persist the new item, and get an id for it
-			name.persist(dbConn);
+			name.persist(sc.getConnection());
 			// Add to the corpus maps
 			corpus.addName(name);
 			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -28,6 +29,7 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Corpus extends CachedEntity {
 	final static String myClass = "Corpus";
 	public final static int NO_WKSP_ID = 0;
+	public final static int ANY_WKSP_ID = -1;
 	public final static int NO_CLONE_ID = 0;
 	public final static int ORDER_DOCS_BY_ALT_ID = 0;
 	public final static int ORDER_DOCS_BY_DATE = 1;
@@ -118,7 +120,7 @@ public class Corpus extends CachedEntity {
 		namesById = new HashMap<Integer, Name>();
 	}
 	
-	public Corpus cloneForWorkspace(Connection dbConn, 
+	public Corpus cloneForWorkspace(ServiceContext sc, 
 			int inWkspId, int wkspOwnerId) {
 		final String myName = ".cloneInWorkspace: ";
 		if(this.wkspId!=NO_WKSP_ID) {
@@ -127,12 +129,13 @@ public class Corpus extends CachedEntity {
 			System.err.println(tmp);
 			throw new RuntimeException(tmp);
 		}
-		Corpus newCorpus = CreateAndPersist(dbConn, 
-				name, description, wkspOwnerId,
+		Corpus newCorpus = CreateAndPersist(sc, 
+				name+"(Clone)", description, wkspOwnerId,
 				inWkspId, id, defaultDocTimeSpan);
 		// For each of the attached entities, we clone and preserve the 
 		// same ordering of id values. This is important for some sorts
 		// Clone Activities, and build maps
+		Connection dbConn = sc.getConnection();
 		ArrayList<Integer> idList = new ArrayList<Integer>(activitiesById.keySet());
 		Collections.sort(idList);
 		for(int id:idList) {
@@ -168,20 +171,44 @@ public class Corpus extends CachedEntity {
 			newCorpus.documentsById.put(clone.getId(), clone);
 			newCorpus.documentsByAltId.put(clone.getAlt_id(), clone);
 		}
+		AddToMaps(sc, newCorpus);
+
 		return newCorpus;
 	}
 	
-	private static void initMaps(ServiceContext sc) {
+	protected static void AddToMaps(ServiceContext sc, Corpus corpus) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		Map<String, Object> nameMap = getNameMap(sc, myClass);
+		AddToMaps(idMap, nameMap, corpus);
+	}
+
+	private static void AddToMaps(
+			Map<Integer, Object> idMap, Map<String, Object> nameMap,
+			Corpus corpus) {
+		String name = corpus.getName();
+		if(name!=null&&!name.isEmpty())
+			nameMap.put(name, corpus);
+		idMap.put(corpus.getId(), corpus);
+	}
+
+	private static void RemoveFromMaps(ServiceContext sc, Corpus corpus) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		Map<String, Object> nameMap = getNameMap(sc, myClass);
+		String name = corpus.getName();
+		if(name!=null&&!name.isEmpty())
+			nameMap.remove(name);
+		idMap.remove(corpus.getId());
+	}
+
+	
+	public static void initMaps(ServiceContext sc) {
 		HashMap<String, Object> nameMap = new HashMap<String, Object>();
 		HashMap<Integer, Object> idMap = new HashMap<Integer, Object>();
 
 		Connection dbConn = sc.getConnection(false);
-		List<Corpus> corpora = ListAll(dbConn);
+		List<Corpus> corpora = LoadAll(dbConn);
 		for(Corpus corpus:corpora) {
-			String name = corpus.getName();
-			if(name!=null&&!name.isEmpty())
-				nameMap.put(name, corpus);
-			idMap.put(corpus.getId(), corpus);
+			AddToMaps(idMap, nameMap, corpus);
 			corpus.initAttachedEntityMaps(dbConn);
 		}
 		setNameMap(sc, myClass, nameMap);
@@ -252,11 +279,17 @@ public class Corpus extends CachedEntity {
 		return CachedEntity.Exists(dbConn, myTablename, id);
 	}
 
-	public static boolean NameUsed(Connection dbConn, String name) {
-		return CachedEntity.NameUsed(dbConn, myTablename, name);
+	public static boolean NameUsed(ServiceContext sc, String name) {
+		return null!=FindByName(sc, name);
 	}
 
-	public static Corpus FindByID(Connection dbConn, int id) {
+	public static Corpus FindByID(ServiceContext sc, int id) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		return (Corpus)idMap.get(id);
+	}
+	
+	/*
+	private static Corpus FindByID(Connection dbConn, int id) {
 		final String myName = ".FindByID: ";
 		final String SELECT_BY_ID = 
 			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, c.clone_of_id, count(*) nDocs, d.id docId"
@@ -286,7 +319,14 @@ public class Corpus extends CachedEntity {
 		}
 		return corpus;
 	}
+	*/
 
+	public static Corpus FindByName(ServiceContext sc, String name) {
+		Map<String, Object> nameMap = getNameMap(sc, myClass);
+		return (Corpus)nameMap.get(name);
+	}
+	
+	/*
 	public static Corpus FindByName(Connection dbConn, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
@@ -317,29 +357,30 @@ public class Corpus extends CachedEntity {
 		}
 		return corpus;
 	}
+	*/
 
-	public static List<Corpus> ListAll(Connection dbConn) {
-		return ListAll(dbConn, 0);
+	public static List<Corpus> ListAll(ServiceContext sc, int wksp_id) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		ArrayList<Corpus> list = new ArrayList<Corpus>();
+		for(Object obj:idMap.values()) {
+			Corpus corpus = (Corpus)obj;
+			if(wksp_id==ANY_WKSP_ID
+				|| wksp_id==corpus.wkspId)
+				list.add(corpus);
+		}
+		return list;
 	}
 	
-	public static List<Corpus> ListAll(Connection dbConn, int wkspId) {
+	
+	private static List<Corpus> LoadAll(Connection dbConn) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
 			"SELECT c.id, c.name, c.description, c.owner_id, c.wksp_id, c.clone_of_id, count(*) nDocs, d.id docId"
-			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id";
-		final String WHERE_WKSP = " WHERE c.wksp_id=?";
-		final String GROUP_BY = " GROUP BY c.id";
+			+" FROM corpus c LEFT JOIN document d ON c.id=d.corpus_id GROUP BY c.id";
 		// Generate the right representation according to its media type.
 		ArrayList<Corpus> corpusList = new ArrayList<Corpus>();
 		try {
-			StringBuilder query = new StringBuilder(200);
-			query.append(SELECT_ALL);
-			if(wkspId>=0)	// wildcard case
-				query.append(WHERE_WKSP);
-			query.append(GROUP_BY);
-			PreparedStatement stmt = dbConn.prepareStatement(query.toString());
-			if(wkspId>=0)	// if not wildcard case
-				stmt.setInt(1, wkspId);
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				Corpus corpus = new Corpus(rs.getInt("id"), rs.getString("name"), 
@@ -363,17 +404,18 @@ public class Corpus extends CachedEntity {
 		return corpusList;
 	}	
 
-	public static Corpus CreateAndPersist(Connection dbConn, 
+	public static Corpus CreateAndPersist(ServiceContext sc, 
 			String name, String description, int owner_id, TimeSpan defaultDocTimeSpan) {
-		return CreateAndPersist(dbConn, 
+		return CreateAndPersist(sc, 
 				name, description, owner_id, NO_WKSP_ID, NO_CLONE_ID, defaultDocTimeSpan);
 	}
 	
-	protected static Corpus CreateAndPersist(Connection dbConn, 
+	protected static Corpus CreateAndPersist(ServiceContext sc, 
 			String name, String description, int owner_id, int wksp_id, int clone_of_id, TimeSpan defaultDocTimeSpan) {
-		int id = persistNew(dbConn, name, description, owner_id, wksp_id, clone_of_id, defaultDocTimeSpan);
+		int id = persistNew(sc.getConnection(), name, description, owner_id, wksp_id, clone_of_id, defaultDocTimeSpan);
 		Corpus corpus = new Corpus(id, name, description, 
 									owner_id, wksp_id, clone_of_id, defaultDocTimeSpan);
+		AddToMaps(sc, corpus);
 		return corpus;
 	}
 	
@@ -487,7 +529,9 @@ public class Corpus extends CachedEntity {
 		persistDocuments(dbConn);
 	}
 	
-	public void deletePersistence(Connection dbConn) {
+	public void deletePersistence(ServiceContext sc) {
+		RemoveFromMaps(sc, this);
+		Connection dbConn = sc.getConnection();
 		deleteAttachedEntities(dbConn);
 		DeletePersistence(dbConn, id);
 	}

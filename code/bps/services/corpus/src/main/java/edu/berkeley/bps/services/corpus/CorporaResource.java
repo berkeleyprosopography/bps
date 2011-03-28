@@ -1,6 +1,7 @@
 package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.BaseResource;
+import edu.berkeley.bps.services.common.ServiceContext;
 import edu.berkeley.bps.services.corpus.sax.AssertionsParser;
 import edu.berkeley.bps.services.corpus.sax.CorpusParser;
 
@@ -65,8 +66,7 @@ public class CorporaResource extends BaseResource {
 					wksp_id = Integer.parseInt(wkspParam);
 				} catch( NumberFormatException nfe) {}
 			}
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			List<Corpus> corpusList = Corpus.ListAll(dbConn, wksp_id);
+			List<Corpus> corpusList = Corpus.ListAll(getServiceContext(srvc), wksp_id);
 			return corpusList;
 		} catch(WebApplicationException wae) {
 			throw wae;
@@ -89,8 +89,7 @@ public class CorporaResource extends BaseResource {
 	@Path("{id}")
 	public Corpus getCorpus(@Context ServletContext srvc, @PathParam("id")int id) {
         try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -118,10 +117,10 @@ public class CorporaResource extends BaseResource {
 	@Consumes("application/xml")
 	public Response createCorpus(@Context ServletContext srvc, Corpus corpus){
     	try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
+    		ServiceContext sc = getServiceContext(srvc);
 
     		// Check that the item is not already registered.
-    		if (Corpus.NameUsed(dbConn, corpus.getName())) {
+    		if (Corpus.NameUsed(sc, corpus.getName())) {
     			String tmp = "A corpus with the name '" + corpus.getName() + "' already exists.";
     			throw new WebApplicationException( 
     					Response.status(
@@ -130,7 +129,8 @@ public class CorporaResource extends BaseResource {
     		// Persist the new item, and get an id for it
     		// Ensure this is recognized as new
     		corpus.setId(CachedEntity.UNSET_ID_VALUE);
-    		corpus.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
+    		corpus.persist(sc.getConnection(), CachedEntity.SHALLOW_PERSIST);
+    		Corpus.AddToMaps(sc, corpus);
     		UriBuilder path = UriBuilder.fromResource(CorporaResource.class);
     		path.path("" + corpus.getId());
     		Response response = Response.created(path.build()).build();
@@ -170,17 +170,17 @@ public class CorporaResource extends BaseResource {
     	int corpusOwner;
     	try {
     		corpusOwner = Integer.parseInt(corpusOwnerStr);
-    		Connection dbConn = getServiceContext(srvc).getConnection();
+    		ServiceContext sc = getServiceContext(srvc);
 
     		// Check that the item is not already registered.
-    		if (Corpus.FindByName(dbConn, corpusName)!=null) {
+    		if (Corpus.FindByName(sc, corpusName)!=null) {
     			String tmp = "A corpus with the name '" + corpusName + "' already exists.";
     			throw new WebApplicationException( 
     					Response.status(
     							Response.Status.BAD_REQUEST).entity(tmp).build());
     		}
     		// Register the new item
-    		Corpus corpus = Corpus.CreateAndPersist(dbConn, corpusName, corpusDescription, corpusOwner, null);
+    		Corpus corpus = Corpus.CreateAndPersist(sc, corpusName, corpusDescription, corpusOwner, null);
     		// Set the response's status and entity
     		UriBuilder path = UriBuilder.fromResource(CorporaResource.class);
     		path.path("" + corpus.getId());
@@ -247,14 +247,14 @@ public class CorporaResource extends BaseResource {
 	@Path("{id}")
 	public Response deleteCorpus(@Context ServletContext srvc, @PathParam("id") int id) {
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+    		ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
             }
-            corpus.deletePersistence(dbConn);
+            corpus.deletePersistence(sc);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
@@ -407,15 +407,16 @@ public class CorporaResource extends BaseResource {
 		final String myName = ".rebuildFromTEI(): ";
         try {
         	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+        	ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 				
 			}
-			// Clear out the existing documents, Names, etc. 
+			// Clear out the existing documents, Names, etc.
+			Connection dbConn = sc.getConnection();
             corpus.deleteAttachedEntities(dbConn);
             CorpusParser.buildFromTEI(dbConn, corpus, teipath);
             // Persist updated corpus (description, etc.)
@@ -446,8 +447,8 @@ public class CorporaResource extends BaseResource {
 		final String myName = ".handleDateAssertions(): ";
         try {
         	String datespath = "/var/bps/corpora/"+id+"/assertions/dates.xml";
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+        	ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -457,7 +458,7 @@ public class CorporaResource extends BaseResource {
 			// Clear out the existing documents, Names, etc. 
 			AssertionsParser.updateCorpusDates(corpus, datespath);
             // Persist updated corpus (description, etc.)
-            corpus.persist(dbConn, CachedEntity.DEEP_PERSIST);
+            corpus.persist(sc.getConnection(), CachedEntity.DEEP_PERSIST);
 
 	        Response response = Response.ok().build();
 	        return response;
@@ -502,8 +503,7 @@ public class CorporaResource extends BaseResource {
         				Response.Status.BAD_REQUEST).entity(
         					"Unrecognized order spec: "+orderByParam).build());
 			}
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -531,8 +531,7 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("docspec") String docspec) {
 		Document document = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-	        document = getDocument(dbConn, id, docspec);
+	        document = getDocument(getServiceContext(srvc), id, docspec);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocument("+docspec
 				+"): Problem querying DB.\n"+ re.getLocalizedMessage();
@@ -547,11 +546,11 @@ public class CorporaResource extends BaseResource {
 	/**
 	 * @return Document for the given id
 	 */
-	protected Document getDocument(Connection dbConn, 
+	protected Document getDocument(ServiceContext sc, 
 			int corpusid, String docspec) {
 		Document document = null;
         try {
-        	Corpus corpus = Corpus.FindByID(dbConn, corpusid);
+        	Corpus corpus = Corpus.FindByID(sc, corpusid);
         	if(corpus==null) {
         		throw new WebApplicationException( 
     				Response.status(
@@ -568,7 +567,7 @@ public class CorporaResource extends BaseResource {
 				document = corpus.getDocument(did);
 			} else {
 				// TODO add a second map by alt_id to corpus
-				document = Document.FindByAltID(dbConn, corpus, docspec);
+				document = Document.FindByAltID(sc.getConnection(), corpus, docspec);
 			}
 			if(document==null) {
             	throw new WebApplicationException( 
@@ -600,8 +599,7 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("docspec") String docspec) {
 		List<NameRoleActivity> nradList = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-	        Document document = getDocument(dbConn, id, docspec);
+	        Document document = getDocument(getServiceContext(srvc), id, docspec);
 	        //docList = Document.ListAllInCorpus(dbConn, corpus);
 	        nradList = document.getNameRoleActivities(true);
 		} catch(RuntimeException re) {
@@ -625,14 +623,14 @@ public class CorporaResource extends BaseResource {
 	@Path("{id}/documents")
 	public Response deleteDocuments(@Context ServletContext srvc, @PathParam("id") int id) {
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+    		ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
             }
-            corpus.deleteDocuments(dbConn);
+            corpus.deleteDocuments(sc.getConnection());
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteCorpusDocs(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
@@ -658,8 +656,7 @@ public class CorporaResource extends BaseResource {
 	public List<Activity> getActivities(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<Activity> activityList = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -689,8 +686,7 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("aid") int aid) {
 		Activity activity = null;
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -726,8 +722,8 @@ public class CorporaResource extends BaseResource {
     		@PathParam("id") int id, Activity activity){
 
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-        	Corpus corpus = Corpus.FindByID(dbConn, id);
+        	ServiceContext sc = getServiceContext(srvc);
+        	Corpus corpus = Corpus.FindByID(sc, id);
         	if(corpus==null) {
         		throw new WebApplicationException( 
         				Response.status(
@@ -735,6 +731,7 @@ public class CorporaResource extends BaseResource {
 
         	}
         	// Check that the item is not already registered.
+    		Connection dbConn = sc.getConnection();
         	if (Activity.FindByName(dbConn, corpus, activity.getName())!=null) {
         		String tmp = "An activity with the name '" + activity.getName() + "' already exists.";
         		throw new WebApplicationException( 
@@ -773,14 +770,15 @@ public class CorporaResource extends BaseResource {
     public Response updateActivity(@Context ServletContext srvc, 
     		@PathParam("id") int id, @PathParam("aid") int aid, Activity activity){
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+        	ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 				
 			}
+    		Connection dbConn = sc.getConnection();
             if(!Activity.Exists(dbConn, corpus, aid)) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -814,14 +812,15 @@ public class CorporaResource extends BaseResource {
 	public Response deleteActivity(@Context ServletContext srvc, 
 			@PathParam("id") int id, @PathParam("aid") int aid) {
         try {
-    		Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+        	ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 				
 			}
+    		Connection dbConn = sc.getConnection();
             if(!Activity.Exists(dbConn, corpus, aid)) {
             	throw new WebApplicationException( 
             			Response.status(
@@ -853,8 +852,7 @@ public class CorporaResource extends BaseResource {
 	public List<ActivityRole> getActivityRoles(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<ActivityRole> activityRoleList = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -884,8 +882,7 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("arid") int arid) {
 		ActivityRole activityRole = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 					Response.status(
@@ -923,8 +920,8 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, ActivityRole activityRole){
 
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -932,6 +929,7 @@ public class CorporaResource extends BaseResource {
 
 			}
 			// Check that the item is not already registered.
+			Connection dbConn = sc.getConnection();
 			if (ActivityRole.FindByName(dbConn, corpus, activityRole.getName())!=null) {
 				String tmp = "An activityRole with the name '" + activityRole.getName() + "' already exists.";
 				throw new WebApplicationException( 
@@ -970,14 +968,15 @@ public class CorporaResource extends BaseResource {
 	public Response updateActivityRole(@Context ServletContext srvc, 
 			@PathParam("id") int id, @PathParam("aid") int aid, ActivityRole activityRole){
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 
 			}
+			Connection dbConn = sc.getConnection();
 			if(!ActivityRole.Exists(dbConn, corpus, aid)) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1011,14 +1010,15 @@ public class CorporaResource extends BaseResource {
 	public Response deleteActivityRole(@Context ServletContext srvc, 
 			@PathParam("id") int id, @PathParam("aid") int aid) {
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 
 			}
+			Connection dbConn = sc.getConnection();
 			if(!ActivityRole.Exists(dbConn, corpus, aid)) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1050,8 +1050,7 @@ public class CorporaResource extends BaseResource {
 	public List<Name> getNames(@Context ServletContext srvc, @PathParam("id") int id) {
 		List<Name> nameList = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1081,8 +1080,7 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, @PathParam("nid") int nid) {
 		Name name = null;
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1118,8 +1116,8 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id, Name name){
 
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1135,7 +1133,7 @@ public class CorporaResource extends BaseResource {
 			} 
 			name.setCorpusId(corpus.getId());
 			// Persist the new item, and get an id for it
-			name.persist(dbConn);
+			name.persist(sc.getConnection());
 			// Add to the corpus maps
 			corpus.addName(name);
 			UriBuilder path = UriBuilder.fromResource(CorporaResource.class);
@@ -1166,14 +1164,15 @@ public class CorporaResource extends BaseResource {
 	public Response updateName(@Context ServletContext srvc, 
 			@PathParam("id") int id, @PathParam("nid") int nid, Name name){
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, nid);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, nid);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 
 			}
+			Connection dbConn = sc.getConnection();
 			if(!Name.Exists(dbConn, corpus, id)) {
 				throw new WebApplicationException( 
 						Response.status(
@@ -1207,14 +1206,15 @@ public class CorporaResource extends BaseResource {
 	public Response deleteName(@Context ServletContext srvc, 
 			@PathParam("id") int id, @PathParam("nid") int nid) {
 		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = Corpus.FindByID(dbConn, id);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 
 			}
+			Connection dbConn = sc.getConnection();
 			if(!Name.Exists(dbConn, corpus, nid)) {
 				throw new WebApplicationException( 
 						Response.status(

@@ -1,5 +1,6 @@
 package edu.berkeley.bps.services.workspace;
 
+import edu.berkeley.bps.services.common.ServiceContext;
 import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
 
@@ -58,15 +59,15 @@ public class Workspace {
 		System.err.println("Workspace.ctor, created: "+this.toString());
 	}
 
-	public void CreateAndPersist(Connection dbConn) {
+	public void CreateAndPersist(ServiceContext sc) {
 		//final String myName = ".CreateAndPersist: ";
-		id = persistNew(dbConn, name, description, owner_id);
+		id = persistNew(sc.getConnection(), name, description, owner_id);
 	}
 		
-	public static Workspace CreateAndPersist(Connection dbConn, 
+	public static Workspace CreateAndPersist(ServiceContext sc, 
 			String name, String description, int owner_id) {
 		//final String myName = ".CreateAndPersist: ";
-		int newId = persistNew(dbConn,name, description, owner_id);
+		int newId = persistNew(sc.getConnection(),name, description, owner_id);
 		Workspace workspace = new Workspace(newId, name, description, owner_id); 
 		return workspace;
 	}
@@ -129,21 +130,24 @@ public class Workspace {
 	public void persistAttachedEntities(Connection dbConn) {
 	}
 	
-	public static List<Workspace> ListAllForUser(Connection dbConn, int user_id) {
+	public static List<Workspace> ListAllForUser(ServiceContext sc, int user_id) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
-			"SELECT id, name, description FROM workspace WHERE owner_id=?";
+			//"SELECT id, name, description FROM workspace WHERE owner_id=?";
+			"SELECT w.id wid, w.name, w.description, c.id cid FROM workspace w, corpus c"
+			+" WHERE w.owner_id=? AND c.wksp_id=w.id";
 		ArrayList<Workspace> wkspList = new ArrayList<Workspace>();
 		try {
+			Connection dbConn = sc.getConnection();
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
 			stmt.setInt(1, user_id);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				Workspace workspace = new Workspace(rs.getInt("id"), 
+				Workspace workspace = new Workspace(rs.getInt("wid"), 
 						rs.getString("name"), 
 						rs.getString("description"),
 						user_id);
-				workspace.findAndLoadCorpus(dbConn);
+				workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
 				wkspList.add(workspace);
 			}
 			rs.close();
@@ -155,14 +159,17 @@ public class Workspace {
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating workspace\n"+se.getLocalizedMessage()).build());
 		}
+		//for(Workspace workspace:wkspList)
+		//	workspace.findAndLoadCorpus(sc);
 		return wkspList;
 	}
 	
-	public static boolean Exists(Connection dbConn, int id) {
+	public static boolean Exists(ServiceContext sc, int id) {
 		boolean exists = false;
 		final String SELECT_BY_ID = 
 			"SELECT name FROM workspace WHERE id = ?";
 		try {
+			Connection dbConn = sc.getConnection();
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
@@ -180,22 +187,26 @@ public class Workspace {
 		return exists;
 	}
 
-	public static Workspace FindByID(Connection dbConn, int id) {
+	public static Workspace FindByID(ServiceContext sc, int id) {
 		final String myName = ".FindByID: ";
 		final String SELECT_BY_ID = 
-			"SELECT id, name, description, owner_id FROM workspace WHERE id = ?";
+			//"SELECT id, name, description, owner_id FROM workspace WHERE id = ?";
+			"SELECT w.id wid, w.name, w.description, w.owner_id, c.id cid"
+			+" FROM workspace w, corpus c"
+			+" WHERE w.id=? AND c.wksp_id=w.id";
 		Workspace workspace = null;
 		try {
+			Connection dbConn = sc.getConnection();
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
 				workspace = new Workspace(
-						rs.getInt("id"), 
+						rs.getInt("wid"), 
 						rs.getString("name"), 
 						rs.getString("description"), 
 						rs.getInt("owner_id"));
-				workspace.findAndLoadCorpus(dbConn);
+				workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
 			}
 			rs.close();
 			stmt.close();
@@ -204,10 +215,12 @@ public class Workspace {
 			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
+		//workspace.findAndLoadCorpus(sc);
 		return workspace;
 	}
 	
-	private void findAndLoadCorpus(Connection dbConn) {
+	/*
+	private void findAndLoadCorpus(ServiceContext sc) {
 		final String myName = ".findAndLoadCorpus: ";
 		final String SELECT_BY_WKSPID = 
 			"SELECT id FROM corpus WHERE wksp_id=?";
@@ -222,11 +235,12 @@ public class Workspace {
 			throw new RuntimeException( tmp );
 		}
 		try {
+			Connection dbConn = sc.getConnection();
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_WKSPID);
 			stmt.setInt(1, this.id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
-				corpus = Corpus.FindByID(dbConn, rs.getInt("id"));
+				corpus = Corpus.FindByID(sc, rs.getInt("id"));
 			}
 			rs.close();
 			stmt.close();
@@ -236,21 +250,25 @@ public class Workspace {
 			throw new RuntimeException( tmp );
 		}
 	}
-	
-	public static Workspace FindByName(Connection dbConn, int user_id, String name) {
+	*/
+	public static Workspace FindByName(ServiceContext sc, int user_id, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
-			"SELECT id, name, description FROM workspace WHERE name = ? and owner_id = ?";
+			//"SELECT id, name, description FROM workspace WHERE name = ? and owner_id = ?";
+			"SELECT w.id wid, w.name, w.description, c.id cid"
+			+" FROM workspace w, corpus c"
+			+" WHERE w.name=? AND w.owner_id=? AND c.wksp_id=w.id";
 		Workspace workspace = null;
 		try {
+			Connection dbConn = sc.getConnection();
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
 			stmt.setString(1, name);
 			stmt.setInt(2, user_id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
-				workspace = new Workspace(rs.getInt("id"), rs.getString("name"), 
+				workspace = new Workspace(rs.getInt("wid"), rs.getString("name"), 
 									rs.getString("description"), user_id); 
-				workspace.findAndLoadCorpus(dbConn);
+				workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
 			}
 			rs.close();
 			stmt.close();
@@ -259,6 +277,7 @@ public class Workspace {
 			System.err.println(tmp);
 			throw new RuntimeException( tmp );
 		}
+		//workspace.findAndLoadCorpus(sc);
 		return workspace;
 	}
 	
@@ -338,7 +357,7 @@ public class Workspace {
 	 * sets the new corpus.
 	 * @param corpus the new corpus to use
 	 */
-	public void setCorpus(Connection dbConn, Corpus newCorpus) {
+	public void setCorpus(ServiceContext sc, Corpus newCorpus) {
 		final String myName = ".setCorpus: ";
 		// Delete any existing corpus clone and all of its attachedEntities
 		if(this.corpus!=null && newCorpus!=null
@@ -354,9 +373,8 @@ public class Workspace {
 			System.err.println(tmp);
 			throw new RuntimeException(tmp);
 		}
-				
 		if(this.corpus!=null)
-			this.corpus.deletePersistence(dbConn);
+			this.corpus.deletePersistence(sc);
 		this.corpus = newCorpus;
 	}
 	
