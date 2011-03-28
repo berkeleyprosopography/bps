@@ -28,7 +28,9 @@ public class CorpusContentHandler extends StackedContentHandler {
 	public void endElement(String namespaceURI, String localName, String qName) {
 		// Look for the teiHeader/fileDesc/titleStmt/title path
 		if(pathMatches(namepath)) {
-			corpus.setName(getCurrentText().trim().replaceAll("[\\s]+", " ")); 
+			// Do not override the name, if one has been set.
+			if(corpus.getName()==null||corpus.getName().isEmpty())
+				corpus.setName(getCurrentText().trim().replaceAll("[\\s]+", " ")); 
 		} else if(pathMatches(descpath)) {
 			corpus.setDescription(getCurrentText().trim().replaceAll("[\\s]+", " ")); 
 		}

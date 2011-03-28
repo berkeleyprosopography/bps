@@ -184,6 +184,12 @@ function getWorkspace($CFG,$user_id, $wkspid){
 				'importedCorpusName' => $wkspObj['importedCorpusName'],
 				'medianDocDate' => $wkspObj['medianDocDate']
 			);
+			// Look for trailing "(Clone)" and trim it
+			if((strlen($workspace['importedCorpusName']) > 7 ) 
+				&& 0==substr_compare($workspace['importedCorpusName'], '(Clone)', -7, 7)) {
+					$workspace['importedCorpusName'] = 
+						substr($workspace['importedCorpusName'], 0, -7);
+			}
 			unset($wkspObj);
 			return $workspace;
 		}
