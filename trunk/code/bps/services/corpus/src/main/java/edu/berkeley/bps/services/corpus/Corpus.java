@@ -595,7 +595,13 @@ public class Corpus extends CachedEntity {
 	}
 	
 	@XmlElement(name="medianDocDate")
-	public String getMedianDocumentDate() {
+	public String getMedianDocumentDateStr() {
+		long medianDate = getMedianDocumentDate();
+		return (medianDate==0)?null:
+			TimeUtils.millisToSimpleYearString(medianDate);
+	}
+	
+	public long getMedianDocumentDate() {
 		long medianDate = 0;
 		if(documentsById != null) {
 			ArrayList<Long> validDates = new ArrayList<Long>(documentsById.size());
@@ -616,8 +622,7 @@ public class Corpus extends CachedEntity {
 			    }	
 			}
 		}
-		return (medianDate==0)?null:
-			TimeUtils.millisToSimpleYearString(medianDate);
+		return medianDate;
 	}
 	
 	public List<Document> getDocuments() {

@@ -6,17 +6,14 @@ import java.util.ArrayList;
 //keep all other dates (or their weights and weighted points) so we can recompute as
 //the referenced TS shifts.
 
-public class DerivedTimeSpan extends BaseTimeSpan {
+public class DerivedTimeSpan extends EvidenceBasedTimeSpan {
 	protected TimeSpan baseTimeSpan = null;
 	private long offset = 0;
-	private ArrayList<Long> times = null;
-	private ArrayList<Double> weights = null;
 	double totalAddedWeight = 0;
 	long addedDatesCenterPoint = 0;
-	long centerPoint;
 
-	public DerivedTimeSpan(TimeSpan baseSpan, long offset, double stdDev) {
-		super(stdDev);
+	public DerivedTimeSpan(TimeSpan baseSpan, long offset, double stdDev, double window) {
+		super(baseSpan.getCenterPoint()+offset, stdDev, window);
 		this.offset = offset;
 		baseTimeSpan = baseSpan;
 	}

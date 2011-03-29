@@ -79,6 +79,9 @@
 					<td>
 						<input id="importCorpButton_{$workspace.importedCorpusId}" type="button" value="Rebuild from Corpus"
 									onclick="workspaceSetCorpus({$workspace.id}, {$workspace.importedCorpusId},true)" />
+						&nbsp; &nbsp;
+						<input id="rebuildEntitiesButton" type="button" value="Rebuild Entities"
+									onclick="workspaceRebuildEntities({$workspace.id})" />
 					</td>
 				</tr>
 			</table>

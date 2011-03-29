@@ -47,6 +47,9 @@
 				{section name=nrad loop=$nrads}
 					<tr>
 						<td class="nrad" style="padding-top:6px">
+							{if $nrads[nrad].activityRoleIsFamily}
+								<span class="familyIndent">&nbsp;</span>
+							{/if}
 							{$nrads[nrad].name}
 						</td>
 						<td class="nrad" style="padding-top:6px">
@@ -57,6 +60,9 @@
 							{/if}
 						</td>
 						<td class="nrad" style="padding-top:6px">
+							{if $nrads[nrad].activityRoleIsFamily}
+								<span class="familyIndent">&nbsp;</span>
+							{/if}
 							{$nrads[nrad].activityRole}
 						</td>
 						<td class="nrad" style="padding-top:6px">

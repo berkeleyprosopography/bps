@@ -313,6 +313,36 @@ public class WorkspaceResource extends BaseResource {
 		return corpus;
 	}
 	
+    /**
+     * HACK - rebuilds the maps of Persons and Clans from the corpus
+	 * @param id the id of the activity of interest
+     * @param activity the representation of the new activity
+     * @return Response, with the path (and so id) of the newly created activity
+     */
+    @PUT
+	@Consumes("text/plain")
+	@Path("{id}/corpora/entities")
+    public Response rebuildEntitiesFromCorpus(@Context ServletContext srvc, 
+    		@PathParam("id") int wkspId, String payload) {
+        try {
+        	ServiceContext sc = getServiceContext(srvc);
+        	Workspace workspace = getWorkspace(sc, wkspId);
+        	workspace.rebuildEntitiesFromCorpus(sc);
+        	UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
+        	path.path(wkspId + "/corpora/entities");
+        	Response response = Response.ok(path.build().toString()).build();
+        	return response;
+        } catch(WebApplicationException wae) {
+        	throw wae;
+        } catch(Exception e) {
+        	String tmp = myClass+".rebuildEntitiesFromCorpus(): Problem rebuilding\n"+ e.getLocalizedMessage();
+        	System.err.println(tmp);
+        	throw new WebApplicationException( 
+        			Response.status(
+        					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+	}
+		
 	/**
      * Gets documents associated with a given corpus.
 	 * @param id the id of the corpus
@@ -427,13 +457,43 @@ public class WorkspaceResource extends BaseResource {
 	@Wrapped(element="nrads")
 	@Path("{id}/documents/{docspec}/nrads")
 	public List<NameRoleActivity> getDocumentNRADs(
-			@Context ServletContext srvc, 
+			@Context ServletContext srvc, @Context UriInfo ui,
 			@PathParam("id") int id, @PathParam("docspec") String docspec) {
 		List<NameRoleActivity> nradList = null;
         try {
 	        Document document = getDocument(getServiceContext(srvc), id, docspec);
-	        nradList = document.getNameRoleActivities(true);
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			String filter = queryParams.getFirst("filter");
+			if(filter != null && "nofamily".equals(filter)) {
+		        nradList = document.getNonFamilyNameRoleActivities();
+			} else {
+		        nradList = document.getNameRoleActivities(true);
+			}
 	        return nradList;
+		} catch(RuntimeException re) {
+			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			System.err.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+    }
+	
+	/**
+     * Gets documents associated with a given corpus.
+	 * @param id the id of the corpus
+	 * @return
+	 */
+	@GET
+	@Produces({"application/xml;charset=UTF-8", "application/json;charset=UTF-8"})
+	@Wrapped(element="nradToEntityLinks")
+	@Path("{wid}/documents/{docId}/nrads/links")
+	public List<NRADEntityLink> getEntityLinksForDoc(
+			@Context ServletContext srvc, @Context UriInfo ui,
+			@PathParam("wid") int wid, @PathParam("docId") int docId) {
+        try {
+        	Workspace workspace = getWorkspace(srvc, wid);
+        	return workspace.getEntityLinksForDoc(docId);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);

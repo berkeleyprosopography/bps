@@ -24,7 +24,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 	protected Document document;
 	protected Activity activity;
 	// TODO These are HBTIN specific, and should be handled generally
-	protected ActivityRole principleAR;
+	protected ActivityRole principalAR;
 	protected ActivityRole witnessAR;
 
 	private boolean inText_transliteration = false;
@@ -42,7 +42,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 		this.corpus = corpus;
 		document = new Document(corpus);
 		activity = corpus.findOrCreateActivity(HBTIN_Constants.ACTIVITY_UNKNOWN, dbConn);
-		principleAR = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_PRINCIPLE, dbConn);
+		principalAR = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_PRINCIPAL, dbConn);
 		witnessAR = corpus.findOrCreateActivityRole(HBTIN_Constants.ROLE_WITNESS, dbConn);
 	}
 
@@ -88,7 +88,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 			} else if(localName.equals("persName")) {
 				ActivityRole ar = null;
 				if(inBody) {
-					ar = principleAR;
+					ar = principalAR;
 				} else if(inWitnesses) {
 					ar = witnessAR;
 				}

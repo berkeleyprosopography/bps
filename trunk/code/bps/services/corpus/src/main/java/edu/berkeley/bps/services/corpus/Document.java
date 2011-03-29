@@ -513,8 +513,6 @@ public class Document {
 	}
 
 	/**
-	 */
-	/**
 	 * @param orderForFamily if true, sorts the base (non-family) roles, and
 	 * 							then appends the associated family nrads
 	 * 							for each base (non-family) role.
@@ -549,6 +547,19 @@ public class Document {
 			}
 		}
 		return familyList;
+	}
+
+	/**
+	 * @return the nameRoleActivities for all non-Family Roles
+	 */
+	public List<NameRoleActivity> getNonFamilyNameRoleActivities() {
+		List<NameRoleActivity> nonFamilyList = new ArrayList<NameRoleActivity>();
+		for(NameRoleActivity nrad:nameRoleActivities) {
+			if(!nrad.getRole().isFamilyRole()) {
+				nonFamilyList.add(nrad);
+			}
+		}
+		return nonFamilyList;
 	}
 
 	/**

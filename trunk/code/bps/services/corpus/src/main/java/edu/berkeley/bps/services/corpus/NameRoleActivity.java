@@ -99,6 +99,8 @@ public class NameRoleActivity
 			String displayName ) {
 		this.id = id;
 		this.name = name;
+		// TODO - this is actually illegal, since the DB is declared to require it
+		// Should callers synthesize a generic "Missing" Name?
 		if(name==null)
 			this.normalName = null;
 		else if(null==(this.normalName = name.getNormal()))
@@ -255,6 +257,20 @@ public class NameRoleActivity
 	}
 
 	/**
+	 * @return the displayName
+	 */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	/**
+	 * @param displayName the displayName to set
+	 */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	/**
 	 * @return the role
 	 */
 	public ActivityRole getRole() {
@@ -275,6 +291,14 @@ public class NameRoleActivity
 	@XmlElement(name="activityRole")
 	public String getRoleString() {
 		return (role==null)?null:role.getName();
+	}
+
+	/**
+	 * @return true if activityRole is a family role
+	 */
+	@XmlElement(name="activityRoleIsFamily")
+	public boolean getRoleIsFamily() {
+		return (role==null)?false:role.isFamilyRole();
 	}
 
 	/**

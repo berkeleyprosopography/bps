@@ -1,8 +1,13 @@
 package edu.berkeley.bps.services.workspace;
 
+import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.ServiceContext;
+import edu.berkeley.bps.services.common.time.EvidenceBasedTimeSpan;
 import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
+import edu.berkeley.bps.services.corpus.Document;
+import edu.berkeley.bps.services.corpus.Name;
+import edu.berkeley.bps.services.corpus.NameRoleActivity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +15,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -23,22 +30,57 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author pschmitz
  *
  */
+/**
+ * @author pschmitz
+ *
+ */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="workspace")
-public class Workspace {
+public class Workspace extends CachedEntity {
 	private final static String myClass = "Workspace";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
 	@XmlElement
-	private int			id;
-	@XmlElement
-	private String		name;
-	@XmlElement
 	private String		description;
 	@XmlElement
 	private int			owner_id;			// Each workspace is tied to a user
+	// TODO - we need to work in Years in the UI, but these are millis
+	@XmlElement
+	private double		activeLifeStdDev;
+	// TODO - we need to work in Years in the UI, but these are millis
+	@XmlElement
+	private double		activeLifeWindow;
+	// Not clear yet how we'll use this
+	//@XmlElement
+	//private double		fatherhoodStdDev;
+	@XmlElement
+	private double		wholeLifeStdDev;
+	
+	/**
+	 * Represents the assumed offset from a child's timespan to a
+	 * declared parent's timespan. Used for deriving a parent's timespan
+	 * from an actual date of activity for the child.
+	 */
+	// TODO - we need to work in Years in the UI, but these are millis
+	@XmlElement
+	private long		generationOffset;
 	
 	private Corpus		corpus;
+	
+	// We hold Persons in lists, where each list shares a forename (Name ID).
+	// One set of lists is by document, and another is for the entire
+	// corpus. We do not build the corpus list until we have completed
+	// work coalescing the per-document lists.
+	
+	// Map indexed by docId to Map indexed by Name (forename), to list of persons
+	private HashMap<Integer, HashMap<Integer, ArrayList<Person>>> personListsByNameByDoc;
+	// Map indexed by Name (forename), of lists of persons (workspace wide)
+	private HashMap<Integer, ArrayList<Person>> personListsByName;
+	// Map indexed by Name, of Clans in the workspace
+	private HashMap<Integer, Clan> clansByName;
+
+	// Map indexed by nrad, of the weights to persons or clans
+	private HashMap<Integer, EntityLinkSet<NameRoleActivity>> nradToEntityLinks;
 
 	public Workspace() {
 		this(Workspace.nextId--,null,null,0);
@@ -56,8 +98,56 @@ public class Workspace {
 		this.description = description;
 		this.owner_id = owner_id;
 		this.corpus = null;
+		this.activeLifeStdDev = Person.DEFAULT_ACTIVE_LIFE_STDDEV;
+		this.activeLifeWindow = Person.DEFAULT_ACTIVE_LIFE_WINDOW;
+		this.personListsByNameByDoc = 
+			new HashMap<Integer, HashMap<Integer, ArrayList<Person>>>();
+		this.personListsByName =
+			new HashMap<Integer, ArrayList<Person>>();
+		this.clansByName = new HashMap<Integer, Clan>();
+		this.nradToEntityLinks = 
+			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
 		System.err.println("Workspace.ctor, created: "+this.toString());
 	}
+
+	protected static void AddToMaps(ServiceContext sc, Workspace workspace) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		Map<String, Object> nameMap = getNameMap(sc, myClass);
+		AddToMaps(idMap, nameMap, workspace);
+	}
+
+	private static void AddToMaps(
+			Map<Integer, Object> idMap, Map<String, Object> nameMap,
+			Workspace workspace) {
+		String name = workspace.getName();
+		if(name!=null&&!name.isEmpty())
+			nameMap.put(name, workspace);
+		idMap.put(workspace.getId(), workspace);
+	}
+
+	private static void RemoveFromMaps(ServiceContext sc, Workspace workspace) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		Map<String, Object> nameMap = getNameMap(sc, myClass);
+		String name = workspace.getName();
+		if(name!=null&&!name.isEmpty())
+			nameMap.remove(name);
+		idMap.remove(workspace.getId());
+	}
+	
+	public static void initMaps(ServiceContext sc) {
+		Map<Integer, Object> idMap = getIdMap(sc, myClass);
+		if(idMap==null) {
+			idMap = new HashMap<Integer, Object>();
+			setIdMap(sc, myClass, idMap);
+		}
+
+		Map<String, Object> nameMap = getNameMap(sc, myClass);
+		if(nameMap==null) {
+			nameMap = new HashMap<String, Object>();
+			setNameMap(sc, myClass, nameMap);
+		}
+	}
+
 
 	public void CreateAndPersist(ServiceContext sc) {
 		//final String myName = ".CreateAndPersist: ";
@@ -138,16 +228,25 @@ public class Workspace {
 			+" WHERE w.owner_id=? AND c.wksp_id=w.id";
 		ArrayList<Workspace> wkspList = new ArrayList<Workspace>();
 		try {
+			initMaps(sc);
+			Map<Integer, Object> idMap = getIdMap(sc, myClass);
 			Connection dbConn = sc.getConnection();
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
 			stmt.setInt(1, user_id);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				Workspace workspace = new Workspace(rs.getInt("wid"), 
+				// Look for the workspace in the cache. If not found, create
+				// and add it
+				int wid = rs.getInt("wid");
+				Workspace workspace = (Workspace)idMap.get(wid);
+				if(workspace==null) {
+					workspace = new Workspace(wid, 
 						rs.getString("name"), 
 						rs.getString("description"),
 						user_id);
-				workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+					AddToMaps(sc, workspace);
+				}
 				wkspList.add(workspace);
 			}
 			rs.close();
@@ -196,20 +295,26 @@ public class Workspace {
 			+" WHERE w.id=? AND c.wksp_id=w.id";
 		Workspace workspace = null;
 		try {
-			Connection dbConn = sc.getConnection();
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
-			stmt.setInt(1, id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				workspace = new Workspace(
-						rs.getInt("wid"), 
-						rs.getString("name"), 
-						rs.getString("description"), 
-						rs.getInt("owner_id"));
-				workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+			initMaps(sc);
+			Map<Integer, Object> idMap = getIdMap(sc, myClass);
+			workspace = (Workspace)idMap.get(id);
+			if(workspace==null) {
+				Connection dbConn = sc.getConnection();
+				PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_ID);
+				stmt.setInt(1, id);
+				ResultSet rs = stmt.executeQuery();
+				if(rs.next()){
+					workspace = new Workspace(
+							rs.getInt("wid"), 
+							rs.getString("name"), 
+							rs.getString("description"), 
+							rs.getInt("owner_id"));
+					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+				}
+				rs.close();
+				stmt.close();
+				AddToMaps(sc, workspace);
 			}
-			rs.close();
-			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
 			System.err.println(tmp);
@@ -251,6 +356,7 @@ public class Workspace {
 		}
 	}
 	*/
+
 	public static Workspace FindByName(ServiceContext sc, int user_id, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
@@ -260,18 +366,24 @@ public class Workspace {
 			+" WHERE w.name=? AND w.owner_id=? AND c.wksp_id=w.id";
 		Workspace workspace = null;
 		try {
-			Connection dbConn = sc.getConnection();
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
-			stmt.setString(1, name);
-			stmt.setInt(2, user_id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				workspace = new Workspace(rs.getInt("wid"), rs.getString("name"), 
-									rs.getString("description"), user_id); 
-				workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+			initMaps(sc);
+			Map<String, Object> nameMap = getNameMap(sc, myClass);
+			workspace = (Workspace)nameMap.get(name);
+			if(workspace==null) {
+				Connection dbConn = sc.getConnection();
+				PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
+				stmt.setString(1, name);
+				stmt.setInt(2, user_id);
+				ResultSet rs = stmt.executeQuery();
+				if(rs.next()){
+					workspace = new Workspace(rs.getInt("wid"), rs.getString("name"), 
+										rs.getString("description"), user_id); 
+					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+				}
+				rs.close();
+				stmt.close();
+				AddToMaps(sc, workspace);
 			}
-			rs.close();
-			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
 			System.err.println(tmp);
@@ -346,39 +458,6 @@ public class Workspace {
 	}
 
 	/**
-	 * @return current local corpus
-	 */
-	public Corpus getCorpus() {
-		return corpus;
-	}
-
-	/**
-	 * Clears all existing resources associated with the corpus, and then
-	 * sets the new corpus.
-	 * @param corpus the new corpus to use
-	 */
-	public void setCorpus(ServiceContext sc, Corpus newCorpus) {
-		final String myName = ".setCorpus: ";
-		// Delete any existing corpus clone and all of its attachedEntities
-		if(this.corpus!=null && newCorpus!=null
-				&& this.corpus.getId()==newCorpus.getId() ) {
-			String tmp = myClass+myName+
-				"newCorpus same as current - ignoring setCorpus() call.";
-			System.err.println(tmp);
-			return;	// Do not update if the same corpus
-		}
-		if(newCorpus!=null 
-			&& newCorpus.getCloneOfId()<=0) { 
-			String tmp = myClass+myName+"newCorpus must be a clone";
-			System.err.println(tmp);
-			throw new RuntimeException(tmp);
-		}
-		if(this.corpus!=null)
-			this.corpus.deletePersistence(sc);
-		this.corpus = newCorpus;
-	}
-	
-	/**
 	 * @return the builtFromCorpus
 	 */
 	@XmlElement(name="builtFromCorpus")
@@ -403,11 +482,19 @@ public class Workspace {
 	}
 
 	@XmlElement(name="medianDocDate")
-	public String getMedianDocumentDate() {
+	public String getMedianDocumentDateStr() {
+		if(corpus!=null) {
+			return corpus.getMedianDocumentDateStr();
+		} else {
+			return null;
+		}
+	}
+
+	public long getMedianDocumentDate() {
 		if(corpus!=null) {
 			return corpus.getMedianDocumentDate();
 		} else {
-			return null;
+			return 0;
 		}
 	}
 
@@ -420,4 +507,250 @@ public class Workspace {
 		+"}";
 	}
 
+	/**
+	 * @return current local corpus
+	 */
+	public Corpus getCorpus() {
+		return corpus;
+	}
+
+	/**
+	 * Clears all existing resources associated with any current corpus, and then
+	 * sets the new corpus.
+	 * @param corpus the new corpus to use
+	 */
+	public void setCorpus(ServiceContext sc, Corpus newCorpus) {
+		final String myName = ".setCorpus: ";
+		// Delete any existing corpus clone and all of its attachedEntities
+		if(this.corpus!=null && newCorpus!=null
+				&& this.corpus.getId()==newCorpus.getId() ) {
+			String tmp = myClass+myName+
+				"newCorpus same as current - ignoring setCorpus() call.";
+			System.err.println(tmp);
+			return;	// Do not update if the same corpus
+		}
+		if(newCorpus!=null) {
+			if( newCorpus.getCloneOfId()<=0) { 
+				String tmp = myClass+myName+"newCorpus must be a clone";
+				System.err.println(tmp);
+				throw new RuntimeException(tmp);
+			}
+			if( newCorpus.getWkspId()!=id ) {
+				String tmp = myClass+myName+"newCorpus appears to be owned by another workspace";
+				System.err.println(tmp);
+				throw new RuntimeException(tmp);
+			}
+		}
+		if(this.corpus!=null)
+			this.corpus.deletePersistence(sc);
+		// GC will deal with the lists, etc.
+		personListsByNameByDoc.clear();
+		personListsByName.clear();
+		this.corpus = newCorpus;
+	}
+	
+	/**
+	 * @return the activeLifeStdDev
+	 */
+	public double getActiveLifeStdDev() {
+		return activeLifeStdDev;
+	}
+
+	/**
+	 * @param activeLifeStdDev the activeLifeStdDev to set
+	 */
+	public void setActiveLifeStdDev(double activeLifeStdDev) {
+		this.activeLifeStdDev = activeLifeStdDev;
+	}
+
+	/**
+	 * @return the activeLifeWindow
+	 */
+	public double getActiveLifeWindow() {
+		return activeLifeWindow;
+	}
+
+	/**
+	 * @param activeLifeWindow the activeLifeWindow to set
+	 */
+	public void setActiveLifeWindow(double activeLifeWindow) {
+		this.activeLifeWindow = activeLifeWindow;
+	}
+
+	/**
+	 * Fetches the map from the main map indexed by docId. If the main map
+	 * does not yet have such a map, creates one and adds it to the main map.
+	 * @param docId
+	 * @return a hashmap indexed by Name of lists of Persons. 
+	 */
+	protected HashMap<Integer, ArrayList<Person>> getPersonListMapForDoc(int docId) {
+		HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
+			personListsByNameByDoc.get(docId);
+		if(personListMapForDoc==null) {
+			personListMapForDoc = new HashMap<Integer, ArrayList<Person>>();
+			personListsByNameByDoc.put(docId, personListMapForDoc);
+		}
+		return personListMapForDoc;
+	}
+
+	/**
+	 * Fetches the map from the main map indexed by docId. If the main map
+	 * does not yet have such a map, creates one and adds it to the main map.
+	 * @param docId
+	 * @return a hashmap indexed by Name of lists of Persons. 
+	 */
+	protected ArrayList<Person> getPersonListName(
+			HashMap<Integer, ArrayList<Person>> personListMap, int nameId) {
+		ArrayList<Person> personList = personListMap.get(nameId);
+		if(personList == null) {
+			personList = new ArrayList<Person>(); 
+			personListMap.put(nameId, personList);
+		}
+		return personList;
+	}
+
+	/*
+	protected void addPersonToDocList(Person person) {
+		int docID = person.getOriginalDocument().getId();
+		int nameID = person.getDeclaredName().getId();
+		// Add to the per-document list
+		HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
+			getPersonListMapForDoc(docID);
+		ArrayList<Person> personList = getPersonListName(personListMapForDoc, nameID);
+		personList.add(person);
+	}
+	*/
+		
+	/**
+	 * Creates a Person with an EvidenceBasedTimeSpan,
+	 * adds the person to the personListMapForDoc, and creates
+	 * a link from the nrad to the new Person with full weight
+	 * @param nrad
+	 * @param center the center value for the new time span
+	 * @param personListMapForDoc
+	 * @return the new person
+	 */
+	private Person addPersonForNRAD(NameRoleActivity nrad, long center,
+			HashMap<Integer, ArrayList<Person>> personListMapForDoc) {
+		int forenameId = nrad.getName().getId();	// get Name
+		// Build a timespan for the new person. Center it on the
+		// document date.
+		EvidenceBasedTimeSpan ts = 
+			new EvidenceBasedTimeSpan(center, 
+					activeLifeStdDev, activeLifeWindow);
+		Person person = new Person(nrad, ts);
+		ArrayList<Person> personList = 
+			getPersonListName(personListMapForDoc, forenameId);
+		personList.add(person);
+		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
+		if(links==null) {
+			links = new EntityLinkSet<NameRoleActivity>(nrad, LinkType.Type.LINK_TO_PERSON);
+			nradToEntityLinks.put(nrad.getId(), links);
+		}
+		NRADEntityLink link = new NRADEntityLink(nrad, person, 1.0, LinkType.Type.LINK_TO_PERSON);
+		links.put(person, link);
+		return person;
+	}
+	
+	/**
+	 * Creates a Person for the father with a derived time span,
+	 * adds the father to the personListMapForDoc, and creates
+	 * a link from the nrad to the new Person with full weight
+	 * @param child
+	 * @param nradFather
+	 * @param personListMapForDoc
+	 * @return the new father Person
+	 */
+	private Person addFatherForPerson(Person child, NameRoleActivity nradFather,
+			HashMap<Integer, ArrayList<Person>> personListMapForDoc) {
+		int forenameId = nradFather.getName().getId();	// get Name
+		Person father = child.createPersonForDeclaredFather(generationOffset, 
+				activeLifeStdDev, activeLifeWindow, true);
+		ArrayList<Person> personList = 
+			getPersonListName(personListMapForDoc, forenameId);
+		personList.add(father);
+		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nradFather.getId());
+		if(links==null) {
+			links = new EntityLinkSet<NameRoleActivity>(nradFather, LinkType.Type.LINK_TO_PERSON);
+			nradToEntityLinks.put(nradFather.getId(), links);
+		}
+		NRADEntityLink link = new NRADEntityLink(nradFather, father, 1.0, LinkType.Type.LINK_TO_PERSON);
+		links.put(father, link);
+		return father;
+	}
+	
+	private Clan addClanForNRAD(NameRoleActivity nrad) {
+		Clan clan = findOrCreateClan(nrad);
+		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
+		if(links==null) {
+			links = new EntityLinkSet<NameRoleActivity>(nrad, LinkType.Type.LINK_TO_CLAN);
+			nradToEntityLinks.put(nrad.getId(), links);
+		}
+		NRADEntityLink link = new NRADEntityLink(nrad, clan, 1.0, LinkType.Type.LINK_TO_CLAN);
+		links.put(clan, link);
+		return clan;
+	}
+	
+	private Clan findOrCreateClan(NameRoleActivity nrad) {
+		int clannameId = nrad.getName().getId();	// get Name
+		Clan clan = clansByName.get(clannameId);
+		if(clan==null) {
+			clan = new Clan(nrad);
+			clansByName.put(clannameId, clan);
+		}
+		return clan;
+	}
+	
+	public void rebuildEntitiesFromCorpus(ServiceContext sc) {
+		// We iterate over the documents first, building persons for each
+		// NRAD, and assembling the persons into lists by forename.
+		// For each NRAD, we build a link to the new person, with all
+		// its weight on that person
+		for(Document doc:corpus.getDocuments()) {
+			long center = doc.getDate_norm();
+			if(center==0) {
+				center = getMedianDocumentDate();
+			}
+			// Get the non-family NRADs - we'll pick up family links from them
+			List<NameRoleActivity> baseNRADs = doc.getNonFamilyNameRoleActivities();
+			if(baseNRADs.size()>0) {
+				// Ensure we have a map for this doc
+				HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
+								getPersonListMapForDoc(doc.getId());
+				for(NameRoleActivity nrad:baseNRADs) {
+					Person person = addPersonForNRAD(nrad, center, personListMapForDoc);
+					// Now we have to add persons for the Family-linked NRADs
+					NameRoleActivity fatherNRAD = nrad.getFather();
+					while(fatherNRAD!=null) {
+						Person father = addFatherForPerson(person, fatherNRAD,
+								personListMapForDoc);
+						fatherNRAD = fatherNRAD.getFather();
+					}
+					NameRoleActivity clanNRAD = nrad.getClan();
+					if(clanNRAD!=null)
+						addClanForNRAD(clanNRAD);
+				}
+			}
+		}
+	}
+	
+	// This will actually return a list of NRADEntityLinks
+	public List<NRADEntityLink> getEntityLinksForDoc(int docId) {
+		Document doc = corpus.getDocument(docId);
+		if(doc==null) 
+			throw new IllegalArgumentException("No document found for id: "+docId);
+		List<NRADEntityLink> nrad2PLinkList = new ArrayList<NRADEntityLink>();
+		List<NameRoleActivity> nrads = doc.getNameRoleActivities(true);
+		for(NameRoleActivity nrad:nrads) {
+			EntityLinkSet<NameRoleActivity> elset = 
+				nradToEntityLinks.get(nrad.getId());
+			if(elset!=null) {
+				for(EntityLink<NameRoleActivity> link:elset.values()) {
+					nrad2PLinkList.add((NRADEntityLink)link);
+				}
+			}
+		}
+		return nrad2PLinkList;
+	}
+	
 }

@@ -78,7 +78,7 @@ public class CachedEntity {
 		return (HashMap<String, Object>)sc.getProperty(entityName+NAME_MAP_SUFFIX);
 	}
 	
-	protected static void setNameMap(ServiceContext sc, String entityName, HashMap<String, Object> map) {
+	protected static void setNameMap(ServiceContext sc, String entityName, Map<String, Object> map) {
 		sc.setProperty(entityName+NAME_MAP_SUFFIX, map);
 	}
 	
@@ -86,7 +86,7 @@ public class CachedEntity {
 		return (HashMap<Integer, Object>)sc.getProperty(entityName+ID_MAP_SUFFIX);
 	}
 	
-	protected static void setIdMap(ServiceContext sc, String entityName, HashMap<Integer, Object> map) {
+	protected static void setIdMap(ServiceContext sc, String entityName, Map<Integer, Object> map) {
 		sc.setProperty(entityName+ID_MAP_SUFFIX, map);
 	}
 	
