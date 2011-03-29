@@ -14,14 +14,15 @@ import java.util.ArrayList;
  * Later versions may incorporate a list of all data values seen with weights,
  * to support more elaborate inference.
  */
+// TODO Consider modifying the window definition (or use) to reflect the evidence.
 public class EvidenceBasedTimeSpan extends BaseTimeSpan {
-	private ArrayList<Long> times = null;
-	private ArrayList<Double> weights = null;
+	protected ArrayList<Long> times = null;
+	protected ArrayList<Double> weights = null;
 	double totalWeight = 0;
 	long centerPoint = Long.MIN_VALUE;
 
-	public EvidenceBasedTimeSpan(long centerPoint, double stdDev) {
-		super(stdDev);
+	public EvidenceBasedTimeSpan(long centerPoint, double stdDev, double window) {
+		super(stdDev, window);
 		this.centerPoint = centerPoint;
 		times = new ArrayList<Long>();
 		weights = new ArrayList<Double>();

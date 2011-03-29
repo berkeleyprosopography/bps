@@ -30,6 +30,7 @@ td.title { border-bottom: 2px solid black; font-weight:bold; text-align:left;
 div.nrads_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
 td.document, td.nrad { font-weight:bold; }
 p.nav-right { float:right; padding-top:10px;}
+span.familyIndent { padding-right: 10px; }
 </style>";
 
 $t->assign("style_block", $style_block);
@@ -122,6 +123,7 @@ function getDocNRADs($CFG,$wid,$did){
 			 	'normalName' => $nradObj['normalName'], 
 			 	'activityRoleId' => $nradObj['activityRoleId'], 
 			 	'activityRole' => $nradObj['activityRole'], 
+			 	'activityRoleIsFamily' => ($nradObj['activityRoleIsFamily']=='true'), 
 			 	'activityId' => $nradObj['activityId'], 
 			 	'activity' => $nradObj['activity'] 
 			);
@@ -150,6 +152,10 @@ if(!(isset($_GET['wid'])&&isset($_GET['did']))) {
 		$t->assign('document', $document);
 		$nrads = getDocNRADs($CFG,$_GET['wid'],$_GET['did']);
 		if($nrads) {
+			// Build map of nrads by id, then get the entities for the nrads,
+			// and assign them.
+			// E.g. $nrads[$nrad['id'] = $nrad;
+
 			$t->assign('nrads', $nrads);
 		} else if($opmsg){
 			$errmsg = "Problem getting Document Name-Role-Activity items: ".$opmsg;

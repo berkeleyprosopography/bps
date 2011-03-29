@@ -595,13 +595,18 @@ public class CorporaResource extends BaseResource {
 	@Wrapped(element="nrads")
 	@Path("{id}/documents/{docspec}/nrads")
 	public List<NameRoleActivity> getDocumentNRADs(
-			@Context ServletContext srvc, 
+			@Context ServletContext srvc,  @Context UriInfo ui,
 			@PathParam("id") int id, @PathParam("docspec") String docspec) {
 		List<NameRoleActivity> nradList = null;
         try {
 	        Document document = getDocument(getServiceContext(srvc), id, docspec);
-	        //docList = Document.ListAllInCorpus(dbConn, corpus);
-	        nradList = document.getNameRoleActivities(true);
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			String filter = queryParams.getFirst("filter");
+			if(filter != null && "nofamily".equals(filter)) {
+		        nradList = document.getNonFamilyNameRoleActivities();
+			} else {
+		        nradList = document.getNameRoleActivities(true);
+			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);

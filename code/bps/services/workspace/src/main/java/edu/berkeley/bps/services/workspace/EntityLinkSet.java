@@ -1,52 +1,53 @@
-package edu.berkeley.bps.services.graphbuilder;
+package edu.berkeley.bps.services.workspace;
 
 import edu.berkeley.bps.services.common.LinkType;
-import edu.berkeley.bps.services.common.utils.Pair;
 import edu.berkeley.bps.services.common.utils.SortedQueue;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 
 /*
- * Models a set of links from objects of type O to Persons. Includes
+ * Models a set of links from objects of type O to Entity instances. Includes
  * convenience methods to adjust the weights of the links by the linked to
- * Person, and to normalize the set of weights. Supports iteration over the set.
+ * Entity, and to normalize the set of weights. Supports iteration over the set.
  */
-public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
+public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 
 	private O fromObj = null;
 	private LinkType.Type linkType = null;
 	private double summedWeight;
 
-	public PersonLinkSet(O fromObj, LinkType.Type linkType) {
+	public EntityLinkSet(O fromObj, LinkType.Type linkType) {
 		if(fromObj== null)
 			throw new IllegalArgumentException("Must specify link base (fromObj).");
 		this.fromObj = fromObj;
 		this.linkType = linkType;
 		summedWeight = 0;
 	}
-
-	/**
-	 * @param fromObj
-	 * @param toPerson
-	 * @param weight
-	 */
-	public void addLink(Person toPerson, double weight) {
-		if(get(toPerson)!= null)
-			throw new IllegalArgumentException("Already have a link to Person: "+toPerson);
-		PersonLink<O> link = new PersonLink<O>(fromObj, toPerson, weight, linkType);
-		put(toPerson, link);
-		summedWeight += weight;
+	
+	public EntityLink<O> put(Entity toEntity, EntityLink<O> link) {
+		if(get(toEntity)!= null)
+			throw new IllegalArgumentException("Already have a link to Entity: "+toEntity);
+		if(link.getFromObj()!= fromObj)
+			throw new IllegalArgumentException("Link fromObject does not match set");
+		if(link.getType()!=linkType)
+			throw new IllegalArgumentException("Passed link type ("
+					+link.getTypeString()+")does not match set type: "
+					+LinkType.ValueToString(linkType));
+		if(link!=null)
+			summedWeight += link.getWeight();
+		return super.put(toEntity, link);
 	}
 
 	/**
 	 * @param fromObj
-	 * @param toPerson
+	 * @param toEntity
 	 * @param weight
 	 */
-	public void updateLink(Person toPerson, double weight) {
-		PersonLink<O> link = get(toPerson);
+	public void updateLink(Entity toEntity, double weight) {
+		EntityLink<O> link = get(toEntity);
 		if(link == null)
-			throw new IllegalArgumentException("No link found to Person: "+toPerson);
+			throw new IllegalArgumentException("No link found to Entity: "+toEntity);
 		double delta = weight-link.getWeight();
 		summedWeight += delta;
 		link.adjustWeight(delta);
@@ -54,13 +55,13 @@ public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 
 	/**
 	 * @param fromObj
-	 * @param toPerson
+	 * @param toEntity
 	 * @param weight
 	 */
-	public void adjustLink(Person toPerson, double delta) {
-		PersonLink<O> link = get(toPerson);
+	public void adjustLink(Entity toEntity, double delta) {
+		EntityLink<O> link = get(toEntity);
 		if(link == null)
-			throw new IllegalArgumentException("No link found to Person: "+toPerson);
+			throw new IllegalArgumentException("No link found to Entity: "+toEntity);
 		summedWeight += delta;
 		link.setWeight(link.getWeight()+delta);
 	}
@@ -70,7 +71,7 @@ public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 	 */
 	public void verifySummedWeight() {
 		double calcSum = 0;
-		for(PersonLink link:values()) {
+		for(EntityLink<O> link:values()) {
 			calcSum += link.getWeight();
 		}
 		if(calcSum!=summedWeight)
@@ -85,7 +86,7 @@ public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 	public void normalize() {
 		// TODO remove once debugged
 		verifySummedWeight();
-		for(PersonLink link:values()) {
+		for(EntityLink<O> link:values()) {
 			link.setWeight(link.getWeight()/summedWeight);
 		}
 		summedWeight = 1;
@@ -97,11 +98,11 @@ public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 	 */
 	public void filterLinksBelowWeight(double belowWeight) {
 		summedWeight = 0;
-		for(Person person:keySet()) {
-			PersonLink link = get(person);
+		for(Entity entity:keySet()) {
+			EntityLink<O> link = get(entity);
 			double weight = link.getWeight();
 			if(weight < belowWeight)
-				put(person, null);
+				put(entity, null);
 			else
 				summedWeight += weight;
 		}
@@ -117,12 +118,12 @@ public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 	public void filterTailProportion(double proportion, boolean renormalize) {
 		if(summedWeight!=1)
 			throw new RuntimeException("Set not normalized.");
-		ArrayList<PersonLink> pal = asSortedQueue().asArrayList();
+		ArrayList<EntityLink<O>> pal = asSortedQueue().asArrayList();
 		for(int ip=pal.size()-1; ip>0; ip--) {
-			PersonLink link = pal.get(ip);
+			EntityLink<O> link = pal.get(ip);
 			double weight = link.getWeight();
 			if(weight < proportion) {
-				put(link.getPerson(), null); // Remove from set
+				put(link.getEntity(), null); // Remove from set
 				proportion -= weight;
 				summedWeight -= weight;
 			} else {
@@ -137,9 +138,9 @@ public class PersonLinkSet<O> extends HashMap<Person, PersonLink<O>> {
 	 * Builds a priority queue whose items are the counter's items, and
 	 * whose priorities are those items' counts in the counter.
 	 */
-	public SortedQueue<PersonLink> asSortedQueue() {
-		SortedQueue<PersonLink> pq = new SortedQueue<PersonLink>(size());
-		for(PersonLink link:values()) {
+	public SortedQueue<EntityLink<O>> asSortedQueue() {
+		SortedQueue<EntityLink<O>> pq = new SortedQueue<EntityLink<O>>(size());
+		for(EntityLink<O> link:values()) {
 			pq.add(link, link.getWeight());
 		}
 		return pq;

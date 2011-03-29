@@ -13,6 +13,14 @@ public class TimeUtils {
 
 	public static final long DAY_IN_MILLIS = 24L*60L*60L*1000L;
 	public static final long APPROX_YEAR_IN_MILLIS = (long)(365.25*(DAY_IN_MILLIS));
+	
+	public static double getDefaultWindowForActiveLife(int activeYears) {
+		return 	activeYears*APPROX_YEAR_IN_MILLIS*2/3;
+	}
+	
+	public static double getDefaultStdDevForActiveLife(int activeYears) {
+		return 	activeYears*APPROX_YEAR_IN_MILLIS*2;
+	}
 
 	/**
 	 * @param year (use negative years to indicate years BCE)

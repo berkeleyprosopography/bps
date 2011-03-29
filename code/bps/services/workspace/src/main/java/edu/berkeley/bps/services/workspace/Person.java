@@ -1,4 +1,4 @@
-package edu.berkeley.bps.services.graphbuilder;
+package edu.berkeley.bps.services.workspace;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import edu.berkeley.bps.services.common.time.*;
  *    a) father as declared, or as shifted to others
  *    b) sons as declared, or as shifted to others
  *    c) Clan?? Perhaps not, or...?
- *    d) (later) co-occurring principles and witnesses, with activity and role type
+ *    d) (later) co-occurring principals and witnesses, with activity and role type
  *    Note: we do not link to grandfather, but only link to the father,
  *    		who in turn links to the grandfather?
  */
@@ -24,67 +24,93 @@ import edu.berkeley.bps.services.common.time.*;
  * @author pschmitz
  *
  */
-public class Person {
+public class Person extends Entity {
+	private static final String myClass = "Person";
+	
+	public static final int DEFAULT_ACTIVE_LIFE_YRS = 15;
+	public static final double DEFAULT_GENERATION = 15.0*TimeUtils.APPROX_YEAR_IN_MILLIS;
+	public static final double DEFAULT_ACTIVE_LIFE_WINDOW = 
+		TimeUtils.getDefaultWindowForActiveLife(DEFAULT_ACTIVE_LIFE_YRS);
+	public static final double DEFAULT_ACTIVE_LIFE_STDDEV =
+		TimeUtils.getDefaultStdDevForActiveLife(DEFAULT_ACTIVE_LIFE_YRS);
+
 	public static final int EQUAL = 0;
 	public static final int COMPAT_LESS_INFO = -1;
 	public static final int COMPAT_MORE_INFO = 1;
 	public static final int COMPATIBLE = Integer.MIN_VALUE;
 	public static final int INCOMPATIBLE = Integer.MAX_VALUE;
-	private NameRoleActivity originalNRAD = null;
-	private Name declaredName = null;
 	private Name declaredFather = null;
 	private Name declaredGrandFather = null;
-	private String displayName = null;
 	private ArrayList<Name> declaredAncestors = null;
 	// TODO?? Do we need to model the clan and link to it? What if we are inferring
 	// it from various other rules?
 	private Name declaredClan = null;
 	// Note that we do not link beyond our fathers, since they should link 
 	// to their own fathers.
-	// TODO - this is probably wrong...
-	private PersonLinkSet<Person>	fatherLinks = null;
-	//private PersonLinkSet<Clan>		clanLinks = null;
+	// TODO - revisit this...
+	private EntityLinkSet<Person>	fatherLinks = null;
+	private EntityLinkSet<Clan>		clanLinks = null;
 
 	//private LinkType.Type roleInNRAD = null;
 	private TimeSpan activeTimeSpan = null;
 	// lifeTimeSpan should generally be a DerivedTimeSpan linked to activeTimeSpan.
-	private TimeSpan lifeTimeSpan = null;
+	//private TimeSpan lifeTimeSpan = null;
+	
+	public static Person CreatePersonFromNRADAsEvidence(NameRoleActivity nrad) {
+		long center = nrad.getDocument().getDate_norm();
+		EvidenceBasedTimeSpan ts = 
+			new EvidenceBasedTimeSpan(center, 
+					DEFAULT_ACTIVE_LIFE_STDDEV, DEFAULT_ACTIVE_LIFE_WINDOW);
+		return new Person(nrad, ts);
+	}
 
 	public Person( NameRoleActivity nrad,
-			TimeSpan activeTimeSpan, TimeSpan lifeTimeSpan ) {
-		String fNameStr = null;
-		if((originalNRAD=nrad)==null 
-			|| (declaredName=originalNRAD.getName())==null 
-			|| (fNameStr=declaredName.getName())==null
-			||  fNameStr.isEmpty())
+			TimeSpan activeTimeSpan ) { //, TimeSpan lifeTimeSpan ) {
+		super(nrad);
+		if(activeTimeSpan==null ) // || lifeTimeSpan==null)
 			throw new IllegalArgumentException(
-					"Person ctor must have valid forename.");
-		if(activeTimeSpan==null || lifeTimeSpan==null)
-			throw new IllegalArgumentException(
-					"Person ctor must take valid active and life TimeSpans.");
+					"Person ctor must specify valid TimeSpans.");
 		this.activeTimeSpan = activeTimeSpan;
-		this.lifeTimeSpan = lifeTimeSpan;
-		NameRoleActivity nradFather=nrad.getFather();
-		declaredFather = (nradFather==null)?null:nradFather.getName();
-		String temp;
-		if((temp=declaredFather.getName())==null||temp.isEmpty())
-			declaredFather = null;
-		NameRoleActivity nradGrandFather =nrad.getGrandFather();
-		declaredGrandFather = (nradGrandFather==null)?null:nradGrandFather.getName();
-		if((temp=declaredGrandFather.getName())==null||temp.isEmpty())
-			declaredGrandFather = null;
-		List<NameRoleActivity> ancestorNRADs = nrad.getAncestors();
-		declaredAncestors = new ArrayList<Name>();
-		if(ancestorNRADs!=null) {
-			for(NameRoleActivity nradA:ancestorNRADs) {
-				Name ancName = nradA.getName();
-				if(ancName!=null 
-					&& ((temp=ancName.getName())!=null
-					&& !temp.isEmpty()))
-					declaredAncestors.add(ancName);
+		// this.lifeTimeSpan = lifeTimeSpan;
+		{
+			NameRoleActivity nradFather=nrad.getFather();
+			declaredFather = (nradFather==null)?null:nradFather.getName();
+			if(declaredFather!=null) {
+				String temp = declaredFather.getName();
+				if(temp==null||temp.isEmpty())
+					declaredFather = null;
+			}
+		}{
+			NameRoleActivity nradGrandFather =nrad.getGrandFather();
+			declaredGrandFather = (nradGrandFather==null)?null:nradGrandFather.getName();
+			if(declaredGrandFather!=null) {
+				String temp=declaredGrandFather.getName();
+				if(temp==null||temp.isEmpty())
+					declaredGrandFather = null;
+			}
+		}{
+			List<NameRoleActivity> ancestorNRADs = nrad.getAncestors();
+			declaredAncestors = new ArrayList<Name>();
+			if(ancestorNRADs!=null) {
+				for(NameRoleActivity nradA:ancestorNRADs) {
+					Name ancName = nradA.getName();
+					if(ancName!=null) {
+						String temp=ancName.getName();
+						if(temp!=null&&!temp.isEmpty())
+							declaredAncestors.add(ancName);
+					}
+				}
+			}
+		}{
+			NameRoleActivity nradClan=nrad.getClan();
+			declaredClan = (nradClan==null)?null:nradClan.getName();
+			if(declaredClan!=null) {
+				String temp=declaredClan.getName();
+				if(temp==null||temp.isEmpty())
+					declaredClan = null;
 			}
 		}
-		fatherLinks = new PersonLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
+		fatherLinks = new EntityLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
 	}
 
 	/**
@@ -98,15 +124,20 @@ public class Person {
 	 * @return
 	 */
 	public Person createPersonForDeclaredFather(
-			long activeTimeSpanOffset, long lifeTimeSpanOffset,
-			double activeTimeSpanStdDev, double lifeTimeSpanStdDev,
+			long activeTimeSpanOffset, // long lifeTimeSpanOffset,
+			double activeTimeSpanStdDev, // double lifeTimeSpanStdDev,
+			double activeTimeSpanWindow,
 			boolean addToFatherLinks) {
 		if(declaredFather==null)
 			return null;
+		NameRoleActivity nradFather = originalNRAD.getFather(); 
+		if(nradFather==null)
+			throw new RuntimeException(myClass+"Internal logic error in Person");
 		DerivedTimeSpan fatherActiveTimeSpan =
-			new DerivedTimeSpan(activeTimeSpan, activeTimeSpanOffset, activeTimeSpanStdDev);
-		DerivedTimeSpan fatherLifeTimeSpan =
-			new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);
+			new DerivedTimeSpan(activeTimeSpan, activeTimeSpanOffset, 
+					activeTimeSpanStdDev, activeTimeSpanWindow);
+		//DerivedTimeSpan fatherLifeTimeSpan =
+		//	new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);
 		/*
 		LinkType.Type fatherRoleInNRAD;
 		switch(roleInNRAD) {
@@ -120,13 +151,12 @@ public class Person {
 			fatherRoleInNRAD = LinkType.Type.LINK_TO_ANCESTOR; break;
 		}
 		*/
-		Person father = new Person(originalNRAD.getFather(), 
-							fatherActiveTimeSpan, fatherLifeTimeSpan);
-		/*
+		Person father = new Person(nradFather, fatherActiveTimeSpan); // , fatherLifeTimeSpan);
 		if(addToFatherLinks) {
-			fatherLinks.addLink(father, 1.0);
+			EntityLink<Person> link = new EntityLink<Person>(this, father, 1.0, LinkType.Type.LINK_TO_FATHER);
+			fatherLinks.put(father, link);
 			fatherLinks.normalize();
-		}*/
+		}
 		return father;
 	}
 
@@ -212,13 +242,14 @@ public class Person {
 		// otherwise, set composite to the clan comparison (COMPAT_MORE or COMPAT_LESS)
 		else if((composite == EQUAL) && (clanCmp!=COMPATIBLE)) {
 			composite = clanCmp;
-		}
+		} // Else we stay with the composite
+		// TODO what if composite was COMPAT_MORE and clanCmp is COMPAT_LESS ?
 		int fatherCmp = compareNames(declaredFather, compareTo.declaredFather);
 		if(fatherCmp==INCOMPATIBLE)
 			return fatherCmp;
 		if(composite == COMPATIBLE) {
 			composite = fatherCmp;
-		} if((composite == EQUAL) && (fatherCmp!=COMPATIBLE)) {
+		} else if((composite == EQUAL) && (fatherCmp!=COMPATIBLE)) {
 			composite = fatherCmp;
 		}
 		int grandFatherCmp = compareNames(declaredGrandFather, compareTo.declaredGrandFather);
@@ -226,7 +257,7 @@ public class Person {
 			return grandFatherCmp;
 		if(composite == COMPATIBLE) {
 			composite = grandFatherCmp;
-		} if((composite == EQUAL) && (grandFatherCmp!=COMPATIBLE)) {
+		} else if((composite == EQUAL) && (grandFatherCmp!=COMPATIBLE)) {
 			composite = grandFatherCmp;
 		}
 		// We're compatible so far
@@ -251,14 +282,6 @@ public class Person {
 		} else {	// name1 is null
 			return(name2!=null)? COMPAT_LESS_INFO:COMPATIBLE;
 		}
-	}
-
-	public Name getDeclaredName() {
-		return declaredName;
-	}
-
-	public void setDeclaredName(Name declaredName) {
-		this.declaredName = declaredName;
 	}
 
 	public Name getDeclaredFather() {
@@ -287,10 +310,6 @@ public class Person {
 
 	public Name getAncestor(int index) {
 		return declaredAncestors.get(index);
-	}
-
-	public String toString() {
-		return displayName;
 	}
 
 }

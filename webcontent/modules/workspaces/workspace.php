@@ -122,6 +122,38 @@ function workspaceSetCorpus(workspaceID, corpusId, fRefresh) {
 	enableElement("importCorpButton_"+corpusId,false);
 }
 
+// The ready state change callback method for update.
+function workspaceRebuildEntitiesRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Entities rebuilt for Workspace.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			window.location.reload();
+		} else {
+			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+function workspaceRebuildEntities(workspaceID) {
+	if( !xmlhttp ) {
+		alert( "Cannot rebuild entities for workspace - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/workspaces/"+workspaceID+"/corpora/entities";
+	var args = "";
+	var verb = "PUT";
+	//alert( "Preparing request: "+verb+": "+url+"?"+args );
+	xmlhttp.open(verb, url, true);
+	xmlhttp.setRequestHeader("Content-Type", "text/plain" );
+	xmlhttp.onreadystatechange=workspaceRebuildEntitiesRSC;
+	xmlhttp.send(args);
+	setBuildingP("Rebuilding entities for workspace...");
+	enableElement(rebuildEntitiesButton,false);
+}
+
 //
 // This should go into a utils.js - how to include?
 function enableElement( elID, sense ) {
