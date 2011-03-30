@@ -1,19 +1,18 @@
 package edu.berkeley.bps.services.workspace.collapser;
 
-import java.util.Map;
-
 import edu.berkeley.bps.services.workspace.Entity;
 
 public interface CollapserRule {
 
 	/**
-	 * Evaluates first and second for collapsing.
+	 * Evaluates collapsing (shifting weight) from fromEntity into toEntity.
+	 * Will scale any evaluation based upon the current value of weight.
 	 * @param first First entity to consider
 	 * @param second Second entity to consider
 	 * @return 0 if this rule does not apply to the pair,
 	 * 			else a value that depends upon the class of rule 
 	 */
-	public float evaluate(Entity first, Entity second);
+	public float evaluate(Entity fromEntity, Entity toEntity);
 
 	/**
 	 * @return the configured name for this rule
@@ -27,20 +26,17 @@ public interface CollapserRule {
 	public void setName(String name);
 	
 	/**
-	 * @return a user-readable description of this rule.
+	 * @return the current weight to give this rule.
 	 */
-	public String getDescription();
+	public float getWeight();
 	
 	/**
-	 * Sets the user-readable description for this rule
-	 * @param description
+	 * Sets the current weight to give this rule. Set to 0 to disable the rule, 
+	 * set to 1 for complete confidence in the rule, or some value between to
+	 * correspond with the confidence or weight to give this rule.
+	 * @param weight must be in the range of 0 to 1
+	 * @throws IllegalArgumentException if weight < 0 or weight > 1
 	 */
-	public void setDescription(String description);
-	
-	/**
-	 * @return a user-readable description of this rule.
-	 */
-	public Map<String, Float> getUserSettings();
-
+	public void setWeight(float weight);
 	
 }
