@@ -1,7 +1,6 @@
 package edu.berkeley.bps.services.workspace.collapser;
 
 import java.util.List;
-import edu.berkeley.bps.services.common.utils.Pair;
 
 public interface CollapserRuleUI {
 
@@ -22,7 +21,7 @@ public interface CollapserRuleUI {
 	 * @return a list of named values for the weight of this rule,
 	 * 			or null, if this rule UI does not support such a model. 
 	 */
-	public List<Pair<String, Float>> getUserSettings();
+	public List<UserWeightSetting> getUserSettings();
 
 	
 }
