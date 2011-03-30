@@ -31,6 +31,8 @@ div.nrads_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
 td.document, td.nrad { font-weight:bold; }
 p.nav-right { float:right; padding-top:10px;}
 span.familyIndent { padding-right: 10px; }
+span.nradLink { padding-left: 5px; font-weight:normal; }
+span.nradLinkWeight { font-style:italic; }
 </style>";
 
 $t->assign("style_block", $style_block);
@@ -100,7 +102,7 @@ function getDocInfo($CFG,$wkspid,$docid){
 	return false;
 }
 
-function getDocNRADs($CFG,$wid,$did){
+function getDocNRADs($CFG,$wid,$did,$linkListMap){
 	global $opmsg;
 
 	$rest = new RESTclient();
@@ -109,12 +111,13 @@ function getDocNRADs($CFG,$wid,$did){
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
 	if($rest->sendRequest()) {
-		$ServWkspDocsOutput = $rest->getResponse();
-		$results = json_decode($ServWkspDocsOutput, true);
+		$ServNRADsOutput = $rest->getResponse();
+		$results = json_decode($ServNRADsOutput, true);
 		$nrads = array();
 		foreach($results as &$result) {
 			$nradObj = &$result['nameRoleActivity'];
-			$nrad = array(	
+			$nradId = $nradObj['id'];
+			$nrads[] = array(	
 				'id' => $nradObj['id'],
 			  'xmlId' => $nradObj['xmlID'],
 			 	'nameId' => $nradObj['nameId'], 
@@ -125,16 +128,56 @@ function getDocNRADs($CFG,$wid,$did){
 			 	'activityRole' => $nradObj['activityRole'], 
 			 	'activityRoleIsFamily' => ($nradObj['activityRoleIsFamily']=='true'), 
 			 	'activityId' => $nradObj['activityId'], 
-			 	'activity' => $nradObj['activity'] 
+			 	'activity' => $nradObj['activity'],
+			 	'links' => $linkListMap[$nradId]
 			);
-			array_push($nrads, $nrad);
 			// Supposed to help with efficiency (dangling refs?)
-			unset($results);
 			unset($result);
 			unset($nradObj);
-			unset($rest);
 		}
+		// Supposed to help with efficiency (dangling refs?)
+		unset($results);
+		unset($rest);
 		return $nrads;
+	}
+	$opmsg = $rest->getError();
+	return false;
+}
+
+function getEntitiesForDocNRADs($CFG,$wid,$did){
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = getDocNRADsUrl($CFG,$wid,$did).'/links';
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServLinksOutput = $rest->getResponse();
+		$results = json_decode($ServLinksOutput, true);
+		$linkListMap = array();
+		foreach($results as &$result) {
+			$entObj = &$result['nradToEntityLink'];
+			$nradId = $entObj['nradId'];
+			// Each map entry is a list of links for that nrad
+			if(!isset($linkListMap[$nradId])) {
+				$linkListMap[$nradId] = array();
+			}
+			// Create link info object and add to list
+			$linkListMap[$nradId][] =
+								array('linkType' => $entObj['type'],
+											'weight' => (round($entObj['weight']*100)),
+											'linkTo' => $entObj['linkTo'] ); 		// Entity displayName 
+			// Supposed to help with efficiency (dangling refs?)
+			unset($result);
+			unset($entObj);
+		}
+		// Supposed to help with efficiency (dangling refs?)
+		unset($results);
+		unset($rest);
+		// TODO create a function to sort on weight descending
+		// Run through each list to sort.
+		return $linkListMap;
 	}
 	$opmsg = $rest->getError();
 	return false;
@@ -143,22 +186,25 @@ function getDocNRADs($CFG,$wid,$did){
 if(!(isset($_GET['wid'])&&isset($_GET['did']))) {
 	$errmsg = "Missing workspace or document specifier(s).";
 } else {
-	$document = getDocInfo($CFG,$_GET['wid'],$_GET['did']);
+	$wid = $_GET['wid'];
+	$did = $_GET['did'];
+	$document = getDocInfo($CFG,$wid,$did);
 	if($document){
 		$t->assign('workspaceID', $_GET['wid']);
 		if($document['date_norm']==0) {
-			$document['date_str'] = '<em>('.getWorkspaceMedianDocDate($CFG,$_GET['wid']).'?)</em>';
+			$document['date_str'] = '<em>('.getWorkspaceMedianDocDate($CFG,$wid).'?)</em>';
 		}
 		$t->assign('document', $document);
-		$nrads = getDocNRADs($CFG,$_GET['wid'],$_GET['did']);
-		if($nrads) {
-			// Build map of nrads by id, then get the entities for the nrads,
-			// and assign them.
-			// E.g. $nrads[$nrad['id'] = $nrad;
-
-			$t->assign('nrads', $nrads);
-		} else if($opmsg){
-			$errmsg = "Problem getting Document Name-Role-Activity items: ".$opmsg;
+		$linkListMap = getEntitiesForDocNRADs($CFG,$wid,$did);
+		if(!$linkListMap) {
+			$errmsg = "Problem getting Document nrad-to-Entity links: ".$opmsg;
+		} else {
+			$nrads = getDocNRADs($CFG,$wid,$did, $linkListMap);
+			if($nrads ) {
+				$t->assign('nrads', $nrads);
+			} else if($opmsg){
+				$errmsg = "Problem getting Document Name-Role-Activity items: ".$opmsg;
+			}
 		}
 	} else if($opmsg){
 		$errmsg = "Problem getting Document Name-Role-Activity items: ".$opmsg;
