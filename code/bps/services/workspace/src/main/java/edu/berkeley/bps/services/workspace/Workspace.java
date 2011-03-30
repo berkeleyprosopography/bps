@@ -543,10 +543,15 @@ public class Workspace extends CachedEntity {
 		}
 		if(this.corpus!=null)
 			this.corpus.deletePersistence(sc);
+		clearEntityMaps();
+		this.corpus = newCorpus;
+	}
+	
+	private void clearEntityMaps() {
 		// GC will deal with the lists, etc.
 		personListsByNameByDoc.clear();
 		personListsByName.clear();
-		this.corpus = newCorpus;
+		clansByName.clear();
 	}
 	
 	/**
@@ -706,6 +711,9 @@ public class Workspace extends CachedEntity {
 		// NRAD, and assembling the persons into lists by forename.
 		// For each NRAD, we build a link to the new person, with all
 		// its weight on that person
+		
+		clearEntityMaps();
+
 		for(Document doc:corpus.getDocuments()) {
 			long center = doc.getDate_norm();
 			if(center==0) {
@@ -725,6 +733,7 @@ public class Workspace extends CachedEntity {
 						Person father = addFatherForPerson(person, fatherNRAD,
 								personListMapForDoc);
 						fatherNRAD = fatherNRAD.getFather();
+						person = father;
 					}
 					NameRoleActivity clanNRAD = nrad.getClan();
 					if(clanNRAD!=null)
