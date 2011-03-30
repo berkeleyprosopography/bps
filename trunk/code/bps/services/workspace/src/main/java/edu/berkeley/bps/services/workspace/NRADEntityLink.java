@@ -9,7 +9,7 @@ import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name="nradToPersonLink")
+@XmlRootElement(name="nradToEntityLink")
 public class NRADEntityLink extends EntityLink<NameRoleActivity> {
 	
 	public NRADEntityLink() {
