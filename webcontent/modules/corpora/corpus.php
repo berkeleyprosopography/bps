@@ -47,6 +47,20 @@ $t->assign("style_block", $style_block);
 
 $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
+if(!isset($_GET['view'])) {
+	$view = 'docs';
+} else {
+	$view = $_GET['view'];
+	if($view!='docs'&&$view!='pnames'&&$view!='cnames'&&$view!='admin')
+		$view = 'docs';
+	else if($view=='admin' && !$canUpdateCorpus)
+		$view = 'docs';
+}
+$t->assign("currSubNav", $view);
+
+if($view!='admin') {
+	$script_block = '';
+} else {
 $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 <script type="text/javascript" src="/scripts/corpus.js"></script>
@@ -175,6 +189,7 @@ function limitChars( field, maxlimit ) {
 }
 
 </script>';
+}
 
 $t->assign("script_block", $script_block);
 
@@ -244,38 +259,55 @@ if(!isset($_GET['id'])) {
 	$errmsg = "Missing corpus specifier. ";
 } else {
 	$corpus = getCorpus($CFG,$_GET['id']);
-	if($corpus){
-		$t->assign('corpus', $corpus);
-		$corp_file = $CFG->corpusdir.'/'.$_GET['id'].'/tei/corpus.xml';
-		if(file_exists($corp_file)) {
-			$t->assign('corpus_file', $corp_file);
-			$teiloc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$_GET['id'].'/tei';
-			$t->assign('teiloc', $teiloc);
-			$teisummaryloc = $teiloc.'/summary';
-			$t->assign('teisummaryloc', $teisummaryloc);
+	if(!$corpus){
+		if($opmsg){
+			$errmsg = "Problem getting Corpus details: ".$opmsg;
+		} else {
+			$errmsg = "Bad or illegal corpus specifier. ";
 		}
-		$dates_file = $CFG->corpusdir.'/'.$_GET['id'].'/assertions/dates.xml';
-		if(file_exists($dates_file)) {
-			$t->assign('dates_file', $dates_file);
-		}
-		$docs = getCorpusDocs($CFG,$_GET['id'], $_GET['o'], '<em>('.$corpus['medianDocDate'].'?)</em>');
-		if($docs) {
-			$t->assign('documents', $docs);
-		} else if($opmsg){
-			$errmsg = "Problem getting Corpus documents: ".$opmsg;
-		}
-	} else if($opmsg){
-		$errmsg = "Problem getting Corpus details: ".$opmsg;
 	} else {
-		$errmsg = "Bad or illegal corpus specifier. ";
+		$t->assign('corpus', $corpus);
+		if($view=='admin') {
+			$corp_file = $CFG->corpusdir.'/'.$_GET['id'].'/tei/corpus.xml';
+			if(file_exists($corp_file)) {
+				$t->assign('corpus_file', $corp_file);
+				$teiloc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$_GET['id'].'/tei';
+				$t->assign('teiloc', $teiloc);
+				$teisummaryloc = $teiloc.'/summary';
+				$t->assign('teisummaryloc', $teisummaryloc);
+			}
+			$dates_file = $CFG->corpusdir.'/'.$_GET['id'].'/assertions/dates.xml';
+			if(file_exists($dates_file)) {
+				$t->assign('dates_file', $dates_file);
+			}
+		} else if($view=='docs') {
+			$docs = getCorpusDocs($CFG,$_GET['id'], $_GET['o'], '<em>('.$corpus['medianDocDate'].'?)</em>');
+			if($docs) {
+				$t->assign('documents', $docs);
+			} else if($opmsg){
+				$errmsg = "Problem getting Corpus documents: ".$opmsg;
+			}
+		}
 	}
 }
-
 
 if($errmsg!="")
 	$t->assign('errmsg', $errmsg);
 
-$t->display('corpus.tpl');
+if($view=='docs') {
+	$t->display('corpus_docs.tpl');
+} else if($view=='pnames') {
+	$t->display('corpus_persnames.tpl');
+} else if($view=='cnames') {
+	$t->display('corpus_clannames.tpl');
+} else if($view=='admin') { 
+	$t->display('corpus_admin.tpl');
+} else {
+	$t->assign('heading', 'Cannot recover rfrom internal error.');
+	$t->assign('message', 'Internal error logic error in corpus module - please report to BPS team!');
+	$t->display('error.tpl');
+
+}
 
 ?>
 

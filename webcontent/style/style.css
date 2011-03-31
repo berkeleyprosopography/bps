@@ -173,6 +173,32 @@ em{
 	top:12px;
 }
 
+
+#subNavBar{
+	position: relative;
+	padding-bottom:8px;
+}
+
+#subNavBarLinks{
+	position: relative;
+	top:4px;
+	padding:4px 8px;
+	background-color:lightblue;
+}
+
+#subNavBarLinks a{
+	color:#369;
+	font-weight:bold;
+	padding:0 4px;
+}
+
+#subNavBarLinks span.currNav{
+	color:#334;
+	font-weight:bold;
+	padding:0 4px;
+}
+
+
 /* ------------------------------------------------------- *
  * - Footer     ------------------------------------------ *
  * ------------------------------------------------------- */

@@ -1,4 +1,5 @@
 {include file="header.tpl"}
+{include file="corpus_header.tpl"}
 
 	{if !isset($corpus) }
 		<h1>Error: No corpus specified!</h1>
@@ -7,14 +8,20 @@
 		{if isset($errmsg) }
 			<h2>{$errmsg}</h2>
 		{else}
-			<p>Description:&nbsp:
-				<textarea id="D_{$corpus.id}" cols="40" rows="2"
-						onkeyup="enableElement('U_{$corpus.id}',true);setStatusP('')">
-					{$corpus.description}
-				</textarea>
-				<input disabled id="U_{$corpus.id}" type="button"
-						onclick="updateCorpus('{$corpus.id}','{$corpus.name}')" value=" Update " />
-			</p>
+			<table border="0" >
+				<tr><td class="corpus corpusdesc" style="padding:3px;">Description:</td></tr>
+				<tr><td class="corpus corpusdesc" width="320px">
+						 <textarea id="D_{$corpus.id}" cols="60" rows="3"
+									onkeyup="enableElement('U_{$corpus.id}',true);setStatusP('')"
+									>{$corpus.description}</textarea>
+					 </td>
+				</tr>
+				<tr><td class="corpus" style="text-align:right;padding:3px;">
+							<input disabled id="U_{$corpus.id}" type="button"
+									onclick="updateCorpus('{$corpus.id}','{$corpus.name}')" value=" Update " />
+					 </td>
+				</tr>
+			</table>
 			<p>&nbsp;</p>
 			{if isset($corpus_file) }
 			<p><strong>
@@ -22,10 +29,9 @@
 					<a href="{$teiloc}">View tei</a>&nbsp;&nbsp;
 					<a href="{$teisummaryloc}">Validate and view summary.</a>&nbsp;&nbsp;
 				</strong>
-				{if isset($canUpdateCorpus) }
 					<input id="processTEIBtn" type="button"
-									onclick="processTEI('{$corpus.id}')" value="  Rebuild corpus from TEI  " />
-				{/if}
+									onclick="processTEI('{$corpus.id}')" i
+									value="  Rebuild corpus from TEI  " />
 			</p>
 		{/if}
 		<div class="form_row">
