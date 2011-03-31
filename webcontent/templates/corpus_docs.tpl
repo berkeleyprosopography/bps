@@ -11,14 +11,13 @@
 			<h1><i>No</i> Documents (yet) in Corpus</h1>
 		{else}
 			<h1>Showing {$documents|@count} Documents in Corpus: {$corpus.name}</h1>
-			<div class="docs_row">
-				<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
+				<table class="" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
-						<td class="title" width="200px">
+						<td class="title" width="160px">
 							<a href="/corpora/corpus?id={$corpus.id}&o=altId">Document</a>
 						</td>
-						<td class="title" width="200px">Publication</td>
-						<td class="title" width="400px">Notes</td>
+						<td class="title" width="160px">Publication</td>
+						<td class="title" width="300px">Notes</td>
 						<td class="title" width="100px">
 							<a href="/corpora/corpus?id={$corpus.id}&o=date">Date</a>
 					</td>
@@ -33,7 +32,6 @@
 						</tr>
 					{/section}
 				</table>
-			</div>
 		{/if}
 	{/if}
 	<p>&nbsp;</p>
