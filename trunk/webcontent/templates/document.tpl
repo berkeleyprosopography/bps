@@ -85,7 +85,7 @@
 									</td>
 								{/section}
 							</tr>
-						{else if isset($workspaceID)}
+						{elseif isset($workspaceID)}
 							<tr>
 								<td class="nrad" colspan="3">
 									{if $nrads[nrad].activityRoleIsFamily}

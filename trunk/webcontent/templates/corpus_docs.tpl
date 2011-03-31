@@ -1,112 +1,17 @@
 {include file="header.tpl"}
+{include file="corpus_header.tpl"}
 
-	<h1>Corpus Details</h1>
-{if isset($errmsg) }
-	<h2>{$errmsg}</h2>
+{if !isset($corpus) }
+	<h1>Error: No corpus specified!</h1>
 {else}
-	{if !isset($corpus) }
-		<p>No corpus specified!</p>
+	{if isset($errmsg) }
+		<h2>{$errmsg}</h2>
 	{else}
-		<p>&nbsp;</p>
-		<table border="0" cellspacing="0" cellpadding="5px" width="100%">
-			<tr>
-				 <td class="title 2" width="200px">Corpus Name</td>
-				 <td class="title corpusndocs" width="80px"># Docs</td>
-				 <td class="title" width="320px">Description</td>
-				{if isset($canUpdateCorpus) }
-				 <td class="title" width="100px">&nbsp;</td>
-				{/if}
-			</tr>
-		</table>
-		<div class="form_row">
-			<form class="form_row" method="post">
-				<input type="hidden" name="id" value="{$corpus.id}" />
-				<table class="form_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
-					<tr>
-						<td class="corpus corpusname 2" width="200px">{$corpus.name}</td>
-						<td class="corpus corpusndocs" width="80px">{$corpus.nDocs}</td>
-					{if !isset($canUpdateCorpus) }
-						<td class="corpus corpusdesc 2" width="320px">
-							{$corpus.description}
-						</td>
-					{else}
-						<td class="corpus corpusdesc 2" width="320px">
-							<textarea id="D_{$corpus.id}" cols="40" rows="2"
-								onkeyup="enableElement('U_{$corpus.id}',true);setStatusP('')"
-								>{$corpus.description}</textarea>
-						</td>
-						<td class="corpus" width="100px">
-							<input disabled id="U_{$corpus.id}" type="button"
-								onclick="updateCorpus('{$corpus.id}','{$corpus.name}')" value=" Update " />
-						</td>
-					{/if}
-					</tr>
-				</table>
-			</form>
-		</div>
-		<p>&nbsp;</p>
-		{if isset($corpus_file) }
-		<p><strong>
-			Corpus file has been uploaded. 
-			  <a href="{$teiloc}">View tei</a>&nbsp;&nbsp;
-			  <a href="{$teisummaryloc}">Validate and view summary.</a>&nbsp;&nbsp;
-			</strong>
-			{if isset($canUpdateCorpus) }
-				<input id="processTEIBtn" type="button"
-								onclick="processTEI('{$corpus.id}')" value="  Rebuild corpus from TEI  " />
-			{/if}
-		</p>
-		{/if}
-		{if isset($canUpdateCorpus) }
-		<div class="form_row">
-			<form enctype="multipart/form-data" action="../../api/uploadTEI.php" method="POST">
-				<!-- MAX_FILE_SIZE must precede the file input field -->
-				<input type="hidden" name="id" value="{$corpus.id}" />
-				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesizeTEI}" />
-				<!-- Name of input element determines name in $_FILES array -->
-				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
-					<tr height="40px">
-						<td class="corpus corpusname 2" width="200px">
-						   Upload a {if isset($corpus_file)}<i>new</i> {/if}TEI Corpus file:</td>
-						<td colspan="2" class="corpus corpusdesc 2" >
-							<input name="teifile" type="file" size="44" />
-							&nbsp;<input type="submit" value="Upload File" />
-						</td>
-					</tr>
-				</table>
-			</form>
-			{if isset($dates_file) }
-			<p><strong>
-				Corpus Dates file has been uploaded. 
-				</strong>
-					<input id="processDatesBtn" type="button"
-									onclick="processDates('{$corpus.id}')" 
-									value="  Process Dates assertions  " />
-			</p>
-			{/if}
-			<form enctype="multipart/form-data" action="../../api/uploadDatesAssertions.php" method="POST">
-				<!-- MAX_FILE_SIZE must precede the file input field -->
-				<input type="hidden" name="id" value="{$corpus.id}" />
-				<input type="hidden" name="MAX_FILE_SIZE" value="{$maxfilesizeAssertions}" />
-				<!-- Name of input element determines name in $_FILES array -->
-				<table class="form_row" border="0" cellspacing="0" cellpadding="4px">
-					<tr height="40px">
-						<td class="corpus corpusname 2" width="200px">
-						   Upload a {if isset($dates_file)}<i>new</i> {/if}Corpus Dates file:</td>
-						<td colspan="2" class="corpus corpusdesc 2" >
-							<input name="datesfile" type="file" size="44" />
-							&nbsp;<input type="submit" value="Upload File" />
-						</td>
-					</tr>
-				</table>
-			</form>
-		</div>
-		{/if}
+		{if empty($documents)}
+			<h1><i>No</i> Documents (yet) in Corpus</h1>
+		{else}
+			<h1>Showing {$documents|@count} Documents in Corpus: {$corpus.name}</h1>
 			<div class="docs_row">
-				{if empty($documents)}
-				<h2><i>No</i> Documents (yet) in Corpus</h2>
-				{else}
-				<h2>{$documents|@count} Documents in Corpus:</h2>
 				<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
 						<td class="title" width="200px">
@@ -128,8 +33,8 @@
 						</tr>
 					{/section}
 				</table>
-				{/if}
 			</div>
+		{/if}
 	{/if}
 	<p>&nbsp;</p>
 	{if isset($opmsg) }
