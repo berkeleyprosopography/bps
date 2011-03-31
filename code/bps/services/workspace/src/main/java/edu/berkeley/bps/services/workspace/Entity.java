@@ -9,7 +9,7 @@ import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
 
 @XmlAccessorType(XmlAccessType.NONE)
-public class Entity {
+public abstract class Entity {
 
 	@XmlElement
 	protected NameRoleActivity originalNRAD = null;
@@ -67,6 +67,9 @@ public class Entity {
 	public Document getOriginalDocument() {
 		return originalNRAD.getDocument();
 	}
+	
+	public abstract int getNumQualifiers();
+
 
 	public String toString() {
 		return displayName;

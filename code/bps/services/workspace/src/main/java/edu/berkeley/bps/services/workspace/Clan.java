@@ -38,4 +38,10 @@ public class Clan extends Entity {
 		super( nrad );
 	}
 
+	@Override
+	public int getNumQualifiers() {
+		// Clans are not (yet) qualified in any way.
+		return 0;
+	}
+
 }
