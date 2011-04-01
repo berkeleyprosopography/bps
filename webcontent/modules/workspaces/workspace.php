@@ -345,8 +345,16 @@ if(!isset($user_id)) {
 }
 
 
-if($errmsg!="")
-	$t->assign('errmsg', $errmsg);
+if($errmsg!="") {
+	if(!$workspace) {
+		$t->assign('heading', 'Cannot show workspace');
+		$t->assign('message', $errmsg);
+		$t->display('error.tpl');
+		die();
+	} else {
+		$t->assign('errmsg', $errmsg);
+	}
+}
 
 if($view=='docs') {
 	$t->display('workspace_docs.tpl');

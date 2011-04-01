@@ -31,7 +31,6 @@ Patrick Schmitz, Semantic Services Architect, IST/Data Services, U.C. Berkeley<b
 Dr. Laurie Pearce, Near Eastern Studies, U.C. Berkeley<br />
 Prof. Niek Veldhuis, Near Eastern Studies, U.C. Berkeley<br />
 Prof. Steve Tinney, Near Eastern Languages and Civilizations, U. Penn<br />
-Pierre Tchetgen, School of Information, U.C. Berkeley<br />
 </p>
 
 </div>
