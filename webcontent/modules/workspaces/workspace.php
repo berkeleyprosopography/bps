@@ -36,6 +36,18 @@ $t->assign("style_block", $style_block);
 
 $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
+if(!isset($_GET['view'])) {
+	$view = 'docs';
+} else {
+	$view = $_GET['view'];
+	if($view!='docs'&&$view!='people'&&$view!='clans'&&$view!='admin')
+		$view = 'docs';
+}
+$t->assign("currSubNav", $view);
+
+if($view!='admin') {
+	$script_block = '';
+} else {
 $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
 <script type="text/javascript" src="/scripts/workspace.js"></script>
@@ -175,6 +187,7 @@ function setBuildingP(str) {
 
 </script>
 ';
+}
 
 $t->assign("script_block", $script_block);
 
@@ -299,28 +312,35 @@ if(!isset($user_id)) {
 	$errmsg = "You must be logged in to access your workspace(s).";
 } else {
 	$workspace = getWorkspace($CFG,$user_id, $_GET['wid']);
-	if($workspace && isset($workspace['importedCorpusId'])){
-		$workspace['nDocs'] = 0;
-		$docs = getWorkspaceDocs($CFG,$workspace['id'], $_GET['o'], '<em>('.$workspace['medianDocDate'].'?)</em>');
-		if($docs) {
-			$workspace['nDocs'] = count($docs);
-			$t->assign('documents', $docs);
-		} else if($opmsg){
-			$errmsg = "Problem getting Workspace documents: ".$opmsg;
+	if(!$workspace) {
+		if($opmsg){
+			$errmsg = "Problem getting Workspace details: ".$opmsg;
+		} else {
+			$errmsg = "Bad or illegal workspace specifier. ";
 		}
-		$t->assign('workspace', $workspace);
-	} else if($workspace){
-		$corpora = getCorpora($CFG);
-		if($corpora) {
-			$t->assign('corpora', $corpora);
-		} else if($opmsg){
-			$errmsg = "Problem getting Corpora list: ".$opmsg;
-		}
-		$t->assign('workspace', $workspace);
-	} else if($opmsg){
-		$errmsg = "Problem getting Workspace details: ".$opmsg;
 	} else {
-		$errmsg = "Bad or illegal workspace specifier. ";
+	 	if(isset($workspace['importedCorpusId'])){
+			if($view=='docs') {
+				$workspace['nDocs'] = 0;
+				$docs = getWorkspaceDocs($CFG,$workspace['id'], $_GET['o'], '<em>('.$workspace['medianDocDate'].'?)</em>');
+				if($docs) {
+					$workspace['nDocs'] = count($docs);
+					$t->assign('documents', $docs);
+				} else if($opmsg){
+					$errmsg = "Problem getting Workspace documents: ".$opmsg;
+				}
+			}
+		} else {
+			if($view=='admin') {
+				$corpora = getCorpora($CFG);
+				if($corpora) {
+					$t->assign('corpora', $corpora);
+				} else if($opmsg){
+					$errmsg = "Problem getting Corpora list: ".$opmsg;
+				}
+			}
+		}
+		$t->assign('workspace', $workspace);
 	}
 }
 
@@ -328,7 +348,20 @@ if(!isset($user_id)) {
 if($errmsg!="")
 	$t->assign('errmsg', $errmsg);
 
-$t->display('workspace.tpl');
+if($view=='docs') {
+	$t->display('workspace_docs.tpl');
+} else if($view=='people') {
+	$t->display('workspace_people.tpl');
+} else if($view=='clans') {
+	$t->display('workspace_clans.tpl');
+} else if($view=='admin') { 
+	$t->display('workspace_admin.tpl');
+} else {
+	$t->assign('heading', 'Cannot recover rfrom internal error.');
+	$t->assign('message', 'Internal error logic error in corpus module - please report to BPS team!');
+	$t->display('error.tpl');
+
+}
 
 ?>
 
