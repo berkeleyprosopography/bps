@@ -136,8 +136,14 @@ em{
 	bottom:5px;
 	right:41px;
 	color:#FFF;
-	font-size:93%;/*12px*/
+	font-size:100%;
 }
+
+#headerBarLinks a, #headerBarLinks a:visited{
+	color:#88bbff;
+	font-weight:bold;
+}
+
 
 #navBar{
 	position: relative;
