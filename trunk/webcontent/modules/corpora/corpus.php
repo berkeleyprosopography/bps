@@ -64,8 +64,8 @@ if($view=='docs') {
 } else if($view!='admin') {
 $script_block = '
 <script>
-function filterNames(corpId) {
-	var url = "/corpora/corpus?id="+corpId+"&view='.$view.'";
+function filterNames(corpId,orderBy) {
+	var url = "/corpora/corpus?id="+corpId+"&view='.$view.'&o="+orderBy;
 	var roleFilterSelEl = document.getElementById("RoleFilterSel");
 	var index = roleFilterSelEl.selectedIndex;
 	var roleFilter = roleFilterSelEl.options[index].value;
@@ -277,7 +277,7 @@ function getCorpusDocs($CFG,$id,$order,$medianDocDate) {
 	return false;
 }
 
-function getCorpusNames($CFG,$id,$roleFilter,$genderFilter,$typeFilter) {
+function getCorpusNames($CFG,$id,$roleFilter,$genderFilter,$typeFilter,$orderBy) {
 	global $opmsg;
 
 	$rest = new RESTclient();
@@ -293,6 +293,9 @@ function getCorpusNames($CFG,$id,$roleFilter,$genderFilter,$typeFilter) {
 	}
 	if(!empty($genderFilter)) {
 		$url .= ($first?'?':'&')."gender=".$genderFilter;
+	}
+	if(!empty($orderBy)) {
+		$url .= ($first?'?':'&')."o=".$orderBy;
 	}
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
@@ -381,11 +384,14 @@ if(!isset($_GET['id'])) {
 		} else if($view=='pnames') {
 			$roleFilter = $_GET['role'];
 			$genderFilter = $_GET['gender'];
-			$names = getCorpusNames($CFG,$corpusID, $roleFilter, $genderFilter, 'person');
+			$orderBy = $_GET['o'];
+			$names = getCorpusNames($CFG,$corpusID, $roleFilter, $genderFilter,
+																'person',$orderBy);
 			if(isset($names)) {
 				$t->assign('names', $names);
 				$t->assign('type', 'Person');
 				$t->assign('view', $view);
+				$t->assign('orderBy', $orderBy);
 				if(!empty($roleFilter))
 					$t->assign('roleFilter', $roleFilter);
 				if(!empty($genderFilter))
@@ -402,11 +408,13 @@ if(!isset($_GET['id'])) {
 		} else if($view=='cnames') {
 			$roleFilter = $_GET['role'];
 			$genderFilter = $_GET['gender'];
-				$t->assign('view', $view);
-			$names = getCorpusNames($CFG,$corpusID, $_GET['role'], null, 'clan');
+			$t->assign('view', $view);
+			$orderBy = $_GET['o'];
+			$names = getCorpusNames($CFG,$corpusID, $_GET['role'], null, 'clan',$orderBy);
 			if(isset($names)) {
 				$t->assign('names', $names);
 				$t->assign('type', 'Clan');
+				$t->assign('orderBy', $orderBy);
 				if(!empty($roleFilter))
 					$t->assign('roleFilter', $roleFilter);
 				$roles = getCorpusRoles($CFG,$corpusID);

@@ -39,7 +39,7 @@
 			<table class="nrads_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 				<tr>
 					<td class="title" width="200px">Name</td>
-					<td class="title" width="200px">Normal Form</td>
+					<td class="title" width="200px">Normalized Form</td>
 					<td class="title" width="140px">Role</td>
 					<td class="title" width="140px">Activity</td>
 					<td class="title" width="140px">XML ID</td>

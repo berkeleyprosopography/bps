@@ -660,11 +660,11 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public List<Name> getNames() {
-		return getNames(null, null, null, null);
+		return getNames(null, null, null, "name", null);
 	}
 	
 	public List<Name> getNames(String typeFilter, ActivityRole roleFilter, 
-				String genderFilter, Connection dbConn) {
+				String genderFilter, String orderBy, Connection dbConn) {
 		List<Name> list;
 		if(typeFilter==null && roleFilter==null && genderFilter==null) {
 			list = new ArrayList<Name>(namesByName.values());
@@ -680,6 +680,21 @@ public class Corpus extends CachedEntity {
 		} else {	// need to run a query to figure out Names by role
 			list = Name.getFilteredNames(this, typeFilter, roleFilter, genderFilter, dbConn);
 		}
+		if(orderBy==null)	// default to "name";
+			orderBy="name";
+		Comparator<Name> comp = null;
+		if("name".equals(orderBy)) { 
+			comp = new Name.NameComparator();
+		} else if("gender".equals(orderBy)) {
+			comp = new Name.GenderComparator();
+		} else if("docCount".equals(orderBy)) {
+			comp = new Name.DocCountComparator();
+		} else if("totalCount".equals(orderBy)) {
+			comp = new Name.TotalCountComparator();
+		} else {
+			throw new RuntimeException("Unknown orderBy variant: "+orderBy);
+		}
+		Collections.sort(list, comp);		
 		return list;
 	}
 	

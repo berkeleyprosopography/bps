@@ -36,16 +36,29 @@
 							Unknown</option>
 				</select>
 			{/if}
-			<input id="goBtn" type="button" value="Go" onclick="filterNames({$corpusID});" />
+			<input id="goBtn" type="button" value="Go"
+							onclick="filterNames({$corpusID},'{$orderBy}');" />
 		</p>
 		<table class="nrads_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 			<tr>
-				<td class="title" width="200px">Name</td>
+				<td class="title" width="200px">
+					{if $orderBy!='name'}<a href="#" 
+						onclick="javascript:filterNames({$corpusID},'name');return false;">{/if}
+						Name{if $orderBy!='name'}</a>{/if}</td>
 				{if $type!='Clan'}
-					<td class="title" width="100px">Gender</td>
+					<td class="title" width="100px">
+					{if $orderBy!='gender'}<a href="#" 
+						onclick="javascript:filterNames({$corpusID},'gender');return false;">{/if}
+						Gender{if $orderBy!='gender'}</a>{/if}</td>
 				{/if}
-				<td class="title" width="140px"># Documents</td>
-				<td class="title" width="140px">Total Instances</td>
+				<td class="title" width="140px">
+					{if $orderBy!='docCount'}<a href="#" 
+						onclick="javascript:filterNames({$corpusID},'docCount');return false;">{/if}
+						# Documents{if $orderBy!='docCount'}</a>{/if}</td>
+				<td class="title" width="140px">
+					{if $orderBy!='totalCount'}<a href="#" 
+						onclick="javascript:filterNames({$corpusID},'totalCount');return false;">{/if}
+						Total Instances{if $orderBy!='totalCount'}</a>{/if}</td>
 			</tr>
 			{section name=iname loop=$names}
 				<tr>
