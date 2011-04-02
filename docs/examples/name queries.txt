@@ -1,0 +1,48 @@
+select n.name, count(*) from name n, name_role_activity_doc nr 
+where n.id=nr.name_id AND n.corpus_id=19 group by n.id
+
+select distinct name_id, document_id from name_role_activity_doc order by name_id limit 20;
+
+select T.name_id, count(*) nDocs from
+  (select distinct name_id, document_id from name_role_activity_doc) AS T
+	group by T.name_id;
+
+
+select n.id, n.name, n.nametype, n.gender, n.notes, n.normal, n.name, 
+count(*) totalCount, T2.nDocs docCount from name n, name_role_activity_doc nr,
+(select T1.name_id, count(*) nDocs from
+  (select distinct name_id, document_id from name_role_activity_doc) AS T1
+	group by T1.name_id) AS T2
+where n.id=nr.name_id AND n.corpus_id=19 and n.id=T2.name_id group by n.id 
+ORDER BY n.normal;
+
+SELECT n.id, n.name, n.nametype, n.gender, n.notes, n.normal,
+count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,
+(SELECT T1.name_id, count(*) nDocs FROM
+(SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1
+GROUP BY T1.name_id) AS T2
+WHERE n.id=nr.name_id AND n.corpus_id=19 AND n.id=T2.name_id GROUP BY n.id 
+ORDER BY n.normal;
+
+SELECT n.name, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,
+count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,
+(SELECT T1.name_id, count(*) nDocs FROM
+(SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1
+WHERE T1.name_id =23499 GROUP BY T1.name_id) AS T2
+WHERE n.id=nr.name_id AND n.id=T2.name_id AND n.id=23499 
+GROUP BY n.id ORDER BY n.normal;
+
+SELECT n.id, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,
+count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,
+(SELECT T1.name_id, count(*) nDocs FROM
+(SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1
+GROUP BY T1.name_id) AS T2
+WHERE n.id=nr.name_id AND n.id=T2.name_id AND n.corpus_id=19 
+AND n.name='Anu-balassu-iqbi' GROUP BY n.id ORDER BY n.normal;
+
+SELECT distinct n.id from name n, name_role_activity_doc nr
+where n.id=nr.name_id AND n.corpus_id=19 AND nr.act_role_id=409;
+
+SELECT distinct n.id from name n, name_role_activity_doc nr
+where n.id=nr.name_id AND n.corpus_id=19 AND n.gender='female'
+AND nr.act_role_id=407;
