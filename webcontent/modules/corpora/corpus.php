@@ -41,6 +41,7 @@ form.form_row  { padding:0px; margin:2px;}
 div.form_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
 div.docs_row  { padding:5px 0px 5px 0px; border-bottom: 1px solid black; }
 td.document { font-weight:bold; }
+p.nav-right { float:right; }
 </style>";
 
 $t->assign("style_block", $style_block);
@@ -58,8 +59,29 @@ if(!isset($_GET['view'])) {
 }
 $t->assign("currSubNav", $view);
 
-if($view!='admin') {
+if($view=='docs') {
 	$script_block = '';
+} else if($view!='admin') {
+$script_block = '
+<script>
+function filterNames(corpId) {
+	var url = "/corpora/corpus?id="+corpId+"&view='.$view.'";
+	var roleFilterSelEl = document.getElementById("RoleFilterSel");
+	var index = roleFilterSelEl.selectedIndex;
+	var roleFilter = roleFilterSelEl.options[index].value;
+	if(roleFilter!="All")
+		url += "&role="+roleFilter;
+	var genderFilterSelEl = document.getElementById("GenderFilterSel");
+	if(genderFilterSelEl != null ) {
+		index = genderFilterSelEl.selectedIndex;
+		var genderFilter = genderFilterSelEl.options[index].value;
+		if(genderFilter!="All")
+			url += "&gender="+genderFilter;
+	}
+	//alert( "Navigating to: " + url );
+	window.location.href = url;
+}
+</script>';
 } else {
 $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
@@ -112,7 +134,7 @@ function processTEIRSC() {
 			// Maybe this should change the cursor or something
 			setStatusP("Corpus rebuilt.");
 			//alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			window.location.reload();
+			//window.location.reload();
 		} else {
 			alert( "Error encountered when trying to rebuild corpus.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
@@ -142,7 +164,7 @@ function processDatesRSC() {
 			// Maybe this should change the cursor or something
 			setStatusP("Date Assertions processed.");
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			window.location.reload();
+			//window.location.reload();
 		} else {
 			alert( "Error encountered when trying to process date assertions.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
@@ -255,10 +277,78 @@ function getCorpusDocs($CFG,$id,$order,$medianDocDate) {
 	return false;
 }
 
+function getCorpusNames($CFG,$id,$roleFilter,$genderFilter,$typeFilter) {
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id."/names";
+	$first = true;
+	if(!empty($typeFilter)) {
+		$url .= "?type=".$typeFilter;
+		$first = false;
+	}
+	if(!empty($roleFilter)) {
+		$url .= ($first?'?':'&')."role=".$roleFilter;
+		$first = false;
+	}
+	if(!empty($genderFilter)) {
+		$url .= ($first?'?':'&')."gender=".$genderFilter;
+	}
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServNamesOutput = $rest->getResponse();
+		$results = json_decode($ServNamesOutput, true);
+		$names = array();
+		foreach($results as &$result) {
+			$nameObj = &$result['name'];
+			array_push($names, array(	'id' => $nameObj['id'], 
+				'name' => $nameObj['name'], 'gender' => $nameObj['gender'],
+				'nametype' => $nameObj['nametype'], 'docCount' => $nameObj['usedInDocCount'],
+				'totalCount' => $nameObj['usedTotalCount']
+			));
+			// Supposed to help with efficiency (dangling refs?)
+			unset($result);
+			unset($nameObj);
+		}
+		return $names;
+	}
+	$opmsg = $rest->getError();
+	return null;
+}
+
+
+function getCorpusRoles($CFG,$cid){
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/activityRoles";
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServRolesOutput = $rest->getResponse();
+		$results = json_decode($ServRolesOutput, true);
+		$roles = array();
+		foreach($results as &$result) {
+			$roleObj = &$result['actrole'];
+			array_push($roles, $roleObj['name']); 
+			// Supposed to help with efficiency (dangling refs?)
+			unset($result);
+			unset($roleObj);
+		}
+		return $roles;
+	}
+	$opmsg = $rest->getError();
+	return false;
+}
+
 if(!isset($_GET['id'])) {
 	$errmsg = "Missing corpus specifier. ";
 } else {
-	$corpus = getCorpus($CFG,$_GET['id']);
+	$corpusID = $_GET['id'];
+	$corpus = getCorpus($CFG,$corpusID);
 	if(!$corpus){
 		if($opmsg){
 			$errmsg = "Problem getting Corpus details: ".$opmsg;
@@ -266,26 +356,67 @@ if(!isset($_GET['id'])) {
 			$errmsg = "Bad or illegal corpus specifier. ";
 		}
 	} else {
+		$t->assign('corpusID', $corpusID);
 		$t->assign('corpus', $corpus);
 		if($view=='admin') {
-			$corp_file = $CFG->corpusdir.'/'.$_GET['id'].'/tei/corpus.xml';
+			$corp_file = $CFG->corpusdir.'/'.$corpusID.'/tei/corpus.xml';
 			if(file_exists($corp_file)) {
 				$t->assign('corpus_file', $corp_file);
-				$teiloc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$_GET['id'].'/tei';
+				$teiloc = $CFG->wwwroot.$CFG->svcsbase.'/corpora/'.$corpusID.'/tei';
 				$t->assign('teiloc', $teiloc);
 				$teisummaryloc = $teiloc.'/summary';
 				$t->assign('teisummaryloc', $teisummaryloc);
 			}
-			$dates_file = $CFG->corpusdir.'/'.$_GET['id'].'/assertions/dates.xml';
+			$dates_file = $CFG->corpusdir.'/'.$corpusID.'/assertions/dates.xml';
 			if(file_exists($dates_file)) {
 				$t->assign('dates_file', $dates_file);
 			}
 		} else if($view=='docs') {
-			$docs = getCorpusDocs($CFG,$_GET['id'], $_GET['o'], '<em>('.$corpus['medianDocDate'].'?)</em>');
+			$docs = getCorpusDocs($CFG,$corpusID, $_GET['o'], '<em>('.$corpus['medianDocDate'].'?)</em>');
 			if($docs) {
 				$t->assign('documents', $docs);
 			} else if($opmsg){
 				$errmsg = "Problem getting Corpus documents: ".$opmsg;
+			}
+		} else if($view=='pnames') {
+			$roleFilter = $_GET['role'];
+			$genderFilter = $_GET['gender'];
+			$names = getCorpusNames($CFG,$corpusID, $roleFilter, $genderFilter, 'person');
+			if(isset($names)) {
+				$t->assign('names', $names);
+				$t->assign('type', 'Person');
+				$t->assign('view', $view);
+				if(!empty($roleFilter))
+					$t->assign('roleFilter', $roleFilter);
+				if(!empty($genderFilter))
+					$t->assign('genderFilter', $genderFilter);
+				$roles = getCorpusRoles($CFG,$corpusID);
+				if($roles) {
+					$t->assign('roles', $roles);
+				} else if($opmsg){
+					$errmsg = "Problem getting Corpus roles: ".$opmsg;
+				}
+			} else if($opmsg){
+				$errmsg = "Problem getting Corpus names: ".$opmsg;
+			}
+		} else if($view=='cnames') {
+			$roleFilter = $_GET['role'];
+			$genderFilter = $_GET['gender'];
+				$t->assign('view', $view);
+			$names = getCorpusNames($CFG,$corpusID, $_GET['role'], null, 'clan');
+			if(isset($names)) {
+				$t->assign('names', $names);
+				$t->assign('type', 'Clan');
+				if(!empty($roleFilter))
+					$t->assign('roleFilter', $roleFilter);
+				$roles = getCorpusRoles($CFG,$corpusID);
+				if($roles) {
+					$t->assign('roles', $roles);
+				} else if($opmsg){
+					$errmsg = "Problem getting Corpus roles: ".$opmsg;
+				}
+			} else if($opmsg){
+				$errmsg = "Problem getting Corpus names: ".$opmsg;
 			}
 		}
 	}

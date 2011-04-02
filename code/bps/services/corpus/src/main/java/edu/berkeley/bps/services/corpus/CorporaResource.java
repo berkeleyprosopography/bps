@@ -1052,7 +1052,8 @@ public class CorporaResource extends BaseResource {
 	@Produces({"application/xml", "application/json"})
 	@Path("{id}/names")
 	@Wrapped(element="names")
-	public List<Name> getNames(@Context ServletContext srvc, @PathParam("id") int id) {
+	public List<Name> getNames(@Context ServletContext srvc, @PathParam("id") int id,
+			@Context UriInfo ui) {
 		List<Name> nameList = null;
 		try {
 			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
@@ -1060,10 +1061,49 @@ public class CorporaResource extends BaseResource {
 				throw new WebApplicationException( 
 						Response.status(
 								Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
-
 			}
-			//activityList = ActivityRole.ListAllInCorpus(dbConn, corpus);
-			nameList = corpus.getNames();
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			String typeFilterParam = queryParams.getFirst("type");
+			if(typeFilterParam!=null) {
+				try {
+					typeFilterParam = typeFilterParam.trim();
+					int gender = Name.NameTypeStringToValue(typeFilterParam);
+				} catch( IllegalArgumentException iae) {
+					throw new WebApplicationException( 
+						Response.status(
+							Response.Status.NOT_FOUND).entity(
+									"Unrecognized type filter: "+typeFilterParam).build());
+				}
+			}
+			String roleFilterParam = queryParams.getFirst("role");
+			ActivityRole roleFilter = null;
+			if(roleFilterParam!=null) {
+				roleFilter = corpus.findActivityRole(roleFilterParam.trim());
+				if(roleFilter==null) {
+					throw new WebApplicationException( 
+						Response.status(
+							Response.Status.NOT_FOUND).entity(
+									"Unrecognized role filter: "+roleFilterParam).build());
+				}
+			}
+			String genderFilterParam = queryParams.getFirst("gender");
+			if(genderFilterParam!=null) {
+				try {
+					genderFilterParam = genderFilterParam.trim();
+					int gender = Name.GenderStringToValue(genderFilterParam);
+				} catch( IllegalArgumentException iae) {
+					throw new WebApplicationException( 
+						Response.status(
+							Response.Status.NOT_FOUND).entity(
+									"Unrecognized gender filter: "+genderFilterParam).build());
+				}
+			}
+			if(typeFilterParam==null && roleFilter==null && genderFilterParam == null) {
+				nameList = corpus.getNames();
+			} else {
+				nameList = corpus.getNames(typeFilterParam, roleFilter, genderFilterParam, 
+										getServiceContext(srvc).getConnection());
+			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getNames(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);

@@ -2,6 +2,7 @@ package edu.berkeley.bps.services.corpus.sax;
 
 import java.sql.Connection;
 
+import org.jboss.resteasy.annotations.cache.Cache;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
@@ -10,6 +11,7 @@ import edu.berkeley.bps.services.common.hbtin.HBTIN_Constants;
 import edu.berkeley.bps.services.common.sax.StackedContentHandler;
 import edu.berkeley.bps.services.corpus.Activity;
 import edu.berkeley.bps.services.corpus.ActivityRole;
+import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.TEI_Constants;
@@ -121,6 +123,8 @@ public class DocumentContentHandler extends StackedContentHandler {
 	@Override
 	public void pop() {
 		if(!notADocument) {
+			// Ensure we have an id before we try to add to the caches, etc.
+			document.persist(dbConn, CachedEntity.DEEP_PERSIST);
 			corpus.addDocument(document);
 			if(!foundAltIDElement)
 				System.err.println("No AltIDElement for document!");

@@ -78,11 +78,16 @@ public class Name {
 	 */
 	private Name		normal;
 	
+	private int 		docCount;
+	private int 		totalCount;
+	
+	private HashMap<Integer, Integer> countsByDocId;
+	
 	/**
 	 * Create a new empty name.
 	 */
-	private Name() {
-		this(Name.nextID--, 0, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
+	protected Name() {
+		this(Name.nextID--, 0, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null, 0, 0);
 	}
 
 	/**
@@ -90,12 +95,16 @@ public class Name {
 	 * @param name A shorthand name for use in UI, etc.
 	 * @param description Any description useful to users.
 	 */
-	public Name( String name, Corpus corpus) {
-		this(Name.nextID--, corpus.getId(), name, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null);
+	protected Name( String name, Corpus corpus) {
+		this(Name.nextID--, corpus.getId(), name, NAME_TYPE_PERSON, GENDER_UNKNOWN, 
+				null, null, 0, 0);
 	}
 
-	public Name(int id, int corpusId, String name, String nametype, String gender, String notes, Name normal) {
-		this(id, corpusId, name, NameTypeStringToValue(nametype), GenderStringToValue(gender), notes, normal);
+	protected Name(int id, int corpusId, String name, String nametype, 
+			String gender, String notes, Name normal,
+			int docCount, int totalCount) {
+		this(id, corpusId, name, NameTypeStringToValue(nametype), 
+				GenderStringToValue(gender), notes, normal, docCount, totalCount);
 	}
 	/**
 	 * Ctor with all params - not generally used.
@@ -104,7 +113,9 @@ public class Name {
 	 * @param notes Researcher notes about this name.
 	 * @param normal Reference to the normalized form (null if this is the normal form)
 	 */
-	public Name(int id, int corpusId, String name, int nametype, int gender, String notes, Name normal) {
+	public Name(int id, int corpusId, String name, int nametype, 
+			int gender, String notes, Name normal,
+			int docCount, int totalCount) {
 		super();
 		this.id = id;
 		this.corpusId = corpusId;
@@ -113,6 +124,9 @@ public class Name {
 		this.gender = gender;
 		this.notes = notes;
 		this.normal = normal;
+		this.docCount = docCount;
+		this.totalCount = totalCount;
+		countsByDocId = new HashMap<Integer, Integer>();
 	}
 	
 	public Name cloneInCorpus(Connection dbConn, Corpus newCorpus) {
@@ -275,6 +289,34 @@ public class Name {
 	public void setNormal(Name normal) {
 		this.normal = normal;
 	}
+	
+	public void addCitation(int docId) {
+		Integer docCountInMap = countsByDocId.get(docId);
+		if(docCountInMap==null)
+			docCountInMap = 1;
+		else
+			docCountInMap++;
+		countsByDocId.put(docId, docCountInMap);
+		this.docCount = 0;
+		this.totalCount = 0;
+	}
+	
+	@XmlElement(name="usedInDocCount")
+	public int getDocCount() {
+		if(docCount==0) {
+			docCount = countsByDocId.keySet().size();
+		}
+		return docCount;
+	}
+
+	@XmlElement(name="usedTotalCount")
+	public int getTotalCount() {
+		if(totalCount==0) {
+			for(Integer perDocCount:countsByDocId.values())
+				totalCount += perDocCount;
+		}
+		return totalCount;
+	}
 
 	/**
 	 * @return Name.
@@ -304,8 +346,16 @@ public class Name {
 		// When we select them, we need to order by normal. 
 		// Assume null normal values sort first, and that there are no chains.
 		final String SELECT_BY_CORPUS_ID = 
-			"SELECT `id`, `name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id`"
-			+ "FROM `name` WHERE `corpus_id`=? ORDER BY normal";
+			//"SELECT `id`, `name`,`nametype`,`gender`,`notes`,`normal`"
+			//+ "FROM `name` WHERE `corpus_id`=? ORDER BY normal";
+			"SELECT n.id, n.name, n.nametype, n.gender, n.notes, n.normal, n.name," 
+			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
+			+" (SELECT T1.name_id, count(*) nDocs FROM"
+			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
+			+" GROUP BY T1.name_id) AS T2"
+			+" WHERE n.id=nr.name_id AND n.corpus_id=? AND n.id=T2.name_id GROUP BY n.id" 
+			+" ORDER BY n.normal";
+		
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
 			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
@@ -319,9 +369,10 @@ public class Name {
 			stmt.setInt(1, corpus_id);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				Name newName = new Name(rs.getInt("id"), rs.getInt("corpus_id"), 
+				Name newName = new Name(rs.getInt("id"), corpus_id, 
 						rs.getString("name"), rs.getString("nametype"), 
-						rs.getString("gender"), rs.getString("notes"), null);
+						rs.getString("gender"), rs.getString("notes"), null, 
+						rs.getInt("docCount"), rs.getInt("totalCount"));
 				int normalId = rs.getInt("normal");
 				if(normalId != 0) {
 					Name normal = nameMap.get(normalId);
@@ -343,6 +394,63 @@ public class Name {
 		}
 		return nameList;
 	}
+	
+	public static List<Name> getFilteredNames(Corpus corpus, String typeFilter, 
+			ActivityRole roleFilter, String genderFilter, Connection dbConn) {
+		ArrayList<Name> list = new ArrayList<Name>();
+		final String SELECT_BY_ROLE = 
+			"SELECT distinct n.id FROM name n, name_role_activity_doc nr"
+			+" WHERE n.id=nr.name_id AND n.corpus_id=? ";
+		final String TYPE_SUFFIX = " AND n.nametype=?";
+		final String GENDER_SUFFIX = " AND n.gender=?";
+		final String ACT_ROLE_SUFFIX = " AND nr.act_role_id=?";
+		StringBuilder sb = new StringBuilder(140);
+		sb.append(SELECT_BY_ROLE);
+		if(typeFilter!=null) {
+			sb.append(TYPE_SUFFIX);
+		}
+		if(roleFilter!=null) {
+			sb.append(ACT_ROLE_SUFFIX);
+		}
+		if(genderFilter!=null) {
+			sb.append(GENDER_SUFFIX);
+		}
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(sb.toString());
+			if(roleFilter!=null) {
+				sb.append(ACT_ROLE_SUFFIX);
+			}
+			stmt.setInt(1, corpus.getId());
+			int iNext = 2;
+			if(typeFilter!=null) {
+				stmt.setString(iNext++, typeFilter);
+			}
+			if(roleFilter!=null) {
+				stmt.setInt(iNext++, roleFilter.getId());
+			}
+			if(genderFilter!=null) {
+				stmt.setString(iNext, genderFilter);
+			}
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				Name newName = corpus.findName(rs.getInt("id"));
+				if(newName==null)
+					throw new RuntimeException(
+							"Name.getFilteredNames got name: "+rs.getInt("id")
+							+" from DB, that corpus: "+corpus.getName()+" cannot find!");
+				list.add(newName);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+			
+		return list;
+	}
+
 	
 	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
 		final String DELETE_ALL = 
@@ -377,7 +485,7 @@ public class Name {
 			String name, int nametype, int gender, String notes, Name normal) {
 		final String myName = ".CreateAndPersist: ";
 		int newId = persistNew(dbConn, corpusId, name, nametype, gender, notes, normal);
-		Name newName = new Name(newId, corpusId, name, nametype, gender, notes, normal); 
+		Name newName = new Name(newId, corpusId, name, nametype, gender, notes, normal, 0, 0); 
 		return newName;
 	}
 	
@@ -470,30 +578,41 @@ public class Name {
 	public static Name FindById(Connection dbConn, int id) {
 		final String myName = ".FindById: ";
 		final String SELECT_STMT = 
-			"SELECT `name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id` FROM `name`"
-			+" WHERE `id`=?";
+			//"SELECT `name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id` FROM `name`"
+			//+" WHERE `id`=?";
+			"SELECT n.name, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,"
+			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
+			+" (SELECT T1.name_id, count(*) nDocs FROM"
+			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
+			+" WHERE T1.name_id =? GROUP BY T1.name_id) AS T2"
+			+" WHERE n.id=nr.name_id AND n.id=T2.name_id AND n.id=?" 
+			+" GROUP BY n.id ORDER BY n.normal";
 
 		Name toFind = null;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_STMT);
 			stmt.setInt(1, id);
+			stmt.setInt(2, id);
 			ResultSet rs = stmt.executeQuery();
 			int normalId = 0;
 			if(rs.next()){
 				toFind = new Name(id, rs.getInt("corpus_id"), rs.getString("name"), 
 									rs.getString("nametype"), rs.getString("gender"),
-									rs.getString("notes"), null);
+									rs.getString("notes"), null,
+									rs.getInt("docCount"), rs.getInt("totalCount"));
 				normalId = rs.getInt("normal");
 			}
 			rs.close();
 			if(normalId!=0) {
 				stmt.setInt(1, normalId);
+				stmt.setInt(2, normalId);
 				rs = stmt.executeQuery();
 				if(rs.next()){
 					// Normal forms do not chain, so we need not recurse.
 					Name normalForm = new Name(normalId, rs.getInt("corpus_id"), rs.getString("name"), 
 										rs.getString("nametype"), rs.getString("gender"),
-										rs.getString("notes"), null);
+										rs.getString("notes"), null,
+										rs.getInt("docCount"), rs.getInt("totalCount"));
 					toFind.setNormal(normalForm);
 				}
 				rs.close();
@@ -539,20 +658,28 @@ public class Name {
 	public static Name FindByName(Connection dbConn, String name, int corpusId) {
 		final String myName = ".FindByName: ";
 		final String SELECT_STMT = 
-			"SELECT `id`,`nametype`,`gender`,`notes`,`normal` FROM `name`"
-			+" WHERE `name`=? AND `corpus_id`=?";
+			//"SELECT `id`,`nametype`,`gender`,`notes`,`normal` FROM `name`"
+			//+" WHERE `name`=? AND `corpus_id`=?";
+			"SELECT n.id, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,"
+			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
+			+" (SELECT T1.name_id, count(*) nDocs FROM"
+			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
+			+" GROUP BY T1.name_id) AS T2"
+			+" WHERE n.id=nr.name_id AND n.id=T2.name_id AND n.corpus_id=?" 
+			+" AND n.name=? GROUP BY n.id ORDER BY n.normal";
 
 		Name toFind = null;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_STMT);
-			stmt.setString(1, name);
-			stmt.setInt(2, corpusId);
+			stmt.setInt(1, corpusId);
+			stmt.setString(2, name);
 			ResultSet rs = stmt.executeQuery();
 			int normalId = 0;
 			if(rs.next()){
 				toFind = new Name(rs.getInt("id"), corpusId, name, 
 									rs.getString("nametype"), rs.getString("gender"),
-									rs.getString("notes"), null);
+									rs.getString("notes"), null,
+									rs.getInt("docCount"), rs.getInt("totalCount"));
 				normalId = rs.getInt("normal");
 			}
 			rs.close();

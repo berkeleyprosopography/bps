@@ -141,6 +141,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 				String cleanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
 				name = corpus.findOrCreateName(cleanNameStr, 
 								Name.NAME_TYPE_PERSON, gender, dbConn);
+				name.addCitation(document.getId());
 			}
 			if(isPrimaryOrMissing(type)) {
 				NameRoleActivity nra = 
@@ -222,6 +223,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 				String clanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
 				name = corpus.findOrCreateName(clanNameStr, Name.NAME_TYPE_CLAN,
 												Name.GENDER_UNKNOWN, dbConn);
+				name.addCitation(document.getId());
 			}
 			String typeStr = attrList.getValue("", "type");
 			if(!("clan".equalsIgnoreCase(typeStr))) {
