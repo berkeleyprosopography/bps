@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -82,6 +83,33 @@ public class Name {
 	private int 		totalCount;
 	
 	private HashMap<Integer, Integer> countsByDocId;
+
+	public static class NameComparator implements	Comparator<Name> {
+		public int compare(Name name1, Name name2) {
+			return name1.name.compareTo(name2.name);
+		}
+	}
+	
+	public static class GenderComparator implements	Comparator<Name> {
+		public int compare(Name name1, Name name2) {
+			return name1.gender - name2.gender;
+		}
+	}
+	
+	public static class DocCountComparator implements	Comparator<Name> {
+		public int compare(Name name1, Name name2) {
+			// Invert normal direction to produce descending sort
+			return name2.docCount - name1.docCount;
+		}
+	}
+	
+	public static class TotalCountComparator implements	Comparator<Name> {
+		public int compare(Name name1, Name name2) {
+			// Invert normal direction to produce descending sort
+			return name2.totalCount - name1.totalCount;
+		}
+	}
+	
 	
 	/**
 	 * Create a new empty name.

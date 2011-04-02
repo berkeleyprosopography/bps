@@ -101,7 +101,7 @@ function workspaceSetCorpusRSC() {
 			// Maybe this should change the cursor or something
 			setStatusP("Corpus imported to Workspace.");
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			window.location.reload();
+			// window.location.reload();
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
@@ -141,7 +141,7 @@ function workspaceRebuildEntitiesRSC() {
 			// Maybe this should change the cursor or something
 			setStatusP("Entities rebuilt for Workspace.");
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			window.location.reload();
+			// window.location.reload();
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );

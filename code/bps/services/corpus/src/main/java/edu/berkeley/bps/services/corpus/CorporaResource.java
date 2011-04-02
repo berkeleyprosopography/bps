@@ -1098,11 +1098,16 @@ public class CorporaResource extends BaseResource {
 									"Unrecognized gender filter: "+genderFilterParam).build());
 				}
 			}
-			if(typeFilterParam==null && roleFilter==null && genderFilterParam == null) {
+			String orderByParam = queryParams.getFirst("o");
+			if(orderByParam!=null) {
+				orderByParam = orderByParam.trim();
+			}
+			if(typeFilterParam==null && roleFilter==null && genderFilterParam == null
+					 && orderByParam == null) {
 				nameList = corpus.getNames();
 			} else {
 				nameList = corpus.getNames(typeFilterParam, roleFilter, genderFilterParam, 
-										getServiceContext(srvc).getConnection());
+										orderByParam, getServiceContext(srvc).getConnection());
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getNames(): Problem querying DB.\n"+ re.getLocalizedMessage();
