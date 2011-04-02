@@ -660,7 +660,26 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public List<Name> getNames() {
-		ArrayList<Name> list = new ArrayList<Name>(namesByName.values());
+		return getNames(null, null, null, null);
+	}
+	
+	public List<Name> getNames(String typeFilter, ActivityRole roleFilter, 
+				String genderFilter, Connection dbConn) {
+		List<Name> list;
+		if(typeFilter==null && roleFilter==null && genderFilter==null) {
+			list = new ArrayList<Name>(namesByName.values());
+		} else if(roleFilter==null) {
+			list = new ArrayList<Name>();
+			int gender = (genderFilter==null)?-1:Name.GenderStringToValue(genderFilter);
+			int type = (typeFilter==null)?-1:Name.NameTypeStringToValue(typeFilter);
+			for( Name name:namesByName.values()) {
+				if((gender<0 || name.getGender()==gender)
+					&& (type<0 || name.getNameType()==type)) 
+					list.add(name);
+			}
+		} else {	// need to run a query to figure out Names by role
+			list = Name.getFilteredNames(this, typeFilter, roleFilter, genderFilter, dbConn);
+		}
 		return list;
 	}
 	
