@@ -52,16 +52,34 @@ public class EntityLink<O> extends Object {
 	/**
 	 * @param weight the weight to set
 	 */
-	public void setWeight(double weight) {
+	public double setWeight(double weight) {
+		double delta = weight - this.weight;
 		this.weight = weight;
+		return delta;
 	}
 
 	/**
 	 * @param weight the weight to set
 	 */
-	public void adjustWeight(double delta) {
-		this.weight += weight;
+	public double adjustWeight(double delta) {
+		this.weight += delta;
+		return delta;
 	}
+
+	/**
+	 * @param scaleFacter factor to multiple the current weight by for the link 
+	 * 					to toEntity. Must be >=0 and <= 1.
+	 */
+	public double scaleWeight(double scaleFactor) {
+		if(scaleFactor<0 || scaleFactor>1)
+			throw new IllegalArgumentException(
+					"scaleLink(): scaleFactor out of range: "+scaleFactor);
+		double newWeight = weight*scaleFactor;
+		double delta = newWeight - weight;
+		weight = newWeight;
+		return delta;
+	}
+
 
 	/**
 	 * @return the fromObj

@@ -8,6 +8,16 @@ import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
+import edu.berkeley.bps.services.workspace.collapser.Collapser;
+import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
+import edu.berkeley.bps.services.workspace.collapser.CollapserRule;
+import edu.berkeley.bps.services.workspace.collapser.FullyQualifiedEqualNameShiftRule;
+import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedCompatibleNameShiftRule;
+import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedEqualNameShiftRule;
+import edu.berkeley.bps.services.workspace.collapser.PersonCollapser;
+import edu.berkeley.bps.services.workspace.collapser.RoleMatrixDiscountRule;
+import edu.berkeley.bps.services.workspace.collapser.UnqualifiedCompatibleNameShiftRule;
+import edu.berkeley.bps.services.workspace.collapser.UnqualifiedEqualNameShiftRule;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -67,6 +77,8 @@ public class Workspace extends CachedEntity {
 	
 	private Corpus		corpus;
 	
+	private PersonCollapser collapser;
+	
 	// We hold Persons in lists, where each list shares a forename (Name ID).
 	// One set of lists is by document, and another is for the entire
 	// corpus. We do not build the corpus list until we have completed
@@ -81,6 +93,10 @@ public class Workspace extends CachedEntity {
 
 	// Map indexed by nrad, of the weights to persons or clans
 	private HashMap<Integer, EntityLinkSet<NameRoleActivity>> nradToEntityLinks;
+	// Map indexed by personId, of lists of EntityLinkSets for the NRADs
+	// that point to this person
+	private HashMap<Person, List<EntityLinkSet<NameRoleActivity>>> 
+												personToEntityLinkSets;
 
 	public Workspace() {
 		this(Workspace.nextId--,null,null,0);
@@ -107,6 +123,8 @@ public class Workspace extends CachedEntity {
 		this.clansByName = new HashMap<Integer, Clan>();
 		this.nradToEntityLinks = 
 			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
+		this.personToEntityLinkSets = 
+			new HashMap<Person, List<EntityLinkSet<NameRoleActivity>>>();
 		System.err.println("Workspace.ctor, created: "+this.toString());
 	}
 
@@ -547,6 +565,46 @@ public class Workspace extends CachedEntity {
 		this.corpus = newCorpus;
 	}
 	
+	public void setupCollapser() {
+		// Create our collapser instance.
+		collapser = new PersonCollapser();
+		// Add the basic rules - 
+		// TODO - this should be configured somehow, but how?
+		CollapserRule rule;
+		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.WITHIN_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.ACROSS_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new PartlyQualifiedEqualNameShiftRule(0.3, CollapserRule.WITHIN_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new PartlyQualifiedEqualNameShiftRule(0.75, CollapserRule.ACROSS_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new UnqualifiedEqualNameShiftRule(0.75, CollapserRule.WITHIN_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new UnqualifiedEqualNameShiftRule(0.5, CollapserRule.ACROSS_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new PartlyQualifiedCompatibleNameShiftRule(0.3, CollapserRule.WITHIN_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new PartlyQualifiedCompatibleNameShiftRule(0.75, CollapserRule.ACROSS_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new UnqualifiedCompatibleNameShiftRule(0.75, CollapserRule.WITHIN_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new UnqualifiedCompatibleNameShiftRule(0.3, CollapserRule.ACROSS_DOCUMENTS);
+		collapser.addRule(rule);
+		rule = new RoleMatrixDiscountRule();	// Only applies within docs now...
+		collapser.addRule(rule);
+	}
+	
+	public void collapseWithinDocuments() {
+		// TODO iterate over docs, and get the Persons for each doc, and pass them
+		// collapser.evaluate.
+		// This needs to run before we call collapseAcrossDocuments
+	}
+	
+	public void collapseAcrossDocuments() {
+		
+	}
+	
 	private void clearEntityMaps() {
 		// GC will deal with the lists, etc.
 		personListsByNameByDoc.clear();
@@ -649,11 +707,22 @@ public class Workspace extends CachedEntity {
 		personList.add(person);
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
 		if(links==null) {
-			links = new EntityLinkSet<NameRoleActivity>(nrad, LinkType.Type.LINK_TO_PERSON);
+			links = new EntityLinkSet<NameRoleActivity>(nrad, 
+										LinkType.Type.LINK_TO_PERSON);
 			nradToEntityLinks.put(nrad.getId(), links);
 		}
-		NRADEntityLink link = new NRADEntityLink(nrad, person, 1.0, LinkType.Type.LINK_TO_PERSON);
+		NRADEntityLink link = 
+			new NRADEntityLink(nrad, person, 1.0, LinkType.Type.LINK_TO_PERSON);
 		links.put(person, link);
+		// Now add a link from the Person back to the linkSet for when we
+		// do weight shifting
+		List<EntityLinkSet<NameRoleActivity>> linkSetsList =
+									personToEntityLinkSets.get(person);
+		if(linkSetsList==null) {
+			linkSetsList = new ArrayList<EntityLinkSet<NameRoleActivity>>();
+			personToEntityLinkSets.put(person, linkSetsList);
+		}
+		linkSetsList.add(links);
 		return person;
 	}
 	
@@ -679,8 +748,19 @@ public class Workspace extends CachedEntity {
 			links = new EntityLinkSet<NameRoleActivity>(nradFather, LinkType.Type.LINK_TO_PERSON);
 			nradToEntityLinks.put(nradFather.getId(), links);
 		}
-		NRADEntityLink link = new NRADEntityLink(nradFather, father, 1.0, LinkType.Type.LINK_TO_PERSON);
+		NRADEntityLink link = 
+			new NRADEntityLink(nradFather, father, 1.0, 
+										LinkType.Type.LINK_TO_PERSON);
 		links.put(father, link);
+		// Now add a link from the father Person back to the linkSet for when we
+		// do weight shifting
+		List<EntityLinkSet<NameRoleActivity>> linkSetsList =
+									personToEntityLinkSets.get(father);
+		if(linkSetsList==null) {
+			linkSetsList = new ArrayList<EntityLinkSet<NameRoleActivity>>();
+			personToEntityLinkSets.put(father, linkSetsList);
+		}
+		linkSetsList.add(links);
 		return father;
 	}
 	
@@ -691,7 +771,8 @@ public class Workspace extends CachedEntity {
 			links = new EntityLinkSet<NameRoleActivity>(nrad, LinkType.Type.LINK_TO_CLAN);
 			nradToEntityLinks.put(nrad.getId(), links);
 		}
-		NRADEntityLink link = new NRADEntityLink(nrad, clan, 1.0, LinkType.Type.LINK_TO_CLAN);
+		NRADEntityLink link = 
+			new NRADEntityLink(nrad, clan, 1.0, LinkType.Type.LINK_TO_CLAN);
 		links.put(clan, link);
 		return clan;
 	}
@@ -761,5 +842,9 @@ public class Workspace extends CachedEntity {
 		}
 		return nrad2PLinkList;
 	}
+	
+	// Do we need this?
+	// public List<NRADEntityLink> getEntityLinksForPerson(Person person) {
+	// }
 	
 }

@@ -10,46 +10,77 @@ import edu.berkeley.bps.services.workspace.Person;
 
 public abstract class CollapserBase implements Collapser {
 	
-	protected List<CollapserRule> allRules;
-	protected List<CollapserRule> shiftRules;
-	protected List<CollapserRule> discountRules;
-	protected List<CollapserRule> boostRules;
+	
+	protected List<CollapserRule> allIntraDocRules;
+	protected List<CollapserRule> intraDocShiftRules;
+	protected List<CollapserRule> intraDocDiscountRules;
+	protected List<CollapserRule> intraDocBoostRules;
+	protected List<CollapserRule> allCorpusWideRules;
+	protected List<CollapserRule> corpusWideShiftRules;
+	protected List<CollapserRule> corpusWideDiscountRules;
+	protected List<CollapserRule> corpusWideBoostRules;
 	
 	public CollapserBase() {
-		allRules = new ArrayList<CollapserRule>();
-		shiftRules = new ArrayList<CollapserRule>();
-		discountRules = new ArrayList<CollapserRule>();
-		boostRules = new ArrayList<CollapserRule>();
+		allIntraDocRules = new ArrayList<CollapserRule>();
+		intraDocShiftRules = new ArrayList<CollapserRule>();
+		intraDocDiscountRules = new ArrayList<CollapserRule>();
+		intraDocBoostRules = new ArrayList<CollapserRule>();
+		allCorpusWideRules = new ArrayList<CollapserRule>();
+		corpusWideShiftRules = new ArrayList<CollapserRule>();
+		corpusWideDiscountRules = new ArrayList<CollapserRule>();
+		corpusWideBoostRules = new ArrayList<CollapserRule>();
 	}
 
+	@Override
+	public void addRule(CollapserRule rule) {
+		addRule(rule, null);
+	}
+	
 	@Override
 	public void addRule(CollapserRule rule, String insertBefore) {
 		if(insertBefore!=null)
 			throw new UnsupportedOperationException("insertBefore support is NYI");
 		switch(rule.getType()) {
 		case CollapserRule.SHIFT_RULE:
-			shiftRules.add(rule);
+			if(rule.appliesWithinDocument())
+				intraDocShiftRules.add(rule);
+			else
+				corpusWideShiftRules.add(rule);
 			break;
 		case CollapserRule.DISCOUNT_RULE:
-			discountRules.add(rule);
+			if(rule.appliesWithinDocument())
+				intraDocDiscountRules.add(rule);
+			else
+				corpusWideDiscountRules.add(rule);
 			break;
 		case CollapserRule.BOOST_RULE:
-			boostRules.add(rule);
+			if(rule.appliesWithinDocument())
+				intraDocBoostRules.add(rule);
+			else
+				corpusWideBoostRules.add(rule);
 			break;
 		}
-		allRules.add(rule);
+		if(rule.appliesWithinDocument())
+			allIntraDocRules.add(rule);
+		else
+			allCorpusWideRules.add(rule);
 	}
 
 	@Override
-	public List<CollapserRule> getRules(int typeFilter) {
+	public List<CollapserRule> getRules(int typeFilter, boolean intraDocument) {
 		if(typeFilter <=0)
-			return allRules;
+			return intraDocument?allIntraDocRules:allCorpusWideRules;
 		switch(typeFilter) {
 		default:
-			throw new IllegalArgumentException("Unknown type specified as filter");
-		case CollapserRule.SHIFT_RULE: return  shiftRules;
-		case CollapserRule.DISCOUNT_RULE: return  discountRules;
-		case CollapserRule.BOOST_RULE: return  boostRules;
+			throw new IllegalArgumentException(this.getClass().getName()+
+					".getRulesForContext: Unknown type specified as filter: "
+					+typeFilter);
+		case CollapserRule.SHIFT_RULE: 
+			return  intraDocument?intraDocShiftRules:corpusWideShiftRules;
+		case CollapserRule.DISCOUNT_RULE: 
+			return  intraDocument?intraDocDiscountRules:corpusWideDiscountRules;
+		case CollapserRule.BOOST_RULE: 
+			return  intraDocument?intraDocBoostRules:corpusWideBoostRules;
 		}
 	}
 

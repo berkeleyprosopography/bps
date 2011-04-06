@@ -25,6 +25,10 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 		summedWeight = 0;
 	}
 	
+	public O getFromObj() {
+		return fromObj;
+	}
+
 	public EntityLink<O> put(Entity toEntity, EntityLink<O> link) {
 		if(get(toEntity)!= null)
 			throw new IllegalArgumentException("Already have a link to Entity: "+toEntity);
@@ -48,22 +52,34 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 		EntityLink<O> link = get(toEntity);
 		if(link == null)
 			throw new IllegalArgumentException("No link found to Entity: "+toEntity);
-		double delta = weight-link.getWeight();
+		double delta = link.setWeight(weight);
 		summedWeight += delta;
-		link.adjustWeight(delta);
 	}
 
 	/**
-	 * @param fromObj
 	 * @param toEntity
-	 * @param weight
+	 * @param delta amount to add to the current weight for the link to toEntity
 	 */
 	public void adjustLink(Entity toEntity, double delta) {
 		EntityLink<O> link = get(toEntity);
 		if(link == null)
 			throw new IllegalArgumentException("No link found to Entity: "+toEntity);
+		link.adjustWeight(delta);
 		summedWeight += delta;
-		link.setWeight(link.getWeight()+delta);
+	}
+
+	/**
+	 * @param toEntity
+	 * @param scaleFacter factor to multiple the current weight by for the link 
+	 * 					to toEntity. Must be >=0 and <= 1.
+	 */
+	public double scaleLink(Entity toEntity, double scaleFactor) {
+		EntityLink<O> link = get(toEntity);
+		if(link == null)
+			throw new IllegalArgumentException("No link found to Entity: "+toEntity);
+		double delta = link.scaleWeight(scaleFactor);
+		summedWeight += delta;
+		return delta;
 	}
 
 	/**

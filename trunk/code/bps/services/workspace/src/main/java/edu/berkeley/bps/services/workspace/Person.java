@@ -160,8 +160,11 @@ public class Person extends Entity {
 		return father;
 	}
 
-	public boolean isDeclaredSimple() {
-		return (declaredName!=null) && (getNumQualifiers()==0);
+	public boolean isUnfiliated() {
+		// Must have name, but neither of Father or Clan
+		return(declaredName!=null) && 
+				(declaredFather==null) && (declaredClan==null);
+
 	}
 
 	public int getNumQualifiers() {
@@ -176,15 +179,18 @@ public class Person extends Entity {
 	/**
 	 * @return true if this has a declared forename, and 1 and only one qualifier
 	 */
-	public boolean isDeclaredPartiallyQualified() {
-		return(declaredName!=null) && (1==getNumQualifiers());
+	public boolean isPartiallyFiliated() {
+		// Must have name, but exactly one of Father or Clan
+		return(declaredName!=null) && 
+			((declaredFather!=null) != (declaredClan!=null));
 	}
 
 	/**
 	 * @return true if this has a declared forename, and at least two qualifiers
 	 */
-	public boolean isDeclaredFullyQualified() {
-		return(declaredName!=null) && (getNumQualifiers()>=2);
+	public boolean isFullyFiliated() {
+		return(declaredName!=null) && 
+			(declaredFather!=null) && (declaredClan!=null);
 	}
 
 	public boolean declaredInSameDoc(Person other) {
@@ -199,7 +205,7 @@ public class Person extends Entity {
 	 */
 	public boolean isSimpleNameForQualifiedLocalRef(Person other) {
 		return(declaredInSameDoc(other)
-			&& isDeclaredSimple() && !other.isDeclaredSimple()
+			&& isUnfiliated() && !other.isUnfiliated()
 			&& (EQUAL==compareNames(declaredName, other.declaredName)));
 	}
 
@@ -211,7 +217,7 @@ public class Person extends Entity {
 	 */
 	public boolean isLessQualifiedNameForLocalRef(Person other) {
 		return (declaredInSameDoc(other)
-			&& !isDeclaredSimple()
+			&& !isUnfiliated()
 			&& (COMPAT_LESS_INFO==compareNames(declaredName, other.declaredName)));
 	}
 

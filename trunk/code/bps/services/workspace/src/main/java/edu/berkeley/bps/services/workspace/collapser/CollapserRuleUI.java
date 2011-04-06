@@ -21,7 +21,7 @@ public interface CollapserRuleUI {
 	 * @return a list of named values for the weight of this rule,
 	 * 			or null, if this rule UI does not support such a model. 
 	 */
-	public List<UserWeightSetting> getUserSettings();
+	public List<UserWeightSetting> getUserSettingsForWeight();
 
 	
 }
