@@ -28,6 +28,11 @@ public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
 		settingsList = new ArrayList<UserWeightSetting>();
 	}
 	
+	public CollapserRuleBaseWithUI(int type, String name, double weight, boolean intraDocument) {
+		super(type, name, weight, intraDocument);
+		settingsList = new ArrayList<UserWeightSetting>();
+	}
+
 	public void initSettings() {
 		settingsList.add(new UserWeightSetting(LABEL_ALWAYS, WEIGHT_ALWAYS)); 
 		settingsList.add(new UserWeightSetting(LABEL_AGGRESSIVE, WEIGHT_AGGRESSIVE)); 
@@ -41,6 +46,7 @@ public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
 	/**
 	 * @return a user-readable description of this rule.
 	 */
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -49,6 +55,7 @@ public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
 	 * Sets the user-readable description for this rule
 	 * @param description
 	 */
+	@Override
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -59,6 +66,7 @@ public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
 	 * @return a list of named values for the weight of this rule,
 	 * 			or null, if this rule UI does not support such a model. 
 	 */
+	@Override
 	public List<UserWeightSetting> getUserSettingsForWeight() {
 		return settingsList;
 	}

@@ -2,14 +2,21 @@ package edu.berkeley.bps.services.workspace.collapser;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+
+import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
 import edu.berkeley.bps.services.workspace.Entity;
+import edu.berkeley.bps.services.workspace.EntityLinkSet;
+import edu.berkeley.bps.services.workspace.NRADEntityLink;
 import edu.berkeley.bps.services.workspace.Person;
 
 public class PersonCollapser extends CollapserBase implements Collapser {
+	private final static String myClass = "PersonCollapser";
 
 	public static class EntitySortByNQuals implements Comparator<Entity> {
 		public int compare(Entity p1, Entity p2) {
@@ -21,17 +28,23 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 	
 	/**
 	 * Evaluates collapsing (shifting weight) among the entities.
-	 * @param entities The list of persons to consider.
-	 * @param entityToNRADLinks map indexed by Entity id of lists of NRADs linked to the Entity
-	 * @param intraDocument if true, this is within a document, else this is corpora-wide
+	 * Evaluates collapsing (shifting weight) among the entities.
+	 * @param entities The list of entities that are being compared to one another
+	 * @param nradToEntityLinks Map indexed by nrad, of the sets of weights 
+	 * 				to persons or clans
+	 * @param personTopersonToEntityLinkSets Map indexed by personId, of lists of 
+	 * 				EntityLinkSets for the NRADs that point to this person
+	 * @param intraDocument true if evaluating pairs within a document, 
+	 * 				false if this is corpora-wide
 	 */
 	@Override
 	public void evaluateList(List<? extends Entity> entities, 
-			Map<Integer, NameRoleActivity> entityToNRADLinks, 
+			HashMap<Integer, EntityLinkSet<NameRoleActivity>> nradToEntityLinks, 
+			HashMap<Person, List<EntityLinkSet<NameRoleActivity>>> personToEntityLinkSets,
 			boolean intraDocument) {
 		if(entities==null || entities.isEmpty())
 			throw new IllegalArgumentException("No Persons to collapse");
-		if(entityToNRADLinks==null || entityToNRADLinks.isEmpty())
+		if(nradToEntityLinks==null || nradToEntityLinks.isEmpty())
 			throw new IllegalArgumentException("Missing/invalid entityToNRADLinks map");
 
 		// First, sort the list by #qualifications, descending
@@ -48,7 +61,9 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 					// First try the shift rules, taking the
 					// first match we get - we should only get one.
 					double totalShift = 0;
-					for(CollapserRule rule:shiftRules) {
+					List<CollapserRule> ruleList = 
+						getRules(CollapserRule.SHIFT_RULE, intraDocument);
+					for(CollapserRule rule:ruleList) {
 						double shift = rule.evaluate(fromPerson, toPerson);
 						if(shift!=0) {	// we have a match. Can go either direction.
 							if(shift<-1 || shift>1)
@@ -60,8 +75,17 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 						}
 					}
 					if(totalShift!=0) {	// any match in the set?
+						// normalize the shift direction for simplicity
+						if(totalShift<0) {
+							Person temp = fromPerson;
+							fromPerson = toPerson;
+							toPerson = temp;
+							totalShift = -totalShift;
+						}
 						// Look for matching discount rules, using all that match
-						for(CollapserRule rule:discountRules) {
+						ruleList = 
+							getRules(CollapserRule.DISCOUNT_RULE, intraDocument);
+						for(CollapserRule rule:ruleList) {
 							double discount = rule.evaluate(fromPerson, toPerson);
 							if(discount==0) {	// we have a match
 								totalShift = 0;
@@ -76,10 +100,13 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 						}
 						if(totalShift!=0) { // Any shift left?
 							// Look for matching boost rules, using all that match
-							for(CollapserRule rule:boostRules) {
+							ruleList = 
+								getRules(CollapserRule.BOOST_RULE, intraDocument);
+							for(CollapserRule rule:ruleList) {
 								double boost = rule.evaluate(fromPerson, toPerson);
 								if(boost > 1) {	// we have a match
-									totalShift *= boost;
+									// Apply the boost, but max out at 1
+									totalShift = Math.min(1, totalShift*boost);
 								} else if(boost<1) { // bad value
 									throw new RuntimeException(
 												"Boost CollapserRule "+rule.getName()
@@ -90,6 +117,9 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 					}
 					if(totalShift!=0) {	// any shift to do?
 						// Perform the shift on the nrad links
+						handleShift( fromPerson, toPerson, totalShift,
+								nradToEntityLinks, 
+								personToEntityLinkSets );
 					}
 				}
 			}
@@ -97,6 +127,51 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 			throw new RuntimeException(
 				"Apparent attempt to use PersonCollapser with non-Person entities."+cce);
 		}
+	}
+	
+	protected void handleShift( Person fromPerson, Person toPerson, double shift,
+			HashMap<Integer, EntityLinkSet<NameRoleActivity>> nradToEntityLinks, 
+			HashMap<Person, List<EntityLinkSet<NameRoleActivity>>> personToEntityLinkSets ) {
+		// We run through all the NRADs that point to fromPerson,
+		// reduce their current weight by 1-shift (multiply by 1-shift).
+		// Then for each of those NRADs:
+		//   If toPerson does not already have a link from the same NRAD,
+		//   the first create a link and insert it into the LinkSet for toPerson.
+		//   Increase (or set, if new) the weight on the NRAD to toPerson link.
+		// Then normalize the linkSets for both fromPerson and toPerson
+		if(shift<=0)
+			throw new IllegalArgumentException(
+					"Shift value for PersonCollapser.handleShift <= 0: "+shift);
+		List<EntityLinkSet<NameRoleActivity>> linkSetsForFromPerson = 
+			personToEntityLinkSets.get(fromPerson);
+		if(linkSetsForFromPerson==null||linkSetsForFromPerson.isEmpty()) {
+			throw new RuntimeException(myClass+
+					".handleShift: linkSets for fromPerson is null or emtpy");
+		}
+		List<EntityLinkSet<NameRoleActivity>> linkSetsForToPerson = 
+			personToEntityLinkSets.get(toPerson);
+		if(linkSetsForToPerson==null||linkSetsForToPerson.isEmpty()) {
+			throw new RuntimeException(myClass+
+					".handleShift: linkSets for toPerson is null or emtpy");
+		}
+		// For each set that includes fromPerson
+		for(EntityLinkSet<NameRoleActivity> linkSet:linkSetsForFromPerson) {
+			// scale the link to the fromPerson - returns the weight shifted.
+			double delta = linkSet.scaleLink(fromPerson, shift);
+			// Now we shift that to the toPerson. If toPerson is in linkSet, 
+			// just adjust it. Otherwise, create a new link.
+			NRADEntityLink link = (NRADEntityLink)linkSet.get(toPerson);
+			if(link!=null) {
+				linkSet.adjustLink(toPerson, delta);
+			} else {
+				link = new NRADEntityLink(linkSet.getFromObj(), toPerson, delta,
+										LinkType.Type.LINK_TO_PERSON);
+				linkSet.put(toPerson, link);
+				// We need to add this linkSet to the List for toPerson 
+				linkSetsForToPerson.add(linkSet);
+			}
+		}
+		
 	}
 
 }

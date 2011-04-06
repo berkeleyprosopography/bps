@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
@@ -37,6 +38,12 @@ public class ActivityRole {
 	
 	private boolean		familyRole;
 
+	public static class IdComparator implements	Comparator<ActivityRole> {
+		public int compare(ActivityRole role1, ActivityRole role2) {
+			return role1.id-role2.id;
+		}
+	}
+	
 	/**
 	 * Create a new empty ActivityRole.
 	 */
