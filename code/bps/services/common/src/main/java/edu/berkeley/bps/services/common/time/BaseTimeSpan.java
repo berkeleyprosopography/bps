@@ -74,7 +74,14 @@ public abstract class BaseTimeSpan implements TimeSpan {
 			// overlapping timespan - return likelihood 1
 			return 1.0;
 		}
-		
+	}
+	
+	public String toString() {
+		return getClass().getName()+": "
+				+TimeUtils.millisToSimpleYearString(getCenterPoint())
+				+" +/- "
+				+TimeUtils.millisToYearOffsetString(halfWindow)
+				+ " yrs";
 	}
 
 }

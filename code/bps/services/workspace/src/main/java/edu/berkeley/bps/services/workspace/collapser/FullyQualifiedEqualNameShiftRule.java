@@ -5,9 +5,13 @@ import edu.berkeley.bps.services.workspace.Person;
 
 public class FullyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "FullyQualifiedEqualNameShiftRule";
+	private static final String DESCRIPTION = 
+		"Collapse equal, fully qualified citations" 
+		+" (e.g., \"PNa, son-of PNb, in-clan CNc\""
+		+" and \"PNa, son-of PNb, in-clan CNc\")";
 
 	public FullyQualifiedEqualNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, weight, intraDocument);
+		super(SHIFT_RULE, myClass, DESCRIPTION,  weight, intraDocument);
 	}
 
 	@Override

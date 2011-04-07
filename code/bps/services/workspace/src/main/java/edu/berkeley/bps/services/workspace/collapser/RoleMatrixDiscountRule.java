@@ -14,6 +14,7 @@ import edu.berkeley.bps.services.workspace.Workspace;
 public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI 
 		implements CollapserRule, CollapserRuleUI, CollapserRulePairMatrixUI{
 	private final static String myClass = "RoleMatrixDiscountRule";
+	private static final String DESCRIPTION = "TO DO";
 
 	protected List<ActivityRole> corpusRoles = null;
 	
@@ -26,7 +27,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	}
 
 	public RoleMatrixDiscountRule(String name) {
-		super(CollapserRule.DISCOUNT_RULE, name, 1.0, 
+		super(CollapserRule.DISCOUNT_RULE, name, DESCRIPTION, 1.0, 
 					CollapserRule.WITHIN_DOCUMENTS);
 	}
 
@@ -38,11 +39,19 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		
 		corpusRoles = null;
 		Corpus corpus = workspace.getCorpus();
-		if(corpus==null)
+		if(corpus==null) {
+			System.err.println(this.getClass().getName()
+					+".initialize(): No corpus found for workspace: "
+					+workspace.getId());
 			return;			// Nothing to do
+		}
 		corpusRoles = corpus.getActivityRoles();
-		if(corpusRoles==null||corpusRoles.isEmpty())
+		if(corpusRoles==null||corpusRoles.isEmpty()) {
+			System.err.println(this.getClass().getName()
+					+".initialize(): No roles found in corpus: "
+					+corpus.getId());
 			return;			// Nothing to do
+		}
 		// Sort the corpusRoles by ID (creation order)
 		Collections.sort(corpusRoles, new ActivityRole.IdComparator());
 		// We have roles, so now we build role-pairs with the weights

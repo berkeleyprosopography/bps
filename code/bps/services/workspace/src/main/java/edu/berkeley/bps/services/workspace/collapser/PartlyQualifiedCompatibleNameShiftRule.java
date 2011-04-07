@@ -5,9 +5,12 @@ import edu.berkeley.bps.services.workspace.Person;
 
 public class PartlyQualifiedCompatibleNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "PartlyQualifiedCompatibleNameShiftRule";
+	private static final String DESCRIPTION = 
+		"Collapse partly qualified citations with compatible, fully qualified citations"
+		+" (e.g., \"PNa, son-of PNb\" and \"PNa, son-of PNb, in-clan CNc\")";
 
 	public PartlyQualifiedCompatibleNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, weight, intraDocument);
+		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);
 	}
 
 	@Override

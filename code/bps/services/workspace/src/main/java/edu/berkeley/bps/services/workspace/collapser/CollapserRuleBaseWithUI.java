@@ -28,8 +28,9 @@ public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
 		settingsList = new ArrayList<UserWeightSetting>();
 	}
 	
-	public CollapserRuleBaseWithUI(int type, String name, double weight, boolean intraDocument) {
+	public CollapserRuleBaseWithUI(int type, String name, String description, double weight, boolean intraDocument) {
 		super(type, name, weight, intraDocument);
+		this.description = description;
 		settingsList = new ArrayList<UserWeightSetting>();
 	}
 
