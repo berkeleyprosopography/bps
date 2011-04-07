@@ -31,6 +31,7 @@ public abstract class Entity {
 			)
 			throw new IllegalArgumentException(
 				this.getClass().getName()+"Entity ctor must have valid name.");
+		declaredName=originalNRAD.getName();
 		//displayName = declaredName.getName();
 		displayName = nrad.getDisplayName();
 	}

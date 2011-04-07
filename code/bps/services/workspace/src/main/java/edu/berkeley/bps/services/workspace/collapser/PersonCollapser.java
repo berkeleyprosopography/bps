@@ -165,18 +165,22 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 			// scale the link to the fromPerson - returns the weight shifted.
 			// delta will always be negative, since we are reducing fromPerson weight.
 			// convert it to the positive delta we will add to toPerson
-			double delta = -(linkSet.scaleLink(fromPerson, 1-shift));
-			// Now we shift that to the toPerson. If toPerson is in linkSet, 
-			// just adjust it. Otherwise, create a new link.
-			NRADEntityLink link = (NRADEntityLink)linkSet.get(toPerson);
-			if(link!=null) {
-				linkSet.adjustLink(toPerson, delta);
-			} else {
-				link = new NRADEntityLink(linkSet.getFromObj(), toPerson, delta,
-										LinkType.Type.LINK_TO_PERSON);
-				linkSet.put(toPerson, link);
-				// We need to add this linkSet to the List for toPerson 
-				linkSetsForToPerson.add(linkSet);
+			double delta = linkSet.scaleLink(fromPerson, 1-shift);
+			// If delta is 0, there was no weight left to shift, so we are done.
+			if(delta!=0) {
+				delta *= -1;
+				// Now we shift that to the toPerson. If toPerson is in linkSet, 
+				// just adjust it. Otherwise, create a new link.
+				NRADEntityLink link = (NRADEntityLink)linkSet.get(toPerson);
+				if(link!=null) {
+					linkSet.adjustLink(toPerson, delta);
+				} else {
+					link = new NRADEntityLink(linkSet.getFromObj(), toPerson, delta,
+											LinkType.Type.LINK_TO_PERSON);
+					linkSet.put(toPerson, link);
+					// We need to add this linkSet to the List for toPerson 
+					linkSetsForToPerson.add(linkSet);
+				}
 			}
 		}
 		
