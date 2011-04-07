@@ -112,6 +112,10 @@ public class Person extends Entity {
 		}
 		fatherLinks = new EntityLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
 	}
+	
+	public double getDateOverlapLikelihood(Person other) {
+		return this.activeTimeSpan.computeMutualProbability(other.activeTimeSpan);
+	}
 
 	/**
 	 * Must be called from Workspace context where the values for the 

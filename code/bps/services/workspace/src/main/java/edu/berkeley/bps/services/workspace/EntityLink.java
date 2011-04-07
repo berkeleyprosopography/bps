@@ -30,7 +30,7 @@ public class EntityLink<O> extends Object {
 		if(linkTo==null)
 			throw new IllegalArgumentException("EntityLink must link to valid Entity");
 		if(weight <= 0 || weight > 1)
-			throw new IllegalArgumentException("EntityLink weight must be in unit range (0-1)");
+			throw new IllegalArgumentException("EntityLink weight not in unit range (0-1): "+weight);
 		this.fromObj = fromObj;
 		this.entity = linkTo;
 		this.weight = weight;
