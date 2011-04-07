@@ -22,10 +22,13 @@ public abstract class Entity {
 		super();
 		String fNameStr = null;
 		if((originalNRAD=nrad)==null 
-			|| (declaredName=originalNRAD.getName())==null 
+			// || (declaredName=originalNRAD.getName())==null 
+			// We can create Clan entities now
 			// || (declaredName.getNameType()!=Name.NAME_TYPE_CLAN)
-			|| (fNameStr=declaredName.getName())==null
-			||  fNameStr.isEmpty())
+			// Need to support Person with missing forename...
+			// || (fNameStr=declaredName.getName())==null
+			// ||  fNameStr.isEmpty()
+			)
 			throw new IllegalArgumentException(
 				this.getClass().getName()+"Entity ctor must have valid name.");
 		//displayName = declaredName.getName();

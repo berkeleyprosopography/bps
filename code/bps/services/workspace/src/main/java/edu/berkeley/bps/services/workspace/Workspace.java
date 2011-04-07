@@ -720,25 +720,29 @@ public class Workspace extends CachedEntity {
 	private Person addPersonForNRAD(NameRoleActivity nrad, long center,
 			HashMap<Integer, ArrayList<Person>> personListMapForDoc) {
 		
-		// TODO NOW Need to handle case of NULL forename.
-		
-		int forenameId = nrad.getName().getId();	// get Name
+		Name name = nrad.getName();
+		int forenameId = (name==null)?-1:name.getId();	// get Name
 		// Build a timespan for the new person. Center it on the
 		// document date.
 		EvidenceBasedTimeSpan ts = 
 			new EvidenceBasedTimeSpan(center, 
 					activeLifeStdDev, activeLifeWindow);
 		Person person = new Person(nrad, ts);
-		ArrayList<Person> personList = 
-			getPersonListName(personListMapForDoc, forenameId);
-		personList.add(person);
-		// Now, we'll remap the displayName of the person to something more sensible.
-		{
-			Name name = nrad.getName();
-			String forename = (name==null)?"(unknown)":name.getName();
-			String displayName = forename+
-							"["+nrad.getDocument().getAlt_id()+personList.size()+"]";
-			person.setDisplayName(displayName);
+		if(forenameId>=0) {
+			// If no declare forename, no list to add to.
+			// TODO figure out what to do about unknowns, since they are
+			// essentially compatible (on forename) with everything.
+			// OTOH, is it really worth collapsing? Maybe only if qualified...
+			ArrayList<Person> personList = 
+				getPersonListName(personListMapForDoc, forenameId);
+			personList.add(person);
+			// Now, we'll remap the displayName of the person to something more sensible.
+			{
+				String forename = (name==null)?"(unknown)":name.getName();
+				String displayName = forename+
+								"["+nrad.getDocument().getAlt_id()+personList.size()+"]";
+				person.setDisplayName(displayName);
+			}
 		}
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
 		if(links==null) {
@@ -813,7 +817,11 @@ public class Workspace extends CachedEntity {
 	}
 	
 	private Clan findOrCreateClan(NameRoleActivity nrad) {
-		int clannameId = nrad.getName().getId();	// get Name
+		Name name = nrad.getName();
+		if(name==null)
+			throw new RuntimeException("Cannot find Clan for NRAD with no Name:"
+											+nrad.getDisplayName());
+		int clannameId = name.getId();	// get Name
 		Clan clan = clansByName.get(clannameId);
 		if(clan==null) {
 			clan = new Clan(nrad);

@@ -428,46 +428,75 @@ public class Name {
 	public static List<Name> getFilteredNames(Corpus corpus, String typeFilter, 
 			ActivityRole roleFilter, String genderFilter, Connection dbConn) {
 		ArrayList<Name> list = new ArrayList<Name>();
-		final String SELECT_BY_ROLE = 
+		/*
+		 final String SELECT_BY_ROLE = 
 			"SELECT distinct n.id FROM name n, name_role_activity_doc nr"
 			+" WHERE n.id=nr.name_id AND n.corpus_id=? ";
+		 */
+		
+		final String SELECT_BY_ROLE_WITH_COUNTS_1 = 
+		"SELECT n.id, n.name, n.nametype, n.gender, n.notes, n.normal, n.name," 
+		+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,";
+		final String T2_1 = " (SELECT T1.name_id, count(*) nDocs FROM";
+		final String T1_NO_ROLE =
+			" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1";
+		final String T1_WITH_ROLE =
+			" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc"
+			+" WHERE act_role_id=?) AS T1";
+		final String T2_2 = " GROUP BY T1.name_id) AS T2";
+		
+		final String SELECT_BY_ROLE_WITH_COUNTS_MAIN_WHERE = 
+			" WHERE n.id=nr.name_id AND n.corpus_id=? AND n.id=T2.name_id";
+		final String SELECT_BY_ROLE_WITH_COUNTS_GROUP_ORDER = 
+			"GROUP BY n.id ORDER BY n.normal";
+
+		
+		final String ACT_ROLE_SUFFIX = " AND nr.act_role_id=?";
 		final String TYPE_SUFFIX = " AND n.nametype=?";
 		final String GENDER_SUFFIX = " AND n.gender=?";
-		final String ACT_ROLE_SUFFIX = " AND nr.act_role_id=?";
-		StringBuilder sb = new StringBuilder(140);
-		sb.append(SELECT_BY_ROLE);
-		if(typeFilter!=null) {
-			sb.append(TYPE_SUFFIX);
-		}
+		StringBuilder sb = new StringBuilder(400);
+		sb.append(SELECT_BY_ROLE_WITH_COUNTS_1);
+		sb.append(T2_1);
+		sb.append((roleFilter==null)?T1_NO_ROLE:T1_WITH_ROLE);
+		sb.append(T2_2);
+		sb.append(SELECT_BY_ROLE_WITH_COUNTS_MAIN_WHERE);
 		if(roleFilter!=null) {
 			sb.append(ACT_ROLE_SUFFIX);
+		}
+		if(typeFilter!=null) {
+			sb.append(TYPE_SUFFIX);
 		}
 		if(genderFilter!=null) {
 			sb.append(GENDER_SUFFIX);
 		}
+		sb.append(SELECT_BY_ROLE_WITH_COUNTS_GROUP_ORDER);
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(sb.toString());
+			int iNext;
 			if(roleFilter!=null) {
-				sb.append(ACT_ROLE_SUFFIX);
+				stmt.setInt(1, roleFilter.getId());
+				stmt.setInt(2, corpus.getId());
+				stmt.setInt(3, roleFilter.getId());
+				iNext=4;
+			} else {
+				stmt.setInt(1, corpus.getId());
+				iNext=2;
 			}
-			stmt.setInt(1, corpus.getId());
-			int iNext = 2;
 			if(typeFilter!=null) {
 				stmt.setString(iNext++, typeFilter);
-			}
-			if(roleFilter!=null) {
-				stmt.setInt(iNext++, roleFilter.getId());
 			}
 			if(genderFilter!=null) {
 				stmt.setString(iNext, genderFilter);
 			}
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
-				Name newName = corpus.findName(rs.getInt("id"));
-				if(newName==null)
-					throw new RuntimeException(
-							"Name.getFilteredNames got name: "+rs.getInt("id")
-							+" from DB, that corpus: "+corpus.getName()+" cannot find!");
+				int nametype = Name.NameTypeStringToValue(rs.getString("nametype"));
+				int gender = Name.GenderStringToValue(rs.getString("gender"));
+				Name normal = corpus.findName(rs.getInt("normal"));
+				Name newName = new Name(rs.getInt("id"), corpus.getId(),
+						rs.getString("name"), nametype, 
+						gender, rs.getString("notes"), normal,
+						rs.getInt("docCount"), rs.getInt("totalCount"));
 				list.add(newName);
 			}
 			rs.close();
