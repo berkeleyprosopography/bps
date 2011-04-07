@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -600,6 +601,7 @@ public class Workspace extends CachedEntity {
 		rule = new UnqualifiedCompatibleNameShiftRule(0.3, CollapserRule.ACROSS_DOCUMENTS);
 		collapser.addRule(rule);
 		rule = new RoleMatrixDiscountRule();	// Only applies within docs now...
+		rule.initialize(this);
 		collapser.addRule(rule);
 	}
 	
@@ -609,10 +611,12 @@ public class Workspace extends CachedEntity {
 			return;
 		if(corpus==null)
 			return;
-		Set<Integer> docIDList = personListsByNameByDoc.keySet();
+		List<Integer> docIDList = new ArrayList<Integer>(personListsByNameByDoc.keySet());
 		// Must have at least 2 Persons to collapse
 		if(docIDList==null || docIDList.isEmpty())
 			return;
+		// Let's run through in doc order for easier understanding.
+		Collections.sort(docIDList);
 		for(Integer docID:docIDList) {
 			HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
 												getPersonListMapForDoc(docID);
@@ -634,6 +638,7 @@ public class Workspace extends CachedEntity {
 		personListsByNameByDoc.clear();
 		personListsByName.clear();
 		clansByName.clear();
+		nradToEntityLinks.clear();
 	}
 	
 	/**
@@ -740,7 +745,7 @@ public class Workspace extends CachedEntity {
 			{
 				String forename = (name==null)?"(unknown)":name.getName();
 				String displayName = forename+
-								"["+nrad.getDocument().getAlt_id()+personList.size()+"]";
+								"["+nrad.getDocument().getAlt_id()+"."+personList.size()+"]";
 				person.setDisplayName(displayName);
 			}
 		}
@@ -776,12 +781,26 @@ public class Workspace extends CachedEntity {
 	 */
 	private Person addFatherForPerson(Person child, NameRoleActivity nradFather,
 			HashMap<Integer, ArrayList<Person>> personListMapForDoc) {
-		int forenameId = nradFather.getName().getId();	// get Name
+		Name name = nradFather.getName();
+		int forenameId = (name==null)?-1:name.getId();	// get Name
 		Person father = child.createPersonForDeclaredFather(generationOffset, 
 				activeLifeStdDev, activeLifeWindow, true);
-		ArrayList<Person> personList = 
-			getPersonListName(personListMapForDoc, forenameId);
-		personList.add(father);
+		if(forenameId>=0) {
+			// If no declared forename, no list to add to.
+			// TODO figure out what to do about unknowns, since they are
+			// essentially compatible (on forename) with everything.
+			// OTOH, is it really worth collapsing? Maybe only if qualified...
+			ArrayList<Person> personList = 
+				getPersonListName(personListMapForDoc, forenameId);
+			personList.add(father);
+			// Now, we'll remap the displayName of the person to something more sensible.
+			{
+				String forename = (name==null)?"(unknown)":name.getName();
+				String displayName = forename+
+								"["+nradFather.getDocument().getAlt_id()+"."+personList.size()+"]";
+				father.setDisplayName(displayName);
+			}
+		}
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nradFather.getId());
 		if(links==null) {
 			links = new EntityLinkSet<NameRoleActivity>(nradFather, LinkType.Type.LINK_TO_PERSON);

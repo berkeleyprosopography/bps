@@ -251,6 +251,7 @@ public class Document {
 			nameRoleActivities.add(nrad);
 			context.put(nrad.getId(), nrad);
 		}
+		Collections.sort(nameRoleActivities);
 		for(NameRoleActivity nrad:nrads) {
 			nrad.initAttachedEntityMaps(dbConn, context);
 		}

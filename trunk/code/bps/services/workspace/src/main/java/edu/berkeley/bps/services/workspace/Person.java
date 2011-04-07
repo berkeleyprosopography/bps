@@ -132,8 +132,8 @@ public class Person extends Entity {
 			double activeTimeSpanStdDev, // double lifeTimeSpanStdDev,
 			double activeTimeSpanWindow,
 			boolean addToFatherLinks) {
-		if(declaredFather==null)
-			return null;
+		//if(declaredFather==null)		// There can be fathers with missing names...
+		//	return null;
 		NameRoleActivity nradFather = originalNRAD.getFather(); 
 		if(nradFather==null)
 			throw new RuntimeException(myClass+"Internal logic error in Person");

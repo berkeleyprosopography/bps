@@ -59,6 +59,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		// All the family roles can combine with anything, so we will skip them, 
 		// and just put in the conflicts between Principle and Witness.
 		setPairWeight("Principle", "Witness", 0);
+		setPairWeight("Witness", "Witness", 0);
 	}
 
 	@Override
