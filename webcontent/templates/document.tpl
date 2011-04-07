@@ -73,18 +73,20 @@
 						</td>
 					</tr>
 						{if isset($nrads[nrad].links)}
-							<tr>
-								{section name=ilink loop=$nrads[nrad].links}
-									<td class="nrad" colspan="3">
-										{if $nrads[nrad].activityRoleIsFamily}
-											<span class="familyIndent">&nbsp;</span>
-										{/if}
-										<span class="nradLink">-- {$nrads[nrad].links[ilink].linkTo}&nbsp;
-											<span class="nradLinkWeight">({$nrads[nrad].links[ilink].weight}%)</span>
-										</span>
-									</td>
-								{/section}
-							</tr>
+							{section name=ilink loop=$nrads[nrad].links}
+								{if $nrads[nrad].links[ilink].weight > 0 }
+									<tr>
+										<td class="nrad" colspan="3">
+											{if $nrads[nrad].activityRoleIsFamily}
+												<span class="familyIndent">&nbsp;</span>
+											{/if}
+											<span class="nradLink">-- {$nrads[nrad].links[ilink].linkTo}&nbsp;
+												<span class="nradLinkWeight">({$nrads[nrad].links[ilink].weight}%)</span>
+											</span>
+										</td>
+									</tr>
+								{/if}
+							{/section}
 						{elseif isset($workspaceID)}
 							<tr>
 								<td class="nrad" colspan="3">

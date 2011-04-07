@@ -100,14 +100,15 @@ function workspaceSetCorpusRSC() {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
 			setBuildingP("Corpus imported to Workspace.");
-			clearWaitCursor();
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
 			// window.location.reload();
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+			setBuildingP("Corpus not imported to Workspace.");
 		}
 		importingCorpus = false;
+		clearWaitCursor();
 	}
 }
 
@@ -142,13 +143,14 @@ function workspaceRebuildEntitiesRSC() {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
 			setBuildingP("Entities rebuilt for Workspace.");
-			clearWaitCursor();
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
 			// window.location.reload();
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+			setBuildingP("Entities not rebuilt for Workspace.");
 		}
+		clearWaitCursor();
 	}
 }
 
