@@ -17,6 +17,7 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 	private LinkType.Type linkType = null;
 	private double summedWeight;
 
+	// TODO add a threshold to Ctor, and use it when normalizing to filter noise
 	public EntityLinkSet(O fromObj, LinkType.Type linkType) {
 		if(fromObj== null)
 			throw new IllegalArgumentException("Must specify link base (fromObj).");

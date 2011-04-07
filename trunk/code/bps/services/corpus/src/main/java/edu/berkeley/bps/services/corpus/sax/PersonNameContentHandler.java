@@ -50,6 +50,9 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	protected static final int T_ANCESTOR = T_PATRONYM|0x20;
 	protected static final int T_MALE = (T_MASCULINE|T_PATRONYM); 
 	protected static final int T_FEMALE = (T_FEMININE); 
+	
+	// TODO this should be configured or set in UI.
+	protected static final String MISSING_NAME_MARKER = "NENNI";
 
 	protected ActivityRole fatherAR;
 	protected ActivityRole grandfatherAR;
@@ -139,9 +142,12 @@ public class PersonNameContentHandler extends StackedContentHandler {
 									Name.GENDER_UNKNOWN);
 			if(nameAttr!=null) {
 				String cleanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
-				name = corpus.findOrCreateName(cleanNameStr, 
-								Name.NAME_TYPE_PERSON, gender, dbConn);
-				name.addCitation(document.getId());
+				// Do not include missing name markers in the names 
+				if(!MISSING_NAME_MARKER.equalsIgnoreCase(cleanNameStr)) {
+					name = corpus.findOrCreateName(cleanNameStr, 
+									Name.NAME_TYPE_PERSON, gender, dbConn);
+					name.addCitation(document.getId());
+				}
 			}
 			if(isPrimaryOrMissing(type)) {
 				NameRoleActivity nra = 

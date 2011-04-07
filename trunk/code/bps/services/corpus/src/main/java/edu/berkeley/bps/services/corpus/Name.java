@@ -85,12 +85,14 @@ public class Name {
 	private HashMap<Integer, Integer> countsByDocId;
 
 	public static class NameComparator implements	Comparator<Name> {
+		// TODO consider working out the normalName issues
 		public int compare(Name name1, Name name2) {
 			return name1.name.compareTo(name2.name);
 		}
 	}
 	
 	public static class GenderComparator implements	Comparator<Name> {
+		// TODO consider a secondary sort when equal
 		public int compare(Name name1, Name name2) {
 			return name1.gender - name2.gender;
 		}

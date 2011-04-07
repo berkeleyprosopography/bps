@@ -113,6 +113,12 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 												+"returned value out of range:"+boost);
 								} // if == 1, indicates no match or no action
 							}
+							if(totalShift!=0) { // Any shift left?
+								// Consider the dates.
+								double likelihood = 
+									fromPerson.getDateOverlapLikelihood(toPerson);
+								totalShift *= likelihood;
+							}
 						}
 					}
 					if(totalShift!=0) {	// any shift to do?
@@ -139,9 +145,9 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 		//   the first create a link and insert it into the LinkSet for toPerson.
 		//   Increase (or set, if new) the weight on the NRAD to toPerson link.
 		// Then normalize the linkSets for both fromPerson and toPerson
-		if(shift<=0)
+		if(shift<=0||shift>1)
 			throw new IllegalArgumentException(
-					"Shift value for PersonCollapser.handleShift <= 0: "+shift);
+					"Shift value for PersonCollapser.handleShift out of range (0-1]: "+shift);
 		List<EntityLinkSet<NameRoleActivity>> linkSetsForFromPerson = 
 			personToEntityLinkSets.get(fromPerson);
 		if(linkSetsForFromPerson==null||linkSetsForFromPerson.isEmpty()) {
@@ -157,7 +163,9 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 		// For each set that includes fromPerson
 		for(EntityLinkSet<NameRoleActivity> linkSet:linkSetsForFromPerson) {
 			// scale the link to the fromPerson - returns the weight shifted.
-			double delta = linkSet.scaleLink(fromPerson, shift);
+			// delta will always be negative, since we are reducing fromPerson weight.
+			// convert it to the positive delta we will add to toPerson
+			double delta = -(linkSet.scaleLink(fromPerson, 1-shift));
 			// Now we shift that to the toPerson. If toPerson is in linkSet, 
 			// just adjust it. Otherwise, create a new link.
 			NRADEntityLink link = (NRADEntityLink)linkSet.get(toPerson);

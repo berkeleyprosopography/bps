@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -126,6 +127,11 @@ public class Workspace extends CachedEntity {
 		this.personToEntityLinkSets = 
 			new HashMap<Person, List<EntityLinkSet<NameRoleActivity>>>();
 		System.err.println("Workspace.ctor, created: "+this.toString());
+	}
+	
+	private void init(ServiceContext sc) {
+		AddToMaps(sc, this);
+		setupCollapser();
 	}
 
 	protected static void AddToMaps(ServiceContext sc, Workspace workspace) {
@@ -263,7 +269,7 @@ public class Workspace extends CachedEntity {
 						rs.getString("description"),
 						user_id);
 					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
-					AddToMaps(sc, workspace);
+					workspace.init(sc);
 				}
 				wkspList.add(workspace);
 			}
@@ -331,7 +337,7 @@ public class Workspace extends CachedEntity {
 				}
 				rs.close();
 				stmt.close();
-				AddToMaps(sc, workspace);
+				workspace.init(sc);
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -400,7 +406,7 @@ public class Workspace extends CachedEntity {
 				}
 				rs.close();
 				stmt.close();
-				AddToMaps(sc, workspace);
+				workspace.init(sc);
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -570,6 +576,8 @@ public class Workspace extends CachedEntity {
 		collapser = new PersonCollapser();
 		// Add the basic rules - 
 		// TODO - this should be configured somehow, but how?
+		
+		// TODO - we need to think about collapse rules for missing forename cases
 		CollapserRule rule;
 		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.WITHIN_DOCUMENTS);
 		collapser.addRule(rule);
@@ -596,9 +604,25 @@ public class Workspace extends CachedEntity {
 	}
 	
 	public void collapseWithinDocuments() {
-		// TODO iterate over docs, and get the Persons for each doc, and pass them
-		// collapser.evaluate.
 		// This needs to run before we call collapseAcrossDocuments
+		if(collapser==null)
+			return;
+		if(corpus==null)
+			return;
+		Set<Integer> docIDList = personListsByNameByDoc.keySet();
+		// Must have at least 2 Persons to collapse
+		if(docIDList==null || docIDList.isEmpty())
+			return;
+		for(Integer docID:docIDList) {
+			HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
+												getPersonListMapForDoc(docID);
+			for(ArrayList<Person> personsByName:personListMapForDoc.values()) {
+				// Do not bother if there is only 1 of a given name
+				if(personsByName.size() > 1)
+					collapser.evaluateList(personsByName, nradToEntityLinks, 
+						personToEntityLinkSets, CollapserRule.WITHIN_DOCUMENTS);
+			}
+		}
 	}
 	
 	public void collapseAcrossDocuments() {
@@ -695,6 +719,9 @@ public class Workspace extends CachedEntity {
 	 */
 	private Person addPersonForNRAD(NameRoleActivity nrad, long center,
 			HashMap<Integer, ArrayList<Person>> personListMapForDoc) {
+		
+		// TODO NOW Need to handle case of NULL forename.
+		
 		int forenameId = nrad.getName().getId();	// get Name
 		// Build a timespan for the new person. Center it on the
 		// document date.
@@ -705,6 +732,14 @@ public class Workspace extends CachedEntity {
 		ArrayList<Person> personList = 
 			getPersonListName(personListMapForDoc, forenameId);
 		personList.add(person);
+		// Now, we'll remap the displayName of the person to something more sensible.
+		{
+			Name name = nrad.getName();
+			String forename = (name==null)?"(unknown)":name.getName();
+			String displayName = forename+
+							"["+nrad.getDocument().getAlt_id()+personList.size()+"]";
+			person.setDisplayName(displayName);
+		}
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
 		if(links==null) {
 			links = new EntityLinkSet<NameRoleActivity>(nrad, 
@@ -787,7 +822,18 @@ public class Workspace extends CachedEntity {
 		return clan;
 	}
 	
+	/**
+	 * Builds the list of all possible Persons and Clans cited in the corpus,
+	 * and then runs the collapser to disambiguate among them. 
+	 * @param sc
+	 */
 	public void rebuildEntitiesFromCorpus(ServiceContext sc) {
+		createEntitiesFromCorpus(sc);
+		collapseWithinDocuments();
+		collapseAcrossDocuments();
+	}
+
+	public void createEntitiesFromCorpus(ServiceContext sc) {
 		// We iterate over the documents first, building persons for each
 		// NRAD, and assembling the persons into lists by forename.
 		// For each NRAD, we build a link to the new person, with all
