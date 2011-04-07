@@ -5,9 +5,10 @@ import edu.berkeley.bps.services.workspace.Person;
 
 public class PartlyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "PartlyQualifiedEqualNameShiftRule";
+	private static final String DESCRIPTION = "TO DO";
 
 	public PartlyQualifiedEqualNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, weight, intraDocument);
+		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);
 	}
 
 	@Override
