@@ -99,7 +99,8 @@ function workspaceSetCorpusRSC() {
   if (xmlhttp.readyState==4) {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
-			setStatusP("Corpus imported to Workspace.");
+			setBuildingP("Corpus imported to Workspace.");
+			clearWaitCursor();
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
 			// window.location.reload();
 		} else {
@@ -131,6 +132,7 @@ function workspaceSetCorpus(workspaceID, corpusId, fRefresh) {
 	//window.status = "request sent: "+verb+": "+url+"?"+args;
 	importingCorpus = true;
 	setBuildingP((fRefresh?"Rebuilding":"Building")+" workspace info from corpus...");
+	setWaitCursor();
 	enableElement("importCorpButton_"+corpusId,false);
 }
 
@@ -139,7 +141,8 @@ function workspaceRebuildEntitiesRSC() {
   if (xmlhttp.readyState==4) {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
-			setStatusP("Entities rebuilt for Workspace.");
+			setBuildingP("Entities rebuilt for Workspace.");
+			clearWaitCursor();
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
 			// window.location.reload();
 		} else {
@@ -163,6 +166,7 @@ function workspaceRebuildEntities(workspaceID) {
 	xmlhttp.onreadystatechange=workspaceRebuildEntitiesRSC;
 	xmlhttp.send(args);
 	setBuildingP("Rebuilding entities for workspace...");
+	setWaitCursor();
 	enableElement(rebuildEntitiesButton,false);
 }
 
@@ -182,6 +186,14 @@ function setBuildingP(str) {
 	var el = document.getElementById("buildingP");
 	el.innerHTML = str;
 	el.style.display = "block";
+}
+
+function setWaitCursor() {
+	document.body.style.cursor = "wait";
+}
+
+function clearWaitCursor() {
+	document.body.style.cursor = "auto";
 }
 
 
