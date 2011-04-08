@@ -19,6 +19,7 @@
 			{section name=role loop=$roles}
 				<td class="title" width="100px" align="center">{$roles[role]}</td>
 			{/section}
+				<td class="title" width="150px" align="center">Workspace</td>
 			{foreach key=kuser item=vroles from=$userroles }
 				<tr><td class="role" ><p><strong>{$kuser}</strong></p></td>
 				{foreach item=role from=$roles}
@@ -30,6 +31,16 @@
 						onclick="MarkChanged(event);" />
 					</td>
 				{/foreach}
+				<td class="role" align="center"><p id="w_{$kuser}">
+				{if $userworkspaces[$kuser]!=0 }
+					<em>Yes</em>&nbsp;&nbsp;
+						<input type="button" value="Delete" onclick="deleteWksp('{$kuser}','{$userworkspaces[$kuser]}')" />
+				{else}
+					<em>No</em>&nbsp;&nbsp;
+						<input type="button" value="Add" onclick="addWkspForUser('{$kuser}')" />
+				{/if}
+					</p>
+				</td>
 				</tr>
 			{/foreach}
 		</tr>

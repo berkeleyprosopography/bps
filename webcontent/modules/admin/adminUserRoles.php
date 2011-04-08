@@ -85,6 +85,79 @@ function MarkChanged(evt) {
 		setRoleForUser( role, user, action );
 	}
 }
+
+var wkspOpForUser = "";
+
+// The ready state change callback method that waits for a response.
+function addWkspForUserRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			window.status = "Workspace created for user.";
+			var wksp_p = document.getElementById("w_"+wkspOpForUser);
+			if(wksp_p!=null) {
+				wksp_p.innerHTML = "<em>Yes</em>";
+			}
+			wkspOpForUser = "";
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to create user workspace.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+function addWkspForUser(user) {
+	if( !xmlhttp )
+	  alert( "Cannot create workspace - no http obj!\n Please advise BPS support." );
+	else {
+		wkspOpForUser = user;
+		var url = "/api/addUserWksp.php";
+		var args = "u="+user;
+		//alert( "Preparing request: POST: "+url+"?"+args );
+		xmlhttp.open("POST", url, true);
+		xmlhttp.setRequestHeader("Content-Type",
+															"application/x-www-form-urlencoded" );
+ 		xmlhttp.onreadystatechange=addWkspForUserRSC;
+		xmlhttp.send(args);
+		//window.status = "request sent: POST: "+url+"?"+args;
+	}
+}
+
+// The ready state change callback method that waits for a response.
+function deleteWkspRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			var wksp_p = document.getElementById("w_"+wkspOpForUser);
+			if(wksp_p!=null) {
+				wksp_p.innerHTML = "<em>No</em>&nbsp;&nbsp;";
+			}
+			wkspOpForUser = "";
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to delete workspace.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+function deleteWksp(user,id) {
+	if( !xmlhttp )
+	  alert( "Cannot delete workspace - no http obj!\n Please advise BPS support." );
+	else {
+		wkspOpForUser = user;
+		var url = "/api/deleteWksp.php";
+		var args = "wid="+id;
+		//alert( "Preparing request: POST: "+url+"?"+args );
+		xmlhttp.open("POST", url, true);
+		xmlhttp.setRequestHeader("Content-Type",
+															"application/x-www-form-urlencoded" );
+ 		xmlhttp.onreadystatechange=deleteWkspRSC;
+		xmlhttp.send(args);
+		//window.status = "request sent: POST: "+url+"?"+args;
+	}
+}
+
 </script>';
 
 $t->assign("script_block", $script_block);
@@ -130,6 +203,23 @@ function getUserRoles(){
 	return $userroles;
 }
 
+function getUserWorkspace(){
+	global $db;
+   /* See if User has workspace or not */
+	$q = "select u.username user, w.id wksp from user u left join workspace w on w.owner_id=u.id";
+	$q .= " order by u.id";
+	$res =& $db->query($q);
+	if (PEAR::isError($res))
+		return false;
+	$userworkspaces = array();
+	while ($row =& $res->fetchRow()) {
+		$userworkspaces[$row['user']] = empty($row['wksp'])?0:$row['wksp'];
+	}
+	// Free the result
+	$res->free();
+	return $userworkspaces;
+}
+
 $roles = getRoles();
 if($roles){
 	$t->assign('roles', $roles);
@@ -138,6 +228,11 @@ if($roles){
 $userroles = getUserRoles();
 if($userroles){
 	$t->assign('userroles', $userroles);
+}
+
+$userworkspaces = getUserWorkspace();
+if($userworkspaces){
+	$t->assign('userworkspaces', $userworkspaces);
 }
 
 //if($opmsg!="")
