@@ -40,7 +40,7 @@ if(!isset($_GET['view'])) {
 	$view = 'docs';
 } else {
 	$view = $_GET['view'];
-	if($view!='docs'&&$view!='people'&&$view!='clans'&&$view!='admin')
+	if($view!='docs'&&$view!='people'&&$view!='clans'&&$view!='params'&&$view!='admin')
 		$view = 'docs';
 }
 $t->assign("currSubNav", $view);
@@ -376,6 +376,8 @@ if($view=='docs') {
 	$t->display('workspace_people.tpl');
 } else if($view=='clans') {
 	$t->display('workspace_clans.tpl');
+} else if($view=='params') { 
+	$t->display('workspace_params.tpl');
 } else if($view=='admin') { 
 	$t->display('workspace_admin.tpl');
 } else {
