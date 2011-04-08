@@ -93,6 +93,7 @@ function updateWorkspace(workspaceID, name) {
 }
 
 var importingCorpus = false;
+var refreshingCorpus = false;
 
 // The ready state change callback method for update.
 function workspaceSetCorpusRSC() {
@@ -101,7 +102,8 @@ function workspaceSetCorpusRSC() {
 			// Maybe this should change the cursor or something
 			setBuildingP("Corpus imported to Workspace.");
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			// window.location.reload();
+			if(!refreshingCorpus)
+				window.location.reload();
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
@@ -132,6 +134,7 @@ function workspaceSetCorpus(workspaceID, corpusId, fRefresh) {
 	xmlhttp.send(args);
 	//window.status = "request sent: "+verb+": "+url+"?"+args;
 	importingCorpus = true;
+	refreshingCorpus = fRefresh;
 	setBuildingP((fRefresh?"Rebuilding":"Building")+" workspace info from corpus...");
 	setWaitCursor();
 	enableElement("importCorpButton_"+corpusId,false);
@@ -333,7 +336,7 @@ if(!isset($user_id)) {
 			$errmsg = "Bad or illegal workspace specifier. ";
 		}
 	} else {
-	 	if(isset($workspace['importedCorpusId'])){
+	 	if($workspace['importedCorpusId']>0){
 			if($view=='docs') {
 				$workspace['nDocs'] = 0;
 				$docs = getWorkspaceDocs($CFG,$workspace['id'], $_GET['o'], '<em>('.$workspace['medianDocDate'].'?)</em>');
