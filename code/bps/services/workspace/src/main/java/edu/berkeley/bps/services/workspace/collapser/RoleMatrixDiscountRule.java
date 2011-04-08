@@ -5,22 +5,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.berkeley.bps.services.common.utils.Pair;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Workspace;
 
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
 public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI 
 		implements CollapserRule, CollapserRuleUI, CollapserRulePairMatrixUI{
 	private final static String myClass = "RoleMatrixDiscountRule";
 	private static final String DESCRIPTION = "TO DO";
 
-	protected List<ActivityRole> corpusRoles = null;
-	
-	protected HashMap<String, ActivityRole> nameToRoleMap = null;
-	
-	protected HashMap<String, Double> rolePairWeights = null;
+	protected Corpus corpus = null;
+
+	protected HashMap<String, Double> rolePairWeights = new HashMap<String, Double>();
 	
 	public RoleMatrixDiscountRule() {
 		this(myClass);
@@ -37,43 +41,25 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		// Get the roles from the workspace, and build the derived Pairs
 		super.initialize(workspace);
 		
-		corpusRoles = null;
-		Corpus corpus = workspace.getCorpus();
+		corpus = workspace.getCorpus();
 		if(corpus==null) {
 			System.err.println(this.getClass().getName()
 					+".initialize(): No corpus found for workspace: "
 					+workspace.getId());
 			return;			// Nothing to do
 		}
-		corpusRoles = corpus.getActivityRoles();
+		List<ActivityRole> corpusRoles = corpus.getActivityRoles();
 		if(corpusRoles==null||corpusRoles.isEmpty()) {
 			System.err.println(this.getClass().getName()
 					+".initialize(): No roles found in corpus: "
 					+corpus.getId());
 			return;			// Nothing to do
 		}
-		// Sort the corpusRoles by ID (creation order)
-		Collections.sort(corpusRoles, new ActivityRole.IdComparator());
-		// We have roles, so now we build role-pairs with the weights
-		nameToRoleMap = new HashMap<String, ActivityRole>();
-		for(ActivityRole role:corpusRoles) {
-			nameToRoleMap.put(role.getName(), role);
-		}
-		hackInInitialHBTINValues();
 	}
 	
-	// HACK - this should be configured,
-	private void hackInInitialHBTINValues() {
-		// Principle, Witness, Father, Mother, Grandfather, Ancestor
-		// All the family roles can combine with anything, so we will skip them, 
-		// and just put in the conflicts between Principle and Witness.
-		setPairWeight("Principle", "Witness", 0);
-		setPairWeight("Witness", "Witness", 0);
-	}
-
 	@Override
 	public double evaluate(Entity fromEntity, Entity toEntity) {
-		if(corpusRoles==null||corpusRoles.isEmpty())
+		if(rolePairWeights.size()==0)
 			return -1.0;	// No way to match the context;
 		// Find the NRADS tied to these Persons, and then get
 		// the discount weight for the pair of roles. 
@@ -81,7 +67,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		// If have multiple nrads, need to find the most restrictive role-pair.
 		// Version 1: just consider the originalNRAD roles
 		ActivityRole fromRole = fromEntity.getOriginalNRAD().getRole();
-		ActivityRole toRole = fromEntity.getOriginalNRAD().getRole();
+		ActivityRole toRole = toEntity.getOriginalNRAD().getRole();
 		double discount = getPairWeight(fromRole, toRole);
 		return discount;
 	}
@@ -93,13 +79,33 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	}
 
 	@Override
+	@XmlElement(name="matrixAxisValues")
 	public List<String> getMatrixAxisValues() {
-		// TODO Auto-generated method stub
 		ArrayList<String> strings = new ArrayList<String>();
-		for(ActivityRole role:corpusRoles) {
+		for(ActivityRole role:corpus.getActivityRoles()) {
 			strings.add(role.getName());
 		}
 		return strings;
+	}
+
+	@XmlElement(name="matrixValues")
+	public List<MatrixItemInfo> getMatrixValues() {
+		ArrayList<MatrixItemInfo> values = new ArrayList<MatrixItemInfo>();
+		for(String pairKey:rolePairWeights.keySet()) {
+			String[] pair = pairKey.split("-");
+			MatrixItemInfo item = new MatrixItemInfo(pair[1], pair[2], rolePairWeights.get(pairKey));
+			values.add(item);
+		}
+		return values;
+	}
+
+	@XmlElement(name="matrixValues")
+	public void setMatrixValues(List<MatrixItemInfo> values) {
+		rolePairWeights.clear();
+		for(MatrixItemInfo item:values) {
+			String key = item.value1+"-"+item.value2;
+			rolePairWeights.put(key, item.weight);
+		}
 	}
 
 	/* gets the discount weight for a pair of Roles. 
@@ -131,11 +137,11 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	@Override
 	public void setPairWeight(String value1, String value2, double weight) {
 		// Get the two roles, then set the weight in the pairs-Weights map
-		ActivityRole role1 = nameToRoleMap.get(value1);
+		ActivityRole role1 = corpus.findActivityRole(value1);
 		if(role1==null)
 			throw new IllegalArgumentException(myClass+
 					".setPairWeight: Unrecognized role: "+value1);
-		ActivityRole role2 = nameToRoleMap.get(value2);
+		ActivityRole role2 = corpus.findActivityRole(value2);
 		if(role2==null)
 			throw new IllegalArgumentException(myClass+
 					".setPairWeight: Unrecognized role: "+value2);

@@ -3,10 +3,12 @@ package edu.berkeley.bps.services.workspace.collapser;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import edu.berkeley.bps.services.common.utils.Pair;
 
 @XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
 public class UserWeightSetting extends Pair<String, Double> {
 	
 	public UserWeightSetting(String label, Double weight) {
@@ -22,9 +24,19 @@ public class UserWeightSetting extends Pair<String, Double> {
 		return getFirst();
 	}
 
+	@XmlElement(name="label")
+	public void setLabel(String newLabel) {
+		setFirst(newLabel);
+	}
+
 	@XmlElement(name="weight")
 	public Double getWeight() {
 		return getSecond();
+	}
+
+	@XmlElement(name="weight")
+	public void setWeight(Double newWeight) {
+		setSecond(newWeight);
 	}
 
 }

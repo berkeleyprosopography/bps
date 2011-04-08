@@ -3,11 +3,16 @@ package edu.berkeley.bps.services.workspace.collapser;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
+import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class CollapserRuleBase implements CollapserRule {
+@XmlSeeAlso({CollapserRuleBaseWithUI.class})
+@XmlRootElement
+public class CollapserRuleBase implements CollapserRule {
 	
 	protected Workspace owner = null;
 	
@@ -101,6 +106,11 @@ public abstract class CollapserRuleBase implements CollapserRule {
 	 */
 	public boolean appliesWithinDocument() {
 		return intraDocument;
+	}
+
+	@Override
+	public double evaluate(Entity fromEntity, Entity toEntity) {
+		throw new RuntimeException("CollapserRuleBase.evaluate should always be overridden");
 	}
 	
 	

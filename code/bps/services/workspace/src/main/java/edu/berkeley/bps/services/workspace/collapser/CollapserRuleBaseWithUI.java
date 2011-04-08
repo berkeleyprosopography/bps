@@ -6,9 +6,13 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import edu.berkeley.bps.services.workspace.Entity;
 
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
+@XmlRootElement
+public class CollapserRuleBaseWithUI extends CollapserRuleBase
 		implements CollapserRule, CollapserRuleUI {
 	
 	protected static final Double WEIGHT_ALWAYS = 1.0;
@@ -70,6 +74,11 @@ public abstract class CollapserRuleBaseWithUI extends CollapserRuleBase
 	@Override
 	public List<UserWeightSetting> getUserSettingsForWeight() {
 		return settingsList;
+	}
+
+	@Override
+	public double evaluate(Entity fromEntity, Entity toEntity) {
+		throw new RuntimeException("CollapserRuleBaseWithUI.evaluate should always be overridden");
 	}
 
 

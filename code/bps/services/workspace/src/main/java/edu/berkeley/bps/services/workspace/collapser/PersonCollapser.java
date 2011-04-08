@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.management.RuntimeErrorException;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
@@ -15,8 +18,18 @@ import edu.berkeley.bps.services.workspace.EntityLinkSet;
 import edu.berkeley.bps.services.workspace.NRADEntityLink;
 import edu.berkeley.bps.services.workspace.Person;
 
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
 public class PersonCollapser extends CollapserBase implements Collapser {
 	private final static String myClass = "PersonCollapser";
+	
+	public PersonCollapser() {
+		super();
+	}
+
+	public PersonCollapser(CollapserBase base) {
+		super(base);
+	}
 
 	public static class EntitySortByNQuals implements Comparator<Entity> {
 		public int compare(Entity p1, Entity p2) {
@@ -26,6 +39,32 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 		}
 	}
 	
+	// TODO We need to hold the shifts for each entity as actions, 
+	// as a list attached to the from entity, and with a rule association.
+	// Where there are multiple shifts for a given rule, we need to divide
+	// the shift by the number of matches. This means that we need to ALSO
+	// keep track of any discounts applied, and any boosts applied, but 
+	// hold them separate until we split the shift weight. Once we complete 
+	// all the pairs in the list, we then do this shift-splitting, apply the
+	// discount/boost weights, and make the shifts happen. An exception is if 
+	// we get a discount of 0, then we discard that shift and do not consider 
+	// it any further. 
+	// TODO - if we shift all the weight away from an NRAD, do not shift weight
+	// to it later. Also, if we shift all weight away from a Person (no linked
+	// nrads with any weight), then we stop considering that Person. Mark it
+	// as GONE. 
+	// TODO - implement the weight threshold: if after shifting (and normalizing),
+	// the weight associated to any link is below the threshold, 0 it. This
+	// must be refined so that we gather sets of links with equal weights and
+	// treat them all the same. This argues for a total weight threshold, rather
+	// than an individual amount threshold. I.e., We order by weight descending,
+	// then we loop and add weight for each. Each time we see a new weight from the
+	// last one, we consider the total, and if it exceeds the threshold, we toss the
+	// rest. That way, if we have a threshold of 10%, but have lots of links at
+	// 10%, we will not toss out a huge chunk of weight at once. We can then 
+	// put the threshold at something like 90% or even 80%, and filter out noise.
+	// We should probably work from the NRADs, since they have to piont to something
+	// and we want to remove their misc links.
 	/**
 	 * Evaluates collapsing (shifting weight) among the entities.
 	 * Evaluates collapsing (shifting weight) among the entities.
@@ -61,7 +100,7 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 					// First try the shift rules, taking the
 					// first match we get - we should only get one.
 					double totalShift = 0;
-					List<CollapserRule> ruleList = 
+					List<CollapserRuleBase> ruleList = 
 						getRules(CollapserRule.SHIFT_RULE, intraDocument);
 					for(CollapserRule rule:ruleList) {
 						double shift = rule.evaluate(fromPerson, toPerson);

@@ -1,13 +1,23 @@
 package edu.berkeley.bps.services.workspace.collapser;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Person;
 
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
 public class PartlyQualifiedCompatibleNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "PartlyQualifiedCompatibleNameShiftRule";
 	private static final String DESCRIPTION = 
 		"Collapse partly qualified citations with compatible, fully qualified citations"
 		+" (e.g., \"PNa, son-of PNb\" and \"PNa, son-of PNb, in-clan CNc\")";
+
+	public PartlyQualifiedCompatibleNameShiftRule() {
+		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
+	}
 
 	public PartlyQualifiedCompatibleNameShiftRule(double weight, boolean intraDocument) {
 		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);
