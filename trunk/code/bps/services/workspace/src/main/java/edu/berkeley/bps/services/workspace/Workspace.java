@@ -11,6 +11,7 @@ import edu.berkeley.bps.services.corpus.NameRoleActivity;
 import edu.berkeley.bps.services.workspace.collapser.Collapser;
 import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRule;
+import edu.berkeley.bps.services.workspace.collapser.CollapserRuleBase;
 import edu.berkeley.bps.services.workspace.collapser.FullyQualifiedEqualNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedCompatibleNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedEqualNameShiftRule;
@@ -132,7 +133,8 @@ public class Workspace extends CachedEntity {
 	
 	private void init(ServiceContext sc) {
 		AddToMaps(sc, this);
-		setupCollapser();
+		if(corpus!=null)
+			setupCollapser();
 	}
 
 	protected static void AddToMaps(ServiceContext sc, Workspace workspace) {
@@ -249,8 +251,9 @@ public class Workspace extends CachedEntity {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
 			//"SELECT id, name, description FROM workspace WHERE owner_id=?";
-			"SELECT w.id wid, w.name, w.description, c.id cid FROM workspace w, corpus c"
-			+" WHERE w.owner_id=? AND c.wksp_id=w.id";
+			"SELECT w.id wid, w.name, w.description, c.id cid"
+			+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id"
+			+" WHERE w.owner_id=?";
 		ArrayList<Workspace> wkspList = new ArrayList<Workspace>();
 		try {
 			initMaps(sc);
@@ -269,7 +272,9 @@ public class Workspace extends CachedEntity {
 						rs.getString("name"), 
 						rs.getString("description"),
 						user_id);
-					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+					int cid = rs.getInt("cid");
+					if(cid>0)
+						workspace.corpus = Corpus.FindByID(sc, cid);
 					workspace.init(sc);
 				}
 				wkspList.add(workspace);
@@ -316,8 +321,8 @@ public class Workspace extends CachedEntity {
 		final String SELECT_BY_ID = 
 			//"SELECT id, name, description, owner_id FROM workspace WHERE id = ?";
 			"SELECT w.id wid, w.name, w.description, w.owner_id, c.id cid"
-			+" FROM workspace w, corpus c"
-			+" WHERE w.id=? AND c.wksp_id=w.id";
+			+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id"
+			+" WHERE w.id=?";
 		Workspace workspace = null;
 		try {
 			initMaps(sc);
@@ -334,7 +339,9 @@ public class Workspace extends CachedEntity {
 							rs.getString("name"), 
 							rs.getString("description"), 
 							rs.getInt("owner_id"));
-					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+					int cid = rs.getInt("cid");
+					if(cid>0)
+						workspace.corpus = Corpus.FindByID(sc, cid);
 				}
 				rs.close();
 				stmt.close();
@@ -348,47 +355,14 @@ public class Workspace extends CachedEntity {
 		//workspace.findAndLoadCorpus(sc);
 		return workspace;
 	}
-	
-	/*
-	private void findAndLoadCorpus(ServiceContext sc) {
-		final String myName = ".findAndLoadCorpus: ";
-		final String SELECT_BY_WKSPID = 
-			"SELECT id FROM corpus WHERE wksp_id=?";
-		if(corpus!=null) {
-			String tmp = myClass+myName+"Corpus already set for workspace:"+id;
-			System.err.println(tmp);
-			return;
-		}
-		if(this.id<=0) {
-			String tmp = myClass+myName+"Cannot load corpus for unpersisted new workspace:"+id;
-			System.err.println(tmp);
-			throw new RuntimeException( tmp );
-		}
-		try {
-			Connection dbConn = sc.getConnection();
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_WKSPID);
-			stmt.setInt(1, this.id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				corpus = Corpus.FindByID(sc, rs.getInt("id"));
-			}
-			rs.close();
-			stmt.close();
-		} catch(SQLException se) {
-			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
-			throw new RuntimeException( tmp );
-		}
-	}
-	*/
 
 	public static Workspace FindByName(ServiceContext sc, int user_id, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
 			//"SELECT id, name, description FROM workspace WHERE name = ? and owner_id = ?";
 			"SELECT w.id wid, w.name, w.description, c.id cid"
-			+" FROM workspace w, corpus c"
-			+" WHERE w.name=? AND w.owner_id=? AND c.wksp_id=w.id";
+			+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id"
+			+" WHERE w.name=? AND w.owner_id=?";
 		Workspace workspace = null;
 		try {
 			initMaps(sc);
@@ -403,7 +377,9 @@ public class Workspace extends CachedEntity {
 				if(rs.next()){
 					workspace = new Workspace(rs.getInt("wid"), rs.getString("name"), 
 										rs.getString("description"), user_id); 
-					workspace.corpus = Corpus.FindByID(sc, rs.getInt("cid"));
+					int cid = rs.getInt("cid");
+					if(cid>0)
+						workspace.corpus = Corpus.FindByID(sc, cid);
 				}
 				rs.close();
 				stmt.close();
@@ -570,6 +546,16 @@ public class Workspace extends CachedEntity {
 			this.corpus.deletePersistence(sc);
 		clearEntityMaps();
 		this.corpus = newCorpus;
+		if(this.corpus!=null)
+			setupCollapser();
+	}
+	
+	public CollapserBase getCollapser() {
+		return collapser;
+	}
+	
+	public void updateCollapser(CollapserBase updatedCollapser) {
+		collapser = new PersonCollapser(updatedCollapser);
 	}
 	
 	public void setupCollapser() {
@@ -579,7 +565,7 @@ public class Workspace extends CachedEntity {
 		// TODO - this should be configured somehow, but how?
 		
 		// TODO - we need to think about collapse rules for missing forename cases
-		CollapserRule rule;
+		CollapserRuleBase rule;
 		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.WITHIN_DOCUMENTS);
 		collapser.addRule(rule);
 		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.ACROSS_DOCUMENTS);
@@ -600,9 +586,14 @@ public class Workspace extends CachedEntity {
 		collapser.addRule(rule);
 		rule = new UnqualifiedCompatibleNameShiftRule(0.3, CollapserRule.ACROSS_DOCUMENTS);
 		collapser.addRule(rule);
-		rule = new RoleMatrixDiscountRule();	// Only applies within docs now...
-		rule.initialize(this);
-		collapser.addRule(rule);
+		RoleMatrixDiscountRule rmdRule = new RoleMatrixDiscountRule();	// Only applies within docs now...
+		rmdRule.initialize(this);
+		// Principle, Witness, Father, Mother, Grandfather, Ancestor
+		// All the family roles can combine with anything, so we will skip them, 
+		// and just put in the conflicts between Principle and Witness.
+		rmdRule.setPairWeight("Principal", "Witness", 0);
+		rmdRule.setPairWeight("Witness", "Witness", 0);
+		collapser.addRule(rmdRule);
 	}
 	
 	public void collapseWithinDocuments() {

@@ -2,42 +2,77 @@ package edu.berkeley.bps.services.workspace.collapser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import edu.berkeley.bps.services.corpus.NameRoleActivity;
-import edu.berkeley.bps.services.workspace.Entity;
-import edu.berkeley.bps.services.workspace.Person;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlSeeAlso({CollapserRuleBaseWithUI.class,
+		FullyQualifiedEqualNameShiftRule.class,
+		PartlyQualifiedEqualNameShiftRule.class,
+		UnqualifiedEqualNameShiftRule.class,
+		PartlyQualifiedCompatibleNameShiftRule.class,
+		UnqualifiedCompatibleNameShiftRule.class})
+@XmlRootElement
 public abstract class CollapserBase implements Collapser {
 	
 	
-	protected List<CollapserRule> allIntraDocRules;
-	protected List<CollapserRule> intraDocShiftRules;
-	protected List<CollapserRule> intraDocDiscountRules;
-	protected List<CollapserRule> intraDocBoostRules;
-	protected List<CollapserRule> allCorpusWideRules;
-	protected List<CollapserRule> corpusWideShiftRules;
-	protected List<CollapserRule> corpusWideDiscountRules;
-	protected List<CollapserRule> corpusWideBoostRules;
+	protected List<CollapserRuleBase> allIntraDocRules;
+	@XmlElementWrapper
+	@XmlAnyElement
+	protected List<CollapserRuleBase> intraDocShiftRules;
+	protected List<CollapserRuleBase> intraDocDiscountRules;
+	@XmlElementWrapper
+	@XmlAnyElement
+	protected List<CollapserRuleBase> intraDocBoostRules;
+	
+	protected List<CollapserRuleBase> allCorpusWideRules;
+	@XmlElementWrapper
+	@XmlAnyElement
+	protected List<CollapserRuleBase> corpusWideShiftRules;
+	@XmlElementWrapper
+	@XmlAnyElement
+	protected List<CollapserRuleBase> corpusWideDiscountRules;
+	@XmlElementWrapper
+	@XmlAnyElement
+	protected List<CollapserRuleBase> corpusWideBoostRules;
 	
 	public CollapserBase() {
-		allIntraDocRules = new ArrayList<CollapserRule>();
-		intraDocShiftRules = new ArrayList<CollapserRule>();
-		intraDocDiscountRules = new ArrayList<CollapserRule>();
-		intraDocBoostRules = new ArrayList<CollapserRule>();
-		allCorpusWideRules = new ArrayList<CollapserRule>();
-		corpusWideShiftRules = new ArrayList<CollapserRule>();
-		corpusWideDiscountRules = new ArrayList<CollapserRule>();
-		corpusWideBoostRules = new ArrayList<CollapserRule>();
+		allIntraDocRules = new ArrayList<CollapserRuleBase>();
+		intraDocShiftRules = new ArrayList<CollapserRuleBase>();
+		intraDocDiscountRules = new ArrayList<CollapserRuleBase>();
+		intraDocBoostRules = new ArrayList<CollapserRuleBase>();
+		allCorpusWideRules = new ArrayList<CollapserRuleBase>();
+		corpusWideShiftRules = new ArrayList<CollapserRuleBase>();
+		corpusWideDiscountRules = new ArrayList<CollapserRuleBase>();
+		corpusWideBoostRules = new ArrayList<CollapserRuleBase>();
+	}
+	
+	public CollapserBase(CollapserBase base) {
+		allIntraDocRules = base.allIntraDocRules;
+		intraDocShiftRules = base.intraDocShiftRules;
+		intraDocDiscountRules = base.intraDocDiscountRules;
+		intraDocBoostRules = base.intraDocBoostRules;
+		allCorpusWideRules = base.allCorpusWideRules;
+		corpusWideShiftRules = base.corpusWideShiftRules;
+		corpusWideDiscountRules = base.corpusWideDiscountRules;
+		corpusWideBoostRules = base.corpusWideBoostRules;
 	}
 
+
+
 	@Override
-	public void addRule(CollapserRule rule) {
+	public void addRule(CollapserRuleBase rule) {
 		addRule(rule, null);
 	}
 	
 	@Override
-	public void addRule(CollapserRule rule, String insertBefore) {
+	public void addRule(CollapserRuleBase rule, String insertBefore) {
 		if(insertBefore!=null)
 			throw new UnsupportedOperationException("insertBefore support is NYI");
 		switch(rule.getType()) {
@@ -67,7 +102,7 @@ public abstract class CollapserBase implements Collapser {
 	}
 
 	@Override
-	public List<CollapserRule> getRules(int typeFilter, boolean intraDocument) {
+	public List<CollapserRuleBase> getRules(int typeFilter, boolean intraDocument) {
 		if(typeFilter <=0)
 			return intraDocument?allIntraDocRules:allCorpusWideRules;
 		switch(typeFilter) {

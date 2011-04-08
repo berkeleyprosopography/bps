@@ -1,11 +1,24 @@
 package edu.berkeley.bps.services.workspace.collapser;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Person;
 
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement
 public class UnqualifiedCompatibleNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "UnqualifiedCompatibleNameShiftRule";
-	private static final String DESCRIPTION = "TO DO";
+	private static final String DESCRIPTION = 
+		"Collapse unqualified citations with compatible, more qualified citations"
+		+" (e.g., \"PNa\" and \"PNa, son-of PNb, in-clan CNc\","
+		+" OR, \"PNa\" and \"PNa, son-of PNb\")";
+
+	public UnqualifiedCompatibleNameShiftRule() {
+		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
+	}
 
 	public UnqualifiedCompatibleNameShiftRule(double weight, boolean intraDocument) {
 		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);

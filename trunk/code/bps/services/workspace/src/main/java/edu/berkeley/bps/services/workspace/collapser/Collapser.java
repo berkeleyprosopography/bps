@@ -30,7 +30,7 @@ public interface Collapser {
 	 * Adds a rule to this Collapser, at the end of the list 
 	 * @param rule the new rule to add
 	 */
-	public void addRule(CollapserRule rule);
+	public void addRule(CollapserRuleBase rule);
 
 	/**
 	 * Adds a rule to this Collapser. 
@@ -38,7 +38,7 @@ public interface Collapser {
 	 * @param insertBefore set to null to add at the end, otherwise, pass the name
 	 * 				of a rule before which this should be added.
 	 */
-	public void addRule(CollapserRule rule, String insertBefore);
+	public void addRule(CollapserRuleBase rule, String insertBefore);
 
 	/**
 	 * Return the rules for this Collapser
@@ -49,6 +49,6 @@ public interface Collapser {
 	 * @return list of rules
 	 * @see edu.berkeley.bps.services.workspace.collapser.CollapserRule#getType()
 	 */
-	public List<CollapserRule> getRules(int typeFilter, boolean intraDocument);
+	public List<CollapserRuleBase> getRules(int typeFilter, boolean intraDocument);
 
 }

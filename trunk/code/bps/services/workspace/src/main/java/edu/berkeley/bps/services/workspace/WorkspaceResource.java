@@ -9,6 +9,8 @@ import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
+import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
+
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -207,6 +209,62 @@ public class WorkspaceResource extends BaseResource {
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
         }
     }
+	
+	/**
+     * Returns details for a given workspace.
+	 * @param id the id of the workspace of interest
+	 * @return
+	 */
+	@GET
+	@Produces({"application/xml", "application/json"})
+	@Path("{id}/collapser")
+	public CollapserBase getCollapser(@Context ServletContext srvc,
+			@PathParam("id")int id) {
+        try {
+        	ServiceContext sc = getServiceContext(srvc);
+			Workspace workspace = getWorkspace(sc, id);
+			return workspace.getCollapser();
+		} catch(WebApplicationException wae) {
+			throw wae;
+		} catch(Exception e) {
+			String tmp = myClass+".getCollapser(): Problem getting Collapser info.\n"+ e.getLocalizedMessage();
+			System.err.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+    }
+
+    /**
+     * Updates an existing workspace
+	 * @param id the id of the workspace of interest
+     * @param workspace the representation of the new workspace
+     * @return Response, with the path (and so id) of the newly created workspace
+     */
+    @PUT
+	@Consumes("application/xml")
+	@Path("{id}/collapser")
+    public Response updateCollapser(@Context ServletContext srvc, 
+    		@PathParam("id") int id, CollapserBase collapser){
+        try {
+        	ServiceContext sc = getServiceContext(srvc);
+			Workspace workspace = getWorkspace(sc, id);
+            // Since all we're changing is the corpus fields, no need
+            // to persist all the docs, etc.
+            workspace.updateCollapser(collapser);
+            // Set the response's status and entity
+            UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
+    		path.path(id + "/collapser");
+            Response response = Response.ok(path.build().toString()).build();
+            return response;
+		} catch(RuntimeException re) {
+			String tmp = myClass+".updateWorkspace(): Problem updating DB.\n"+ re.getLocalizedMessage();
+			System.err.println(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+	}
 	
 	private Corpus parsePayloadToGetCorpus(ServiceContext sc, String payload) {
     	int corpusID = Integer.parseInt(payload);
