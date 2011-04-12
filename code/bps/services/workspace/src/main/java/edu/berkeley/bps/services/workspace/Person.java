@@ -173,6 +173,9 @@ public class Person extends Entity {
 
 	public int getNumQualifiers() {
 		int nQuals = 0;
+		// TODO Consider making Father and Clan worth 2, so that
+		// Father and Clan is worth more than Father and Grandfather
+		// Talk to Laurie about this - does it really make sense?
 		if(declaredFather!=null) nQuals++;
 		if(declaredClan!=null) nQuals++;
 		if(declaredGrandFather!=null) nQuals++;

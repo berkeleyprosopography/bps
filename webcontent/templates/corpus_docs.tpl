@@ -10,16 +10,22 @@
 		{if empty($documents)}
 			<h1><i>No</i> Documents (yet) in Corpus</h1>
 		{else}
-			<h1>Showing {$documents|@count} Documents in Corpus: {$corpus.name}</h1>
+			{if isset($nameFilterName) || isset($roleFilterName)}
+			<p class="nav-right"><a href="/corpora/corpus?id={$corpus.id}">Show all documents</a></p>
+			{/if}
+			<h1>Showing {$documents|@count} Documents in 
+						Corpus: {$corpus.name}{if isset($nameFilterName) }<br />&nbsp;&nbsp;that 
+						cite: {$nameFilterName}{/if}{if isset($roleFilterName) } in 
+						role: {$roleFilterName}{/if}</h1>
 				<table class="" border="0" cellspacing="0" cellpadding="4px" width="100%">
 					<tr>
 						<td class="title" width="160px">
-							<a href="/corpora/corpus?id={$corpus.id}&o=altId">Document</a>
+							<a href="/corpora/corpus?id={$corpus.id}&name={$nameFilter}&role={$roleFilterName}&o=altId">Document</a>
 						</td>
 						<td class="title" width="160px">Publication</td>
 						<td class="title" width="300px">Notes</td>
 						<td class="title" width="100px">
-							<a href="/corpora/corpus?id={$corpus.id}&o=date">Date</a>
+							<a href="/corpora/corpus?id={$corpus.id}&name={$nameFilter}&role={$roleFilterName}&o=date">Date</a>
 					</td>
 					</tr>
 					{section name=doc loop=$documents}

@@ -638,6 +638,18 @@ public class Corpus extends CachedEntity {
 		return list;
 	}
 	
+	public List<Document> getDocuments(ServiceContext sc, Name nameFilter,
+			ActivityRole roleFilter, int orderBy) {
+		List<Document> list;
+		if(nameFilter==null && roleFilter==null) {
+			list = getDocuments(orderBy);
+		} else {
+			list = Document.getFilteredDocuments(sc.getConnection(), this, 
+											nameFilter, roleFilter, orderBy);
+		}
+		return list;
+	}
+	
 	public Document getDocument(int docId) {
 		Document doc = documentsById.get(docId);
 		return doc;
