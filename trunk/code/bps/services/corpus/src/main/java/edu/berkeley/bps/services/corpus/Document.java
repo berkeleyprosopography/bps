@@ -349,6 +349,63 @@ public class Document {
 		return docList;
 	}
 	
+	public static List<Document> getFilteredDocuments(Connection dbConn,
+			Corpus corpus, Name nameFilter, ActivityRole roleFilter, int orderBy ) {
+		ArrayList<Document> list = new ArrayList<Document>();
+		// Note that since Names and roles are per corpus, we need not
+		// filter on corpus_id for docs
+		final String SELECT_BY_NAME_AND_ROLE_1 = 
+			"SELECT DISTINCT d.id from document d, name_role_activity_doc nr"
+			+" WHERE nr.document_id=d.id";
+		final String ROLE_QUAL_SUFFIX = 
+			" AND nr.act_role_id=?";
+		final String NAME_QUAL_SUFFIX = 
+			" AND nr.name_id=?";
+		final String ORDER_BY_ALT_ID = 
+			" ORDER BY d.alt_id";
+		final String ORDER_BY_DATE = 
+			" ORDER BY d.date_norm";
+		
+		StringBuilder sb = new StringBuilder(200);
+		sb.append(SELECT_BY_NAME_AND_ROLE_1);
+		if(roleFilter!=null) {
+			sb.append(ROLE_QUAL_SUFFIX);
+		}
+		if(nameFilter!=null) {
+			sb.append(NAME_QUAL_SUFFIX);
+		}
+		if(orderBy==Corpus.ORDER_DOCS_BY_ALT_ID) {
+			sb.append(ORDER_BY_ALT_ID);
+		} else {
+			sb.append(ORDER_BY_DATE);
+		}
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(sb.toString());
+			int iNext = 1;
+			if(roleFilter!=null) {
+				stmt.setInt(iNext++, roleFilter.getId());
+			}
+			if(nameFilter!=null) {
+				stmt.setInt(iNext++, nameFilter.getId());
+			}
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				Document doc = corpus.getDocument(rs.getInt("id"));
+				list.add(doc);
+			}
+			rs.close();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".getFilteredDocuments: Problem querying DB.\n"+ se.getMessage();
+			System.err.println(tmp);
+			throw new RuntimeException( tmp );
+		}
+			
+		return list;
+	}
+
+
+	
 	public static void DeleteAllInCorpus(Connection dbConn, Corpus corpus) {
 		final String DELETE_ALL = 
 			"DELETE FROM document WHERE corpus_id=?";

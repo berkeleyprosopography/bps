@@ -81,6 +81,18 @@ function filterNames(corpId,orderBy) {
 	//alert( "Navigating to: " + url );
 	window.location.href = url;
 }
+
+function filterDocsByName(corpId,nameId) {
+	var url = "/corpora/corpus?id="+corpId+"&view=docs&name="+nameId;
+	var roleFilterSelEl = document.getElementById("RoleFilterSel");
+	var index = roleFilterSelEl.selectedIndex;
+	var roleFilter = roleFilterSelEl.options[index].value;
+	if(roleFilter!="All")
+		url += "&role="+roleFilter;
+	//alert( "Navigating to: " + url );
+	window.location.href = url;
+}
+
 </script>';
 } else {
 $script_block = '
@@ -245,13 +257,23 @@ function getCorpus($CFG,$id){
 	return false;
 }
 
-function getCorpusDocs($CFG,$id,$order,$medianDocDate) {
+function getCorpusDocs($CFG,$cid,$nid,$role,$order,$medianDocDate) {
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id."/documents";
-	if(!empty($order))
-		$url .= "?o=".$order;
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/documents";
+	$qch = "?";
+	if(!empty($nid)) {
+		$url .= "?name=".$nid;
+		$qch = "&";
+	}
+	if(!empty($role)) {
+		$url .= $qch."role=".$role;
+		$qch = "&";
+	}
+	if(!empty($order)) {
+		$url .= $qch."o=".$order;
+	}
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -274,6 +296,29 @@ function getCorpusDocs($CFG,$id,$order,$medianDocDate) {
 		return $documents;
 	}
 	$opmsg = $rest->getError();
+	return false;
+}
+
+function getNameInCorpus($CFG,$cid, $nid) {
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/names/".$nid;
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServNameOutput = $rest->getResponse();
+		$result = json_decode($ServNameOutput, true);
+		$nameObj = &$result['name'];
+		$nameStr = $nameObj['name'];
+		unset($nameObj);
+		return $nameStr;
+	} else if($rest->getStatus() == 404) {
+		$opmsg = "Bad or illegal corpus+name specifier. ";
+	} else {
+		$opmsg = $rest->getError();
+	}
 	return false;
 }
 
@@ -375,9 +420,20 @@ if(!isset($_GET['id'])) {
 				$t->assign('dates_file', $dates_file);
 			}
 		} else if($view=='docs') {
-			$docs = getCorpusDocs($CFG,$corpusID, $_GET['o'], '<em>('.$corpus['medianDocDate'].'?)</em>');
+			$nameIDFilter = $_GET['name'];
+			$roleFilter = $_GET['role'];
+			$docs = getCorpusDocs($CFG,$corpusID, $nameIDFilter, $roleFilter, $_GET['o'],
+															'<em>('.$corpus['medianDocDate'].'?)</em>');
 			if($docs) {
 				$t->assign('documents', $docs);
+				if(!empty($nameIDFilter)) {
+					$t->assign('nameFilter', $nameIDFilter);
+					$nameFilterName = getNameInCorpus($CFG,$corpusID, $nameIDFilter);
+					$t->assign('nameFilterName', empty($nameFilterName)? "(Unavailable)":$nameFilterName);
+					if(!empty($roleFilter)) {
+						$t->assign('roleFilterName', $roleFilter);
+					}
+				}
 			} else if($opmsg){
 				$errmsg = "Problem getting Corpus documents: ".$opmsg;
 			}

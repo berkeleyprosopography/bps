@@ -63,7 +63,9 @@
 			{section name=iname loop=$names}
 				<tr>
 					<td class="name" style="padding-top:6px">
-						{$names[iname].name}
+						<a href="#" 
+						onclick="javascript:filterDocsByName({$corpusID},{$names[iname].id});return false;">
+						{$names[iname].name}</a>
 					</td>
 					{if $type!='Clan'}
 						<td class="name" style="padding-top:6px">

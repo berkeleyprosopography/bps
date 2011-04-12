@@ -503,14 +503,19 @@ public class CorporaResource extends BaseResource {
         				Response.Status.BAD_REQUEST).entity(
         					"Unrecognized order spec: "+orderByParam).build());
 			}
-			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
+			ServiceContext sc = getServiceContext(srvc);
+			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
             	throw new WebApplicationException( 
             			Response.status(
             				Response.Status.NOT_FOUND).entity("No corpus found with id: "+id).build());
 			}
+			ActivityRole roleFilter = getRoleFromParams(queryParams, corpus);
+			Name nameFilter = getNameFromParams(queryParams, corpus);
 	        //docList = Document.ListAllInCorpus(dbConn, corpus);
-	        docList = corpus.getDocuments(orderBy);
+	        docList = corpus.getDocuments(sc, nameFilter, roleFilter, orderBy);
+		} catch(WebApplicationException wae) {
+			throw wae;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocuments(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			System.err.println(tmp);
@@ -882,9 +887,9 @@ public class CorporaResource extends BaseResource {
 	 */
 	@GET
 	@Produces({"application/xml", "application/json"})
-	@Path("{id}/activityRoles/{arid}")
+	@Path("{id}/activityRoles/{arspec}")
 	public ActivityRole getActivityRole(@Context ServletContext srvc, 
-			@PathParam("id") int id, @PathParam("arid") int arid) {
+			@PathParam("id") int id, @PathParam("arspec") String arspec) {
 		ActivityRole activityRole = null;
 		try {
 			Corpus corpus = Corpus.FindByID(getServiceContext(srvc), id);
@@ -893,9 +898,16 @@ public class CorporaResource extends BaseResource {
 					Response.status(
 						Response.Status.NOT_FOUND).entity(
 								"No corpus found with id: "+id).build());
-
 			}
-			activityRole = corpus.findActivityRole(arid);
+			int arid = -1;
+			try {
+				arid = Integer.parseInt(arspec);
+			} catch( NumberFormatException nfe) {}
+			if(arid>0) {
+				activityRole = corpus.findActivityRole(arid);
+			} else {
+				activityRole = corpus.findActivityRole(arspec);
+			}
 			if(activityRole==null) {
 				throw new WebApplicationException( 
 					Response.status(
@@ -1075,17 +1087,7 @@ public class CorporaResource extends BaseResource {
 									"Unrecognized type filter: "+typeFilterParam).build());
 				}
 			}
-			String roleFilterParam = queryParams.getFirst("role");
-			ActivityRole roleFilter = null;
-			if(roleFilterParam!=null) {
-				roleFilter = corpus.findActivityRole(roleFilterParam.trim());
-				if(roleFilter==null) {
-					throw new WebApplicationException( 
-						Response.status(
-							Response.Status.NOT_FOUND).entity(
-									"Unrecognized role filter: "+roleFilterParam).build());
-				}
-			}
+			ActivityRole roleFilter = getRoleFromParams(queryParams, corpus);
 			String genderFilterParam = queryParams.getFirst("gender");
 			if(genderFilterParam!=null) {
 				try {
@@ -1280,4 +1282,49 @@ public class CorporaResource extends BaseResource {
 		}
 		return Response.ok().build();
 	}
+	
+	private ActivityRole getRoleFromParams(MultivaluedMap<String, String> queryParams,
+			Corpus corpus) {
+		String roleFilterParam = queryParams.getFirst("role");
+		ActivityRole roleFilter = null;
+		if(roleFilterParam!=null) {
+			System.err.println("Corpus.getRoleFromParams called with: "+roleFilterParam);
+			roleFilter = corpus.findActivityRole(roleFilterParam.trim());
+			if(roleFilter==null) {
+				throw new WebApplicationException( 
+					Response.status(
+						Response.Status.NOT_FOUND).entity(
+								"Unrecognized role filter: "+roleFilterParam).build());
+			}
+			return roleFilter;
+		}
+		return null;
+	}
+
+	private Name getNameFromParams(MultivaluedMap<String, String> queryParams,
+			Corpus corpus) {
+		String nameFilterParam = queryParams.getFirst("name");
+		Name name= null;
+		if(nameFilterParam!=null) {
+			System.err.println("Corpus.getNameFromParams called with: "+nameFilterParam);
+			int name_id = -1;
+			try {
+				name_id = Integer.parseInt(nameFilterParam);
+			} catch( NumberFormatException nfe) {}
+			if(name_id>0) {
+				name = corpus.findName(name_id);
+			} else {
+				name = corpus.findName(nameFilterParam);
+			}
+			if(name==null) {
+				throw new WebApplicationException( 
+					Response.status(
+						Response.Status.NOT_FOUND).entity(
+								"Unrecognized name: "+nameFilterParam).build());
+			}
+			return name;
+		}
+		return null;
+	}
+
 }
