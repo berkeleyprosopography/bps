@@ -1288,7 +1288,6 @@ public class CorporaResource extends BaseResource {
 		String roleFilterParam = queryParams.getFirst("role");
 		ActivityRole roleFilter = null;
 		if(roleFilterParam!=null) {
-			System.err.println("Corpus.getRoleFromParams called with: "+roleFilterParam);
 			roleFilter = corpus.findActivityRole(roleFilterParam.trim());
 			if(roleFilter==null) {
 				throw new WebApplicationException( 
@@ -1306,7 +1305,6 @@ public class CorporaResource extends BaseResource {
 		String nameFilterParam = queryParams.getFirst("name");
 		Name name= null;
 		if(nameFilterParam!=null) {
-			System.err.println("Corpus.getNameFromParams called with: "+nameFilterParam);
 			int name_id = -1;
 			try {
 				name_id = Integer.parseInt(nameFilterParam);
