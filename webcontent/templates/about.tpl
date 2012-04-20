@@ -7,7 +7,7 @@
 models that support research. The prototype focuses on a corpus of cuneiform 
 tablets transcribed into Babylonian.
 
-For more information, see the <a href="http://code.google.com/p/berkeley-prosopography-services/wiki/BPSProjectHome">project wiki pages.</a> 
+For more information, see the <a href="https://wikihub.berkeley.edu/display/istds/Berkeley+Prosopography+Services+Wiki+Home">project wiki pages.</a> 
 </p>
 
 <p>BPS was originally created 
@@ -21,7 +21,7 @@ An article about the project has just been published in Berkeley's iNews:
 and Social Network Analysis to study ancient Babylonian society</a>.</p>
 <p>
 BPS is an open-source project created under the <a href="http://www.apache.org/licenses/LICENSE-2.0"> Apache 2.0</a> license. To find the project source code
-and collaborate, see the <a href="http://code.google.com/p/berkeley-prosopography-services/wiki/BPSProjectHome">project wiki</a>.
+and collaborate, see the <a href="https://wikihub.berkeley.edu/display/istds/Berkeley+Prosopography+Services+Wiki+Home">project wiki</a>.
 </p>
 
 <h3>Project Team:</h3>
