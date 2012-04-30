@@ -76,6 +76,7 @@ public class Corpus extends CachedEntity {
 	 */
 	private HashMap<String, Name> namesByName = null;
 	private HashMap<Integer, Name> namesById = null;
+	private HashMap<String, Name> namesByNymId = null;
 
 	/**
 	 * Create a new empty corpus.
@@ -118,6 +119,7 @@ public class Corpus extends CachedEntity {
 		activityRolesById = new HashMap<Integer, ActivityRole>();
 		namesByName = new HashMap<String, Name>();
 		namesById = new HashMap<Integer, Name>();
+		namesByNymId = new HashMap<String, Name>();
 	}
 	
 	public Corpus cloneForWorkspace(ServiceContext sc, 
@@ -161,6 +163,9 @@ public class Corpus extends CachedEntity {
 			Name clone = nameItem.cloneInCorpus(dbConn,newCorpus);
 			newCorpus.namesById.put(clone.getId(), clone);
 			newCorpus.namesByName.put(clone.getName(), clone);
+			String nymId = clone.getNymId();
+			if(nymId!=null)
+				newCorpus.namesByNymId.put(nymId, clone);
 		}
 		// Clone Documents, and build maps
 		idList = new ArrayList<Integer>(documentsById.keySet());
@@ -242,10 +247,14 @@ public class Corpus extends CachedEntity {
 		// Handle Names Maps
 		namesByName.clear();
 		namesById.clear();
+		namesByNymId.clear();
 		List<Name> namesList = Name.ListAllInCorpus(dbConn, this);
 		for(Name name:namesList) {
 			namesByName.put(name.getName(), name);
 			namesById.put(name.getId(), name);
+			String nymId = name.getNymId();
+			if(nymId!=null)
+				namesByNymId.put(nymId, name);
 		}
 		System.err.println("Corpus.initAEMaps() Built names list. Count: "+namesByName.size());
 		// Handle Documents Map
@@ -272,6 +281,7 @@ public class Corpus extends CachedEntity {
 		activityRolesById.clear();
 		namesByName.clear();
 		namesById.clear();
+		namesByNymId.clear();
 	}
 	
 	
@@ -776,6 +786,8 @@ public class Corpus extends CachedEntity {
 		Name.DeleteAllInCorpus(dbConn, this);
 		if(namesByName!=null)
 			namesByName.clear();
+		if(namesByNymId!=null)
+			namesByNymId.clear();
 		if(namesById!=null)
 			namesById.clear();
 	}
@@ -788,9 +800,12 @@ public class Corpus extends CachedEntity {
 			activityRolesById.clear();
 	}
 
-	// This should really take more qualifiers, to ensure
-	// we do not conflate male/female or person/clan
 	public Name findOrCreateName(String name, int type,
+			int gender, Connection dbConn) {
+		return findOrCreateName(name, null, type, gender, dbConn);
+	}
+	
+	public Name findOrCreateName(String name, String nymId, int type,
 			int gender, Connection dbConn) {
 		Name instance = namesByName.get(name);
 		if(instance == null) {
@@ -802,6 +817,13 @@ public class Corpus extends CachedEntity {
 				+","+Name.NameTypeToString(type)
 				+") Found name match with inconsistent type:"
 				+instance.getNameTypeString();
+			System.err.println(tmp);
+			//throw new RuntimeException(tmp);
+		} else if( nymId!=null && instance.getNymId()!=nymId) {
+			String tmp = myClass+".findOrCreateName("+name
+				+","+nymId
+				+") Found name match with inconsistent nymId:"
+				+instance.getNymId();
 			System.err.println(tmp);
 			//throw new RuntimeException(tmp);
 		} else if( instance.getGender()!=gender) {
@@ -832,12 +854,22 @@ public class Corpus extends CachedEntity {
 			throw new RuntimeException("Corpus.addName: duplicate (name).");
 		if(namesById.get(toAdd.getId())!=null)
 			throw new RuntimeException("Corpus.addName: duplicate (id).");
+		String nymId = toAdd.getNymId();
+		if(nymId != null && namesByNymId.get(nymId)!=null)
+			throw new RuntimeException("Corpus.addName: duplicate (nymId).");
 		namesByName.put(toAdd.getName(), toAdd);
 		namesById.put(toAdd.getId(), toAdd);
+		if(nymId != null)
+			namesByName.put(nymId, toAdd);
 	}
 
 	public Name findName(String name) {
 		Name instance = namesByName.get(name);
+		return instance;
+	}
+
+	public Name findNym(String nymId) {
+		Name instance = namesByNymId.get(nymId);
 		return instance;
 	}
 

@@ -36,6 +36,8 @@ public class Document {
 	@XmlElement
 	private String		alt_id;			// Secondary identifier string
 	@XmlElement
+	private String		primaryPubl;	// Reference to primary publication
+	@XmlElement
 	private String		sourceURL;		// TEI source for this document - may be relative
 	@XmlElement
 	private String		xml_id;			// Element within source (for compound files).
@@ -80,11 +82,12 @@ public class Document {
 	 * @param date_str Date string from document
 	 * @param date_norm Normalized date
 	 */
-	public Document(int id, Corpus corpus, String alt_id, String sourceURL, String xml_id,
+	public Document(int id, Corpus corpus, String alt_id, String primaryPubl, String sourceURL, String xml_id,
 			String notes, String date_str, long date_norm) {
 		this.id = id;
 		this.corpus = corpus;
 		this.alt_id = alt_id;
+		this.primaryPubl = primaryPubl;
 		this.sourceURL = sourceURL;
 		this.xml_id = xml_id;
 		this.notes = notes;
@@ -97,7 +100,7 @@ public class Document {
 		Document newDoc = new Document(
 				Document.nextId--,
 				newCorpus,
-				alt_id, sourceURL, xml_id, notes, date_str, date_norm);
+				alt_id, primaryPubl, sourceURL, xml_id, notes, date_str, date_norm);
 		// Get doc id before we create the NRADs
 		newDoc.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
 		// Clone the NRAD list
@@ -120,15 +123,16 @@ public class Document {
 	/**
 	 * Create a new Document, and synthesize an ID.
 	 * @param alt_id Secondary identifier string
+	 * @param primaryPubl Reference to publication
 	 * @param source URL TEI source for this document - may be relative
 	 * @param xml_id Element within source (for compound files).
 	 * @param notes Any notes on document
 	 * @param date_str Date string from document
 	 * @param date_norm Normalized date
 	 */
-	public Document(Corpus corpus, String alt_id, String sourceURL, String xml_id,
+	public Document(Corpus corpus, String alt_id, String primaryPubl, String sourceURL, String xml_id,
 			String notes, String date_str, long date_norm) {
-		this(Document.nextId--, corpus, alt_id, sourceURL, xml_id,
+		this(Document.nextId--, corpus, alt_id, primaryPubl, sourceURL, xml_id,
 				notes, date_str, date_norm);
 	}
 
@@ -136,44 +140,45 @@ public class Document {
 	 * Create a new Document from an alt_id
 	 * @param alt_id Secondary identifier string
 	 */
-	public Document(Corpus corpus, String alt_id, String date, long date_norm) {
-		this(Document.nextId--, corpus, alt_id, null, null, null, date, date_norm);
+	public Document(Corpus corpus, String alt_id, String primaryPubl, String date, long date_norm) {
+		this(Document.nextId--, corpus, alt_id, primaryPubl, null, null, null, date, date_norm);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
 	public Document(Corpus corpus) {
-		this(Document.nextId--, corpus, null, null, null, null, null, 0);
+		this(Document.nextId--, corpus, null, null, null, null, null, null, 0);
 	}
 
 	/**
 	 * Create a new null Document.
 	 */
 	private Document() {
-		this(Document.nextId--, null, null, null, null, null, null, 0);
+		this(Document.nextId--, null, null, null, null, null, null, null, 0);
 	}
 	
 	public void CreateAndPersist(Connection dbConn) {
 		//final String myName = ".CreateAndPersist: ";
-		id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
+		id = persistNew(dbConn, corpus.getId(), alt_id, primaryPubl, sourceURL, xml_id, 
 				notes, date_str, date_norm);
 	}
 		
 	public void persist(Connection dbConn, boolean shallow) {
 		final String myName = ".persist: ";
 		if(id <= CachedEntity.UNSET_ID_VALUE) {
-			id = persistNew(dbConn, corpus.getId(), alt_id, sourceURL, xml_id, 
+			id = persistNew(dbConn, corpus.getId(), alt_id, primaryPubl, sourceURL, xml_id, 
 					notes, date_str, date_norm);
 		} else {
 			//System.err.println("Document: "+id+"("+alt_id+") updating.");
 			// Note that we do not update the corpus_id - moving them is not allowed 
 			final String UPDATE_STMT = 
-				"UPDATE document SET alt_id=?, sourceURL=?, xml_id=?, notes=?, "
+				"UPDATE document SET alt_id=?, primary_publ=?, sourceURL=?, xml_id=?, notes=?, "
 				+"date_str=?, date_norm=? WHERE id=?";
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setString(1, alt_id);
+				stmt.setString(1, primaryPubl);
 				stmt.setString(2, sourceURL);
 				stmt.setString(3, xml_id);
 				stmt.setString(4, notes);
@@ -192,19 +197,21 @@ public class Document {
 	}
 		
 	private static int persistNew(Connection dbConn, 
-			int corpus_id, String alt_id, String sourceURL, String xml_id, 
+			int corpus_id, String alt_id, String primaryPubl, String sourceURL, String xml_id, 
 			String notes, String date_str, long date_norm ) {
 		System.err.println("Document: ("+alt_id+") persisting new.");
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
-			"INSERT INTO document(corpus_id, alt_id, sourceURL, xml_id, notes, date_str, date_norm, creation_time)"
-			+ " VALUES(?,?,?,?,?,?,?,now())";
+			"INSERT INTO document(corpus_id, alt_id, primary_publ, sourceURL, xml_id, notes, date_str, date_norm, creation_time)"
+			+ " VALUES(?,?,?,?,?,?,?,?,now())";
 		int newId = 0;
+		
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setInt(1, corpus_id);
 			stmt.setString(2, alt_id);
+			stmt.setString(2, primaryPubl);
 			stmt.setString(3, sourceURL);
 			stmt.setString(4, xml_id);
 			stmt.setString(5, notes);
@@ -265,7 +272,7 @@ public class Document {
 	
 	public static Document FindByID(Connection dbConn, Corpus corpus, int docId) {
 		final String SELECT_BY_ID = 
-			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
+			"SELECT id, alt_id, primary_publ, sourceURL, xml_id, notes, date_str"
 			+" FROM document WHERE id = ? and corpus_id = ?";
 		Document document = null;
 		try {
@@ -274,7 +281,8 @@ public class Document {
 			stmt.setInt(2, corpus.getId());
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
-				document = new Document(rs.getInt("id"), corpus, rs.getString("alt_id"), 
+				document = new Document(rs.getInt("id"), corpus, 
+						rs.getString("alt_id"), rs.getString("primary_publ"),
 						rs.getString("sourceURL"), rs.getString("xml_id"),
 						rs.getString("notes"), rs.getString("date_str"), 0);
 			}
@@ -290,7 +298,7 @@ public class Document {
 
 	public static Document FindByAltID(Connection dbConn, Corpus corpus, String altId) {
 		final String SELECT_BY_ALT_ID = 
-			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str"
+			"SELECT id, alt_id, primary_publ, sourceURL, xml_id, notes, date_str"
 			+" FROM document WHERE alt_id = ? and corpus_id = ?";
 		Document document = null;
 		try {
@@ -299,7 +307,8 @@ public class Document {
 			stmt.setInt(2, corpus.getId());
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
-				document = new Document(rs.getInt("id"), corpus, rs.getString("alt_id"), 
+				document = new Document(rs.getInt("id"), corpus, 
+						rs.getString("alt_id"), rs.getString("primary_publ"),
 						rs.getString("sourceURL"), rs.getString("xml_id"),
 						rs.getString("notes"), rs.getString("date_str"), 0);
 			}
@@ -315,7 +324,7 @@ public class Document {
 
 	public static List<Document> ListAllInCorpus(Connection dbConn, Corpus corpus) {
 		final String SELECT_BY_CORPUS_ID = 
-			"SELECT id, alt_id, sourceURL, xml_id, notes, date_str, date_norm"
+			"SELECT id, alt_id, primary_publ, sourceURL, xml_id, notes, date_str, date_norm"
 			+" FROM document WHERE corpus_id = ?";
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
@@ -332,6 +341,7 @@ public class Document {
 				Document document = 
 					new Document(rs.getInt("id"), corpus, 
 						rs.getString("alt_id"), 
+						rs.getString("primary_publ"), 
 						rs.getString("sourceURL"), 
 						rs.getString("xml_id"),
 						rs.getString("notes"), 
@@ -473,6 +483,14 @@ public class Document {
 	 */
 	public void setAlt_id(String alt_id) {
 		this.alt_id = alt_id;
+	}
+
+	public String getPrimaryPubl() {
+		return primaryPubl;
+	}
+
+	public void setPrimaryPubl(String primaryPubl) {
+		this.primaryPubl = primaryPubl;
 	}
 
 	/**
