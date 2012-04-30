@@ -85,6 +85,7 @@ function getDocInfo($CFG,$corpid,$docid){
 		$document = array(
 			'id' => $docObj['id'],
 			'alt_id' => $docObj['alt_id'], 
+			'primaryPubl' => $docObj['primaryPubl'],
 			'notes' => $docObj['notes'],
 			'sourceURL' => $docObj['sourceURL'],
 			'xml_id' => $docObj['xml_id'],

@@ -107,7 +107,7 @@
 							<tr>
 								<td class="document" style="padding-top:6px">
 									<a href="/workspace/document?wid={$workspace.id}&did={$documents[doc].id}">{$documents[doc].alt_id}</a></td>
-								<td class="document" style="padding-top:6px">&nbsp; </td>
+								<td class="document" style="padding-top:6px">{$documents[doc].primaryPubl}</td>
 								<td class="document" style="padding-top:6px">{$documents[doc].notes}</td>
 								<td class="document" style="padding-top:6px">{$documents[doc].date_str}</td>
 							</tr>
