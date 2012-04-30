@@ -588,6 +588,9 @@ public class Workspace extends CachedEntity {
 		collapser.addRule(rule);
 		RoleMatrixDiscountRule rmdRule = new RoleMatrixDiscountRule();	// Only applies within docs now...
 		rmdRule.initialize(this);
+//
+// HACK HACK HACK - this must be initialized, or set by a project-specific class
+//
 		// Principle, Witness, Father, Mother, Grandfather, Ancestor
 		// All the family roles can combine with anything, so we will skip them, 
 		// and just put in the conflicts between Principle and Witness.
