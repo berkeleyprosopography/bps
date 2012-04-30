@@ -31,6 +31,7 @@ CREATE TABLE `document` (
   `id`            INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
   `corpus_id`     INT(10) UNSIGNED NOT NULL,
   `alt_id`        VARCHAR(255) NULL,
+  `primary_publ`  VARCHAR(255) NULL,
   `sourceURL`     VARCHAR(255) NULL,
   `xml_id`        VARCHAR(255) NULL,
   `notes`         text NULL,
@@ -94,6 +95,7 @@ DROP TABLE IF EXISTS `name`;
 CREATE TABLE `name` (
   `id`             INT(10) unsigned PRIMARY KEY NOT NULL auto_increment,
   `name`           VARCHAR(255) NOT NULL,
+  `nym_id`         VARCHAR(255) NULL,
   `nametype`       ENUM ('person', 'clan') NOT NULL DEFAULT 'person',
   `gender`         ENUM ('male', 'female', 'unknown') NOT NULL DEFAULT 'unknown',
   `notes`          text NULL,

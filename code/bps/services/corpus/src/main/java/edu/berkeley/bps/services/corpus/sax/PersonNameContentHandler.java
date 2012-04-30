@@ -115,6 +115,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 		String xmlid = attrList.getValue("xml:id");
 		try {
 			String nameAttr = attrList.getValue("", "n");
+			String nymRefAttr = attrList.getValue("", "nymRef");
 			Name name = null;
 			String typeStr = attrList.getValue("", "type");
 			String subTypeStr = attrList.getValue("", "subtype");
@@ -140,11 +141,22 @@ public class PersonNameContentHandler extends StackedContentHandler {
 			int gender = isMale(type)?Name.GENDER_MALE:
 								(isFemale(type)?Name.GENDER_FEMALE:
 									Name.GENDER_UNKNOWN);
-			if(nameAttr!=null) {
+			if(nymRefAttr!=null) {
+				nymRefAttr = nymRefAttr.trim();
+				nymRefAttr = nymRefAttr.replaceAll("#", "");
+				if(nymRefAttr.isEmpty()) {
+					nymRefAttr = null;
+				} else {
+					name = corpus.findNym(nymRefAttr);
+					if(name!=null)
+						name.addCitation(document.getId());
+				}
+			}
+			if(name==null && nameAttr!=null) {
 				String cleanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
 				// Do not include missing name markers in the names 
 				if(!MISSING_NAME_MARKER.equalsIgnoreCase(cleanNameStr)) {
-					name = corpus.findOrCreateName(cleanNameStr, 
+					name = corpus.findOrCreateName(cleanNameStr, nymRefAttr,
 									Name.NAME_TYPE_PERSON, gender, dbConn);
 					name.addCitation(document.getId());
 				}
@@ -224,11 +236,23 @@ public class PersonNameContentHandler extends StackedContentHandler {
 		String xmlid = attrList.getValue("xml:id");
 		try {
 			String nameAttr = attrList.getValue("", "n");
+			String nymRefAttr = attrList.getValue("", "nymRef");
 			Name name = null;
-			if(nameAttr!=null) {
+			if(nymRefAttr!=null) {
+				nymRefAttr = nymRefAttr.trim();
+				nymRefAttr = nymRefAttr.replaceAll("#", "");
+				if(nymRefAttr.isEmpty()) {
+					nymRefAttr = null;
+				} else {
+					name = corpus.findNym(nymRefAttr);
+					if(name!=null)
+						name.addCitation(document.getId());
+				}
+			}
+			if(name==null && nameAttr!=null) {
 				String clanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
-				name = corpus.findOrCreateName(clanNameStr, Name.NAME_TYPE_CLAN,
-												Name.GENDER_UNKNOWN, dbConn);
+				name = corpus.findOrCreateName(clanNameStr, nymRefAttr,
+						Name.NAME_TYPE_CLAN, Name.GENDER_UNKNOWN, dbConn);
 				name.addCitation(document.getId());
 			}
 			String typeStr = attrList.getValue("", "type");

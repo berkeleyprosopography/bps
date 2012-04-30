@@ -51,6 +51,11 @@ public class Name {
 	@XmlElement
 	private int			id;
 	/**
+	 * A nymID from the corpus
+	 */
+	@XmlElement
+	private String		nymId;
+	/**
 	 * The associated corpus, if non-zero. If 0, indicates no corpus link
 	 */
 	@XmlElement
@@ -117,7 +122,7 @@ public class Name {
 	 * Create a new empty name.
 	 */
 	protected Name() {
-		this(Name.nextID--, 0, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null, 0, 0);
+		this(Name.nextID--, 0, null, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, null, null, 0, 0);
 	}
 
 	/**
@@ -126,16 +131,24 @@ public class Name {
 	 * @param description Any description useful to users.
 	 */
 	protected Name( String name, Corpus corpus) {
-		this(Name.nextID--, corpus.getId(), name, NAME_TYPE_PERSON, GENDER_UNKNOWN, 
+		this(Name.nextID--, corpus.getId(), name, null, NAME_TYPE_PERSON, GENDER_UNKNOWN, 
 				null, null, 0, 0);
 	}
 
 	protected Name(int id, int corpusId, String name, String nametype, 
 			String gender, String notes, Name normal,
 			int docCount, int totalCount) {
-		this(id, corpusId, name, NameTypeStringToValue(nametype), 
+		this(id, corpusId, name, null, nametype, 
+				gender, notes, normal, docCount, totalCount);
+	}
+
+	protected Name(int id, int corpusId, String name, String nymId, String nametype, 
+			String gender, String notes, Name normal,
+			int docCount, int totalCount) {
+		this(id, corpusId, name, nymId, NameTypeStringToValue(nametype), 
 				GenderStringToValue(gender), notes, normal, docCount, totalCount);
 	}
+	
 	/**
 	 * Ctor with all params - not generally used.
 	 * @param id ID of the Name to be created. Must be unique.
@@ -143,13 +156,14 @@ public class Name {
 	 * @param notes Researcher notes about this name.
 	 * @param normal Reference to the normalized form (null if this is the normal form)
 	 */
-	public Name(int id, int corpusId, String name, int nametype, 
+	public Name(int id, int corpusId, String name, String nymId, int nametype, 
 			int gender, String notes, Name normal,
 			int docCount, int totalCount) {
 		super();
 		this.id = id;
 		this.corpusId = corpusId;
 		this.name = name;
+		this.nymId = nymId;
 		this.nametype = nametype;
 		this.gender = gender;
 		this.notes = notes;
@@ -167,7 +181,7 @@ public class Name {
 			throw new RuntimeException(tmp);
 		}
 		return CreateAndPersist(dbConn, newCorpus.getId(),
-				name, nametype, gender, notes, null);
+				name, nymId, nametype, gender, notes, null);
 	}
 
 	/**
@@ -211,6 +225,14 @@ public class Name {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getNymId() {
+		return nymId;
+	}
+
+	public void setNymId(String nymId) {
+		this.nymId = nymId;
 	}
 
 	/**
@@ -378,7 +400,7 @@ public class Name {
 		final String SELECT_BY_CORPUS_ID = 
 			//"SELECT `id`, `name`,`nametype`,`gender`,`notes`,`normal`"
 			//+ "FROM `name` WHERE `corpus_id`=? ORDER BY normal";
-			"SELECT n.id, n.name, n.nametype, n.gender, n.notes, n.normal, n.name," 
+			"SELECT n.id, n.name, n.nym_id, n.nametype, n.gender, n.notes, n.normal, " 
 			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
 			+" (SELECT T1.name_id, count(*) nDocs FROM"
 			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
@@ -400,7 +422,8 @@ public class Name {
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				Name newName = new Name(rs.getInt("id"), corpus_id, 
-						rs.getString("name"), rs.getString("nametype"), 
+						rs.getString("name"), rs.getString("nym_id"), 
+						rs.getString("nametype"), 
 						rs.getString("gender"), rs.getString("notes"), null, 
 						rs.getInt("docCount"), rs.getInt("totalCount"));
 				int normalId = rs.getInt("normal");
@@ -435,7 +458,7 @@ public class Name {
 		 */
 		
 		final String SELECT_BY_ROLE_WITH_COUNTS_1 = 
-		"SELECT n.id, n.name, n.nametype, n.gender, n.notes, n.normal, n.name," 
+		"SELECT n.id, n.name, n.nym_id, n.nametype, n.gender, n.notes, n.normal," 
 		+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,";
 		final String T2_1 = " (SELECT T1.name_id, count(*) nDocs FROM";
 		final String T1_NO_ROLE =
@@ -494,7 +517,7 @@ public class Name {
 				int gender = Name.GenderStringToValue(rs.getString("gender"));
 				Name normal = corpus.findName(rs.getInt("normal"));
 				Name newName = new Name(rs.getInt("id"), corpus.getId(),
-						rs.getString("name"), nametype, 
+						rs.getString("name"), rs.getString("nym_id"), nametype, 
 						gender, rs.getString("notes"), normal,
 						rs.getInt("docCount"), rs.getInt("totalCount"));
 				list.add(newName);
@@ -542,9 +565,27 @@ public class Name {
 	 */
 	public static Name CreateAndPersist(Connection dbConn, int corpusId,
 			String name, int nametype, int gender, String notes, Name normal) {
+		return CreateAndPersist(dbConn, corpusId, name, null, 
+								nametype, gender, notes, normal);
+	}
+	
+	/**
+	 * Creates a new Name entity, persists to the DB store, and sets the created ID. 
+	 * @param dbConn an open JDCB connection
+	 * @param corpusId 0 if a generic Name, else set to a linked corpus
+	 * @param name The name form
+	 * @param nymId a nym id from corpus (may be null)
+	 * @param nametype One of NAME_TYPE_PERSON or NAME_TYPE_CLAN
+	 * @param gender One of GENDER_MALE, GENDER_FEMALE, or GENDER_UNKNOWN
+	 * @param notes Any notes on form, etc.
+	 * @param normal The normal form of this name, if 'name' is not the normal form. 
+	 * @return
+	 */
+	public static Name CreateAndPersist(Connection dbConn, int corpusId,
+			String name, String nymId, int nametype, int gender, String notes, Name normal) {
 		final String myName = ".CreateAndPersist: ";
-		int newId = persistNew(dbConn, corpusId, name, nametype, gender, notes, normal);
-		Name newName = new Name(newId, corpusId, name, nametype, gender, notes, normal, 0, 0); 
+		int newId = persistNew(dbConn, corpusId, name, nymId, nametype, gender, notes, normal);
+		Name newName = new Name(newId, corpusId, name, nymId, nametype, gender, notes, normal, 0, 0); 
 		return newName;
 	}
 	
@@ -560,17 +601,18 @@ public class Name {
 	 * @return
 	 */
 	public static int persistNew(Connection dbConn, int corpusId,
-			String name, int nametype, int gender, String notes, Name normal) {
+			String name, String nym_id, int nametype, int gender, String notes, Name normal) {
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
-			"INSERT INTO `name`(`name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id`,creation_time)"
-			+" VALUES(?,?,?,?,?,?,now())";
+			"INSERT INTO `name`(`name`,`nym_id`,`nametype`,`gender`,`notes`,`normal`,`corpus_id`,creation_time)"
+			+" VALUES(?,?,?,?,?,?,?,now())";
 			
 		int newId = 0;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, name);
+			stmt.setString(1, nym_id);
 			stmt.setString(2, NameTypeToString(nametype));
 			stmt.setString(3, GenderToString(gender));
 			stmt.setString(4, notes);
@@ -599,17 +641,18 @@ public class Name {
 	public void persist(Connection dbConn) {
 		final String myName = ".persist: ";
 		if(id<=CachedEntity.UNSET_ID_VALUE) {
-			id = persistNew(dbConn, corpusId, name, 
+			id = persistNew(dbConn, corpusId, name, nymId, 
 					nametype, gender, 
 					notes, normal);
 		} else {
 			final String UPDATE_STMT = 
 				"UPDATE `name`"
-				+ " SET `name`=?,`nametype`=?,`gender`=?,`notes`=?,`normal`=?,`corpus_id`=?"
+				+ " SET `name`=?,`nym_id`=?,`nametype`=?,`gender`=?,`notes`=?,`normal`=?,`corpus_id`=?"
 				+ " WHERE id=?";
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setString(1, name);
+				stmt.setString(1, nymId);
 				stmt.setString(2, NameTypeToString(nametype));
 				stmt.setString(3, GenderToString(gender));
 				stmt.setString(4, notes);
@@ -639,7 +682,7 @@ public class Name {
 		final String SELECT_STMT = 
 			//"SELECT `name`,`nametype`,`gender`,`notes`,`normal`,`corpus_id` FROM `name`"
 			//+" WHERE `id`=?";
-			"SELECT n.name, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,"
+			"SELECT n.name, n.nym_id, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,"
 			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
 			+" (SELECT T1.name_id, count(*) nDocs FROM"
 			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
@@ -655,7 +698,8 @@ public class Name {
 			ResultSet rs = stmt.executeQuery();
 			int normalId = 0;
 			if(rs.next()){
-				toFind = new Name(id, rs.getInt("corpus_id"), rs.getString("name"), 
+				toFind = new Name(id, rs.getInt("corpus_id"), rs.getString("name"),
+									rs.getString("nym_id"),
 									rs.getString("nametype"), rs.getString("gender"),
 									rs.getString("notes"), null,
 									rs.getInt("docCount"), rs.getInt("totalCount"));
@@ -668,7 +712,8 @@ public class Name {
 				rs = stmt.executeQuery();
 				if(rs.next()){
 					// Normal forms do not chain, so we need not recurse.
-					Name normalForm = new Name(normalId, rs.getInt("corpus_id"), rs.getString("name"), 
+					Name normalForm = new Name(normalId, rs.getInt("corpus_id"), 
+										rs.getString("name"), rs.getString("nym_id"), 
 										rs.getString("nametype"), rs.getString("gender"),
 										rs.getString("notes"), null,
 										rs.getInt("docCount"), rs.getInt("totalCount"));
@@ -715,27 +760,43 @@ public class Name {
 	 * @return
 	 */
 	public static Name FindByName(Connection dbConn, String name, int corpusId) {
-		final String myName = ".FindByName: ";
+		return FindByNameOrNymId(dbConn, name, null, corpusId);
+	}
+
+	/**
+	 * @param dbConn an open JDBC connection
+	 * @param id DB id of the Name to find
+	 * @param forCorpusId 0 if matches any generic Name, or >0 to match for a corpus
+	 * @return
+	 */
+	public static Name FindByNymId(Connection dbConn, String nymId, int corpusId) {
+		return FindByNameOrNymId(dbConn, null, nymId, corpusId);
+	}
+
+	private static Name FindByNameOrNymId(Connection dbConn, 
+			String name, String nymId, int corpusId) {
+		final String myName = ".FindByNameOrNymId: ";
+		final String colId = ((name!=null)?"n.name":"n.nym_id"); 
 		final String SELECT_STMT = 
-			//"SELECT `id`,`nametype`,`gender`,`notes`,`normal` FROM `name`"
-			//+" WHERE `name`=? AND `corpus_id`=?";
-			"SELECT n.id, n.nametype, n.gender, n.notes, n.normal, n.corpus_id,"
+			"SELECT n.id, n.name, n.nym_id,"
+			+" n.nametype, n.gender, n.notes, n.normal, n.corpus_id,"
 			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
 			+" (SELECT T1.name_id, count(*) nDocs FROM"
 			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
 			+" GROUP BY T1.name_id) AS T2"
 			+" WHERE n.id=nr.name_id AND n.id=T2.name_id AND n.corpus_id=?" 
-			+" AND n.name=? GROUP BY n.id ORDER BY n.normal";
+			+" AND "+colId+"=? GROUP BY n.id ORDER BY n.normal";
 
 		Name toFind = null;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_STMT);
 			stmt.setInt(1, corpusId);
-			stmt.setString(2, name);
+			stmt.setString(2, (name!=null)?name:nymId);
 			ResultSet rs = stmt.executeQuery();
 			int normalId = 0;
 			if(rs.next()){
-				toFind = new Name(rs.getInt("id"), corpusId, name, 
+				toFind = new Name(rs.getInt("id"), corpusId, 
+									rs.getString("name"), rs.getString("nym_id"),   
 									rs.getString("nametype"), rs.getString("gender"),
 									rs.getString("notes"), null,
 									rs.getInt("docCount"), rs.getInt("totalCount"));
@@ -774,6 +835,41 @@ public class Name {
 			String tmp = myClass+".DeletePersistence: Problem querying DB.\n"+ se.getMessage();
 			System.err.println(tmp);
 			throw new RuntimeException( tmp );
+		}
+	}
+	
+	public void checkAttributes(String name, String nymId, int type,
+			int gender) {
+		final String mySig = myClass+".checkAttributes("; 
+		if( this.nametype!=type) {
+			String tmp = mySig+name+","+Name.NameTypeToString(type)
+			+") Name match with inconsistent type:"+getNameTypeString();
+			System.err.println(tmp);
+			//throw new RuntimeException(tmp);
+		} else if( nymId!=null && this.nymId!=nymId) {
+			String tmp = mySig+name+","+nymId
+			+") Name match with inconsistent nymId:"+this.nymId;
+			System.err.println(tmp);
+			//throw new RuntimeException(tmp);
+		} else if( this.gender!=gender) {
+			// Allow unknown to combine with known. 
+			if(gender == Name.GENDER_UNKNOWN) {
+				String tmp = mySig+name
+				+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+
+				this.gender;
+				System.err.println(tmp);
+			} else if(this.gender==Name.GENDER_UNKNOWN) {
+				String tmp = mySig+name
+				+","+Name.GenderToString(gender)+") Assuming name match with unknown gender, and updating existing name.";
+				System.err.println(tmp);
+				setGender(gender);
+			} else {
+				String tmp = mySig+name
+				+","+Name.GenderToString(gender)+") Found name match with conflicting gender:"+
+				getGenderString();
+				System.err.println(tmp);
+				//throw new RuntimeException(tmp);
+			}
 		}
 	}
 }

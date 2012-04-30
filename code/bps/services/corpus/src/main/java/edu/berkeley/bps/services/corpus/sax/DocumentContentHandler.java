@@ -28,13 +28,16 @@ public class DocumentContentHandler extends StackedContentHandler {
 	// TODO These are HBTIN specific, and should be handled generally
 	protected ActivityRole principalAR;
 	protected ActivityRole witnessAR;
-
+	
 	private boolean inText_transliteration = false;
+	private boolean inNymList = false;
 	private boolean inBody = false;
 	private boolean onBack = false;
 	private boolean inWitnesses = false;
 	private boolean onAltIDElement = false;
+	private boolean onPrimPubElement = false;
 	private boolean foundAltIDElement = false;
+	private boolean foundPrimPubElement = false;
 	private boolean notADocument = false;
 
 	public DocumentContentHandler(Connection dbConn, Corpus corpus, 
@@ -54,6 +57,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 		if(pathMatches(TEI_Constants.ALT_ID_PATH)){
 			String type = attrList.getValue("", "type");  
 			onAltIDElement = (TEI_Constants.ALT_ID_PATH_TYPE_ATTR.equalsIgnoreCase(type));
+			onPrimPubElement = (TEI_Constants.PRIMARY_PUB_PATH_TYPE_ATTR.equalsIgnoreCase(type));
 			/*
 			 if(onAltIDElement)
 				System.err.println("Found AltIDElement");
@@ -66,11 +70,22 @@ public class DocumentContentHandler extends StackedContentHandler {
 			String type = attrList.getValue("", "type");  
 			if("transliteration".equalsIgnoreCase(type)) {
 				inText_transliteration = true;
-			} else if("listNym".equalsIgnoreCase(type)
-					|| "listPerson".equalsIgnoreCase(type)) {
+			} else if("listNym".equalsIgnoreCase(type)) {
+				notADocument = true;
+				inNymList = true;
+			} else if("listPerson".equalsIgnoreCase(type)) {
 				notADocument = true;
 			} else {
 				inText_transliteration = false;
+			}
+		} else if(inNymList) {
+			if(localName.equals("nym")) {
+				NymContentHandler nymCH = 
+					new NymContentHandler(dbConn, corpus, parser, this);
+				// Pretend nymCH was already set when we started this element
+				elPath.pop();	// nymCH will close this element out.
+				nymCH.startElement(namespaceURI, localName, qName, attrList);
+				parser.setContentHandler(nymCH);
 			}
 		} else if(inText_transliteration) {
 			if(localName.equals("body")) {
@@ -98,7 +113,7 @@ public class DocumentContentHandler extends StackedContentHandler {
 					PersonNameContentHandler pnCH = 
 						new PersonNameContentHandler(dbConn, corpus,document,activity,
 								ar, parser, this);
-					// Pretend docCH was already set when we started this element
+					// Pretend pnCH was already set when we started this element
 					elPath.pop();	// pnCH will close this element out.
 					pnCH.startElement(namespaceURI, localName, qName, attrList);
 					parser.setContentHandler(pnCH);
@@ -116,6 +131,13 @@ public class DocumentContentHandler extends StackedContentHandler {
 			document.setAlt_id(altID);
 			onAltIDElement = false;
 			foundAltIDElement = true;
+		} else if(onPrimPubElement) {
+			// Preserve spaces in primary pub. Only used in display
+			String primPub = getCurrentText().trim();
+			//System.err.println("Found Primary Publication for document:"+primPub);
+			document.setPrimaryPubl(primPub);
+			onPrimPubElement = false;
+			foundPrimPubElement = true;
 		}
 		super.endElement(namespaceURI, localName, qName);
 	}
@@ -128,6 +150,8 @@ public class DocumentContentHandler extends StackedContentHandler {
 			corpus.addDocument(document);
 			if(!foundAltIDElement)
 				System.err.println("No AltIDElement for document!");
+			if(!foundPrimPubElement)
+				System.err.println("No Primary Publication Element for document!");
 		}
 		super.pop();
 	}
