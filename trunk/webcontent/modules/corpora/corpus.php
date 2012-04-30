@@ -284,7 +284,8 @@ function getCorpusDocs($CFG,$cid,$nid,$role,$order,$medianDocDate) {
 		foreach($results as &$result) {
 			$docObj = &$result['document'];
 			$docDate = ($docObj['dateString']==0)?$medianDocDate:$docObj['dateString'];
-			$document = array(	'id' => $docObj['id'], 'alt_id' => $docObj['alt_id'], 
+			$document = array(	'id' => $docObj['id'],
+				'alt_id' => $docObj['alt_id'], 'primaryPubl' => $docObj['primaryPubl'], 
 				'notes' => $docObj['notes'], 'sourceURL' => $docObj['sourceURL'],
 				'xml_id' => $docObj['xml_id'], 'date_str' => $docDate
 			);

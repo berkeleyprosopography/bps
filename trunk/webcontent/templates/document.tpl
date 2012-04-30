@@ -26,7 +26,7 @@
 			</tr>
 			<tr>
 				<td class="document" style="padding-top:6px">{$document.alt_id}</td>
-				<td class="document" style="padding-top:6px">&nbsp; </td>
+				<td class="document" style="padding-top:6px">{$documents[doc].primaryPubl}</td>
 				<td class="document" style="padding-top:6px">{$document.notes}</td>
 				<td class="document" style="padding-top:6px">{$document.date_str}</td>
 			</tr>
