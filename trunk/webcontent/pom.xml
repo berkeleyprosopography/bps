@@ -21,7 +21,26 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<targetDir>target/classes</targetDir>
-  </properties>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>DEV</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<bps.supportEmail>false</bps.supportEmail>
+			</properties>
+		</profile>
+		<profile>
+			<id>PROD</id>
+			<properties>
+				<bps.supportEmail>true</bps.supportEmail>
+			</properties>
+		</profile>
+	</profiles>
+		
 
 
 	<build>
