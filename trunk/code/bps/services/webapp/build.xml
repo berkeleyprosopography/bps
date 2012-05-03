@@ -1,7 +1,8 @@
-<!-- This is largely obsolete, and can probably be deleted soon. Use mvn instead. -->
-<project name="corpus" default="install" basedir=".">
+<!-- This is largely obsolete, and can probably be deleted soon. Use mvn instead.
+		 The main thing that is useful is the undeploy - need to do this in mvn. -->
+<project name="common" default="install" basedir=".">
     <description>
-        bps corpus module
+        bps webapp module
     </description>
     <!-- set global properties for this build -->
     <property name="build_root" value=".."/>
@@ -11,6 +12,7 @@
     <property name="mvn.opts" value="" />
     <property name="src" location="src"/>
     <property name="build" location="build"/>
+    <property name="target" location="target"/>
 		<property name="db.script.dir" location="target/db"/>
 
     <condition property="osfamily-unix">
@@ -22,12 +24,16 @@
 
 		<target name="deploy" 
 							description="deploy services in ${jee.server.bps}">
-			<!-- Nothing to deploy here -->
+			<!-- Copy the webapp war to the jee server -->
+			<copy todir="${jee.deploy.bps}"
+					file="${target}/${bps.services.war}"/>
 		</target>
 
 		<target name="undeploy" 
 							description="undeploy services from ${jee.server.bps}">
-			<!-- Nothing to undeploy here -->
+			<!-- Remove the webapp war (and expanded dirs) from the jee server -->
+			<delete failonerror="false" dir="${jee.deploy.bps}/${bps.services.context}"/>
+			<delete failonerror="false" file="${jee.deploy.bps.services}"/>
 		</target>
 
     <target name="install" depends="install-unix,install-windows"
@@ -84,29 +90,8 @@
         </exec>
     </target>
 
-		<target name="setup_sql" description="copy init_db scripts, replacing keywords">
-			<copy todir="${db.script.dir}">
-				<fileset dir="${src}/main/resources/schemas"/>
-				<filterset>
-					<!-- Note: double-subs from build.props (where build.props sets from env) fail -->
-					<filter token="DB_NAME" value="${db.name}" />
-					<filter token="DB_USER_BPS" value="${db.bps.user}" />
-					<filter token="DB_PASSWORD_BPS" value="${env.DB_PASSWORD_BPS}" />
-				</filterset>
-			</copy>
-		</target>
-
-    <target name="create_db" depends="setup_sql"
-            description="create tables(s), indices for corpus services">
-				<sql driver="${db.jdbc.driver.class}"
-             url="${db.jdbc.bps.url}"
-             userid="${db.user}"
-             password="${db.user.password}"
-             src="${db.script.dir}/corpus.sql">
-            <classpath>
-                <pathelement path="${db.driver.jar}"/>
-            </classpath>
-					</sql>
+    <target name="create_db" 
+            description="create tables(s), indices for webapp">
     </target>
 
 </project>

@@ -11,7 +11,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>edu.berkeley.bps.services</groupId>
-  <artifactId>edu.berkeley.bps.services.user</artifactId>
+  <artifactId>services.user</artifactId>
   <version>0.9.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -25,14 +25,104 @@
   <dependencies>
 		<dependency>
 			<groupId>edu.berkeley.bps.services</groupId>
-			<artifactId>edu.berkeley.bps.services.common</artifactId>
+			<artifactId>services.common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+		<build>
+		<!-- Filter resources using the build.properties pulled in below -->
+		<resources>
+				<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+				</resource>
+		</resources>
+		<plugins>
+			<!-- Get the base properties file, for use in this pom -->
+			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>../build.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+			<!-- No need to include sql in jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+					<configuration>
+						<excludes>
+							<exclude>**/*.sql</exclude>
+						</excludes>
+						<!-- Should preclude empty jar, but does not seem to -->
+						<skipIfEmpty>true</skipIfEmpty>
+					</configuration>
+				</plugin>
+
+			<!-- Declare the sql plugin, and run the setup sql.
+					 Note that since we do not want this to run each build, 
+					 You must run it explicitly. However, you still need the
+					 build.properties include, so invoke this with:
+					 mvn initialize sql:execute -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sql-maven-plugin</artifactId>
+        <version>1.5</version>
+
+        <dependencies>
+          <!-- specify the dependent jdbc driver here -->
+				 <dependency>
+						<groupId>mysql</groupId>
+						<artifactId>mysql-connector-java</artifactId>
+						<version>5.1.13</version>
+					</dependency>
+        </dependencies>
+        <!-- common configuration shared by all executions -->
+        <configuration>
+					<driver>${db.jdbc.driver.class}</driver>
+					<url>${db.jdbc.bps.url}</url>
+					<username>${db.user}</username>
+					<password>${db.user.password}</password>
+        </configuration>
+				<executions>
+					<!-- Declare this only to run on the explicit goal, so we do not
+							 blow away our DB with every build. -->
+					<execution>
+						<id>default-cli</id>
+						<phase>none</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<autocommit>true</autocommit>
+							<srcFiles>
+								<srcFile>target/classes/schemas/user_mgmnt.sql</srcFile>
+								<srcFile>target/classes/schemas/addBaseRolesAndPerms.sql</srcFile>
+							</srcFiles>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
 </project>

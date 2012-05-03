@@ -1,7 +1,7 @@
 <?php
 
 //Bring in the user's config file
-//require_once('/var/www/config.php');
+//require_once('${bps.webroot}/config.php');
 require_once("../libs/env.php");
 // This uses the XSLT BPSTEINames.xsl to process an uploaded TEI file, 
 // returning an HTML summary of the names and dates found in the file. 

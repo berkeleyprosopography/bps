@@ -38,10 +38,10 @@ unset($CFG);  // Ignore this line
 //
 
 $CFG->dbtype    = 'mysql';       // mysql
-$CFG->dbhost    = 'localhost';   // eg localhost or db.isp.com
-$CFG->dbname    = 'bpsdev';      // database name
-$CFG->dbuser    = 'bpsdev';    // your database username
-$CFG->dbpass    = 'G0Names!';    // your database password
+$CFG->dbhost    = '${db.host}';   // eg localhost or db.isp.com
+$CFG->dbname    = '${db.name}';      // database name
+$CFG->dbuser    = '${db.bps.user}';    // your database username
+$CFG->dbpass    = '${db.bps.user.password}';    // your database password
 $CFG->prefix    = '';        // Prefix to use for all table names (not working yet)
 
 
@@ -84,8 +84,16 @@ $CFG->svcsbase   = '/bps.services.webapp';
 //    $CFG->dirroot = 'c:\program files\easyphp\www\delphi';    // Windows
 //    $CFG->dirroot = '/var/www/html/delphi';     // Redhat Linux
 //    $CFG->dirroot = '/home/example/public_html/delphi'; // Cpanel host
+// Also, specify the full OS directory path to the root directory
+// for corpus files (which will be stored by ID underneath). 
+// Do not include a trailing slash.
+// Make sure the upper/lower case is correct.  Some examples:
+//
+//    $CFG->corpusdir = 'c:\bps\corpora';    // Windows
+//    $CFG->corpusdir = '/var/bps/corpora';     // Linux
 
-$CFG->dirroot           = '/var/www';
+$CFG->dirroot           = '${bps.webroot}';
+$CFG->corpusdir         = '${bps.corpora}';
 
 
 //=========================================================================
@@ -94,22 +102,8 @@ $CFG->dirroot           = '/var/www';
 // Specify an email address to recieve messages from the contact form
 //
 
-$CFG->contactEmail      = "bps_feedback@lists.berkeley.edu";
+$CFG->contactEmail      = 'bps_feedback@lists.berkeley.edu';
 
-//=========================================================================
-// 5. CORPUS FILE DIRECTORY
-//=========================================================================
-// Here, specify the full OS directory path to the root directory
-// for corpus files (which will be stored by ID underneath). 
-// Make sure the upper/lower case is correct.  Some examples:
-//
-//    $CFG->corpusdir = 'c:\bps\corpora';    // Windows
-//    $CFG->corpusdir = '/var/bps/corpora';     // Linux
-//
-// Do not include a trailing slash!
-
-
-$CFG->corpusdir       = "/var/bps/corpora";
 
 
 //=========================================================================

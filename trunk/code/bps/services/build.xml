@@ -1,3 +1,4 @@
+<!-- This is largely obsolete, and can probably be deleted soon. Use mvn instead. -->
 <project name="services" default="install" basedir=".">
 	<description>
         bps services
@@ -29,9 +30,6 @@
 		<exec executable="mvn" failonerror="true">
 			<arg value="install" />
 			<arg value="-Dmaven.test.skip=true" />
-			<arg value="-f" />
-			<arg value="${basedir}/pom.xml" />
-			<arg value="-N" />
 			<arg value="${mvn.opts}" />
 		</exec>
 	</target>
@@ -42,9 +40,6 @@
 			<arg value="mvn.bat" />
 			<arg value="install" />
 			<arg value="-Dmaven.test.skip=true" />
-			<arg value="-f" />
-			<arg value="${basedir}/pom.xml" />
-			<arg value="-N" />
 			<arg value="${mvn.opts}" />
 		</exec>
 	</target>
@@ -135,10 +130,14 @@
 							message="Required environment variable DB_PASSWORD_BPS has not been set."/>
 	</target>
 
-	<target name="undeploy"
+	<target name="undeploy" depends="checkvars"
             description="undeploy services from ${jee.server.bsp}">
-		<delete failonerror="false" dir="${jee.deploy.bps}/${bps.services.context}"/>
-		<delete failonerror="false" file="${jee.deploy.bps.services}"/>
+		<ant antfile="common/build.xml" target="undeploy" inheritAll="false"/>
+		<ant antfile="corpus/build.xml" target="undeploy" inheritAll="false"/>
+		<ant antfile="graphbuilder/build.xml" target="undeploy" inheritAll="false"/>
+		<ant antfile="user/build.xml" target="undeploy" inheritAll="false"/>
+		<ant antfile="workspace/build.xml" target="undeploy" inheritAll="false"/>
+		<ant antfile="webapp/build.xml" target="undeploy" inheritAll="false"/>
 	</target>
 
 	<target name="eclipse" depends="eclipse-unix,eclipse-windows" description="Generate Eclipse files" />

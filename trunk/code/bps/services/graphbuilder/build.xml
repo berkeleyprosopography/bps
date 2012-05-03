@@ -1,3 +1,4 @@
+<!-- This is largely obsolete, and can probably be deleted soon. Use mvn instead. -->
 <project name="graphbuilder" default="install" basedir=".">
     <description>
         bps graphbuilder module
@@ -19,15 +20,22 @@
         <os family="windows" />
     </condition>
 
+		<target name="deploy" 
+							description="deploy services in ${jee.server.bps}">
+			<!-- Nothing to deploy here -->
+		</target>
+
+		<target name="undeploy" 
+							description="undeploy services from ${jee.server.bps}">
+			<!-- Nothing to undeploy here -->
+		</target>
+
     <target name="install" depends="install-unix,install-windows"
             description="Install" />
     <target name="install-unix" if="osfamily-unix">
         <exec executable="mvn" failonerror="true">
             <arg value="install" />
             <arg value="-Dmaven.test.skip=true" />
-            <arg value="-f" />
-            <arg value="${basedir}/pom.xml" />
-            <arg value="-N" />
             <arg value="${mvn.opts}" />
         </exec>
     </target>
@@ -37,9 +45,6 @@
             <arg value="mvn.bat" />
             <arg value="install" />
             <arg value="-Dmaven.test.skip=true" />
-            <arg value="-f" />
-            <arg value="${basedir}/pom.xml" />
-            <arg value="-N" />
             <arg value="${mvn.opts}" />
         </exec>
     </target>
@@ -92,7 +97,7 @@
 		</target>
 
     <target name="create_db" depends="setup_sql"
-            description="create tables(s), indices for account service">
+            description="create tables(s), indices for graphbuilder service">
      </target>
 
 </project>
