@@ -51,11 +51,13 @@ public class WorkspaceResource extends BaseResource {
 				user_id = Integer.parseInt(user);
 			} catch( NumberFormatException nfe) {}
 		}
+		/* Nice to be able to list all, so let's do that
 		if(user_id <=0 ) {
         	throw new WebApplicationException( 
         			Response.status(
         				Response.Status.NOT_FOUND).entity("Must specify user for workspaces!").build());
 		}
+		*/
 		return user_id;
 	}
 

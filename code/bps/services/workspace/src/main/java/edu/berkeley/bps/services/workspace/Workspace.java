@@ -247,20 +247,29 @@ public class Workspace extends CachedEntity {
 	public void persistAttachedEntities(Connection dbConn) {
 	}
 	
+	public static List<Workspace> ListAll(ServiceContext sc) {
+		// TODO Add pagination support
+		return ListAllForUser(sc, -1);
+	}
+	
 	public static List<Workspace> ListAllForUser(ServiceContext sc, int user_id) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
-			//"SELECT id, name, description FROM workspace WHERE owner_id=?";
-			"SELECT w.id wid, w.name, w.description, c.id cid"
-			+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id"
-			+" WHERE w.owner_id=?";
+				//"SELECT id, name, description FROM workspace WHERE owner_id=?";
+				"SELECT w.id wid, w.owner_id, w.name, w.description, c.id cid"
+				+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id";
+		final String WHERE_USER = " WHERE w.owner_id=?";
 		ArrayList<Workspace> wkspList = new ArrayList<Workspace>();
 		try {
 			initMaps(sc);
 			Map<Integer, Object> idMap = getIdMap(sc, myClass);
 			Connection dbConn = sc.getConnection();
-			PreparedStatement stmt = dbConn.prepareStatement(SELECT_ALL);
-			stmt.setInt(1, user_id);
+			String query = SELECT_ALL;
+			if(user_id>=0)
+				query += WHERE_USER;
+			PreparedStatement stmt = dbConn.prepareStatement(query);
+			if(user_id>=0)
+				stmt.setInt(1, user_id);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				// Look for the workspace in the cache. If not found, create
@@ -271,7 +280,7 @@ public class Workspace extends CachedEntity {
 					workspace = new Workspace(wid, 
 						rs.getString("name"), 
 						rs.getString("description"),
-						user_id);
+						rs.getInt("owner_id"));
 					int cid = rs.getInt("cid");
 					if(cid>0)
 						workspace.corpus = Corpus.FindByID(sc, cid);
