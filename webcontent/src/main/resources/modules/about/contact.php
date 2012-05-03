@@ -11,6 +11,10 @@ $t->assign('subject', "");
 if(isset($_POST['submit'])){
 	$msg = array();
 	
+	if(!$CFG->supportEmail){
+		array_push($msg, "Email is not supported on this version of BPS.");
+	}
+	
 	if(!emailValid($_POST['email'])){
 		array_push($msg, "Email address is not valid.");
 	}

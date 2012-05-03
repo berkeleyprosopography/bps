@@ -94,6 +94,7 @@ $CFG->svcsbase   = '/bps.services.webapp';
 
 $CFG->dirroot           = '${bps.webroot}';
 $CFG->corpusdir         = '${bps.corpora}';
+$CFG->supportEmail      = ${bps.supportEmail};
 
 
 //=========================================================================

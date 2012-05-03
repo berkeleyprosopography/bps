@@ -56,6 +56,9 @@ function usernameTaken($username){
 
 function sendRegMail($uid, $username, $email){
 	global $CFG;
+	if(!$CFG->supportEmail)
+		return;
+
 	$confirmUrl = $CFG->wwwroot . '/register?confirm=' . $uid;
 	$plaintextmsg = 
 		'Thank you for registering with BPS!
@@ -112,12 +115,12 @@ function addNewUser($username, $password, $email){
 		/* TODO Create a default workspace for the user */
 		$name = "My Workspace";
 		$description = "This workspace was created for you automatically when you registered. Click the Admin link to change this description.";
-		$sql = 'INSERT INTO workspace ( name, description, owner_id, creation_time )'
-		      ." VALUES ('$name', '$description', '$new_uid', now() )";
-		
-		$affected =& $db->exec($sql);
-		if (PEAR::isError($affected)) {
-		    die($res->getMessage());
+		$insertQ = "INSERT IGNORE INTO workspace(name, description, owner_id, creation_time) "
+									." VALUES( ?, ?, ?, now())";
+		$stmt = $db->prepare($insertQ, array('text', 'text', 'integer'), MDB2_PREPARE_MANIP);
+		$res =& $stmt->execute(array($name, $description, $new_uid));
+		if (PEAR::isError($res)) {
+			die("Problem creating workspace for new user.\n".$res->getMessage());
 		}
 		
 		// Send confirmation email
