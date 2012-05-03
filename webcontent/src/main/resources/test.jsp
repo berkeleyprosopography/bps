@@ -6,12 +6,12 @@ import="java.sql.*" errorPage="" %>
 		<p>The time is now: <%= new java.util.Date() %></p>
 
 		<% 
-		String url = "jdbc:mysql://bpsdev.db.6836812.hostedresource.com:3306/bpsdev";
-		String user= "bpsdev";
-		String pass= "G0Names!";
+		String url = "jdbc:mysql://${db.host}:3306/${db.name}";
+		String user= "${db.bps.user}";
+		String pass= "${db.bps.user.password}";
 		boolean isAvail = false;
 		try{
-			Class.forName ("com.mysql.jdbc.Driver").newInstance ();
+		Class.forName ("{$db.jdbc.driver.class}").newInstance ();
 			Connection conn = DriverManager.getConnection(url, user, pass);
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT lockoutActive lo FROM DBInfo");

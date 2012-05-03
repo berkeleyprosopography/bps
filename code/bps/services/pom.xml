@@ -17,6 +17,7 @@
     </properties>
 
     <modules>
+        <module>db</module>
         <module>common</module>
 				<module>user</module>
         <module>corpus</module>
@@ -67,13 +68,16 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-				<repository>  
-					<id>maven-restlet</id>  
-					<name>Public online Restlet repository</name>  
-					<url>http://maven.restlet.org</url>  
-				</repository>  
-				
-    </repositories>
+				<!-- Funky repo that has older jars we need -->
+        <repository>
+            <id>goldin repo</id>
+            <name>goldin repo</name>
+            <url>http://evgeny-goldin.org/artifactory/repo/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+   </repositories>
 
     <pluginRepositories>
         <pluginRepository>
@@ -166,11 +170,57 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-        </plugins>
+          <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-compiler-plugin</artifactId>
+          </plugin>
+
+					<!-- Declare the sql plugin, and run the initdb sql.
+							 Note that since we do not want this to run each build, 
+							 You must run it explicitly. However, you still need the
+							 build.properties include, so invoke this with:
+							 mvn initialize sql:execute -->
+					 <plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>sql-maven-plugin</artifactId>
+						<version>1.5</version>
+
+						<dependencies>
+							<!-- specify the dependent jdbc driver here -->
+						 <dependency>
+								<groupId>mysql</groupId>
+								<artifactId>mysql-connector-java</artifactId>
+								<version>5.1.13</version>
+							</dependency>
+						</dependencies>
+						<!-- common configuration shared by all executions -->
+						<configuration>
+							<driver>com.mysql.jdbc.Driver</driver>
+							<url>jdbc:mysql://localhost</url>
+							<username>root</username>
+							<password>admin</password>jdbc:mysql://localhost
+						</configuration>
+						<executions>
+							<!-- Declare this only to run on the explicit goal, so we do not
+									 blow away our DB with every build. -->
+					 		<execution>
+								<id>default-cli</id>
+								<phase>none</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<autocommit>true</autocommit>
+									<forceMojoExecution>true</forceMojoExecution>
+									<srcFiles>
+										<!-- Dummy entry, so this will recurse for all the dirs -->
+									</srcFiles>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+       </plugins>
+				
     </build>
     
     <dependencies>
@@ -188,27 +238,27 @@
 			<dependencies>
 				<dependency>
 					<groupId>edu.berkeley.bps.services</groupId>
-					<artifactId>edu.berkeley.bps.services.common</artifactId>
+					<artifactId>services.common</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>edu.berkeley.bps.services</groupId>
-					<artifactId>edu.berkeley.bps.services.corpus</artifactId>
+					<artifactId>services.corpus</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>edu.berkeley.bps.services</groupId>
-					<artifactId>edu.berkeley.bps.services.graphbuilder</artifactId>
+					<artifactId>services.graphbuilder</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>edu.berkeley.bps.services</groupId>
-					<artifactId>edu.berkeley.bps.services.user</artifactId>
+					<artifactId>services.user</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>edu.berkeley.bps.services</groupId>
-					<artifactId>edu.berkeley.bps.services.workspace</artifactId>
+					<artifactId>services.workspace</artifactId>
 					<version>${project.version}</version>
 				</dependency>
 				 <dependency>

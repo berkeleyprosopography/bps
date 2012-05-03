@@ -109,19 +109,16 @@ function addNewUser($username, $password, $email){
 		$row = $res->fetchRow();
 		$new_uid = $row['id'];
 
-		/* TODO Create a default workspace for the user
-		$name = $row['username'] . "\'s Workspace";
-		$description = "This workspace was created for you automatically when you registered. Click the edit link to change this description.";
-		$policy = "private";
-		$owner_id = $row['id'];
-		$sql = 'INSERT INTO workspaces ( name, description, policy, owner_id, creation_time )'
-		      ." VALUES ('$name', '$description', '$policy', '$owner_id', now() )";
+		/* TODO Create a default workspace for the user */
+		$name = "My Workspace";
+		$description = "This workspace was created for you automatically when you registered. Click the Admin link to change this description.";
+		$sql = 'INSERT INTO workspace ( name, description, owner_id, creation_time )'
+		      ." VALUES ('$name', '$description', '$new_uid', now() )";
 		
 		$affected =& $db->exec($sql);
 		if (PEAR::isError($affected)) {
 		    die($res->getMessage());
 		}
-		 */
 		
 		// Send confirmation email
 		sendRegMail($new_uid, $username, $email);

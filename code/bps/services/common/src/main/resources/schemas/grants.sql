@@ -4,11 +4,11 @@
 
 -- You must set the password for your installation!
 
-DROP User '@DB_USER_BPS@';
+DROP User '${db.bps.user}';
 FLUSH PRIVILEGES;
-CREATE USER '@DB_USER_BPS@'@'%' IDENTIFIED BY '@DB_PASSWORD_BPS@';
+CREATE USER '${db.bps.user}'@'%' IDENTIFIED BY '${db.bps.user.password}';
 FLUSH PRIVILEGES;
 
-GRANT SELECT,INSERT,UPDATE,DELETE ON @DB_NAME@.* TO '@DB_USER_BPS@'@'%';
+GRANT SELECT,INSERT,UPDATE,DELETE ON ${db.name}.* TO '${db.bps.user}'@'%';
 FLUSH PRIVILEGES;
 

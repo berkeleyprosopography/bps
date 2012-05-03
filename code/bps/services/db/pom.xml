@@ -11,36 +11,19 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>edu.berkeley.bps.services</groupId>
-  <artifactId>services.workspace</artifactId>
+  <artifactId>services.db</artifactId>
   <version>0.9.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>bps.services.workspace</name>
+  <name>bps.services.db</name>
   <url>http://maven.apache.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencies>
-		<dependency>
-			<groupId>edu.berkeley.bps.services</groupId>
-			<artifactId>services.common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
- 		<dependency>
-			<groupId>edu.berkeley.bps.services</groupId>
-			<artifactId>services.corpus</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-   <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-		<build>
+
+	<build>
 		<!-- Filter resources using the build.properties pulled in below -->
 		<resources>
 				<resource>
@@ -83,7 +66,7 @@
 					</configuration>
 				</plugin>
 
-			<!-- Declare the sql plugin, and run the setup sql.
+			<!-- Declare the sql plugin, and run the initdb sql.
 					 Note that since we do not want this to run each build, 
 					 You must run it explicitly. However, you still need the
 					 build.properties include, so invoke this with:
@@ -104,7 +87,7 @@
         <!-- common configuration shared by all executions -->
         <configuration>
 					<driver>${db.jdbc.driver.class}</driver>
-					<url>${db.jdbc.bps.url}</url>
+					<url>${db.jdbc.baseurl}</url>
 					<username>${db.user}</username>
 					<password>${db.user.password}</password>
         </configuration>
@@ -120,13 +103,12 @@
 						<configuration>
 							<autocommit>true</autocommit>
 							<srcFiles>
-								<srcFile>target/classes/schemas/workspace.sql</srcFile>
+								<srcFile>target/classes/initdb.sql</srcFile>
 							</srcFiles>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

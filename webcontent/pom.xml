@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project 
+	xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+			<groupId>edu.berkeley.bps.services</groupId>
+			<artifactId>services</artifactId>
+			<version>0.9.1-SNAPSHOT</version>
+	</parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>edu.berkeley.bps.services</groupId>
+  <artifactId>webcontent</artifactId>
+  <version>0.9.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>bps.webcontent</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<targetDir>target/classes</targetDir>
+  </properties>
+
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<!-- Get the base properties file, for use in this pom -->
+			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>../code/bps/services/build.properties</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+			</plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.0.1</version>
+        <executions>
+          <execution>
+            <id>enforce-property</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>env.BPS_WEBROOT</property>
+                  <message>You must set the environment variable BPS_WEBROOT!</message>
+                </requireProperty>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+			</plugin>
+
+			<!-- No need to include sql in jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+					<configuration>
+						<excludes>
+							<exclude>**/*.*</exclude>
+						</excludes>
+						<!-- Should preclude empty jar, but does not seem to -->
+						<skipIfEmpty>true</skipIfEmpty>
+					</configuration>
+				</plugin>
+
+				<!-- Run the ant tasks to copy things -->
+				<plugin>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.7</version>
+					<executions>
+						<execution>
+							<phase>process-resources</phase>
+							<configuration>
+								<target>
+									<copy todir="${apache.conf}">
+										<filelist dir="${targetDir}">
+											<file name=".htaccess"/>
+										</filelist>
+									</copy>
+									<copy todir="${bps.webroot}">
+										<filelist dir="${targetDir}">
+											<file name="test.jsp"/>
+											<file name="favicon.ico"/>
+											<file name="robots.txt"/>
+											<file name="php.ini"/>
+											<file name="test.html"/>
+											<file name="missing.html"/>
+											<file name="config.php"/>
+											<file name="gdform.php"/>
+											<file name="home.php"/>
+										</filelist>
+									</copy>
+									<copy todir="${bps.webroot}/api">
+										<fileset dir="${targetDir}/api"/>
+									</copy>
+									<copy todir="${bps.webroot}/images">
+										<fileset dir="${targetDir}/images"/>
+									</copy>
+									<copy todir="${bps.webroot}/libs">
+										<fileset dir="${targetDir}/libs"/>
+									</copy>
+									<copy todir="${bps.webroot}/modules">
+										<fileset dir="${targetDir}/modules"/>
+									</copy>
+									<copy todir="${bps.webroot}/scripts">
+										<fileset dir="${targetDir}/scripts"/>
+									</copy>
+									<copy todir="${bps.webroot}/style">
+										<fileset dir="${targetDir}/style"/>
+									</copy>
+									<copy todir="${bps.webroot}/templates">
+										<fileset dir="${targetDir}/templates"/>
+									</copy>
+									<mkdir dir="${bps.webroot}/templates_c" />
+								</target>
+							</configuration>
+							<goals>
+								<goal>run</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+		</plugins>
+	</build>
+</project>
