@@ -23,7 +23,13 @@
 	<build>
 		<!-- Rename to bps-services -->
 		<finalName>bps.services.webapp</finalName>
-		<pluginManagement>
+		<!-- Filter resources using the build.properties pulled in below -->
+		<resources>
+				<resource>
+						<directory>src/main/resources</directory>
+						<filtering>true</filtering>
+				</resource>
+		</resources>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -122,9 +128,6 @@
 						</execution>
 					</executions>
 				</plugin>			
-			</plugins>
-		</pluginManagement>
-		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
