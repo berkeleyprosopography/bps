@@ -2,6 +2,7 @@ package edu.berkeley.bps.services.corpus;
 
 import edu.berkeley.bps.services.common.BaseResource;
 import edu.berkeley.bps.services.common.ServiceContext;
+import edu.berkeley.bps.services.common.SystemProperties;
 import edu.berkeley.bps.services.corpus.sax.AssertionsParser;
 import edu.berkeley.bps.services.corpus.sax.CorpusParser;
 
@@ -322,16 +323,16 @@ public class CorporaResource extends BaseResource {
 		final String myName = ".getTEISummary(): ";
         try {
         	final InputStream xmls;
-        	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
-			if (teipath != null && !teipath.isEmpty()) {
-				xmls = new FileInputStream(teipath);
-			} else {
-				String tmp = myClass+myName+"No corpus file uploaded.";
+        	String corpora_base = SystemProperties.getProperty(SystemProperties.CORPUS_DIR);
+        	if(corpora_base==null||corpora_base.isEmpty()) {
+				String tmp = myClass+myName+"No corpora base specified!";
 				System.err.println(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
-	    				Response.Status.BAD_REQUEST).entity(tmp).build());
-			}
+	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        	}
+        	String teipath = corpora_base+"/"+id+"/tei/corpus.xml";
+			xmls = new FileInputStream(teipath);
         	return transformTEI(srvc, xmls);
 		} catch(WebApplicationException wae) {
 			throw wae;
