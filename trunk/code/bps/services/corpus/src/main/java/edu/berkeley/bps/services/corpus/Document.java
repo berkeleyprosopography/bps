@@ -178,13 +178,13 @@ public class Document {
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setString(1, alt_id);
-				stmt.setString(1, primaryPubl);
-				stmt.setString(2, sourceURL);
-				stmt.setString(3, xml_id);
-				stmt.setString(4, notes);
-				stmt.setString(5, date_str);
-				stmt.setLong(6, date_norm);
-				stmt.setInt(7, id);
+				stmt.setString(2, primaryPubl);
+				stmt.setString(3, sourceURL);
+				stmt.setString(4, xml_id);
+				stmt.setString(5, notes);
+				stmt.setString(6, date_str);
+				stmt.setLong(7, date_norm);
+				stmt.setInt(8, id);
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -211,12 +211,12 @@ public class Document {
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setInt(1, corpus_id);
 			stmt.setString(2, alt_id);
-			stmt.setString(2, primaryPubl);
-			stmt.setString(3, sourceURL);
-			stmt.setString(4, xml_id);
-			stmt.setString(5, notes);
-			stmt.setString(6, date_str);
-			stmt.setLong(7, date_norm);
+			stmt.setString(3, primaryPubl);
+			stmt.setString(4, sourceURL);
+			stmt.setString(5, xml_id);
+			stmt.setString(6, notes);
+			stmt.setString(7, date_str);
+			stmt.setLong(8, date_norm);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();

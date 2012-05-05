@@ -612,16 +612,16 @@ public class Name {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
 												Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, name);
-			stmt.setString(1, nym_id);
-			stmt.setString(2, NameTypeToString(nametype));
-			stmt.setString(3, GenderToString(gender));
-			stmt.setString(4, notes);
+			stmt.setString(2, nym_id);
+			stmt.setString(3, NameTypeToString(nametype));
+			stmt.setString(4, GenderToString(gender));
+			stmt.setString(5, notes);
 			if(normal==null) {
-				stmt.setNull(5, Types.INTEGER);
+				stmt.setNull(6, Types.INTEGER);
 			} else {
-				stmt.setInt(5, normal.id);
+				stmt.setInt(6, normal.id);
 			}
-			stmt.setInt(6, corpusId);
+			stmt.setInt(7, corpusId);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
@@ -652,17 +652,17 @@ public class Name {
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setString(1, name);
-				stmt.setString(1, nymId);
-				stmt.setString(2, NameTypeToString(nametype));
-				stmt.setString(3, GenderToString(gender));
-				stmt.setString(4, notes);
+				stmt.setString(2, nymId);
+				stmt.setString(3, NameTypeToString(nametype));
+				stmt.setString(4, GenderToString(gender));
+				stmt.setString(5, notes);
 				if(normal==null) {
-					stmt.setNull(5, Types.INTEGER);
+					stmt.setNull(6, Types.INTEGER);
 				} else {
-					stmt.setInt(5, normal.id);
+					stmt.setInt(6, normal.id);
 				}
-				stmt.setInt(6, corpusId);
-				stmt.setInt(7, id);
+				stmt.setInt(7, corpusId);
+				stmt.setInt(8, id);
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();

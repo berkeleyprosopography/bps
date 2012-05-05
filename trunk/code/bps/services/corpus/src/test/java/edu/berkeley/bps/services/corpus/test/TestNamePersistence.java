@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 public class TestNamePersistence extends TestDBBase {
 	
 	private static final String TEST_NAME ="Mike";
+	private static final String TEST_NYM_ID = "42";
 	private static final int TEST_NAME_TYPE = Name.NAME_TYPE_PERSON;
 	private static final int TEST_GENDER = Name.GENDER_MALE;
 	private static final String TEST_NOTES = "Famous for his steam-shovel";
@@ -47,7 +48,7 @@ public class TestNamePersistence extends TestDBBase {
 	 */
 	public void testCreateAndPersist() {
 		Name testName = Name.CreateAndPersist(getConnection(), TEST_CORPUS, 
-				TEST_NAME, TEST_NAME_TYPE, TEST_GENDER, TEST_NOTES, null);
+				TEST_NAME, TEST_NYM_ID, TEST_NAME_TYPE, TEST_GENDER, TEST_NOTES, null);
 		assertNotNull("New Name should be non-null", testName);
 		assertTrue("New Name must have id from DB", (testName.getId()>0));
 		assertEquals(testName.getName(), TEST_NAME);
@@ -55,6 +56,7 @@ public class TestNamePersistence extends TestDBBase {
 		assertEquals(testName.getNameType(), TEST_NAME_TYPE);
 		assertEquals(testName.getGender(), TEST_GENDER);
 		assertEquals(testName.getNotes(), TEST_NOTES);
+		assertEquals(testName.getNymId(), TEST_NYM_ID);
 	}
 
 	/**

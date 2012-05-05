@@ -48,6 +48,18 @@ public class CorporaResource extends BaseResource {
 	
 	private static final String myClass = "CorporaResource";
 	
+	protected String corpora_base = null;
+	
+	public CorporaResource() {
+    	corpora_base = SystemProperties.getProperty(SystemProperties.CORPUS_DIR);
+    	if(corpora_base==null||corpora_base.isEmpty()) {
+			String tmp = myClass+": No corpora base specified in properties!";
+			System.err.println(tmp);
+        	throw new RuntimeException(tmp);
+    	}
+		
+	}
+	
 	/**
      * Returns a listing of all corpora.
 	 * @return Full (shallow) details of all corpora
@@ -280,16 +292,15 @@ public class CorporaResource extends BaseResource {
 		final String myName = ".getTEI(): ";
         try {
         	final InputStream xmls;
-        	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
-			if (teipath != null && !teipath.isEmpty()) {
-				xmls = new FileInputStream(teipath);
-			} else {
-				String tmp = myClass+myName+"No corpus file uploaded.";
+        	if(corpora_base==null||corpora_base.isEmpty()) {
+				String tmp = myClass+myName+"No corpora base specified!";
 				System.err.println(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
-	    				Response.Status.BAD_REQUEST).entity(tmp).build());
-			}
+	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        	}
+        	String teipath = corpora_base+"/"+id+"/tei/corpus.xml";
+			xmls = new FileInputStream(teipath);
 			Response response = Response.ok(xmls).build();
 	        return response;
 	    } catch(WebApplicationException wae) {
@@ -323,7 +334,6 @@ public class CorporaResource extends BaseResource {
 		final String myName = ".getTEISummary(): ";
         try {
         	final InputStream xmls;
-        	String corpora_base = SystemProperties.getProperty(SystemProperties.CORPUS_DIR);
         	if(corpora_base==null||corpora_base.isEmpty()) {
 				String tmp = myClass+myName+"No corpora base specified!";
 				System.err.println(tmp);
@@ -407,7 +417,14 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id) {
 		final String myName = ".rebuildFromTEI(): ";
         try {
-        	String teipath = "/var/bps/corpora/"+id+"/tei/corpus.xml";
+        	if(corpora_base==null||corpora_base.isEmpty()) {
+				String tmp = myClass+myName+"No corpora base specified!";
+				System.err.println(tmp);
+	        	throw new WebApplicationException( 
+	    			Response.status(
+	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        	}
+        	String teipath = corpora_base+"/"+id+"/tei/corpus.xml";
         	ServiceContext sc = getServiceContext(srvc);
 			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {
@@ -447,7 +464,14 @@ public class CorporaResource extends BaseResource {
 			@PathParam("id") int id) {
 		final String myName = ".handleDateAssertions(): ";
         try {
-        	String datespath = "/var/bps/corpora/"+id+"/assertions/dates.xml";
+        	if(corpora_base==null||corpora_base.isEmpty()) {
+				String tmp = myClass+myName+"No corpora base specified!";
+				System.err.println(tmp);
+	        	throw new WebApplicationException( 
+	    			Response.status(
+	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        	}
+        	String datespath = corpora_base+"/"+id+"/assertions/dates.xml";
         	ServiceContext sc = getServiceContext(srvc);
 			Corpus corpus = Corpus.FindByID(sc, id);
 			if(corpus==null) {

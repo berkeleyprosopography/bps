@@ -55,10 +55,17 @@ public class NymContentHandler extends StackedContentHandler {
 			nymId = attrList.getValue("xml:id");
 		} else if(localName.equals("form")) {
 			if(normalizedForm!=null) {
-				generateParseWarning(nymId,
-					"Nym parse error: Cannot handle multiple forms for one nym.");
+				generateParseWarning(nymId, "Cannot handle multiple forms for one nym.");
 			}
 			normalizedForm = attrList.getValue("", "norm");
+			if(normalizedForm==null) {
+				generateParseWarning(nymId, "Form has missing/empty normalizedForm.");
+			}
+			if(nymId==null) {
+				generateParseWarning(nymId, "Form has missing/empty nymId.");
+			}
+			normalName = corpus.findOrCreateName(normalizedForm, nymId,
+								Name.NAME_TYPE_PERSON, Name.GENDER_UNKNOWN, dbConn);
 		} else if(localName.equals("orth")) {
 			orthId = attrList.getValue("xml:id");
 		}
@@ -67,12 +74,12 @@ public class NymContentHandler extends StackedContentHandler {
 	public void endElement(String namespaceURI, String localName, String qName) {
 		final String myName = ".endElement: ";
 		if(localName.equals("form")) {
-			normalizedForm = getCurrentText().trim();
-			normalName = corpus.findOrCreateName(normalizedForm, nymId,
-								Name.NAME_TYPE_PERSON, Name.GENDER_UNKNOWN, dbConn);
+			if(normalName==null || orthId==null) {
+				generateParseWarning(nymId, "Failed to build normalName, or found not orthId.");
+			}
 		} else if(localName.equals("orth")) {
 			if(orthId==null) {
-				throw new RuntimeException(myClass+" Nym parse error: missing orth ID.");
+				generateParseError(nymId," missing orth ID.");
 			}
 			String orth = getCurrentText().trim();
 			Name variant = corpus.findOrCreateName(orth, orthId,
@@ -83,13 +90,13 @@ public class NymContentHandler extends StackedContentHandler {
 	}
 
 	protected void generateParseError(String xmlid, String error ) {
-		throw new RuntimeException("Parse Error near element: "
+		throw new RuntimeException(myClass+": Parse Error near element: "
 				+((xmlid!=null)?xmlid:"(unknown)")
 				+": "+error);
 	}
 	
 	protected void generateParseWarning(String xmlid, String warning ) {
-		System.err.println("Warning near element: "
+		System.err.println(myClass+": Parse Warning near element: "
 				+((xmlid!=null)?xmlid:"(unknown)")
 				+": "+warning);
 	}
