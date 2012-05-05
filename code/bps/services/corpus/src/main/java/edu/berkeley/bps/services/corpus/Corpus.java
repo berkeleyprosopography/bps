@@ -800,6 +800,9 @@ public class Corpus extends CachedEntity {
 			activityRolesById.clear();
 	}
 
+	/*
+	 * Should we deprecate this, or will we have corpora with no Name (nym) declarations?
+	 */
 	public Name findOrCreateName(String name, int type,
 			int gender, Connection dbConn) {
 		return findOrCreateName(name, null, type, gender, dbConn);
@@ -807,9 +810,16 @@ public class Corpus extends CachedEntity {
 	
 	public Name findOrCreateName(String name, String nymId, int type,
 			int gender, Connection dbConn) {
+		if(name==null||name.isEmpty()) {
+			String tmp = myClass+".findOrCreateName("+name
+					+","+nymId
+					+") Emtpy name!";
+				System.err.println(tmp);
+				throw new RuntimeException(tmp);
+		}
 		Name instance = namesByName.get(name);
 		if(instance == null) {
-			instance = Name.CreateAndPersist(dbConn, id, name, 
+			instance = Name.CreateAndPersist(dbConn, id, name, nymId, 
 					type, gender, null, null);
 			addName(instance);
 		} else if( instance.getNameType()!=type) {
@@ -822,7 +832,7 @@ public class Corpus extends CachedEntity {
 		} else if( nymId!=null && instance.getNymId()!=nymId) {
 			String tmp = myClass+".findOrCreateName("+name
 				+","+nymId
-				+") Found name match with inconsistent nymId:"
+				+") Found name match with inconsistent nymId (duplicate orthography?):"
 				+instance.getNymId();
 			System.err.println(tmp);
 			//throw new RuntimeException(tmp);
@@ -850,17 +860,21 @@ public class Corpus extends CachedEntity {
 	}
 	
 	public void addName(Name toAdd) {
-		if(namesByName.get(toAdd.getName())!=null)
-			throw new RuntimeException("Corpus.addName: duplicate (name).");
-		if(namesById.get(toAdd.getId())!=null)
-			throw new RuntimeException("Corpus.addName: duplicate (id).");
+		String name = toAdd.getName();
+		if(namesByName.get(name)!=null)
+			throw new RuntimeException("Corpus.addName: duplicate (name): "+name);
+		int id = toAdd.getId();
+		if(namesById.get(id)!=null)
+			throw new RuntimeException("Corpus.addName: duplicate (id): "+id);
 		String nymId = toAdd.getNymId();
-		if(nymId != null && namesByNymId.get(nymId)!=null)
-			throw new RuntimeException("Corpus.addName: duplicate (nymId).");
-		namesByName.put(toAdd.getName(), toAdd);
-		namesById.put(toAdd.getId(), toAdd);
-		if(nymId != null)
-			namesByName.put(nymId, toAdd);
+		if(nymId != null) {
+			if(namesByNymId.get(nymId)!=null) {
+				throw new RuntimeException("Corpus.addName: duplicate (nymId): "+nymId);
+			}
+			namesByNymId.put(nymId, toAdd);
+		}
+		namesByName.put(name, toAdd);
+		namesById.put(id, toAdd);
 	}
 
 	public Name findName(String name) {
