@@ -113,7 +113,7 @@
 								<deployable>
 									<!-- location of war file -->
 									<location>
-										target/${warfile}
+										${basedir}/target/${warfile}
 									</location>
 								</deployable>
 							</deployables>
