@@ -15,7 +15,7 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 }
 
 $t->assign('page_title', 'Corpus Details'.$CFG->page_title_default);
-$maxKTEI = 10000;
+$maxKTEI = 15000;
 $maxKAssertions = 1000;
 $maxfilesizeTEI = $maxKTEI * 1024;
 $t->assign('maxfilesizeTEI', $maxfilesizeTEI);

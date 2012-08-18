@@ -8,7 +8,7 @@ require_once("../libs/env.php");
 // The uploaded file file is passed in $_FILES['teifile']
 
 $err = null;
-$maxK = 10000;
+$maxK = 15000;
 $maxsize = $maxK * 1024;
 
 $upload_error_types = array(

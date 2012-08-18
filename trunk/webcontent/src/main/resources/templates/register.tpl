@@ -10,6 +10,7 @@
 	</ul>
 </div>
 {/if}
+{if $supportOpenReg || $currentUser_isAdmin || $currentUser_isAuthStaff }
 <form action="/register" method="post" class="bpsForm">
 	<label for="user">Username <span class="requiredFieldIndicator">*</span></label>
 	<input class="bpsFormInput" type="text" name="user" maxlength="40" value="{$user}">
@@ -26,5 +27,11 @@
 		<input type="submit" name="subjoin" value="Register"/>
 	</div>
 </form>
+{else}
+<p>Thanks for you interest in Berkeley Prosopography Services!</p>  
+<p>The system does not currently allow self-registration. 
+If you would like to have an account, please use the
+<a href="/contact">Contact us</a> link to request an account.</p>
+{/if}
 
 {include file="footer.tpl"}

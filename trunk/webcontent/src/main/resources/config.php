@@ -96,6 +96,10 @@ $CFG->dirroot           = '${bps.webroot}';
 $CFG->corpusdir         = '${bps.corpora}';
 $CFG->supportEmail      = ${bps.supportEmail};
 
+// Controls whether any user can register themselves, or if only
+// authorized users and admins can create new accounts
+$CFG->supportOpenReg    = false;
+
 
 //=========================================================================
 // 4. CONTACT EMAIL
