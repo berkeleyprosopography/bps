@@ -148,8 +148,10 @@ public class PersonNameContentHandler extends StackedContentHandler {
 					nymRefAttr = null;
 				} else {
 					name = corpus.findNym(nymRefAttr);
-					if(name!=null)
+					if(name!=null) {
+						name.checkAndUpdateGender(gender);
 						name.addCitation(document.getId());
+					}
 				}
 			}
 			if(name==null && nameAttr!=null) {
@@ -245,8 +247,10 @@ public class PersonNameContentHandler extends StackedContentHandler {
 					nymRefAttr = null;
 				} else {
 					name = corpus.findNym(nymRefAttr);
-					if(name!=null)
+					if(name!=null) {
+						// Since this is a clan name, we do not bother with gender checks.
 						name.addCitation(document.getId());
+					}
 				}
 			}
 			if(name==null && nameAttr!=null) {
