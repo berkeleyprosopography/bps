@@ -156,16 +156,41 @@ public class Corpus extends CachedEntity {
 			newCorpus.activityRolesByName.put(clone.getName(), clone);
 		}
 		// Clone Names, and build maps
+		// TODO Need to first clone all normal forms, build an association map, 
+		// and then pass that to the clone method, to associated to the clone of the normal.
+		// If we order the keySet by id, that should be sufficient, just as we ordered the 
+		// original query to build the list with links in Name.ListAllInCorpus()
 		idList = new ArrayList<Integer>(namesById.keySet());
 		Collections.sort(idList);
+		HashMap<Integer, Name> oldNormalNameIdsToNewNames = new HashMap<Integer, Name>();
+		// we Loop over the ids twice, once for those with no Normal form (Normals), 
+		// building up our map of old to new Normal Ids. Then we can consider the
+		// Names with normal forms, and map them.
 		for(int id:idList) {
 			Name nameItem = namesById.get(id);
-			Name clone = nameItem.cloneInCorpus(dbConn,newCorpus);
-			newCorpus.namesById.put(clone.getId(), clone);
-			newCorpus.namesByName.put(clone.getName(), clone);
-			String nymId = clone.getNymId();
-			if(nymId!=null)
-				newCorpus.namesByNymId.put(nymId, clone);
+			if(nameItem.getNormal()==null) { // Has no normal, so IS normal
+				Name clone = nameItem.cloneInCorpus(dbConn,newCorpus, null);
+				int newId = clone.getId();
+				oldNormalNameIdsToNewNames.put(id, clone);
+				newCorpus.namesById.put(newId, clone);
+				newCorpus.namesByName.put(clone.getName(), clone);
+				String nymId = clone.getNymId();
+				if(nymId!=null)
+					newCorpus.namesByNymId.put(nymId, clone);
+			}
+		}
+		for(int id:idList) {
+			Name nameItem = namesById.get(id);
+			if(nameItem.getNormal()!=null) { // Has normal, so clone passing in the map
+				Name clone = nameItem.cloneInCorpus(dbConn,newCorpus, oldNormalNameIdsToNewNames);
+				int newId = clone.getId();
+				oldNormalNameIdsToNewNames.put(id, clone);
+				newCorpus.namesById.put(newId, clone);
+				newCorpus.namesByName.put(clone.getName(), clone);
+				String nymId = clone.getNymId();
+				if(nymId!=null)
+					newCorpus.namesByNymId.put(nymId, clone);
+			}
 		}
 		// Clone Documents, and build maps
 		idList = new ArrayList<Integer>(documentsById.keySet());
@@ -803,12 +828,12 @@ public class Corpus extends CachedEntity {
 	/*
 	 * Should we deprecate this, or will we have corpora with no Name (nym) declarations?
 	 */
-	public Name findOrCreateName(String name, int type,
+	public Name findOrCreateName(String name, int nametype,
 			int gender, Connection dbConn) {
-		return findOrCreateName(name, null, type, gender, dbConn);
+		return findOrCreateName(name, null, nametype, gender, dbConn);
 	}
 	
-	public Name findOrCreateName(String name, String nymId, int type,
+	public Name findOrCreateName(String name, String nymId, int nametype,
 			int gender, Connection dbConn) {
 		if(name==null||name.isEmpty()) {
 			String tmp = myClass+".findOrCreateName("+name
@@ -820,11 +845,11 @@ public class Corpus extends CachedEntity {
 		Name instance = namesByName.get(name);
 		if(instance == null) {
 			instance = Name.CreateAndPersist(dbConn, id, name, nymId, 
-					type, gender, null, null);
+					nametype, gender, null, null);
 			addName(instance);
-		} else if( instance.getNameType()!=type) {
+		} else if( instance.getNameType()!=nametype) {
 			String tmp = myClass+".findOrCreateName("+name
-				+","+Name.NameTypeToString(type)
+				+","+Name.NameTypeToString(nametype)
 				+") Found name match with inconsistent type:"
 				+instance.getNameTypeString();
 			System.err.println(tmp);
@@ -836,25 +861,9 @@ public class Corpus extends CachedEntity {
 				+instance.getNymId();
 			System.err.println(tmp);
 			//throw new RuntimeException(tmp);
-		} else if( instance.getGender()!=gender) {
-			// Allow unknown to combine with known. 
-			if(gender == Name.GENDER_UNKNOWN) {
-				String tmp = myClass+".findOrCreateName("+name
-					+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+
-					instance.getGenderString();
-				System.err.println(tmp);
-			} else if(instance.getGender()==Name.GENDER_UNKNOWN) {
-				String tmp = myClass+".findOrCreateName("+name
-					+","+Name.GenderToString(gender)+") Assuming name match with unknown gender, and updating existing name.";
-				System.err.println(tmp);
-				instance.setGender(gender);
-			} else {
-				String tmp = myClass+".findOrCreateName("+name
-					+","+Name.GenderToString(gender)+") Found name match with conflicting gender:"+
-					instance.getGenderString();
-				System.err.println(tmp);
-				//throw new RuntimeException(tmp);
-			}
+		} else if(Name.typeHasGender(nametype)) {
+			instance.checkAndUpdateGender(gender);
+				//if not compatible, throw new RuntimeException(tmp);?
 		}
 		return instance;
 	}

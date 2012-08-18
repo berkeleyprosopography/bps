@@ -171,17 +171,33 @@ public class Name {
 		this.docCount = docCount;
 		this.totalCount = totalCount;
 		countsByDocId = new HashMap<Integer, Integer>();
+		if(normal!=null) {
+			if(gender==GENDER_UNKNOWN) {
+				gender = normal.gender;
+			} else {
+				normal.checkAndUpdateGender(gender);
+			}
+		}
 	}
 	
-	public Name cloneInCorpus(Connection dbConn, Corpus newCorpus) {
+	public Name cloneInCorpus(Connection dbConn, Corpus newCorpus, HashMap<Integer, Name> oldNameIdsToNewNames) {
 		final String myName = ".cloneInCorpus: ";
+		Name normalClone = null;
 		if(normal!=null) {
-			String tmp = myClass+myName+"Cannot clone Name with normal form (NYI).\n";
-			System.err.println(tmp);
-			throw new RuntimeException(tmp);
+			if(oldNameIdsToNewNames==null) {
+				String tmp = myClass+myName+"Cannot clone Name with normal form (No map!).\n";
+				System.err.println(tmp);
+				throw new RuntimeException(tmp);
+			}
+			normalClone = oldNameIdsToNewNames.get(normal.id);
+			if(normalClone==null) {
+				String tmp = myClass+myName+"Cannot clone Name with normal form (No clone in map!).\n";
+				System.err.println(tmp);
+				throw new RuntimeException(tmp);
+			}
 		}
 		return CreateAndPersist(dbConn, newCorpus.getId(),
-				name, nymId, nametype, gender, notes, null);
+				name, nymId, nametype, gender, notes, normalClone);
 	}
 
 	/**
@@ -297,6 +313,10 @@ public class Name {
 	public void setNameType(int nametype) {
 		this.nametype = nametype;
 	}
+	
+	public static boolean typeHasGender(int nametype) {
+		return nametype==NAME_TYPE_PERSON;
+	}
 
 	/**
 	 * @return the gender
@@ -333,7 +353,44 @@ public class Name {
 	 */
 	public void setGender(int gender) {
 		this.gender = gender;
+		if(normal!=null && gender!=GENDER_UNKNOWN) {
+			normal.checkAndUpdateGender(gender);
+		}
 	}
+	
+	/**
+	 * Checks the existing gender for this name against a declaration of gender.
+	 * If the existing gender is UNKNOWN and the declared gender is not, it will update
+	 * the existing gender for this name. 
+	 * @param declaredGender
+	 * @return true if the existing gender and the declared gender are compatible, 
+	 *   false if the two are both not UNKNOWN but not equal.
+	 */
+	public boolean checkAndUpdateGender( int declaredGender ) {
+		boolean compatible = true;
+		if(gender!=declaredGender) {
+			// Allow unknown to combine with known. 
+			if(declaredGender == Name.GENDER_UNKNOWN) {
+				String tmp = myClass+".checkAndUpdateGender("+name
+						+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+
+						getGenderString();
+				System.err.println(tmp);
+			} else if(gender==Name.GENDER_UNKNOWN) {
+				String tmp = myClass+".checkAndUpdateGender("+name
+						+","+Name.GenderToString(declaredGender)+") Assuming name match with unknown gender, and updating existing name.";
+				System.err.println(tmp);
+				setGender(declaredGender);
+			} else {
+				String tmp = myClass+".checkAndUpdateGender("+name
+						+","+Name.GenderToString(declaredGender)+") Found name match with conflicting gender:"+
+						getGenderString();
+				System.err.println(tmp);
+				compatible = false;
+			}
+		}
+		return compatible;
+	}
+
 
 	/**
 	 * @param normal the normal to set
@@ -395,18 +452,22 @@ public class Name {
 	}
 
 	public static List<Name> ListAllInCorpus(Connection dbConn, Corpus corpus) {
-		// When we select them, we need to order by normal. 
-		// Assume null normal values sort first, and that there are no chains.
+		// When we select them, we need to order by normal, since we will expect 
+		// to find them when we load the non-normal forms.
+		// We have to LEFT JOIN on the nrads, since the normal forms may not
+		// be referenced in the documents. This could be inefficient in that we
+		// load unused names, but that is what the input doc says, so we go with it.
+		// Might be a feature - those names will show 0 docs in a listing.
 		final String SELECT_BY_CORPUS_ID = 
-			//"SELECT `id`, `name`,`nametype`,`gender`,`notes`,`normal`"
-			//+ "FROM `name` WHERE `corpus_id`=? ORDER BY normal";
-			"SELECT n.id, n.name, n.nym_id, n.nametype, n.gender, n.notes, n.normal, " 
-			+" count(*) totalCount, T2.nDocs docCount FROM name n, name_role_activity_doc nr,"
-			+" (SELECT T1.name_id, count(*) nDocs FROM"
+			"SELECT n.id, n.name, n.nym_id, n.nametype, n.gender, n.notes, n.normal," 
+			+" count(*) totalCount, T2.nDocs docCount"
+			+" FROM name n LEFT JOIN name_role_activity_doc nr ON n.id=nr.name_id"
+			+" LEFT JOIN (SELECT T1.name_id, count(*) nDocs FROM"
 			+" (SELECT DISTINCT name_id, document_id FROM name_role_activity_doc) AS T1"
-			+" GROUP BY T1.name_id) AS T2"
-			+" WHERE n.id=nr.name_id AND n.corpus_id=? AND n.id=T2.name_id GROUP BY n.id" 
-			+" ORDER BY n.normal";
+			+" GROUP BY T1.name_id) AS T2 ON n.id=T2.name_id"
+			+" WHERE n.corpus_id=?"
+			+" GROUP BY n.id" 
+			+" ORDER BY n.normal, n.id";	// Order by normal so normal forms are loaded first
 		
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
