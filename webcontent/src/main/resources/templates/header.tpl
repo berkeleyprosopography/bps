@@ -4,10 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!--
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-Would be nice to have a shortcut icon
 <link rel="shortcut icon" href="/media/favicon.ico" type="image/vnd.microsoft.icon">
 -->
+<link rel="icon" type="image/vnd.microsoft.icon" href="/favicon.ico"/>
 <link rel="stylesheet" href="/style/style.css" type="text/css" />
 {if isset($style_block) }
 {$style_block}

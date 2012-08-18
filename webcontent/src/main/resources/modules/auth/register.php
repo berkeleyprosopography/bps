@@ -7,6 +7,7 @@ require_once($CFG->dirroot."/libs/utils.php");
 $t->assign('messages', null);
 $t->assign('email', null);
 $t->assign('user', null);
+$t->assign('supportOpenReg', $CFG->supportOpenReg);
 /**
  * Confirms a user's registration, clearing the pending flag in the DB
  */
