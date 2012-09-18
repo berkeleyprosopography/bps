@@ -46,7 +46,8 @@ p.nav-right { float:right; }
 
 $t->assign("style_block", $style_block);
 
-$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
+// $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
+unset($errmsg);
 
 if(!isset($_GET['view'])) {
 	$view = 'docs';
@@ -283,11 +284,15 @@ function getCorpusDocs($CFG,$cid,$nid,$role,$order,$medianDocDate) {
 		$documents = array();
 		foreach($results as &$result) {
 			$docObj = &$result['document'];
-			$docDate = ($docObj['dateString']==0)?$medianDocDate:$docObj['dateString'];
+			$docDate = (isset($docObj['dateString'])&&$docObj['dateString']!=0)?
+						$docObj['dateString']:$medianDocDate;
 			$document = array(	'id' => $docObj['id'],
-				'alt_id' => $docObj['alt_id'], 'primaryPubl' => $docObj['primaryPubl'], 
-				'notes' => $docObj['notes'], 'sourceURL' => $docObj['sourceURL'],
-				'xml_id' => $docObj['xml_id'], 'date_str' => $docDate
+				'alt_id' => isset($docObj['alt_id'])?$docObj['alt_id']:null,
+				'primaryPubl' => isset($docObj['primaryPubl'])?$docObj['primaryPubl']:null, 
+				'notes' => isset($docObj['notes'])?$docObj['notes']:null,
+				'sourceURL' => isset($docObj['sourceURL'])?$docObj['sourceURL']:null,
+				'xml_id' => isset($docObj['xml_id'])?$docObj['xml_id']:null,
+				'date_str' => $docDate
 			);
 			array_push($documents, $document);
 			// Supposed to help with efficiency (dangling refs?)
@@ -421,9 +426,10 @@ if(!isset($_GET['id'])) {
 				$t->assign('dates_file', $dates_file);
 			}
 		} else if($view=='docs') {
-			$nameIDFilter = $_GET['name'];
-			$roleFilter = $_GET['role'];
-			$docs = getCorpusDocs($CFG,$corpusID, $nameIDFilter, $roleFilter, $_GET['o'],
+			$nameIDFilter = isset($_GET['name'])?($_GET['name']):null;
+			$roleFilter = isset($_GET['role'])?($_GET['role']):null;
+			$orderBy = isset($_GET['o'])?($_GET['o']):null;
+			$docs = getCorpusDocs($CFG,$corpusID, $nameIDFilter, $roleFilter, $orderBy,
 															'<em>('.$corpus['medianDocDate'].'?)</em>');
 			if($docs) {
 				$t->assign('documents', $docs);
@@ -439,9 +445,9 @@ if(!isset($_GET['id'])) {
 				$errmsg = "Problem getting Corpus documents: ".$opmsg;
 			}
 		} else if($view=='pnames') {
-			$roleFilter = $_GET['role'];
-			$genderFilter = $_GET['gender'];
-			$orderBy = $_GET['o'];
+			$roleFilter = isset($_GET['role'])?($_GET['role']):null;
+			$genderFilter = isset($_GET['gender'])?($_GET['gender']):null;
+			$orderBy = isset($_GET['o'])?($_GET['o']):null;
 			$names = getCorpusNames($CFG,$corpusID, $roleFilter, $genderFilter,
 																'person',$orderBy);
 			if(isset($names)) {
@@ -463,11 +469,11 @@ if(!isset($_GET['id'])) {
 				$errmsg = "Problem getting Corpus names: ".$opmsg;
 			}
 		} else if($view=='cnames') {
-			$roleFilter = $_GET['role'];
-			$genderFilter = $_GET['gender'];
+			$roleFilter = isset($_GET['role'])?($_GET['role']):null;
+			$genderFilter = isset($_GET['gender'])?($_GET['gender']):null;
+			$orderBy = isset($_GET['o'])?($_GET['o']):null;
 			$t->assign('view', $view);
-			$orderBy = $_GET['o'];
-			$names = getCorpusNames($CFG,$corpusID, $_GET['role'], null, 'clan',$orderBy);
+			$names = getCorpusNames($CFG,$corpusID, $roleFilter, null, 'clan',$orderBy);
 			if(isset($names)) {
 				$t->assign('names', $names);
 				$t->assign('type', 'Clan');
@@ -487,7 +493,7 @@ if(!isset($_GET['id'])) {
 	}
 }
 
-if($errmsg!="")
+if(isset($errmsg))
 	$t->assign('errmsg', $errmsg);
 
 if($view=='docs') {
@@ -506,6 +512,7 @@ if($view=='docs') {
 }
 
 ?>
+
 
 
 
