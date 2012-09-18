@@ -24,6 +24,8 @@
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 unset($CFG);  // Ignore this line
+$CFG = new stdClass();
+date_default_timezone_set('America/Los_Angeles');
 
 //=========================================================================
 // 1. DATABASE SETUP

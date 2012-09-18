@@ -40,6 +40,7 @@ $t->assign("style_block", $style_block);
 //$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $opmsg = false;
+unset($errmsg);
 
 function getDocUrl($CFG,$wid,$did){
 	return $CFG->wwwroot.$CFG->svcsbase."/workspaces/".$wid."/documents/".$did;
@@ -86,13 +87,13 @@ function getDocInfo($CFG,$wkspid,$docid){
 		$docObj = &$result['document'];
 		$document = array(
 			'id' => $docObj['id'],
-			'alt_id' => $docObj['alt_id'], 
-			'primaryPubl' => $docObj['primaryPubl'],
-			'notes' => $docObj['notes'],
-			'sourceURL' => $docObj['sourceURL'],
-			'xml_id' => $docObj['xml_id'],
-			'date_norm' => $docObj['dateValue'],
-			'date_str' => $docObj['dateString'] );
+			'alt_id' => isset($docObj['alt_id'])?$docObj['alt_id']:null, 
+			'primaryPubl' => isset($docObj['primaryPubl'])?$docObj['primaryPubl']:null,
+			'notes' => isset($docObj['notes'])?$docObj['notes']:null,
+			'sourceURL' => isset($docObj['sourceURL'])?$docObj['sourceURL']:null,
+			'xml_id' => isset($docObj['xml_id'])?$docObj['xml_id']:null,
+			'date_norm' => isset($docObj['dateValue'])?$docObj['dateValue']:null,
+			'date_str' => isset($docObj['dateString'])?$docObj['dateString']:null );
 		unset($docObj);
 		return $document;
 	} else if($rest->getStatus() == 404) {
@@ -197,14 +198,19 @@ if(!(isset($_GET['wid'])&&isset($_GET['did']))) {
 		}
 		$t->assign('document', $document);
 		$linkListMap = getEntitiesForDocNRADs($CFG,$wid,$did);
-		if(!$linkListMap) {
+		if(!isset($linkListMap)) {
 			$errmsg = "Problem getting Document nrad-to-Entity links: ".$opmsg;
+		} else if(empty($linkListMap)) {
+				$errmsg = "No Name-Role-Activity items found in Document.";
 		} else {
 			$nrads = getDocNRADs($CFG,$wid,$did, $linkListMap);
-			if($nrads ) {
+			if(!isset($nrads)) {
+				$errmsg = "Problem getting Document Name-Role-Activity items: "
+					.(empty($opmsg)?"Unknown problem":$opmsg);
+			} else if(empty($nrads)) {
+					$errmsg = "No Name-Role-Activity items found in Document.";
+			} else {
 				$t->assign('nrads', $nrads);
-			} else if($opmsg){
-				$errmsg = "Problem getting Document Name-Role-Activity items: ".$opmsg;
 			}
 		}
 	} else if($opmsg){
@@ -215,7 +221,7 @@ if(!(isset($_GET['wid'])&&isset($_GET['did']))) {
 }
 
 
-if($errmsg!="")
+if(isset($errmsg))
 	$t->assign('errmsg', $errmsg);
 
 $t->display('document.tpl');

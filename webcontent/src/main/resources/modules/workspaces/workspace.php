@@ -34,7 +34,8 @@ td.document { font-weight:bold; }
 
 $t->assign("style_block", $style_block);
 
-$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
+// $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
+unset($errmsg);
 
 if(!isset($_GET['view'])) {
 	$view = 'docs';
@@ -240,12 +241,11 @@ function getWorkspace($CFG,$user_id, $wkspid){
 			$wkspObj = &$result['workspace'];
 			$workspace = array(
 				'id' => $wkspObj['id'],
-				'name' => $wkspObj['name'], 
-				'description' => $wkspObj['description'],
-				'importedCorpusId' => $wkspObj['builtFromCorpus'],
-				'importedCorpusName' => $wkspObj['importedCorpusName'],
-				'medianDocDate' => $wkspObj['medianDocDate']
-			);
+				'name' => isset($wkspObj['name'])?($wkspObj['name']):null, 
+				'description' => isset($wkspObj['description'])?($wkspObj['description']):null,
+				'importedCorpusId' => isset($wkspObj['builtFromCorpus'])?($wkspObj['builtFromCorpus']):null,
+				'importedCorpusName' => isset($wkspObj['importedCorpusName'])?($wkspObj['importedCorpusName']):null,
+				'medianDocDate' => isset($wkspObj['medianDocDate'])?($wkspObj['medianDocDate']):null			);
 			// Look for trailing "(Clone)" and trim it
 			if((strlen($workspace['importedCorpusName']) > 7 ) 
 				&& 0==substr_compare($workspace['importedCorpusName'], '(Clone)', -7, 7)) {
@@ -279,11 +279,15 @@ function getWorkspaceDocs($CFG,$id,$order,$medianDocDate) {
 		$documents = array();
 		foreach($results as &$result) {
 			$docObj = &$result['document'];
-			$docDate = ($docObj['dateString']==0)?$medianDocDate:$docObj['dateString'];
+			$docDate = (!isset($docObj['dateString'])||$docObj['dateString']==0)?
+									$medianDocDate:$docObj['dateString'];
 			$document = array(	'id' => $docObj['id'],
-			 	'alt_id' => $docObj['alt_id'], 'primaryPubl' => $docObj['primaryPubl'],
-				'notes' => $docObj['notes'], 'sourceURL' => $docObj['sourceURL'],
-				'xml_id' => $docObj['xml_id'], 'date_str' => $docDate
+				'alt_id' => isset($docObj['alt_id'])?($docObj['alt_id']):null,
+				'primaryPubl' => isset($docObj['primaryPubl'])?($docObj['primaryPubl']):null,
+				'notes' => isset($docObj['notes'])?($docObj['notes']):null,
+				'sourceURL' => isset($docObj['sourceURL'])?($docObj['sourceURL']):null,
+				'xml_id' => isset($docObj['xml_id'])?($docObj['xml_id']):null,
+				'date_str' => $docDate
 			);
 			array_push($documents, $document);
 			// Supposed to help with efficiency (dangling refs?)
@@ -329,7 +333,7 @@ $user_id = getCurrUser();
 if(!isset($user_id)) {
 	$errmsg = "You must be logged in to access your workspace(s).";
 } else {
-	$workspace = getWorkspace($CFG,$user_id, $_GET['wid']);
+	$workspace = getWorkspace($CFG,$user_id, isset($_GET['wid'])?$_GET['wid']:null);
 	if(!$workspace) {
 		if($opmsg){
 			$errmsg = "Problem getting Workspace details: ".$opmsg;
@@ -340,7 +344,9 @@ if(!isset($user_id)) {
 	 	if($workspace['importedCorpusId']>0){
 			if($view=='docs') {
 				$workspace['nDocs'] = 0;
-				$docs = getWorkspaceDocs($CFG,$workspace['id'], $_GET['o'], '<em>('.$workspace['medianDocDate'].'?)</em>');
+				$docs = getWorkspaceDocs($CFG,$workspace['id'], 
+					isset($_GET['o'])?$_GET['o']:null,
+				 	'<em>('.$workspace['medianDocDate'].'?)</em>');
 				if($docs) {
 					$workspace['nDocs'] = count($docs);
 					$t->assign('documents', $docs);
@@ -363,7 +369,7 @@ if(!isset($user_id)) {
 }
 
 
-if($errmsg!="") {
+if(isset($errmsg)) {
 	if(!$workspace) {
 		$t->assign('heading', 'Cannot show workspace');
 		$t->assign('message', $errmsg);

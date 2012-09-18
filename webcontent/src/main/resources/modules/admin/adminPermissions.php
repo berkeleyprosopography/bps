@@ -35,7 +35,7 @@ form.form_row  { padding:0px; margin:0px;}
 
 $t->assign("style_block", $style_block);
 
-$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
+// $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $script_block = '
 <script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>

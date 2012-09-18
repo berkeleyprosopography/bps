@@ -25,6 +25,8 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	die();
 }
 
+unset($opmsg);
+
 $t->assign('page_title', 'Corpora Management'.$CFG->page_title_default);
 
 $canAddCorpus = false;
@@ -227,8 +229,11 @@ if($rest->sendRequest()) {
 	$corpora = array();
 	foreach($results as &$result) {
 		$corpObj = &$result['corpus'];
-		$corpus = array(	'id' => $corpObj['id'], 'name' => $corpObj['name'], 
-					'nDocs' => $corpObj['ndocs'], 'description' => $corpObj['description']);
+		$corpus = array(
+			'id' => $corpObj['id'],
+			'name' => isset($corpObj['name'])?$corpObj['name']:null, 
+			'nDocs' => isset($corpObj['ndocs'])?$corpObj['ndocs']:null,
+			'description' => isset($corpObj['description'])?$corpObj['description']:null);
 		array_push($corpora, $corpus);
 		// Supposed to help with efficiency (dangling refs?)
 		unset($result);
@@ -243,7 +248,7 @@ if($corpora)
 else if($ServCorpOutput != "")
 	$t->assign('opmsg', $ServCorpOutput);
 
-if($opmsg!="")
+if(isset($opmsg))
 	$t->assign('opmsg', $opmsg);
 
 $t->display('corpora.tpl');

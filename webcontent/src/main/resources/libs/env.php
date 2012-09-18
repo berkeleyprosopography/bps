@@ -83,7 +83,7 @@ if( $noDB ) {
 // Determine user's login state
 require_once "$CFG->dirroot/modules/auth/checkLogin.php";
 require_once "$CFG->dirroot/modules/admin/authUtils.php";
-$login_state == BPS_LOGGED_OUT;
+$login_state = BPS_LOGGED_OUT;
 $login_state = checkLogin();
 // echo $login_state;
 

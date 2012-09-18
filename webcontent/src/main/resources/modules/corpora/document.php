@@ -38,6 +38,7 @@ $t->assign("style_block", $style_block);
 //$themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 
 $opmsg = false;
+unset($errmsg);
 
 function getDocUrl($CFG,$cid,$did){
 	return $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/documents/".$did;
@@ -84,13 +85,13 @@ function getDocInfo($CFG,$corpid,$docid){
 		$docObj = &$result['document'];
 		$document = array(
 			'id' => $docObj['id'],
-			'alt_id' => $docObj['alt_id'], 
-			'primaryPubl' => $docObj['primaryPubl'],
-			'notes' => $docObj['notes'],
-			'sourceURL' => $docObj['sourceURL'],
-			'xml_id' => $docObj['xml_id'],
-			'date_norm' => $docObj['dateValue'],
-			'date_str' => $docObj['dateString'] );
+			'alt_id' => isset($docObj['alt_id'])?($docObj['alt_id']):null, 
+			'primaryPubl' => isset($docObj['primaryPubl'])?($docObj['primaryPubl']):null,
+			'notes' => isset($docObj['notes'])?($docObj['notes']):null,
+			'sourceURL' => isset($docObj['sourceURL'])?($docObj['sourceURL']):null,
+			'xml_id' => isset($docObj['xml_id'])?($docObj['xml_id']):null,
+			'date_norm' => isset($docObj['dateValue'])?($docObj['dateValue']):null,
+			'date_str' => isset($docObj['dateString'])?($docObj['dateString']):null );
 		unset($docObj);
 		return $document;
 	} else if($rest->getStatus() == 404) {
@@ -117,16 +118,17 @@ function getDocNRADs($CFG,$cid,$did){
 			$nradObj = &$result['nameRoleActivity'];
 			$nrad = array(	
 				'id' => $nradObj['id'],
-			  'xmlId' => $nradObj['xmlID'],
-			 	'nameId' => $nradObj['nameId'], 
-			 	'name' => $nradObj['name'], 
-			 	'normalNameId' => $nradObj['normalNameId'], 
-			 	'normalName' => $nradObj['normalName'], 
-			 	'activityRoleId' => $nradObj['activityRoleId'], 
-			 	'activityRole' => $nradObj['activityRole'], 
-			 	'activityRoleIsFamily' => ($nradObj['activityRoleIsFamily']=='true'), 
-			 	'activityId' => $nradObj['activityId'], 
-			 	'activity' => $nradObj['activity'] 
+			  'xmlId' => isset($nradObj['xmlID'])?($nradObj['xmlID']):null,
+			 	'nameId' => isset($nradObj['nameId'])?($nradObj['nameId']):null, 
+			 	'name' => isset($nradObj['name'])?($nradObj['name']):null, 
+			 	'normalNameId' => isset($nradObj['normalNameId'])?($nradObj['normalNameId']):null, 
+			 	'normalName' => isset($nradObj['normalName'])?($nradObj['normalName']):null, 
+			 	'activityRoleId' => isset($nradObj['activityRoleId'])?($nradObj['activityRoleId']):null, 
+			 	'activityRole' => isset($nradObj['activityRole'])?($nradObj['activityRole']):null, 
+				'activityRoleIsFamily' => (isset($nradObj['activityRoleIsFamily'])
+																	&&($nradObj['activityRoleIsFamily']=='true')), 
+			 	'activityId' => isset($nradObj['activityId'])?($nradObj['activityId']):null, 
+			 	'activity' => isset($nradObj['activity'])?($nradObj['activity']):null 
 			);
 			array_push($nrads, $nrad);
 			// Supposed to help with efficiency (dangling refs?)
@@ -165,7 +167,7 @@ if(!(isset($_GET['cid'])&&isset($_GET['did']))) {
 }
 
 
-if($errmsg!="")
+if(isset($errmsg))
 	$t->assign('errmsg', $errmsg);
 
 $t->display('document.tpl');
