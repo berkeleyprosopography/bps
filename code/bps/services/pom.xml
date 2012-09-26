@@ -23,6 +23,7 @@
         <module>corpus</module>
 				<module>workspace</module>
 				<module>graphbuilder</module>
+				<module>sna</module>
 				<module>webapp</module>
     </modules>
 
@@ -167,6 +168,39 @@
                         </execution>
                     </executions>
                 </plugin>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                	<groupId>org.eclipse.m2e</groupId>
+                	<artifactId>lifecycle-mapping</artifactId>
+                	<version>1.0.0</version>
+                	<configuration>
+                		<lifecycleMappingMetadata>
+                			<pluginExecutions>
+                				<pluginExecution>
+                					<pluginExecutionFilter>
+                						<groupId>
+                							org.codehaus.mojo
+                						</groupId>
+                						<artifactId>
+                							properties-maven-plugin
+                						</artifactId>
+                						<versionRange>
+                							[1.0-alpha-2,)
+                						</versionRange>
+                						<goals>
+                							<goal>
+                								read-project-properties
+                							</goal>
+                						</goals>
+                					</pluginExecutionFilter>
+                					<action>
+                						<ignore></ignore>
+                					</action>
+                				</pluginExecution>
+                			</pluginExecutions>
+                		</lifecycleMappingMetadata>
+                	</configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -261,12 +295,32 @@
 					<artifactId>services.workspace</artifactId>
 					<version>${project.version}</version>
 				</dependency>
+				<dependency>
+					<groupId>edu.berkeley.bps.services</groupId>
+					<artifactId>services.sna</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>net.sf.jung</groupId>
+					<artifactId>jung-graph-impl</artifactId>
+					<version>2.0.1</version>
+				</dependency>
+				<dependency>
+					<groupId>net.sf.jung</groupId>
+					<artifactId>jung-algorithms</artifactId>
+					<version>2.0.1</version>
+				</dependency>
+				<dependency>
+					<groupId>net.sf.jung</groupId>
+					<artifactId>jung-io</artifactId>
+					<version>2.0.1</version>
+				</dependency>
 				 <dependency>
 						<groupId>mysql</groupId>
 						<artifactId>mysql-connector-java</artifactId>
 						<version>5.1.13</version>
 						<scope>provided</scope>
 					</dependency>
-        </dependencies>
-    </dependencyManagement>
-</project>
+				</dependencies>
+			</dependencyManagement>
+	</project>

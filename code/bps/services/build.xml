@@ -107,6 +107,7 @@
 		<ant antfile="graphbuilder/build.xml" target="create_db" inheritAll="false"/>
 		<ant antfile="user/build.xml" target="create_db" inheritAll="false"/>
 		<ant antfile="workspace/build.xml" target="create_db" inheritAll="false"/>
+		<ant antfile="sna/build.xml" target="create_db" inheritAll="false"/>
 	</target>
 
 	<target name="deploy" depends="checkvars,install"
@@ -117,6 +118,7 @@
 		<ant antfile="user/build.xml" target="deploy" inheritAll="false"/>
 		<ant antfile="workspace/build.xml" target="deploy" inheritAll="false"/>
 		<ant antfile="webapp/build.xml" target="deploy" inheritAll="false"/>
+		<ant antfile="sna/build.xml" target="deploy" inheritAll="false"/>
 	</target>
 
 	<target name="checkvars">
@@ -138,6 +140,7 @@
 		<ant antfile="user/build.xml" target="undeploy" inheritAll="false"/>
 		<ant antfile="workspace/build.xml" target="undeploy" inheritAll="false"/>
 		<ant antfile="webapp/build.xml" target="undeploy" inheritAll="false"/>
+		<ant antfile="sna/build.xml" target="undeploy" inheritAll="false"/>
 	</target>
 
 	<target name="eclipse" depends="eclipse-unix,eclipse-windows" description="Generate Eclipse files" />
