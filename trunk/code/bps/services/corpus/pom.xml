@@ -10,9 +10,7 @@
 	</parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>edu.berkeley.bps.services</groupId>
   <artifactId>services.corpus</artifactId>
-  <version>0.9.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>bps.services.corpus</name>
@@ -33,7 +31,7 @@
       <artifactId>junit</artifactId>
       <version>4.1</version>
       <scope>test</scope>
-    </dependency>
+    </dependency><!--$NO-MVN-MAN-VER$-->
     <dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>saxon</artifactId>
@@ -80,8 +78,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-					<configuration>
+				<configuration>
 						<excludes>
 							<exclude>**/*.sql</exclude>
 						</excludes>
