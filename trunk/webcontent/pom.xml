@@ -50,6 +50,27 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+        <includes>
+          <include>**/*.html</include>
+          <include>**/*.php</include>
+          <include>**/*.txt</include>
+          <include>**/*.js</include>
+          <include>**/*.css</include>
+          <include>**/*.tpl</include>
+          <include>**/*.xsl</include>
+          <include>**/*.jsp</include>
+          <include>**/*.htaccess</include>
+       </includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+        <includes>
+          <include>**/*.png</include>
+          <include>**/*.gif</include>
+          <include>**/*.jpg</include>
+          <include>**/*.ico</include>
+       </includes>
 			</resource>
 		</resources>
 		<plugins>
@@ -129,7 +150,7 @@
 											<file name="test.jsp"/>
 											<file name="favicon.ico"/>
 											<file name="robots.txt"/>
-											<file name="php.ini"/>
+											<!-- <file name="php.ini"/> -->
 											<file name="test.html"/>
 											<file name="missing.html"/>
 											<file name="config.php"/>
