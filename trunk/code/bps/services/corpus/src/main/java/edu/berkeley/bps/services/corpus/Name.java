@@ -491,10 +491,15 @@ public class Name {
 				if(normalId != 0) {
 					Name normal = nameMap.get(normalId);
 					if(normal==null) {
-						throw new RuntimeException(myClass+".ListAllInCorpus:"
-							+" Internal error: Could not find normal form of name in map!");
+						String tmp = myClass+".ListAllInCorpus:"
+								+" Internal error: Could not find normal form of name in map!";
+						/*
+						throw new RuntimeException(tmp);
+						 */
+						System.err.println(tmp);
+					} else {
+						newName.setNormal(normal);
 					}
-					newName.setNormal(normal);
 				}
 				nameList.add(newName);
 				nameMap.put(newName.id, newName);
