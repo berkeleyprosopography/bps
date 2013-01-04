@@ -32,7 +32,7 @@
 			</tr>
 		</table>
 		<p>&nbsp;&nbsp;See also:
-				<a href="http://cdli.ucla.edu/{$document.alt_id}">CDLI</a>
+				<a href="http://cdli.ucla.edu/{$document.alt_id}" target="_blank">CDLI</a>
 				&nbsp;&nbsp;<a href="http://oracc.museum.upenn.edu/hbtin/{$document.alt_id}" target="_blank">Oracc</a>
 				&nbsp;&nbsp;<a href="http://oracc.museum.upenn.edu/hbtin/{$document.alt_id}/tei" target="_blank">TEI</a>
 				&nbsp;&nbsp;<a href="http://cdli.ucla.edu/dl/photo/{$document.alt_id}.jpg" target="_blank">Image</a>
