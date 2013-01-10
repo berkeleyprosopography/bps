@@ -15,8 +15,11 @@ import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.TEI_Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentContentHandler extends StackedContentHandler {
+	final Logger logger = LoggerFactory.getLogger(DocumentContentHandler.class);
 	protected static String[] namepath = 
 	{"TEI","text","body"};
 	
@@ -60,9 +63,9 @@ public class DocumentContentHandler extends StackedContentHandler {
 			onPrimPubElement = (TEI_Constants.PRIMARY_PUB_PATH_TYPE_ATTR.equalsIgnoreCase(type));
 			/*
 			 if(onAltIDElement)
-				System.err.println("Found AltIDElement");
+				logger.debug("Found AltIDElement");
 			else
-				System.err.println("Almost found AltIDElement; type:"+type);
+				logger.debug("Almost found AltIDElement; type:"+type);
 			*/
 		} else if(localName.equals("text")) {
 			// This may have to be more flexible, saving the stack size
@@ -127,14 +130,14 @@ public class DocumentContentHandler extends StackedContentHandler {
 		// Look for the teiHeader/fileDesc/titleStmt/title path
 		if(onAltIDElement) {
 			String altID = getCurrentText().trim().replaceAll("[\\s]+", " ");
-			//System.err.println("Found AltID for document:"+altID);
+			//logger.debug("Found AltID for document:"+altID);
 			document.setAlt_id(altID);
 			onAltIDElement = false;
 			foundAltIDElement = true;
 		} else if(onPrimPubElement) {
 			// Preserve spaces in primary pub. Only used in display
 			String primPub = getCurrentText().trim();
-			//System.err.println("Found Primary Publication for document:"+primPub);
+			//logger.debug("Found Primary Publication for document:"+primPub);
 			document.setPrimaryPubl(primPub);
 			onPrimPubElement = false;
 			foundPrimPubElement = true;
@@ -149,9 +152,9 @@ public class DocumentContentHandler extends StackedContentHandler {
 			document.persist(dbConn, CachedEntity.DEEP_PERSIST);
 			corpus.addDocument(document);
 			if(!foundAltIDElement)
-				System.err.println("No AltIDElement for document!");
+				logger.warn("No AltIDElement for document!");
 			if(!foundPrimPubElement)
-				System.err.println("No Primary Publication Element for document!");
+				logger.warn("No Primary Publication Element for document!");
 		}
 		super.pop();
 	}

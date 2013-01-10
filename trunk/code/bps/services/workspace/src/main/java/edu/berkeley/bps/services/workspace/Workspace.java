@@ -39,6 +39,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author pschmitz
  *
@@ -50,6 +53,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="workspace")
 public class Workspace extends CachedEntity {
+	static final Logger logger = LoggerFactory.getLogger(Workspace.class);
+	
 	private final static String myClass = "Workspace";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
@@ -128,7 +133,7 @@ public class Workspace extends CachedEntity {
 			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
 		this.personToEntityLinkSets = 
 			new HashMap<Person, List<EntityLinkSet<NameRoleActivity>>>();
-		System.err.println("Workspace.ctor, created: "+this.toString());
+		logger.debug("Workspace.ctor, created: "+this.toString());
 	}
 	
 	private void init(ServiceContext sc) {
@@ -212,7 +217,7 @@ public class Workspace extends CachedEntity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -236,7 +241,7 @@ public class Workspace extends CachedEntity {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -292,7 +297,7 @@ public class Workspace extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllForUser(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating workspace\n"+se.getLocalizedMessage()).build());
@@ -320,7 +325,7 @@ public class Workspace extends CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 		}
 		return exists;
 	}
@@ -358,7 +363,7 @@ public class Workspace extends CachedEntity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		//workspace.findAndLoadCorpus(sc);
@@ -396,7 +401,7 @@ public class Workspace extends CachedEntity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		//workspace.findAndLoadCorpus(sc);
@@ -417,7 +422,7 @@ public class Workspace extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}
@@ -536,18 +541,18 @@ public class Workspace extends CachedEntity {
 				&& this.corpus.getId()==newCorpus.getId() ) {
 			String tmp = myClass+myName+
 				"newCorpus same as current - ignoring setCorpus() call.";
-			System.err.println(tmp);
+			logger.debug(tmp);
 			return;	// Do not update if the same corpus
 		}
 		if(newCorpus!=null) {
 			if( newCorpus.getCloneOfId()<=0) { 
 				String tmp = myClass+myName+"newCorpus must be a clone";
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException(tmp);
 			}
 			if( newCorpus.getWkspId()!=id ) {
 				String tmp = myClass+myName+"newCorpus appears to be owned by another workspace";
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException(tmp);
 			}
 		}

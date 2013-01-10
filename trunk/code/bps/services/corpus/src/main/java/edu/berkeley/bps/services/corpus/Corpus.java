@@ -22,11 +22,15 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="corpus")
 public class Corpus extends CachedEntity {
+	static final Logger logger = LoggerFactory.getLogger(CachedEntity.class);
+			
 	final static String myClass = "Corpus";
 	public final static int NO_WKSP_ID = 0;
 	public final static int ANY_WKSP_ID = -1;
@@ -128,7 +132,7 @@ public class Corpus extends CachedEntity {
 		if(this.wkspId!=NO_WKSP_ID) {
 			String tmp = myClass+myName+
 				"Cannot clone a workspace-owned Corpus.\n";
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException(tmp);
 		}
 		Corpus newCorpus = CreateAndPersist(sc, 
@@ -250,7 +254,7 @@ public class Corpus extends CachedEntity {
 		// attached elements as hashmaps
 		if(id<=0)
 			return;
-		System.err.println("Corpus.initAttachedEntityMaps() called...");
+		logger.trace("Corpus.initAttachedEntityMaps() called...");
 		// Handle Activities Map
 		activitiesByName.clear();
 		activitiesById.clear();
@@ -259,7 +263,7 @@ public class Corpus extends CachedEntity {
 			activitiesByName.put(act.getName(), act);
 			activitiesById.put(act.getId(), act);
 		}
-		System.err.println("Corpus.initAEMaps() Built activities list. Count: "+activitiesByName.size());
+		logger.trace("Corpus.initAEMaps() Built activities list. Count: "+activitiesByName.size());
 		// Handle Activity Roles Map
 		activityRolesByName.clear();
 		activityRolesById.clear();
@@ -268,7 +272,7 @@ public class Corpus extends CachedEntity {
 			activityRolesByName.put(actRole.getName(), actRole);
 			activityRolesById.put(actRole.getId(), actRole);
 		}
-		System.err.println("Corpus.initAEMaps() Built roles list. Count: "+activityRolesByName.size());
+		logger.trace("Corpus.initAEMaps() Built roles list. Count: "+activityRolesByName.size());
 		// Handle Names Maps
 		namesByName.clear();
 		namesById.clear();
@@ -281,7 +285,7 @@ public class Corpus extends CachedEntity {
 			if(nymId!=null)
 				namesByNymId.put(nymId, name);
 		}
-		System.err.println("Corpus.initAEMaps() Built names list. Count: "+namesByName.size());
+		logger.trace("Corpus.initAEMaps() Built names list. Count: "+namesByName.size());
 		// Handle Documents Map
 		documentsById.clear();
 		documentsByAltId.clear();
@@ -294,7 +298,7 @@ public class Corpus extends CachedEntity {
 				documentsByAltId.put(altId, doc);
 			}
 		}
-		System.err.println("Corpus.initAEMaps() Built doc list. Count: "+documentsById.size());
+		logger.trace("Corpus.initAEMaps() Built doc list. Count: "+documentsById.size());
 	}
 	
 	private void clearMaps() {
@@ -349,7 +353,7 @@ public class Corpus extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return corpus;
@@ -387,7 +391,7 @@ public class Corpus extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return corpus;
@@ -431,7 +435,7 @@ public class Corpus extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAll(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating corpus\n"+se.getLocalizedMessage()).build());
@@ -481,7 +485,7 @@ public class Corpus extends CachedEntity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return newId;
@@ -503,7 +507,7 @@ public class Corpus extends CachedEntity {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -580,7 +584,7 @@ public class Corpus extends CachedEntity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}
@@ -762,7 +766,7 @@ public class Corpus extends CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".getNDocuments: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 		}
 	}
 	*/
@@ -839,8 +843,8 @@ public class Corpus extends CachedEntity {
 			String tmp = myClass+".findOrCreateName("+name
 					+","+nymId
 					+") Emtpy name!";
-				System.err.println(tmp);
-				throw new RuntimeException(tmp);
+			logger.error(tmp);
+			throw new RuntimeException(tmp);
 		}
 		Name instance = namesByName.get(name);
 		if(instance == null) {
@@ -852,14 +856,14 @@ public class Corpus extends CachedEntity {
 				+","+Name.NameTypeToString(nametype)
 				+") Found name match with inconsistent type:"
 				+instance.getNameTypeString();
-			System.err.println(tmp);
+			logger.warn(tmp);
 			//throw new RuntimeException(tmp);
 		} else if( nymId!=null && instance.getNymId()!=nymId) {
 			String tmp = myClass+".findOrCreateName("+name
 				+","+nymId
 				+") Found name match with inconsistent nymId (duplicate orthography?):"
 				+instance.getNymId();
-			System.err.println(tmp);
+			logger.warn(tmp);
 			//throw new RuntimeException(tmp);
 		} else if(Name.typeHasGender(nametype)) {
 			instance.checkAndUpdateGender(gender);

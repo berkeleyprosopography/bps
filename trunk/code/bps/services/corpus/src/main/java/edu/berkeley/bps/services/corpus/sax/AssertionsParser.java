@@ -12,8 +12,11 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AssertionsParser {
+	static final Logger logger = LoggerFactory.getLogger(AssertionsParser.class);
 	
 	public static void updateCorpusDates(Corpus corpus, String assertionsFile) {
         try {
@@ -23,7 +26,7 @@ public class AssertionsParser {
         		new AssertionsContentHandler(corpus, parser, defaultHandler);
         	parser.setContentHandler(assertionsHandler);
         	parser.setErrorHandler(defaultHandler);
-        	System.err.println("Opening assertions file...");
+        	logger.debug("Opening assertions file...");
         	try{
         		parser.parse(assertionsFile);
         	} catch(SAXException se) {
@@ -32,9 +35,9 @@ public class AssertionsParser {
         	} catch(IOException ioe) {
         		ioe.printStackTrace();
         	}
-        	System.err.println("Assertions parsed.");
+        	logger.debug("Assertions parsed.");
         } catch (Exception e) {
-        	System.err.println(e.getLocalizedMessage());
+        	logger.error(e.getLocalizedMessage());
             e.printStackTrace();
             throw new RuntimeException(e);
         }

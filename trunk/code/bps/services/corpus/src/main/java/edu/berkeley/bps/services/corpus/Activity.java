@@ -16,10 +16,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import edu.berkeley.bps.services.common.time.TimeSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="activity")
 public class Activity {
+	final static Logger logger = LoggerFactory.getLogger(Activity.class);
+			
 	private final static String myClass = "Activity";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
@@ -67,7 +71,7 @@ public class Activity {
 		this.parent = parent;
 		if(parent!=null)
 			parent.addChild(this);
-		System.err.println("Activity.ctor, created: "+this.toString());
+		logger.trace("Activity.ctor, created: {}", this.toString());
 	}
 	
 	/**
@@ -85,7 +89,7 @@ public class Activity {
 		final String myName = ".cloneInCorpus: ";
 		if(parent!=null) {
 			String tmp = myClass+myName+"Cannot clone Activity with parent (NYI).\n";
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException(tmp);
 		}
 		return CreateAndPersist(dbConn, newCorpus, name, description, null);
@@ -147,7 +151,7 @@ public class Activity {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -176,7 +180,7 @@ public class Activity {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -202,7 +206,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAll(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating activity\n"+se.getLocalizedMessage()).build());
@@ -221,7 +225,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting activities\n"+se.getLocalizedMessage()).build());
@@ -246,7 +250,7 @@ public class Activity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.debug(tmp);
 		}
 		return exists;
 	}
@@ -269,7 +273,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return activity;
@@ -293,7 +297,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return activity;
@@ -313,7 +317,7 @@ public class Activity {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}

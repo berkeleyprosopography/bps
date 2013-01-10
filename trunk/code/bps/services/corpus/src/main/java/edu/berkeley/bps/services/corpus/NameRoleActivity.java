@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pschmitz
@@ -30,6 +32,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="nameRoleActivity")
 public class NameRoleActivity 
 	implements Comparable<NameRoleActivity> {
+	static final Logger logger = LoggerFactory.getLogger(NameRoleActivity.class);
+	
 	private final static String myClass = "NameRoleActivity";
 	private static int	nextID = CachedEntity.UNSET_ID_VALUE;
 
@@ -462,7 +466,7 @@ public class NameRoleActivity
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 			
@@ -516,7 +520,7 @@ public class NameRoleActivity
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 	    	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -531,7 +535,7 @@ public class NameRoleActivity
 		int doc_id = 0;
 		if(document==null || (doc_id=document.getId())<=0) {
 			String tmp = myClass+".ListAllInDocument: Invalid document.\n";
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new IllegalArgumentException( tmp );
 		}
 		ArrayList<NameRoleActivity> nradList = new ArrayList<NameRoleActivity>();
@@ -558,7 +562,7 @@ public class NameRoleActivity
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllInDocument: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return nradList;
@@ -578,7 +582,7 @@ public class NameRoleActivity
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting nrads\n"+se.getLocalizedMessage()).build());

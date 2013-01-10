@@ -32,6 +32,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resource that manages a list of items.
@@ -39,6 +41,7 @@ import javax.ws.rs.core.UriInfo;
  */
 @Path("/workspaces")
 public class WorkspaceResource extends BaseResource {
+	static final Logger logger = LoggerFactory.getLogger(WorkspaceResource.class);
 	
 	private static final String myClass = "WorkspaceResource";
 	
@@ -92,7 +95,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".getAllForUser(): Problem getting Workspace List.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -115,7 +118,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".getCorpus(): Problem getting Workspace.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -146,7 +149,7 @@ public class WorkspaceResource extends BaseResource {
     		throw wae;
     	} catch(Exception e) {
     		String tmp = myClass+".createWorkspace(): Problem creating Workspace.\n"+ e.getLocalizedMessage();
-    		System.err.println(tmp);
+    		logger.error(tmp);
     		throw new WebApplicationException( 
     				Response.status(
     						Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -182,7 +185,7 @@ public class WorkspaceResource extends BaseResource {
             return response;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateWorkspace(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -205,7 +208,7 @@ public class WorkspaceResource extends BaseResource {
 	        return Response.ok().build();
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteWorkspace(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -230,7 +233,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".getCollapser(): Problem getting Collapser info.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -261,7 +264,7 @@ public class WorkspaceResource extends BaseResource {
             return response;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateWorkspace(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -297,7 +300,7 @@ public class WorkspaceResource extends BaseResource {
 					&& (corpusToAdd.getId()!=workspace.getBuiltFromCorpus())) {
 				String tmp = myClass+".refreshFromCorpus(): Unknown Corpus specifier in payload: "
 				+payload;
-				System.err.println(tmp);
+				logger.error(tmp);
 		    	throw new WebApplicationException( 
 					Response.status(
 						Response.Status.BAD_REQUEST).entity(tmp).build());
@@ -316,13 +319,13 @@ public class WorkspaceResource extends BaseResource {
 		} catch(NumberFormatException nfe) {
 			String tmp = myClass+".addFromCorpus(): Illegal Corpus specifier in payload: "
 			+payload+ nfe.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 	    	throw new WebApplicationException( 
 				Response.status(
 					Response.Status.BAD_REQUEST).entity(tmp).build());
 		} catch(Exception e) {
 			String tmp = myClass+".addFromCorpus(): Problem adding Corpus\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 	    	throw new WebApplicationException( 
 				Response.status(
 					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -396,7 +399,7 @@ public class WorkspaceResource extends BaseResource {
         	throw wae;
         } catch(Exception e) {
         	String tmp = myClass+".rebuildEntitiesFromCorpus(): Problem rebuilding\n"+ e.getLocalizedMessage();
-        	System.err.println(tmp);
+        	logger.error(tmp);
         	throw new WebApplicationException( 
         			Response.status(
         					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -443,7 +446,7 @@ public class WorkspaceResource extends BaseResource {
             return docList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocuments(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -464,7 +467,7 @@ public class WorkspaceResource extends BaseResource {
 	        return document;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocument(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -500,7 +503,7 @@ public class WorkspaceResource extends BaseResource {
 	        return document;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocument(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -532,7 +535,7 @@ public class WorkspaceResource extends BaseResource {
 	        return nradList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -556,7 +559,7 @@ public class WorkspaceResource extends BaseResource {
         	return workspace.getEntityLinksForDoc(docId);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -596,7 +599,7 @@ public class WorkspaceResource extends BaseResource {
 	        return activityList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivities(ServletContext, int)(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -625,7 +628,7 @@ public class WorkspaceResource extends BaseResource {
 	        return activity;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivity(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -665,7 +668,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".createActivity(): Problem creating Activity.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 	    	throw new WebApplicationException( 
 				Response.status(
 					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -702,7 +705,7 @@ public class WorkspaceResource extends BaseResource {
 	        return response;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateActivity(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -732,7 +735,7 @@ public class WorkspaceResource extends BaseResource {
 	        return Response.ok().build();
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteActivity(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -764,7 +767,7 @@ public class WorkspaceResource extends BaseResource {
 			return activityRoleList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivityRoles(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -794,7 +797,7 @@ public class WorkspaceResource extends BaseResource {
 			return activityRole;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -834,7 +837,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".createActivityRole(): Problem creating ActivityRole.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -871,7 +874,7 @@ public class WorkspaceResource extends BaseResource {
 			return response;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateActivityRole(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -901,7 +904,7 @@ public class WorkspaceResource extends BaseResource {
 			return Response.ok().build();
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -933,7 +936,7 @@ public class WorkspaceResource extends BaseResource {
 			return nameList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getNames(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -962,7 +965,7 @@ public class WorkspaceResource extends BaseResource {
 			return name;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1003,7 +1006,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".createName(): Problem creating Name.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1040,7 +1043,7 @@ public class WorkspaceResource extends BaseResource {
 			return response;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateName(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1070,7 +1073,7 @@ public class WorkspaceResource extends BaseResource {
 			return Response.ok().build();
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteName(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());

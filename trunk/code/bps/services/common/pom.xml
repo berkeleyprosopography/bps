@@ -25,6 +25,12 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
 			<version>1.1.GA</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -35,6 +41,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.4</version>
+			<scope>provided</scope>
 		</dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -44,7 +51,17 @@
 					 depend upon this.
 					 <scope>test</scope> -->
     </dependency>
-  </dependencies>
+		<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>1.5.8</version>
+		</dependency>
+		<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.5.8</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<!-- Filter resources using the build.properties pulled in below -->
 		<resources>

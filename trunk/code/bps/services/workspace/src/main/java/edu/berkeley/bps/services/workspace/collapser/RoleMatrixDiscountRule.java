@@ -10,15 +10,22 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Workspace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
 public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI 
 		implements CollapserRule, CollapserRuleUI, CollapserRulePairMatrixUI{
+	static final Logger logger = LoggerFactory.getLogger(RoleMatrixDiscountRule.class);
+	
 	private final static String myClass = "RoleMatrixDiscountRule";
 	private static final String DESCRIPTION = "TO DO";
 
@@ -43,16 +50,14 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		
 		corpus = workspace.getCorpus();
 		if(corpus==null) {
-			System.err.println(this.getClass().getName()
-					+".initialize(): No corpus found for workspace: "
-					+workspace.getId());
+			logger.error("{}.initialize(): No corpus found for workspace: {}", 
+					this.getClass().getName(), workspace.getId());
 			return;			// Nothing to do
 		}
 		List<ActivityRole> corpusRoles = corpus.getActivityRoles();
 		if(corpusRoles==null||corpusRoles.isEmpty()) {
-			System.err.println(this.getClass().getName()
-					+".initialize(): No roles found in corpus: "
-					+corpus.getId());
+			logger.error("{}.initialize(): No roles found in corpus: ", 
+					this.getClass().getName(), corpus.getId());
 			return;			// Nothing to do
 		}
 	}

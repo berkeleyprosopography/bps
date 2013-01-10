@@ -2,13 +2,16 @@ package edu.berkeley.bps.services.common.test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class TestDBBase extends TestCase {
+	
+	final Logger logger = LoggerFactory.getLogger(TestDBBase.class);
+	
 	String host = "localhost";
 	String dbName = "bpsdev";
 	String dbUser = "bpsdev";
@@ -41,7 +44,7 @@ public abstract class TestDBBase extends TestCase {
 		final String myName = "openConnection: ";
 		if(connectionUrl == null) {
 			String tmp = myName+"No connectionUrl set.";
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		try {
@@ -49,16 +52,17 @@ public abstract class TestDBBase extends TestCase {
 			jdbcConnection = DriverManager.getConnection(connectionUrl);
 		} catch ( ClassNotFoundException cnfe ) {
 			String tmp = myName+"Cannot load the SQL Driver class.";
-			System.out.println(tmp+"\n"+cnfe.getMessage());
+			logger.error(tmp);
+			logger.error(cnfe.getMessage());
 			throw new RuntimeException(tmp);
 		} catch (SQLException se) {
 			String tmp = myName+"Problem connecting to DB. URL: "
 				+"\n"+connectionUrl+"\n"+ se.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		} catch (Exception e) {
 			String tmp = myName+"\n"+ e.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}

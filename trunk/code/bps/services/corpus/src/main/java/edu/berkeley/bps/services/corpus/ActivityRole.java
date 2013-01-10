@@ -15,10 +15,14 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="actrole")
 public class ActivityRole {
+	final static Logger logger = LoggerFactory.getLogger(ActivityRole.class);
+	
 	public static final String FATHER_ROLE = "Father";
 	public static final String MOTHER_ROLE = "Mother";
 	public static final String GRANDFATHER_ROLE = "Grandfather";
@@ -187,7 +191,7 @@ public class ActivityRole {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -211,7 +215,7 @@ public class ActivityRole {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -237,7 +241,7 @@ public class ActivityRole {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAll(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem creating activityRole\n"+se.getLocalizedMessage()).build());
@@ -263,7 +267,7 @@ public class ActivityRole {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.debug(tmp);
 		}
 		return exists;
 	}
@@ -286,7 +290,7 @@ public class ActivityRole {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return activityRole;
@@ -310,7 +314,7 @@ public class ActivityRole {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return activityRole;
@@ -330,7 +334,7 @@ public class ActivityRole {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".deletePersistence: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}
@@ -346,7 +350,7 @@ public class ActivityRole {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting activityRoles\n"+se.getLocalizedMessage()).build());
