@@ -3,6 +3,8 @@ package edu.berkeley.bps.services.corpus.test;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
@@ -12,6 +14,7 @@ import edu.berkeley.bps.services.corpus.*;
 import edu.berkeley.bps.services.corpus.sax.CorpusContentHandler;
 
 public class CorpusSAXTest {
+	static final Logger logger = LoggerFactory.getLogger(CorpusSAXTest.class);
 
 	public static void printUsage(String error) {
 		if(error!=null)
@@ -31,7 +34,7 @@ public class CorpusSAXTest {
         		new CorpusContentHandler(null, corpus, parser, defaultHandler);
         	parser.setContentHandler(corpusHandler);
         	parser.setErrorHandler(defaultHandler);
-        	System.out.println("Opening corpus file...");
+        	logger.debug("Opening corpus file...");
         	try{
         		parser.parse(corpusFile);
         	} catch(SAXException se) {
@@ -39,22 +42,22 @@ public class CorpusSAXTest {
         	} catch(IOException ioe) {
         		ioe.printStackTrace();
         	}
-        	System.out.println("Corpus parsed.");
-        	System.out.println(corpus.toString());
-        	System.out.println("Corpus document count: "+corpus.getNDocuments());
-        	System.out.println("Documents: ");
+        	logger.debug("Corpus parsed.");
+        	logger.debug(corpus.toString());
+        	logger.debug("Corpus document count: "+corpus.getNDocuments());
+        	logger.debug("Documents: ");
         	List<Document> docs = corpus.getDocuments();
         	for(Document doc:docs) {
-            	System.out.println(" - "+doc.toString());
+        		logger.debug(" - "+doc.toString());
         	}
         // TODO NPE catch should be removed once we can handle passing in a Connection
         } catch (NullPointerException npe) {
-        	System.out.println(npe.getLocalizedMessage());
-        	System.out.println("This test is out of date and must be rewritten!");
+        	logger.error(npe.getLocalizedMessage());
+        	logger.error("This test is out of date and must be rewritten!");
         } catch (SAXException se) {
-        	System.out.println(se.getLocalizedMessage());
+        	logger.error(se.getLocalizedMessage());
         } catch (Exception e) {
-        	System.err.println(e.getLocalizedMessage());
+        	logger.error(e.getLocalizedMessage());
             e.printStackTrace();
         }
 	}
@@ -86,7 +89,7 @@ public class CorpusSAXTest {
         try {
         	parse(corpusFile);
         } catch (Exception e) {
-        	System.err.println(e);
+        	logger.error(e.getLocalizedMessage());
             e.printStackTrace();
         }
 	}

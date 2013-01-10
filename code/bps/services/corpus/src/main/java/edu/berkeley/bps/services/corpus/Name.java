@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pschmitz
@@ -30,6 +32,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="name")
 public class Name {
+	static final Logger logger = LoggerFactory.getLogger(Name.class);
+	
 	private final static String myClass = "Name";
 	private static int	nextID = CachedEntity.UNSET_ID_VALUE;
 	
@@ -186,13 +190,13 @@ public class Name {
 		if(normal!=null) {
 			if(oldNameIdsToNewNames==null) {
 				String tmp = myClass+myName+"Cannot clone Name with normal form (No map!).\n";
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException(tmp);
 			}
 			normalClone = oldNameIdsToNewNames.get(normal.id);
 			if(normalClone==null) {
 				String tmp = myClass+myName+"Cannot clone Name with normal form (No clone in map!).\n";
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException(tmp);
 			}
 		}
@@ -374,17 +378,17 @@ public class Name {
 				String tmp = myClass+".checkAndUpdateGender("+name
 						+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+
 						getGenderString();
-				System.err.println(tmp);
+				logger.warn(tmp);
 			} else if(gender==Name.GENDER_UNKNOWN) {
 				String tmp = myClass+".checkAndUpdateGender("+name
 						+","+Name.GenderToString(declaredGender)+") Assuming name match with unknown gender, and updating existing name.";
-				System.err.println(tmp);
+				logger.warn(tmp);
 				setGender(declaredGender);
 			} else {
 				String tmp = myClass+".checkAndUpdateGender("+name
 						+","+Name.GenderToString(declaredGender)+") Found name match with conflicting gender:"+
 						getGenderString();
-				System.err.println(tmp);
+				logger.warn(tmp);
 				compatible = false;
 			}
 		}
@@ -472,7 +476,7 @@ public class Name {
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
 			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new IllegalArgumentException( tmp );
 		}
 		ArrayList<Name> nameList = new ArrayList<Name>();
@@ -496,7 +500,7 @@ public class Name {
 						/*
 						throw new RuntimeException(tmp);
 						 */
-						System.err.println(tmp);
+						logger.error(tmp);
 					} else {
 						newName.setNormal(normal);
 					}
@@ -508,7 +512,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return nameList;
@@ -592,7 +596,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 			
@@ -611,7 +615,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting documents\n"+se.getLocalizedMessage()).build());
@@ -698,7 +702,7 @@ public class Name {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return newId;
@@ -732,7 +736,7 @@ public class Name {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -790,7 +794,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return toFind;
@@ -814,7 +818,7 @@ public class Name {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 		}
 		return exists;
 	}
@@ -879,7 +883,7 @@ public class Name {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return toFind;
@@ -899,7 +903,7 @@ public class Name {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeletePersistence: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}
@@ -910,30 +914,29 @@ public class Name {
 		if( this.nametype!=type) {
 			String tmp = mySig+name+","+Name.NameTypeToString(type)
 			+") Name match with inconsistent type:"+getNameTypeString();
-			System.err.println(tmp);
+			logger.error(tmp);
 			//throw new RuntimeException(tmp);
 		} else if( nymId!=null && this.nymId!=nymId) {
 			String tmp = mySig+name+","+nymId
 			+") Name match with inconsistent nymId:"+this.nymId;
-			System.err.println(tmp);
+			logger.warn(tmp);
 			//throw new RuntimeException(tmp);
 		} else if( this.gender!=gender) {
 			// Allow unknown to combine with known. 
 			if(gender == Name.GENDER_UNKNOWN) {
 				String tmp = mySig+name
-				+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+
-				this.gender;
-				System.err.println(tmp);
+				+","+Name.GENDER_UNKNOWN_S+") Assuming name match with gender:"+ this.gender;
+				logger.warn(tmp);
 			} else if(this.gender==Name.GENDER_UNKNOWN) {
 				String tmp = mySig+name
 				+","+Name.GenderToString(gender)+") Assuming name match with unknown gender, and updating existing name.";
-				System.err.println(tmp);
+				logger.warn(tmp);
 				setGender(gender);
 			} else {
 				String tmp = mySig+name
 				+","+Name.GenderToString(gender)+") Found name match with conflicting gender:"+
 				getGenderString();
-				System.err.println(tmp);
+				logger.warn(tmp);
 				//throw new RuntimeException(tmp);
 			}
 		}

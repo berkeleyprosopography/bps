@@ -3,8 +3,11 @@ package edu.berkeley.bps.services.common;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SystemProperties {
+	final Logger logger = LoggerFactory.getLogger(SystemProperties.class);
 	
 	public static final String CORPUS_DIR = "corpus_dir";
 	
@@ -20,14 +23,12 @@ public class SystemProperties {
 		try {
 			props.load(in);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println("Error loading properties file: "+PROPS_FILENAME+ " :"+e.getLocalizedMessage());
+			logger.error("Error loading properties file: {} :{}", PROPS_FILENAME, e.getLocalizedMessage());
 		}
 		try {
 			in.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println("Error closing file: "+PROPS_FILENAME+ " :"+e.getLocalizedMessage());
+			logger.error("Error closing file: {} :{}", PROPS_FILENAME, e.getLocalizedMessage());
 		}
 	}
 	

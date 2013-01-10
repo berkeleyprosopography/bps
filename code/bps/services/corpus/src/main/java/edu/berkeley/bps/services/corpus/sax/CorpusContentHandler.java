@@ -8,8 +8,11 @@ import org.xml.sax.XMLReader;
 
 import edu.berkeley.bps.services.common.sax.StackedContentHandler;
 import edu.berkeley.bps.services.corpus.Corpus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CorpusContentHandler extends StackedContentHandler {
+	final Logger logger = LoggerFactory.getLogger(CorpusContentHandler.class);
 	protected static String[] namepath = 
 		{"teiCorpus","teiHeader","fileDesc","titleStmt","title"};
 	protected static String[] descpath = 

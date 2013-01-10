@@ -12,10 +12,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAccessType;
 
 import edu.berkeley.bps.services.common.ServiceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @XmlAccessorType(XmlAccessType.NONE)
 public class CachedEntity {
-
+	final static Logger logger = LoggerFactory.getLogger(CachedEntity.class);
+			
 	public static final int UNSET_ID_VALUE = -1;
 	public static final boolean SHALLOW_PERSIST = true;
 	public static final boolean DEEP_PERSIST = false;
@@ -48,7 +51,7 @@ public class CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".Exists: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.debug(tmp);
 		}
 		return exists;
 	}
@@ -68,7 +71,7 @@ public class CachedEntity {
 		} catch(SQLException se) {
 			// Just absorb it
 			String tmp = myClass+".NameUsed: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.debug(tmp);
 		}
 	
 		return exists;

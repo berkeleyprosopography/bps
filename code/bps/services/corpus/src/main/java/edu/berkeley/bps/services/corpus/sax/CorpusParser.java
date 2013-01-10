@@ -12,8 +12,11 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CorpusParser {
+	static final Logger logger = LoggerFactory.getLogger(CorpusParser.class);
 	
 	public static void buildFromTEI(Connection dbConn, Corpus corpus, String teiFile) {
         try {
@@ -23,7 +26,7 @@ public class CorpusParser {
         		new CorpusContentHandler(dbConn, corpus, parser, defaultHandler);
         	parser.setContentHandler(corpusHandler);
         	parser.setErrorHandler(defaultHandler);
-        	System.err.println("Opening corpus file...");
+        	logger.debug("Opening corpus file...");
         	try{
         		parser.parse(teiFile);
         	} catch(SAXException se) {
@@ -32,18 +35,17 @@ public class CorpusParser {
         	} catch(IOException ioe) {
         		ioe.printStackTrace();
         	}
-        	System.err.println("Corpus parsed.");
+        	logger.debug("Corpus parsed; found {} documents", corpus.getNDocuments());
         	/*
-        	System.err.println(corpus.toString());
-        	System.err.println("Corpus document count: "+corpus.getNDocuments());
-        	System.err.println("Documents: ");
+        	logger.debug(corpus.toString());
+        	logger.trace("Documents: ");
         	List<Document> docs = corpus.getDocuments();
         	for(Document doc:docs) {
-            	System.err.println(" - "+doc.toString());
+            	logger.trace(" - "+doc.toString());
         	}
         	*/
         } catch (Exception e) {
-        	System.err.println(e.getLocalizedMessage());
+        	logger.error(e.getLocalizedMessage());
             e.printStackTrace();
             throw new RuntimeException(e);
         }

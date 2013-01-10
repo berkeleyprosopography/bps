@@ -15,10 +15,13 @@ import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.TEI_Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO This main class belongs elsewhere - in common.sax
 public class AssertionsContentHandler extends StackedContentHandler {
-	
+	final Logger logger = LoggerFactory.getLogger(AssertionsContentHandler.class);
+
 	private static final String myClass = "AssertionsContentHandler";
 
 	protected Corpus corpus;
@@ -38,9 +41,9 @@ public class AssertionsContentHandler extends StackedContentHandler {
 		final String myName = ".startElement: ";
 		super.startElement(namespaceURI, localName, qName, attrList);
 		if(localName.equals("assertions")) {
-			//System.out.println(myClass+myName+"Saw assertions wrapper");
+			//logger.trace(myClass+myName+"Saw assertions wrapper");
 		} else if(localName.equals("assert")) {
-			//System.out.println(myClass+myName+"Saw assert element");
+			//logger.trace(myClass+myName+"Saw assert element");
 			docName = null;
 			dateString = null;
 		}
@@ -63,12 +66,12 @@ public class AssertionsContentHandler extends StackedContentHandler {
 				String msg = myClass+
 				" Assertions error: Unrecognized document resource: "
 				+docName;
-				System.out.println(msg);
+				logger.error(msg);
 				//throw new RuntimeException(msg);
 			} else {
 				doc.setDate_str(dateString);
 				doc.setDate_norm(date_norm);
-				//System.out.println(myClass+myName+"Set year: "+dateString+
+				//logger.debug(myClass+myName+"Set year: "+dateString+
 				//		" for document: "+docName);
 			}
 			// TODO move this to a handler for document dates. Allow this to take a handler

@@ -6,8 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServiceContext {
+	
+	final Logger logger = LoggerFactory.getLogger(ServiceContext.class);
+	
 	public static final String label = "ServiceContext";
 	
 	// TODO Really need to test and handle dropped connections
@@ -48,7 +53,7 @@ public class ServiceContext {
 		final String myName = ".isAvailable: ";
 		if(dbConn == null) {
 			String tmp = label+myName+"No dbConnection set.";
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		try {
@@ -57,18 +62,17 @@ public class ServiceContext {
 			if(rs.next()){
 				return !rs.getBoolean("lockoutActive"); 
 			} else {
-				String tmp = label+myName+"DBInfo table not correctly initialized!";
-				System.out.println(tmp);
+				logger.warn("{} {} DBInfo table not correctly initialized!", label, myName);
 			}
 			rs.close();
 		} catch (SQLException se) {
 			String tmp = label+myName+"Problem connecting to DB. URL: "
 				+"\n"+connectionUrl+"\n"+ se.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		} catch (Exception e) {
 			String tmp = label+myName+"\n"+ e.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return false;
@@ -86,7 +90,7 @@ public class ServiceContext {
 		final String myName = ".openConnection: ";
 		if(connectionUrl == null) {
 			String tmp = label+myName+"No connectionUrl set.";
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		boolean valid = false;
@@ -96,22 +100,23 @@ public class ServiceContext {
 			valid = dbConn.isValid(SECONDS_TO_WAIT_FOR_VALID_CONNECTION);
 		} catch ( ClassNotFoundException cnfe ) {
 			String tmp = myName+"Cannot load the SQLServerDriver class.";
-			System.out.println(tmp+"\n"+cnfe.getMessage());
+			logger.error(tmp);
+			logger.error(cnfe.getMessage());
 			throw new RuntimeException(tmp);
 		} catch (SQLException se) {
 			String tmp = myName+"Problem connecting to DB. URL: "
 				+"\n"+connectionUrl+"\n"+ se.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		} catch (Exception e) {
 			String tmp = myName+"\n"+ e.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		if(!valid) {
 			String tmp = myName+"Problem connecting to DB. URL: "
 			+"\n"+connectionUrl+"\nConnection succeeded, but DB not valid";
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 	}
@@ -127,8 +132,7 @@ public class ServiceContext {
 			if (dbConn == null)
 				return dbConn.isValid(3);
 		} catch (SQLException se) {
-			String tmp = myName+"Problem connecting to DB. \n"+ se.getMessage();
-			System.out.println(tmp);
+			logger.error("{} Problem connecting to DB. \n{}", myName, se.getMessage());
 		}
 		return false;
 	}

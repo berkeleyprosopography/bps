@@ -17,9 +17,12 @@ import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.TEI_Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO This main class belongs elsewhere - in common.sax
 public class NymContentHandler extends StackedContentHandler {
+	final Logger logger = LoggerFactory.getLogger(NymContentHandler.class);
 	
 	private static final String myClass = "NymContentHandler";
 	
@@ -96,7 +99,7 @@ public class NymContentHandler extends StackedContentHandler {
 	}
 	
 	protected void generateParseWarning(String xmlid, String warning ) {
-		System.err.println(myClass+": Parse Warning near element: "
+		logger.warn(myClass+": Parse Warning near element: "
 				+((xmlid!=null)?xmlid:"(unknown)")
 				+": "+warning);
 	}

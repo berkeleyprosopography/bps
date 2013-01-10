@@ -5,7 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-//import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -13,8 +14,8 @@ import java.sql.Statement;
  *
  */
 public class DBLoadUtils {
-	//static Logger logger = Logger.getLogger(DBLoadUtils.class);
-
+	final Logger logger = LoggerFactory.getLogger(DBLoadUtils.class);
+	
 	private String connectionUrl = null;
 
 	public DBLoadUtils(String protocol, String host, String dbName, String user, String password ) {
@@ -52,13 +53,13 @@ public class DBLoadUtils {
 		try {
 			if(jdbcConnection != null) {
 				sqlStatement = jdbcConnection.createStatement();
-				System.out.println(myName+"Setting lockout to: "+(lockoutActive?"true":"false"));
+				logger.warn("{} Setting lockout to: {}", myName, (lockoutActive?"true":"false"));
 				sqlStatement.execute(mainStatement);
 				success = true;
 			}
 		} catch (Exception e) {
 			String tmp = myName+"\n"+ e.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		} finally {
 			closeConnection(jdbcConnection);
@@ -157,35 +158,35 @@ public class DBLoadUtils {
 			if(jdbcConnection != null) {
 				sqlStatement = jdbcConnection.createStatement();
 				if(deleteStmt!=null) {
-					System.out.println(myName+"Deleting entries from "+table+" table...");
+					logger.debug("{} Deleting entries from {} table...", myName, table);
 					sqlStatement.execute(deleteStmt);
 				} else {
-					System.out.println(myName+"Truncating "+table+" table...");
+					logger.debug("{} Truncating {} table...", myName, table);
 					sqlStatement.execute(truncateStatement);
 				}
 				if(mainStmt!=null){
-					System.out.println(myName+"Setting UTF* for names...");
+					logger.debug("{} Setting UTF* for names...", myName);
 					sqlStatement.execute(utf8SetupStatement);
-					System.out.println(myName+"Disabling keys...");
+					logger.debug("{} Disabling keys...", myName);
 					sqlStatement.execute(disableKeysStatement);
-					System.out.println(myName+"Executing Load statement...");
+					logger.debug("{} Executing Load statement...", myName);
 					sqlStatement.execute(mainStmt);
-					System.out.println(myName+"(Re-)enabling keys...");
+					logger.debug("{} (Re-)enabling keys...", myName);
 					sqlStatement.execute(enableKeysStatement);
-					System.out.println(myName+"Getting "+table+" count...");
+					logger.debug("{} Getting {} count...", myName, table);
 					ResultSet results = sqlStatement.executeQuery(getCountStatement);
 					if(results.next()) {
 						int count = results.getInt(1);
-						System.out.println(myName+table+" table now reports: "+count+" total rows.");
+						logger.debug("{} {} table now reports: {} total rows.", myName+table, count);
 					} else {
-						System.out.println("Problem querying for "+table+" count.");
+						logger.error("{} Problem querying for count on table: {}", myName, table);
 					}
 				}
 				success = true;
 			}
 		} catch (Exception e) {
 			String tmp = myName+"\n"+ e.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		} finally {
 			closeConnection(jdbcConnection);
@@ -200,17 +201,18 @@ public class DBLoadUtils {
 			Class.forName("com.mysql.jdbc.Driver");
 			jdbcConnection = DriverManager.getConnection(connectionUrl);
 		} catch ( ClassNotFoundException cnfe ) {
-			String tmp = myName+"Cannot load the SQLServerDriver class.";
-			System.out.println(tmp+"\n"+cnfe.getMessage());
-			throw new RuntimeException(tmp);
+			String tmp1 = myName+"Cannot load the SQLServerDriver class.";
+			String tmp2 = tmp1+"\n"+cnfe.getMessage();
+			logger.error(tmp2);
+			throw new RuntimeException(tmp1);
 		} catch (SQLException se) {
 			String tmp = myName+"Problem connecting to DB. URL: "
 				+"\n"+connectionUrl+"\n"+ se.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		} catch (Exception e) {
 			String tmp = myName+"\n"+ e.getMessage();
-			System.out.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return jdbcConnection;

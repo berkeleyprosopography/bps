@@ -18,8 +18,11 @@ import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameFamilyLink;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
 import edu.berkeley.bps.services.corpus.TEI_Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PersonNameContentHandler extends StackedContentHandler {
+	final Logger logger = LoggerFactory.getLogger(PersonNameContentHandler.class);
 	
 	protected Connection dbConn;
 	protected Corpus corpus;
@@ -375,10 +378,8 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	}
 	
 	protected void generateParseWarning(String xmlid, String warning ) {
-		System.err.println("Warning near element: "
-				+((xmlid!=null)?xmlid:"(unknown)")
-				+" in document: "+document.getAlt_id()
-				+": "+warning);
+		logger.warn("Warning near element: {} in document: {}", 
+				((xmlid!=null)?xmlid:"(unknown)"), document.getAlt_id()	+": "+warning);
 	}
 	
 }

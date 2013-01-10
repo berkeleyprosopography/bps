@@ -7,9 +7,12 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import edu.berkeley.bps.services.common.utils.StringStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class StackedContentHandler extends DefaultHandler implements
-		ContentHandler {
+public class StackedContentHandler extends DefaultHandler implements ContentHandler {
+	final Logger logger = LoggerFactory.getLogger(StackedContentHandler.class);
+
 	protected StringBuffer accumulator;		// Accumulate text
 	protected StringStack elPath;				// Keep track of path in this context
 	protected XMLReader parser;
@@ -62,6 +65,7 @@ public class StackedContentHandler extends DefaultHandler implements
 			String err = "StackedContentHandler.endElement name does not match stack!"
 				+"\nExpecting: "+localName+" popped: "+popped
 				+" at: "+generateErrorContext();
+			logger.error(err);
 			throw new RuntimeException(err);
 		}
 		if(elPath.isEmpty()) {
@@ -71,7 +75,9 @@ public class StackedContentHandler extends DefaultHandler implements
 
 	@Override
 	public void endDocument() {
-		throw new RuntimeException("StackedContentHandler.endDocument reached without popping stack!");
+		String err = "StackedContentHandler.endDocument reached without popping stack!";
+		logger.error(err);
+		throw new RuntimeException(err);
 	}
 	
 	@Override

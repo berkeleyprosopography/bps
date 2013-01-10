@@ -39,6 +39,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Resource that manages a list of items.
  * 
@@ -46,7 +49,9 @@ import javax.xml.transform.stream.StreamSource;
 @Path("/corpora")
 public class CorporaResource extends BaseResource {
 	
-	private static final String myClass = "CorporaResource";
+    final Logger logger = LoggerFactory.getLogger(CorporaResource.class);
+
+    private static final String myClass = "CorporaResource";
 	
 	protected String corpora_base = null;
 	
@@ -54,10 +59,10 @@ public class CorporaResource extends BaseResource {
     	corpora_base = SystemProperties.getProperty(SystemProperties.CORPUS_DIR);
     	if(corpora_base==null||corpora_base.isEmpty()) {
 			String tmp = myClass+": No corpora base specified in properties!";
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new RuntimeException(tmp);
     	}
-		
+		logger.trace("CorporaReseource initialized.");
 	}
 	
 	/**
@@ -85,7 +90,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".getAll(): Problem getting Corpus List.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -114,7 +119,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".getCorpus(): Problem getting Corpus.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -152,7 +157,7 @@ public class CorporaResource extends BaseResource {
     		throw wae;
     	} catch(Exception e) {
     		String tmp = myClass+".createCorpus(): Problem creating Corpus.\n"+ e.getLocalizedMessage();
-    		System.err.println(tmp);
+    		logger.error(tmp);
     		throw new WebApplicationException( 
     				Response.status(
     						Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -207,7 +212,7 @@ public class CorporaResource extends BaseResource {
     						"Illegal (non integer) value for corpus owner id").build());
         } catch(Exception e) {
         	String tmp = myClass+".createCorpus(): Problem creating Corpus.\n"+ e.getLocalizedMessage();
-        	System.err.println(tmp);
+        	logger.error(tmp);
         	throw new WebApplicationException( 
         			Response.status(
         					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -238,7 +243,7 @@ public class CorporaResource extends BaseResource {
 	    	corpus.persist(dbConn, CachedEntity.SHALLOW_PERSIST);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateCorpus(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -270,7 +275,7 @@ public class CorporaResource extends BaseResource {
             corpus.deletePersistence(sc);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteCorpus(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -294,7 +299,7 @@ public class CorporaResource extends BaseResource {
         	final InputStream xmls;
         	if(corpora_base==null||corpora_base.isEmpty()) {
 				String tmp = myClass+myName+"No corpora base specified!";
-				System.err.println(tmp);
+				logger.error(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -307,13 +312,13 @@ public class CorporaResource extends BaseResource {
 			throw wae;
         } catch (FileNotFoundException fnfe) {
 			String tmp = myClass+myName+"Could not open corpus file: \n"+ fnfe.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		} catch(Exception e) {
 			String tmp = myClass+myName+".Problem getting TEI.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -336,7 +341,7 @@ public class CorporaResource extends BaseResource {
         	final InputStream xmls;
         	if(corpora_base==null||corpora_base.isEmpty()) {
 				String tmp = myClass+myName+"No corpora base specified!";
-				System.err.println(tmp);
+				logger.error(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -348,13 +353,13 @@ public class CorporaResource extends BaseResource {
 			throw wae;
         } catch (FileNotFoundException fnfe) {
 			String tmp = myClass+myName+"Could not open corpus file: \n"+ fnfe.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		} catch(Exception e) {
 			String tmp = myClass+myName+".Problem getting TEI.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -383,7 +388,7 @@ public class CorporaResource extends BaseResource {
 						        new StreamResult(output));
                     } catch (TransformerException tce) {
             			String tmp = myClass+".getTEI(): Problem transforming TEI.\n"+ tce.getLocalizedMessage();
-            			System.err.println(tmp);
+            			logger.error(tmp);
                     	throw new WebApplicationException( 
                 			Response.status(
                 				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -392,13 +397,13 @@ public class CorporaResource extends BaseResource {
         	};
         } catch (TransformerConfigurationException tce) {
 			String tmp = myClass+".getTEI(): Problem transforming TEI.\n"+ tce.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 		} catch(Exception e) {
 			String tmp = myClass+".getTEI(): Problem getting TEI.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -419,7 +424,7 @@ public class CorporaResource extends BaseResource {
         try {
         	if(corpora_base==null||corpora_base.isEmpty()) {
 				String tmp = myClass+myName+"No corpora base specified!";
-				System.err.println(tmp);
+				logger.error(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -445,7 +450,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+myName+"Problem parsing TEI.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -466,7 +471,7 @@ public class CorporaResource extends BaseResource {
         try {
         	if(corpora_base==null||corpora_base.isEmpty()) {
 				String tmp = myClass+myName+"No corpora base specified!";
-				System.err.println(tmp);
+				logger.error(tmp);
 	        	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -491,7 +496,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+myName+"Problem parsing TEI.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -543,7 +548,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocuments(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -565,7 +570,7 @@ public class CorporaResource extends BaseResource {
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocument("+docspec
 				+"): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -607,7 +612,7 @@ public class CorporaResource extends BaseResource {
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocument(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -639,7 +644,7 @@ public class CorporaResource extends BaseResource {
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getDocumentNRADs(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -668,7 +673,7 @@ public class CorporaResource extends BaseResource {
             corpus.deleteDocuments(sc.getConnection());
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteCorpusDocs(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -702,7 +707,7 @@ public class CorporaResource extends BaseResource {
 			activityList = corpus.getActivities();
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivities(ServletContext, int)(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -737,7 +742,7 @@ public class CorporaResource extends BaseResource {
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivity(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -785,7 +790,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".createActivity(): Problem creating Activity.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 	    	throw new WebApplicationException( 
 				Response.status(
 					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -824,7 +829,7 @@ public class CorporaResource extends BaseResource {
             activity.persist(dbConn);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateActivity(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -864,7 +869,7 @@ public class CorporaResource extends BaseResource {
             Activity.DeletePersistence(dbConn, corpus, aid);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteActivity(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(
     				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -899,7 +904,7 @@ public class CorporaResource extends BaseResource {
 			return activityRoleList;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivityRoles(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -942,7 +947,7 @@ public class CorporaResource extends BaseResource {
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -990,7 +995,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".createActivityRole(): Problem creating ActivityRole.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1029,7 +1034,7 @@ public class CorporaResource extends BaseResource {
 			activityRole.persist(dbConn);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateActivityRole(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1069,7 +1074,7 @@ public class CorporaResource extends BaseResource {
 			ActivityRole.DeletePersistence(dbConn, corpus, aid);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1138,7 +1143,7 @@ public class CorporaResource extends BaseResource {
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getNames(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1173,7 +1178,7 @@ public class CorporaResource extends BaseResource {
 			}
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1221,7 +1226,7 @@ public class CorporaResource extends BaseResource {
 			throw wae;
 		} catch(Exception e) {
 			String tmp = myClass+".createName(): Problem creating Name.\n"+ e.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1260,7 +1265,7 @@ public class CorporaResource extends BaseResource {
 			name.persist(dbConn);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateActivityRole(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -1300,7 +1305,7 @@ public class CorporaResource extends BaseResource {
 			Name.DeletePersistence(dbConn, id, nid);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".deleteName(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(
 							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());

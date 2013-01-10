@@ -19,6 +19,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pschmitz
@@ -27,6 +29,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="document")
 public class Document {
+	static final Logger logger = LoggerFactory.getLogger(Document.class);
+	
 	private final static String myClass = "Document";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
 
@@ -170,7 +174,7 @@ public class Document {
 			id = persistNew(dbConn, corpus.getId(), alt_id, primaryPubl, sourceURL, xml_id, 
 					notes, date_str, date_norm);
 		} else {
-			//System.err.println("Document: "+id+"("+alt_id+") updating.");
+			//logger.trace("Document: "+id+"("+alt_id+") updating.");
 			// Note that we do not update the corpus_id - moving them is not allowed 
 			final String UPDATE_STMT = 
 				"UPDATE document SET alt_id=?, primary_publ=?, sourceURL=?, xml_id=?, notes=?, "
@@ -188,7 +192,7 @@ public class Document {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -199,7 +203,7 @@ public class Document {
 	private static int persistNew(Connection dbConn, 
 			int corpus_id, String alt_id, String primaryPubl, String sourceURL, String xml_id, 
 			String notes, String date_str, long date_norm ) {
-		System.err.println("Document: ("+alt_id+") persisting new.");
+		logger.trace("Document: ("+alt_id+") persisting new.");
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO document(corpus_id, alt_id, primary_publ, sourceURL, xml_id, notes, date_str, date_norm, creation_time)"
@@ -227,7 +231,7 @@ public class Document {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 	    	throw new WebApplicationException( 
 	    			Response.status(
 	    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
@@ -265,7 +269,7 @@ public class Document {
 	}
 	
 	public void persistAttachedEntities(Connection dbConn) {
-		//System.err.println("Document: "+id+"("+alt_id+") persisting NRADS");
+		//logger.trace("Document: "+id+"("+alt_id+") persisting NRADS");
 		persistNRADs(dbConn);
 		persistNRADAttachedEntities(dbConn);
 	}
@@ -290,7 +294,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".FindByID: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return document;
@@ -316,7 +320,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".FindByID: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return document;
@@ -329,7 +333,7 @@ public class Document {
 		int corpus_id = 0;
 		if(corpus==null || (corpus_id=corpus.getId())<=0) {
 			String tmp = myClass+".ListAllInCorpus: Invalid corpus.\n";
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new IllegalArgumentException( tmp );
 		}
 		ArrayList<Document> docList = new ArrayList<Document>();
@@ -353,7 +357,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllInCorpus: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return docList;
@@ -407,7 +411,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".getFilteredDocuments: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 			
@@ -428,7 +432,7 @@ public class Document {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".DeleteAllInCorpus(): Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new WebApplicationException( 
 					Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
 							"Problem deleting documents\n"+se.getLocalizedMessage()).build());

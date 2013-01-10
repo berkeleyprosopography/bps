@@ -14,12 +14,16 @@ import java.util.List;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import edu.berkeley.bps.services.common.LinkType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pschmitz
  *
  */
 public class NameFamilyLink {
+	static final Logger logger = LoggerFactory.getLogger(NameFamilyLink.class);
+	
 	private final static String myClass = "NameFamilyLink";
 	private static int	nextID = CachedEntity.UNSET_ID_VALUE;
 
@@ -112,7 +116,7 @@ public class NameFamilyLink {
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return newId;
@@ -136,7 +140,7 @@ public class NameFamilyLink {
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
-				System.err.println(tmp);
+				logger.error(tmp);
 				throw new RuntimeException( tmp );
 			}
 		}
@@ -150,7 +154,7 @@ public class NameFamilyLink {
 		int nrad_id = 0;
 		if(linkFrom==null || (nrad_id=linkFrom.getId())<=0) {
 			String tmp = myClass+".ListAllForNRAD: Invalid nrad.\n";
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new IllegalArgumentException( tmp );
 		}
 		ArrayList<NameFamilyLink> nflList = new ArrayList<NameFamilyLink>();
@@ -175,7 +179,7 @@ public class NameFamilyLink {
 			stmt.close();
 		} catch(SQLException se) {
 			String tmp = myClass+".ListAllForNRAD: Problem querying DB.\n"+ se.getMessage();
-			System.err.println(tmp);
+			logger.error(tmp);
 			throw new RuntimeException( tmp );
 		}
 		return nflList;
