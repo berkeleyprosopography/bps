@@ -343,4 +343,24 @@ tr.paramDesc.lastParamRow td{
 	text-align:center;
 }
 
+/* ------------------------------------------------------- *
+ * - Individual Page rules ------------------------------- *
+ * ------------------------------------------------------- */
+
+ div.uxideas {
+  margin-left: auto;
+  margin-right:auto
+}
+
+div.uxideas img {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div.uxideas p.figcaption {
+  padding-top: 10px;
+  text-align: center;
+  font-weight: bold; 
+}
 
