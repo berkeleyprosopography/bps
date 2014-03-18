@@ -17,20 +17,20 @@
     identifies two, three, or even four additional family members, who may or may not appear in
     other activities and contexts elsewhere in the archive. Another naming practice employed in this
     corpus, papponymy (naming a child for a grandfather), results in many grandfathers and grandsons
-    having the same personal name, and adds to the problem of disambiguation of name sakes, as
-    discussed in §4.1. The complexities of disambiguation and the effect it may have on research
+    having the same personal name, and adds to the problem of disambiguation of name sakes.
+    The complexities of disambiguation and the effect it may have on research
     outcomes are addressed in the Research Problem and presentation of the BPS User Experience that
     follow.</p>
   <h2>Figures</h2>
   <ul>
     <li><a href="nondigital_prosopography#FigureA">Figure A</a> - Hand-written
       Family Tree</li>
-    <li><a href="nondigital_prosopography#FigureB">Figure B</a> - Printed diagram of
-      network relations, Ossendrijver</li>
+    <li><a href="nondigital_prosopography#FigureB">Figure B</a> - Printed Diagram of
+      Network Relations, Ossendrijver</li>
     <li><a href="BPSarchitecture#FigureC">Figure C</a> - BPS Architecture
-      diagram</li>
-    <li><a href="#FigureD">Figure D</a> - WYSIWYM TEI editor</li>
-    <li><a href="#FigureE">Figure E</a> - Basic display of name instances</li>
+      Diagram</li>
+    <li><a href="#FigureD">Figure D</a> - WYSIWYM TEI Editor</li>
+    <li><a href="#FigureE">Figure E</a> - Basic display of Name Instances</li>
     <li><a href="#FigureF">Figure F</a> - General Settings: Setting Model Parameters</li>
     <li><a href="#FigureG">Figure G</a> - General Settings: Intra-document Rules</li>
     <li><a href="#FigureH">Figure H</a> - Assertion List</li>
@@ -103,12 +103,12 @@
   <figure>
     <a name="FigureD"></a>
     <img src="/images/Text%20editing-DONE.png"/>
-    <p class="figcaption">Figure D</p>
+    <p class="figcaption">Figure D - WYSIWYM TEI Editor</p>
   </figure>
   <figure>
     <a name="FigureE"></a>
     <img src="/images/Doc%20detail%20with%20family%20tree-edited%20for%20appendix.png"/>
-    <p class="figcaption">Figure E</p>
+    <p class="figcaption">Figure E - Basic display of Name Instances</p>
   </figure>
   <p>Some researchers may wish to add additional TEI mark-up for persons, location, roles, and
     activities to existing text. To enrich the TEI, a WYSIWYM (what you see is what you mark) TEI
@@ -144,19 +144,19 @@
     with their roles, as they appear in a particular activity. In this view the name Tanittu-Anu
     appears three times, twice in the role of “heir”, once in the role of “father.” The researcher
     must answer the question: Do these name instances represent one, two, or three distinct
-    individuals? As described in §4.1, the person named Tanittu-Anu is the criterion that
+    individuals? The person named Tanittu-Anu is the criterion that
     distinguishes Anu-belšunu(1) from Anu-belšunu(2). Prosopographic research depends on the
     disambiguation of these name instances; this view makes clear that multiple similar name
     instances present challenges at the initial stage of prosopographical research.</p>
   <figure>
     <a name="FigureF"></a>
     <img src="/images/Assertions%20config%201-General%20settings-DONE.png"/>
-    <p class="figcaption">Figure F</p>
+    <p class="figcaption">Figure F - General Settings: Setting Model Parameters</p>
   </figure>
   <figure>
     <a name="FigureG"></a>
     <img src="/images/Assertions%20config%202-Intradocument-DONE.png"/>
-    <p class="figcaption">Figure G</p>
+    <p class="figcaption">Figure G - General Settings: Intra-document Rules</p>
   </figure>
   <p>A researcher begins to address this problem by asking, for example: can a “father” be an
     “heir”, or a “scribe” a “seller” in any given document? He will apply this and similar knowledge
@@ -201,12 +201,12 @@
     not. In a second section, they can review the assertions that they have accepted, which were
     shared by other researchers working in this corpus, and see who originally authored each
     one.</p>
-  <h4>More on "What If:</h4> The Workspace environment is a distinctive and innovative BPS feature.
+  <h4>More on "What If":</h4> The Workspace environment is a distinctive and innovative BPS feature.
   It enables the user to ask “what if?”— what if an individual is removed from a set of data—how
   does the resulting SNA change? How does this impact interpretation of the persons, activities,
   communities and cultural processes preserved in the text? The impact of “what if” on research
   outcomes research can be considered in the "Examples of visualizations in non-digital
-  prosopography projects", <a href="nondigital_prosopography#FigureB">Figure B</a>.,
+  prosopography projects", <a href="nondigital_prosopography#FigureB">Figure B</a>,
   which presents the results of Ossendrijver’s analysis (<a
     href="https://www.academia.edu/1351397/Science_in_Action_Networks_in_Babylonian_Astronomy"
     >Ossendrijver 2011</a>) of networks of scribal activity in the astronomical texts in the Uruk
@@ -224,12 +224,12 @@
   research, which is then archived for reference, attribution and citation. <figure>
     <a name="FigureH"></a>
     <img src="/images/Assertion_List_1.PNG"/>
-    <p class="figcaption">Figure H</p>
+    <p class="figcaption">Figure H - Assertion List</p>
   </figure>
   <figure>
     <a name="FigureI"></a>
     <img src="/images/Workspace%20dashboard-DONE.png"/>
-    <p class="figcaption">Figure I</p>
+    <p class="figcaption">Figure I - Workspace Dashboard</p>
   </figure>
   <h3>Presentation, Visualization, Reporting</h3><a name="presentation"></a>
   <h4>Discovering Names, People, Relationships:</h4>
@@ -245,12 +245,12 @@
   <figure>
     <a name="FigureJ"></a>
     <img src="/images/Persons%20with%20family%20tree%20and%20sna%20DONE.png"/>
-    <p class="figcaption">Figure J</p>
+    <p class="figcaption">Figure J - SNA: List of Disambiguated Persons</p>
   </figure>
   <figure>
     <a name="FigureK"></a>
     <img src="/images/Docs%20select%20for%20SNA-DONE-cropped.png"/>
-    <p class="figcaption">Figure K</p>
+    <p class="figcaption">Figure K - SNA: Selecting Documents</p>
   </figure>
   <p>Figures <a href="#FigureK">K</a>, <a href="#FigureL">L</a>, and <a href="#FigureM">M</a> show
     some of the user interface that will support investigation of Social Networks. The user can set
@@ -263,12 +263,12 @@
   <figure>
     <a name="FigureL"></a>
     <img src="/images/Activities%20select%20for%20SNA-DONE-cropped.png"/>
-    <p class="figcaption">Figure L</p>
+    <p class="figcaption">Figure L - SNA: Selecting Activities</p>
   </figure>
   <figure>
     <a name="FigureM"></a>
     <img src="/images/Persons%20select%20for%20SNA-DONE.png"/>
-    <p class="figcaption">Figure M</p>
+    <p class="figcaption">Figure M - SNA: Selecting Individuals</p>
   </figure>
   <h4>The Social Network Graphs</h4>
   <p>SNA graphs demonstrate the connections between individuals (nodes, represented as colored dots)
@@ -285,12 +285,12 @@
   <figure>
     <a name="FigureN"></a>
     <img src="/images/Family%20tree%20v3.png"/>
-    <p class="figcaption">Figure N</p>
+    <p class="figcaption">Figure N - Family Tree</p>
   </figure>
   <figure>
     <a name="FigureO"></a>
     <img src="/images/SNA%20entire%20network%20DONE.png"/>
-    <p class="figcaption">Figure O</p>
+    <p class="figcaption">Figure O - Network Visualization, Single Individual</p>
   </figure>
   <p>The graph in <a href="#FigureO">Figure O</a> is centered on Nana-iddin, represented by the
     largest node on the graph, and reflects the social network metric of degree (how many
@@ -305,7 +305,7 @@
   <figure>
     <a name="FigureP"></a>
     <img src="/images/SNA%20radial%20view%20v2.png"/>
-    <p class="figcaption">Figure P</p>
+    <p class="figcaption">Figure P - Radial View</p>
   </figure>
   <p>The graph in <a href="#FigureP">Figure P</a> offers a different view of (much of) the same
     information as in <a href="#FigureO">Figure O</a>. The same individuals remain distributed
