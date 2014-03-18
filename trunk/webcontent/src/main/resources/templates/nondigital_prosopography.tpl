@@ -7,7 +7,7 @@
     factors in disambiguating namesakes and do not allow any adjustment or "what-if" scenarios.</p>
   <figure>
     <a name="FigureA"></a>
-    <img src="/images/Hellenistic%20family%20tree%20handwritten.jpg"/>
+    <img src="/images/Hellenistic%20family%20tree%20handwritten%20-%20clean%20and%20crop%20with%20highlights.jpg"/>
     <p class="figcaption">Figure A: Hand-written Family Tree (a: “Ron doesn’t have him”; b: “only in
       patronymic”; c: “Ron doesn’t put this so late”)</p>
   </figure>
@@ -21,7 +21,11 @@
   <p>The diagram in <a href="#FigureB">Figure B</a> illustrates that teacher-student relations in
     Hellenistic Uruk crisscross family lines. Many of the individuals depicted in <a href="#FigureB"
       >Figure B</a> also appear in <a href="#FigureA">Figure A</a>. However, in the print form it is
-    impossible to explore the connections between these two views.</p>
+    impossible to explore the connections between these two views. From: M. Ossendrijver,
+		<a href="https://www.academia.edu/1351397/Science_in_Action_Networks_in_Babylonian_Astronomy">
+		"Science in Action: Networks in Babylonian Astronomy."</a> Pp. 213-221 in
+		<em>Babylon: Wissenskultur in Orient und Okzident</em>, eds. E. Christiane Cancik-Kirschbaum,
+		et al.  Berlin:  2011.</p>
 </div>
 
 {include file="footer.tpl"}
