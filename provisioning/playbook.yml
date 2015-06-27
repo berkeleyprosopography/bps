@@ -1,0 +1,66 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  
+  tasks:
+    #- hostname: name=bpsdev
+  
+    - name: update apt cache
+      apt: update_cache=yes
+    
+    #- name: Upgrade apt cache
+    #  apt: upgrade=yes
+   
+    - name: install required packages
+      apt: name={{ item }} state=present
+      with_items:
+        - apache2
+        - mysql-server
+        - php5
+        - php5-mysql
+        - tomcat6
+        - tomcat6-admin
+        - libapache2-mod-jk 
+        - libmysql-java 
+        - php-pear
+        - git
+        - maven
+      
+    - name: install MDB2 mysql support via PEAR
+      shell: pear install -a MDB2_Driver_mysql
+      
+    - name: install HTTP_Request2 support via PEAR
+      shell: pear install HTTP_Request2
+      
+    - name: enabled mod_rewrite
+      apache2_module: name=rewrite state=present
+      notify:
+        - restart apache2
+        
+    - name: enabled mod_proxy
+      apache2_module: name=proxy state=present
+      notify:
+        - restart apache2
+        
+    - name: enabled mod_proxy_http
+      apache2_module: name=proxy_http state=present
+      notify:
+        - restart apache2
+    - name: Set environment variables
+      environment:
+        JAVA_HOME: 
+        BPS_JEESERVER_HOME: value
+        BPS_WEBROOT: {{ project_root }}
+        DB_USER: value
+        DB_PASSWORD: {{ db_password }}
+        BPS_CORPORA : "/"
+        PATH: {{ ansible_env.PATH }}:/thingy/bin
+
+    
+    - name: Create the DB
+        shell: mvn create_db
+    
+  handlers:
+    - name: restart apache2
+      service: name=apache2 state=restarted

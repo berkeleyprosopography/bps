@@ -1,0 +1,7 @@
+---
+project_name: BPS
+project_root: /opt/bps
+project_repo: git@github.com:berkeleyprosopography/bps.git
+branch: master
+db_user: value
+db_password: value
