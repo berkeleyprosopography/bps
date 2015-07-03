@@ -2,16 +2,18 @@
 - hosts: all
   sudo: true
   gather_facts: true
-  
+  vars_files:
+    - variables.yml
+
   tasks:
     #- hostname: name=bpsdev
-  
+
     - name: update apt cache
       apt: update_cache=yes
-    
+
     #- name: Upgrade apt cache
     #  apt: upgrade=yes
-   
+
     - name: install required packages
       apt: name={{ item }} state=present
       with_items:
@@ -26,41 +28,75 @@
         - php-pear
         - git
         - maven
-      
+
     - name: install MDB2 mysql support via PEAR
-      shell: pear install -a MDB2_Driver_mysql
-      
+      command: pear install -a MDB2_Driver_mysql
+      ignore_errors: yes
+
     - name: install HTTP_Request2 support via PEAR
-      shell: pear install HTTP_Request2
-      
+      command: pear install HTTP_Request2
+      ignore_errors: yes
+
     - name: enabled mod_rewrite
       apache2_module: name=rewrite state=present
       notify:
         - restart apache2
-        
+
     - name: enabled mod_proxy
       apache2_module: name=proxy state=present
       notify:
         - restart apache2
-        
+
     - name: enabled mod_proxy_http
       apache2_module: name=proxy_http state=present
       notify:
         - restart apache2
-    - name: Set environment variables
-      environment:
-        JAVA_HOME: 
-        BPS_JEESERVER_HOME: value
-        BPS_WEBROOT: {{ project_root }}
-        DB_USER: value
-        DB_PASSWORD: {{ db_password }}
-        BPS_CORPORA : "/"
-        PATH: {{ ansible_env.PATH }}:/thingy/bin
 
-    
-    - name: Create the DB
-        shell: mvn create_db
-    
+    - name: Create the project directory.
+      file: state=directory path={{ project_root }}
+
+    - name: Create user.
+      user: home={{ project_root }}/home/ name={{ user }} password={{ user_password }} state=present
+
+    - name: Update the project directory.
+      file: group={{ user }} owner={{ user }} mode=755 state=directory path={{ project_root }}
+
+    - name: Create the code directory.
+      file: group={{ user }} owner={{ user }} mode=755 state=directory path={{ project_root }}/code/
+
+    - name: Create the SSH directory.
+      file: state=directory path={{ project_root }}/home/.ssh/
+
+    - name: Upload SSH known hosts.
+      copy: src=files/ssh/known_hosts dest={{ project_root }}/home/.ssh/known_hosts mode=0600
+
+    - name: Upload the private RSA SSH key.
+      copy: src=files/ssh/id_rsa dest={{ project_root }}/home/.ssh/id_rsa mode=0600
+
+    - name: Upload the public RSA SSH key.
+      copy: src=files/ssh/id_rsa.pub dest={{ project_root }}/home/.ssh/id_rsa.pub mode=0600
+
+    - name: Change permissions.
+      shell: chown -R {{ user }}:{{ user }} {{ project_root }}
+
+    - name: Pull sources from the repository.
+      git: repo={{ project_repo }} dest={{ project_root }}/code version={{ branch }} accept_hostkey=yes
+      sudo_user: "{{ user }}"
+
+
+    #- name: Create the DB
+    #    shell: mvn create_db
+
+    - name: Install Apache configuration file.
+      template: src=files/apache2/bps.j2 dest=/etc/apache2/sites-available/{{ project_name }} backup=yes
+
+    - name: Ensure that the default site is disabled
+      command: rm /etc/apache2/sites-enabled/000-default removes=/etc/Apache/sites-enabled/default
+
+    - name: make site available 
+      file: src=/etc/apache2/sites-available/{{ project_name }} dest=/etc/apache2/sites-enabled/{{ project_name }} state=link
+      notify: restart apache2
+
   handlers:
-    - name: restart apache2
-      service: name=apache2 state=restarted
+  - name: restart apache2
+    service: name=apache2 state=restarted

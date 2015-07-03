@@ -11,7 +11,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "ansible" do |ansible|
         ansible.playbook = "provisioning/playbook.yml"
         ansible.verbose = 'vvvv'
-        ansible.inventory_path = ".vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory"
+#        ansible.inventory_path = ".vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory"
   end
 
 end
