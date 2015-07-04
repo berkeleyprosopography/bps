@@ -23,6 +23,7 @@
         - php5-mysql
         - tomcat6
         - tomcat6-admin
+        - openjdk-6-jdk
         - libapache2-mod-jk 
         - libmysql-java 
         - php-pear
@@ -55,6 +56,9 @@
     - name: Create the project directory.
       file: state=directory path={{ project_root }}
 
+    - name: Create the corpora directory.
+      file: state=directory path={{ project_root }}/corpora
+
     - name: Create user.
       user: home={{ project_root }}/home/ name={{ user }} password={{ user_password }} state=present
 
@@ -83,19 +87,55 @@
       git: repo={{ project_repo }} dest={{ project_root }}/code version={{ branch }} accept_hostkey=yes
       sudo_user: "{{ user }}"
 
+    - name: Create the webroot directory.
+      file: state=directory path=/var/www/{{ project_name }}
+
+    - name: Update the project directory.
+      file: group={{ user }} owner={{ user }} mode=755 state=directory path=/var/www/{{ project_name }}
+
+
+    - name: Build WAR with maven
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/code/code/bps/services
+      #ignore_errors: yes
+      environment:
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk/
+        BPS_JEESERVER_HOME: /var/lib/tomcat6/
+        BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_USER: "{{ db_user }}"
+        DB_PASSWORD: "{{ db_password }}"
+        BPS_CORPORA : "{{ project_root }}/corpora"
+        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+
+    - name: Copy webroot files
+      shell: mvn initialize chdir={{ project_root }}/code/webcontent
+      sudo: yes
+      #ignore_errors: yes
+      environment:
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk/
+        BPS_JEESERVER_HOME: /var/lib/tomcat6/
+        BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_USER: "{{ db_user }}"
+        DB_PASSWORD: "{{ db_password }}"
+        BPS_CORPORA : "{{ project_root }}/corpora"
+        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     #- name: Create the DB
     #    shell: mvn create_db
+
+    - name: Change ownership of  web directory.
+      file: group=www-data owner=www-data mode=755 state=directory path=/var/www/{{ project_name }} recurse=yes
 
     - name: Install Apache configuration file.
       template: src=files/apache2/bps.j2 dest=/etc/apache2/sites-available/{{ project_name }} backup=yes
 
     - name: Ensure that the default site is disabled
-      command: rm /etc/apache2/sites-enabled/000-default removes=/etc/Apache/sites-enabled/default
+      command: rm /etc/apache2/sites-enabled/000-default removes=/etc/apache2/sites-enabled/000-default
 
     - name: make site available 
       file: src=/etc/apache2/sites-available/{{ project_name }} dest=/etc/apache2/sites-enabled/{{ project_name }} state=link
       notify: restart apache2
+
+
 
   handlers:
   - name: restart apache2
