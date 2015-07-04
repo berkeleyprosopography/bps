@@ -23,6 +23,7 @@
         - php5-mysql
         - tomcat6
         - tomcat6-admin
+        - openjdk-6-jre
         - openjdk-6-jdk
         - libapache2-mod-jk 
         - libmysql-java 
@@ -98,7 +99,7 @@
       shell: mvn clean install -DskipTests chdir={{ project_root }}/code/code/bps/services
       #ignore_errors: yes
       environment:
-        JAVA_HOME: /usr/lib/jvm/java-6-openjdk/
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-i386
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
         DB_USER: "{{ db_user }}"
@@ -107,11 +108,11 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Copy webroot files
-      shell: mvn initialize chdir={{ project_root }}/code/webcontent
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/code/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
-        JAVA_HOME: /usr/lib/jvm/java-6-openjdk/
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-i386
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
         DB_USER: "{{ db_user }}"
