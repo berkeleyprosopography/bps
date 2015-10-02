@@ -123,7 +123,6 @@
     - name: Update the project directory.
       file: group={{ user }} owner={{ user }} mode=755 state=directory path=/var/www/{{ project_name }}
 
-
     - name: Build WAR with maven
       shell: mvn clean install -DskipTests chdir={{ project_root }}/code/code/bps/services
       #ignore_errors: yes
@@ -133,6 +132,7 @@
         BPS_WEBROOT: "/var/www/{{ project_name }}"
         DB_USER: "{{ db_user }}"
         DB_PASSWORD: "{{ db_password }}"
+        DB_PASSWORD_BPS: "{{ db_password }}"
         BPS_CORPORA : "{{ project_root }}/corpora"
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
@@ -146,6 +146,7 @@
         BPS_WEBROOT: "/var/www/{{ project_name }}"
         DB_USER: "{{ db_user }}"
         DB_PASSWORD: "{{ db_password }}"
+        DB_PASSWORD_BPS: "{{ db_password }}"
         BPS_CORPORA : "{{ project_root }}/corpora"
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
@@ -200,3 +201,12 @@
 
   - name: restart tomcat
     service: name=tomcat6 state=restarted
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+      BPS_JEESERVER_HOME: /var/lib/tomcat6/
+      BPS_WEBROOT: "/var/www/{{ project_name }}"
+      DB_USER: "{{ db_user }}"
+      DB_PASSWORD: "{{ db_password }}"
+      DB_PASSWORD_BPS: "{{ db_password }}"
+      BPS_CORPORA : "{{ project_root }}/corpora"
+      CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH

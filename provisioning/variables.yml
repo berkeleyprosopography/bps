@@ -2,7 +2,7 @@
 project_name: bps
 project_root: /opt/bps
 project_repo: git@github.com:berkeleyprosopography/bps.git
-branch: master
+branch: provisioning
 user: bpsuser
 user_password: bpsuser
 db_user: bpsdev
