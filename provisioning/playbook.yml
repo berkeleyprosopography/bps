@@ -18,18 +18,47 @@
       apt: name={{ item }} state=present
       with_items:
         - apache2
-        - mysql-server
         - php5
         - php5-mysql
         - tomcat6
         - tomcat6-admin
         - openjdk-6-jre
         - openjdk-6-jdk
-        - libapache2-mod-jk 
+        - libapache2-mod-jk
         - libmysql-java
         - php-pear
         - git
         - maven
+        - python-pip
+
+    - name: install docker-py
+      pip: name=docker-py version=1.1.0
+      #state: present
+
+    - name: download docker installation script
+      copy: src=files/docker/docker.sh dest=/etc/docker.sh mode=740
+      sudo: yes
+
+    - name: install docker
+      sudo: yes
+      shell: sh /etc/docker.sh
+
+    - name: remove docker installation script
+      sudo: yes
+      file: path=/etc/docker.sh state=absent
+
+    - name: Setting up container for MySQL DB
+      docker:
+        name: database
+        image: mysql
+        state: running
+        ports:
+          - "3306:3306"
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ db_password }}"
+          MYSQL_DATABASE: "{{db_name}}"
+          MYSQL_PASSWORD: "{{ db_password }}"
+          MYSQL_USER: "{{ db_user }}"
 
     - name: install MDB2 mysql support via PEAR
       command: pear install -a MDB2_Driver_mysql
@@ -99,7 +128,7 @@
       shell: mvn clean install -DskipTests chdir={{ project_root }}/code/code/bps/services
       #ignore_errors: yes
       environment:
-        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-i386
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
         DB_USER: "{{ db_user }}"
@@ -112,7 +141,7 @@
       sudo: yes
       #ignore_errors: yes
       environment:
-        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-i386
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
         DB_USER: "{{ db_user }}"
@@ -120,8 +149,27 @@
         BPS_CORPORA : "{{ project_root }}/corpora"
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
-    #- name: Create the DB
-    #    shell: mvn create_db
+    - name: Create missing db directory
+      file: path={{project_root}}/code/code/bps/services/common/target/db state=directory
+
+    - name: Copy db init file
+      copy: src=files/db/initdb.sql  dest={{ project_root }}/code/code/bps/services/common/target/db/initdb.sql
+
+    - name: Create the DB
+      shell: ant create_db chdir={{ project_root }}/code/code/bps/services
+      environment:
+          JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+          BPS_JEESERVER_HOME: /var/lib/tomcat6/
+          BPS_WEBROOT: "/var/www/{{ project_name }}"
+          DB_USER: "{{ db_user }}"
+          DB_PASSWORD: "{{ db_password }}"
+          DB_PASSWORD_BPS: "{{ db_password }}"
+          BPS_CORPORA : "{{ project_root }}/corpora"
+          CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+
+#    - name: Load DB dump into docker db instance
+ #     shell: docker exec -i dump mysql -uroot -proot <
+  #    sudo: yes
 
     - name: Change ownership of  web directory.
       file: group=www-data owner=www-data mode=755 state=directory path=/var/www/{{ project_name }} recurse=yes
@@ -132,7 +180,7 @@
     - name: Ensure that the default site is disabled
       command: rm /etc/apache2/sites-enabled/000-default removes=/etc/apache2/sites-enabled/000-default
 
-    - name: make site available 
+    - name: make site available
       file: src=/etc/apache2/sites-available/{{ project_name }} dest=/etc/apache2/sites-enabled/{{ project_name }} state=link
       notify: restart apache2
 
