@@ -31,6 +31,18 @@
         - maven
         - python-pip
 
+    - name: Set enviroment variables
+      lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
+      with_items:
+        - { key: '^BPS_JEESERVER_HOME', value : 'BPS_JEESERVER_HOME=/var/lib/tomcat6/' }
+        - { key: '^BPS_WEBROOT', value : 'BPS_WEBROOT=/var/www/{{ project_name }}' }
+        - { key: '^DB_USER', value : 'DB_USER={{ db_user }}'}
+        - { key: '^DB_PASSWORD', value : 'DB_PASSWORD={{ db_password }}'}
+        - { key: '^DB_PASSWORD_BPS', value : 'DB_PASSWORD_BPS={{ db_password }}'}
+        - { key: '^BPS_CORPORA', value : 'BPS_CORPORA={{ project_root }}/corpora'}
+        - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
+      notify: source environment
+
     - name: install docker-py
       pip: name=docker-py version=1.1.0
       #state: present
@@ -159,38 +171,48 @@
     - name: Create the DB
       shell: ant create_db chdir={{ project_root }}/code/code/bps/services
       environment:
-          JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
-          BPS_JEESERVER_HOME: /var/lib/tomcat6/
-          BPS_WEBROOT: "/var/www/{{ project_name }}"
-          DB_USER: "{{ db_user }}"
-          DB_PASSWORD: "{{ db_password }}"
-          DB_PASSWORD_BPS: "{{ db_password }}"
-          BPS_CORPORA : "{{ project_root }}/corpora"
-          CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
-
-#    - name: Load DB dump into docker db instance
- #     shell: docker exec -i dump mysql -uroot -proot <
-  #    sudo: yes
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+        BPS_JEESERVER_HOME: /var/lib/tomcat6/
+        BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_USER: "{{ db_user }}"
+        DB_PASSWORD: "{{ db_password }}"
+        DB_PASSWORD_BPS: "{{ db_password }}"
+        BPS_CORPORA : "{{ project_root }}/corpora"
+        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Change ownership of  web directory.
       file: group=www-data owner=www-data mode=755 state=directory path=/var/www/{{ project_name }} recurse=yes
 
+    - name: Adjust ownership level of  corpora directory.
+      file: group={{user}} owner={{user}} mode=777 state=directory path={{ project_root }}/corpora recurse=yes
+
     - name: Install Apache configuration file.
-      template: src=files/apache2/bps.j2 dest=/etc/apache2/sites-available/{{ project_name }} backup=yes
+      template: src=files/apache2/bps.j2 dest=/etc/apache2/sites-available/{{ project_name }}.conf backup=yes
 
-    - name: Ensure that the default site is disabled
-      command: rm /etc/apache2/sites-enabled/000-default removes=/etc/apache2/sites-enabled/000-default
+  #  - name: Ensure that the default site is disabled
+   #   command: rm /etc/apache2/sites-enabled/000-default removes=/etc/apache2/sites-enabled/000-default
 
-    - name: make site available
-      file: src=/etc/apache2/sites-available/{{ project_name }} dest=/etc/apache2/sites-enabled/{{ project_name }} state=link
-      notify: restart apache2
+  #  - name: make site available
+ #     file: src=/etc/apache2/sites-available/{{ project_name }} dest=/etc/apache2/sites-enabled/{{ project_name }} state=link
+  #    notify: restart apache2
+
+    - name: Apache | Disable the default site
+      action: command a2dissite 000-default
+      tags: common
+
+    - name: Apache | Enable bps site
+      action: command a2ensite {{ project_name }}.conf
+      tags: common
 
     - name: Upload tomcat users file
       copy: src=files/tomcat/tomcat-users.conf dest=/etc/tomcat6/tomcat-users.xml #mode=0600
-      notify: restart tomcat
 
     - name: Creat symlink to mysql-connector-java
       file: src=/usr/share/java/mysql-connector-java.jar dest=/var/lib/tomcat6/shared/mysql-connector-java.jar state=link
+      sudo: true
+
+    - name: Setup tomcat server configuration
+      file: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
       sudo: true
       notify: restart tomcat
 
@@ -198,9 +220,6 @@
   handlers:
   - name: restart apache2
     service: name=apache2 state=restarted
-
-  - name: restart tomcat
-    service: name=tomcat6 state=restarted
     environment:
       JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
       BPS_JEESERVER_HOME: /var/lib/tomcat6/
@@ -210,3 +229,18 @@
       DB_PASSWORD_BPS: "{{ db_password }}"
       BPS_CORPORA : "{{ project_root }}/corpora"
       CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+
+  - name: restart tomcat
+    service: name=tomcat6 state=restarted
+    environment:
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+        BPS_JEESERVER_HOME: /var/lib/tomcat6/
+        BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_USER: "{{ db_user }}"
+        DB_PASSWORD: "{{ db_password }}"
+        DB_PASSWORD_BPS: "{{ db_password }}"
+        BPS_CORPORA : "{{ project_root }}/corpora"
+        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+
+  - name: source environment
+    shell: sudo -iu {{user}} . /etc/environment

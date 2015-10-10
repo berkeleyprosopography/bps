@@ -78,6 +78,10 @@
         Allow from 127.0.0.0/255.0.0.0 ::1/128
     </Directory>
 
+    ProxyPreserveHost On
+    ProxyPass /manage_tomcat/ http://127.0.0.1:8080/
+    ProxyPassReverse /manage_tomcat/ http://127.0.0.1:8080/
+
     JkMount /bps.services.webapp/* ajp13_worker
 
 </VirtualHost>
