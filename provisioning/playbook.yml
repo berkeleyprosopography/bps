@@ -211,8 +211,12 @@
       file: src=/usr/share/java/mysql-connector-java.jar dest=/var/lib/tomcat6/shared/mysql-connector-java.jar state=link
       sudo: true
 
+    - name: Remove existing Tomcat server configuration
+      file: path=/etc/tomcat6/server.xml state=absent
+      sudo: true
+
     - name: Setup tomcat server configuration
-      file: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
+      copy: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
       sudo: true
       notify: restart tomcat
 

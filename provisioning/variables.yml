@@ -8,3 +8,6 @@ user_password: bpsuser
 db_user: bpsdev
 db_password: G0Names!
 db_name: bpsdev
+#ansible_connection: ssh
+#ansible_ssh_user: root
+#ansible_ssh_pass: PatrickDavideLaurie4$
