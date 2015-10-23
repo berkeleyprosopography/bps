@@ -7,12 +7,14 @@
 
   tasks:
     #- hostname: name=bpsdev
+    - name: Add NewRelic deb
+      apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present
+
+    - name: Add NewRelic key
+      shell: wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
 
     - name: update apt cache
       apt: update_cache=yes
-
-    #- name: Upgrade apt cache
-    #  apt: upgrade=yes
 
     - name: install required packages
       apt: name={{ item }} state=present
@@ -30,6 +32,11 @@
         - git
         - maven
         - python-pip
+        - newrelic-sysmond
+
+    - name: Configure NewRelic
+      shell: nrsysmond-config --set license_key=b677ca6d9d5b3b805efebbce42826bca62b034c8
+      notify: start_newrelic
 
     - name: Set enviroment variables
       lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
@@ -200,6 +207,10 @@
       action: command a2dissite 000-default
       tags: common
 
+    - name: Apache | Remove existing index.html
+      file: path=/var/www/index.html state=absent
+      sudo: true
+
     - name: Apache | Enable bps site
       action: command a2ensite {{ project_name }}.conf
       tags: common
@@ -248,3 +259,6 @@
 
   - name: source environment
     shell: sudo -iu {{user}} . /etc/environment
+
+  - name: start_newrelic
+    service: name=newrelic-sysmond state=started
