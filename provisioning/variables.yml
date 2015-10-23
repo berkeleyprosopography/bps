@@ -1,0 +1,13 @@
+---
+project_name: bps
+project_root: /opt/bps
+project_repo: git@github.com:berkeleyprosopography/bps.git
+branch: provisioning
+user: bpsuser
+user_password: platypusesarecute
+db_user: bpsdev
+db_password: G0Names!
+db_name: bpsdev
+ansible_connection: ssh
+ansible_ssh_user: root
+ansible_ssh_pass: LLamasaretrulyamazing4$

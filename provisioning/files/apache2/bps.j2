@@ -1,0 +1,87 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+
+    DocumentRoot /var/www/{{project_name}}
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+    <Directory /var/www/{{project_name}}>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Order allow,deny
+        allow from all
+        RewriteEngine on
+    # Direct to frontpage
+    RewriteRule   ^$ home.php
+
+    # About rules
+    RewriteRule   ^about/{0,1}$ modules/about/about.php
+    RewriteRule   ^contact/{0,1}$ modules/about/contact.php
+    RewriteRule   ^privacy/{0,1}$ modules/about/privacy.php
+    RewriteRule   ^help/{0,1}$ modules/help/help.php
+
+    # Auth rules
+    RewriteRule   ^logout/{0,1}$ modules/auth/logout.php
+    RewriteRule   ^login/{0,1}$ modules/auth/login.php
+    RewriteRule   ^profile/{0,1}$ modules/auth/profile.php
+    RewriteRule   ^profileEdit/{0,1}$ modules/auth/profileEdit.php
+    RewriteRule   ^lostpass/{0,1}$ modules/auth/forgotpw.php
+    RewriteRule   ^register/{0,1}$ modules/auth/register.php
+
+    # Admin rules
+    RewriteRule   ^admin/{0,1}$ modules/admin/admin.php
+    RewriteRule   ^admin/userroles/{0,1}$ modules/admin/adminUserRoles.php
+    RewriteRule   ^admin/roles/{0,1}$ modules/admin/adminRoles.php
+    RewriteRule   ^admin/roleperms/{0,1}$ modules/admin/adminRolePerms.php
+    RewriteRule   ^admin/permissions/{0,1}$ modules/admin/adminPermissions.php
+    RewriteRule   ^admin/editNews/{0,1}$ modules/admin/editNews.php
+
+    #Corpora rules
+    RewriteRule   ^corpora/{0,1}$ modules/corpora/corpora.php
+    RewriteRule   ^corpora/corpus/{0,1}$ modules/corpora/corpus.php
+    RewriteRule   ^corpora/params/{0,1}$ modules/corpora/params.php
+
+    # Corpus Document rules
+    RewriteRule   ^document/{0,1}$ modules/corpora/document.php
+
+    #Workspace rules
+    RewriteRule   ^workspace/{0,1}$ modules/workspaces/workspace.php
+    RewriteRule   ^workspace/document/{0,1}$ modules/workspaces/document.php
+
+    #Docs rules
+    RewriteRule   ^docs/(.*)$ modules/docs/$1
+    </Directory>
+
+    ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+    <Directory "/usr/lib/cgi-bin">
+        AllowOverride None
+        Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    Alias /doc/ "/usr/share/doc/"
+    <Directory "/usr/share/doc/">
+        Options Indexes MultiViews FollowSymLinks
+        AllowOverride None
+        Order deny,allow
+        Deny from all
+        Allow from 127.0.0.0/255.0.0.0 ::1/128
+    </Directory>
+
+    ProxyPreserveHost On
+    ProxyPass /manage_tomcat/ http://127.0.0.1:8080/
+    ProxyPassReverse /manage_tomcat/ http://127.0.0.1:8080/
+
+    JkMount /bps.services.webapp/* ajp13_worker
+
+</VirtualHost>

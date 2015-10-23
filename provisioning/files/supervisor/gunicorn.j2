@@ -1,0 +1,6 @@
+[program:gunicorn]
+command = gunicorn liquidns_ui.wsgi:application -w 3
+directory = {{ project_root}}/code/liquidns_ui
+user = {{ project_name}}
+autostart=true
+autorestart=true

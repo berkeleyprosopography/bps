@@ -1,0 +1,29 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  
+  tasks:
+    #- hostname: name=bpsdev
+  
+    - name: update apt cache
+      apt: update_cache=yes
+    
+    - name: Upgrade apt cache
+      apt: upgrade=yes
+   
+    - name: install required packages
+      apt: name={{ item }} state=present
+      with_items:
+        - apache2
+        - mysql-server
+        - php5
+        - tomcat6
+        - libapache2-mod-jk 
+        - php-pear
+      
+    - name: install MDB2 mysql support via PEAR
+      shell: pear install -a MDB2_Driver_mysql
+      
+    - name: install HTTP_Request2 support via PEAR
+      shell: pear install HTTP_Request2
