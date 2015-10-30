@@ -11,3 +11,4 @@ db_name: bpsdev
 ansible_connection: ssh
 ansible_ssh_user: root
 ansible_ssh_pass: LLamasaretrulyamazing4$
+newrelic_license_key: b6dcfa22132466e99c98e064cd6c99efedac8e84

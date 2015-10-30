@@ -35,7 +35,7 @@
         - newrelic-sysmond
 
     - name: Configure NewRelic
-      shell: nrsysmond-config --set license_key=b677ca6d9d5b3b805efebbce42826bca62b034c8
+      shell: nrsysmond-config --set license_key={{newrelic_licencse_key}}
       notify: start_newrelic
 
     - name: Set enviroment variables
@@ -116,18 +116,6 @@
 
     - name: Create the code directory.
       file: group={{ user }} owner={{ user }} mode=755 state=directory path={{ project_root }}/code/
-
-    - name: Create the SSH directory.
-      file: state=directory path={{ project_root }}/home/.ssh/
-
-    - name: Upload SSH known hosts.
-      copy: src=files/ssh/known_hosts dest={{ project_root }}/home/.ssh/known_hosts mode=0600
-
-    - name: Upload the private RSA SSH key.
-      copy: src=files/ssh/id_rsa dest={{ project_root }}/home/.ssh/id_rsa mode=0600
-
-    - name: Upload the public RSA SSH key.
-      copy: src=files/ssh/id_rsa.pub dest={{ project_root }}/home/.ssh/id_rsa.pub mode=0600
 
     - name: Change permissions.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}
@@ -216,7 +204,7 @@
       tags: common
 
     - name: Upload tomcat users file
-      copy: src=files/tomcat/tomcat-users.conf dest=/etc/tomcat6/tomcat-users.xml #mode=0600
+      template: src=files/tomcat/tomcat-users.conf dest=/etc/tomcat6/tomcat-users.xml #mode=0600
 
     - name: Creat symlink to mysql-connector-java
       file: src=/usr/share/java/mysql-connector-java.jar dest=/var/lib/tomcat6/shared/mysql-connector-java.jar state=link
