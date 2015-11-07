@@ -9,9 +9,11 @@
     #- hostname: name=bpsdev
     - name: Add NewRelic deb
       apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present
+      when: newrelic_license_key is defined
 
     - name: Add NewRelic key
       shell: wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
+      when: newrelic_license_key is defined
 
     - name: update apt cache
       apt: update_cache=yes
@@ -32,11 +34,19 @@
         - git
         - maven
         - python-pip
+        - python-mysqldb
+
+
+    - name: Install NewRelic monitor
+      apt: name={{ item }} state=present
+      with_items:
         - newrelic-sysmond
+      when: newrelic_license_key is defined
 
     - name: Configure NewRelic
-      shell: nrsysmond-config --set license_key={{newrelic_licencse_key}}
+      shell: nrsysmond-config --set license_key={{newrelic_license_key}}
       notify: start_newrelic
+      when: newrelic_license_key is defined
 
     - name: Set enviroment variables
       lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
@@ -78,6 +88,17 @@
           MYSQL_DATABASE: "{{db_name}}"
           MYSQL_PASSWORD: "{{ db_password }}"
           MYSQL_USER: "{{ db_user }}"
+
+    - name: Set user privileges
+      mysql_user:
+        host: 127.0.0.1
+        login_user: "root"
+        login_password: "{{db_password}}"
+        user: "{{db_user}}"
+        priv: "*.*:ALL,GRANT"
+        state: present
+        check_implicit_admin: True
+
 
     - name: install MDB2 mysql support via PEAR
       command: pear install -a MDB2_Driver_mysql
@@ -162,6 +183,7 @@
 
     - name: Copy db init file
       copy: src=files/db/initdb.sql  dest={{ project_root }}/code/code/bps/services/common/target/db/initdb.sql
+
 
     - name: Create the DB
       shell: ant create_db chdir={{ project_root }}/code/code/bps/services
