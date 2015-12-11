@@ -21,6 +21,7 @@
     - name: install required packages
       apt: name={{ item }} state=present
       with_items:
+        - mysql-server
         - apache2
         - php5
         - php5-mysql
@@ -60,45 +61,20 @@
         - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
       notify: source environment
 
-    - name: install docker-py
-      pip: name=docker-py version=1.1.0
-      #state: present
-
-    - name: download docker installation script
-      copy: src=files/docker/docker.sh dest=/etc/docker.sh mode=740
-      sudo: yes
-
-    - name: install docker
-      sudo: yes
-      shell: sh /etc/docker.sh
-
-    - name: remove docker installation script
-      sudo: yes
-      file: path=/etc/docker.sh state=absent
-
-    - name: Setting up container for MySQL DB
-      docker:
-        name: database
-        image: mysql
-        state: running
-        ports:
-          - "3306:3306"
-        env:
-          MYSQL_ROOT_PASSWORD: "{{ db_password }}"
-          MYSQL_DATABASE: "{{db_name}}"
-          MYSQL_PASSWORD: "{{ db_password }}"
-          MYSQL_USER: "{{ db_user }}"
+    - name: Start MySQL Database server
+      shell: service mysql start
 
     - name: Set user privileges
       mysql_user:
-        host: 127.0.0.1
+        login_host: 127.0.0.1
+        login_port: 3306
         login_user: "root"
         login_password: "{{db_password}}"
         user: "{{db_user}}"
+        password: "{{db_password}}"
         priv: "*.*:ALL,GRANT"
         state: present
         check_implicit_admin: True
-
 
     - name: install MDB2 mysql support via PEAR
       command: pear install -a MDB2_Driver_mysql
@@ -165,7 +141,7 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Copy webroot files
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/code/webcontent
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
@@ -272,3 +248,6 @@
 
   - name: start_newrelic
     service: name=newrelic-sysmond state=started
+
+  - name: start_db
+    service: name=mysql state=started

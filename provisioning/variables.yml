@@ -8,3 +8,5 @@ user_password: platypusesarecute
 db_user: bpsdev
 db_password: G0Names!
 db_name: bpsdev
+tomcat_admin: tomcat
+tomcat_admin_password: bps4me
