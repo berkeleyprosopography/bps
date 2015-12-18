@@ -3,8 +3,7 @@
 
 
 Vagrant.configure(2) do |config|
-
-  config.vm.synced_folder "/Users/davide/Documents/Projects/bps/bps", "/bps"
+  config.vm.synced_folder ".", "/bps"
 
   config.vm.box = "yungsang/boot2docker"
   config.vm.network "forwarded_port", guest: 80, host: 7000
