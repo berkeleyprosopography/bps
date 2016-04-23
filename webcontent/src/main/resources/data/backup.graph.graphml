@@ -1,0 +1,302 @@
+<graphml>
+	<!--Keys for nodes -->
+	<key id="name" for="node" attr.name="Name" attr.type="string"/>
+	<key id="father" for="node" attr.name="Father" attr.type="string"/>
+	<key id="grandfather" for="node" attr.name="Grandfather" attr.type="string"/>
+	<key id="clan" for="node" attr.name="Clan" attr.type="string"/>
+	<key id="status" for="node" attr.name="Social Status" attr.type="string">
+		<default>free</default>
+	</key>
+	<key id="gender" for="node" attr.name="Gender" attr.type="string">
+		<default>M</default>
+	</key>
+	
+	<!--Keys for edges -->
+	<key id="weight" for="edge" attr.name="weight" attr.type="float">
+		<default>1.0</default>
+	</key>
+	<key id="type" for="edge" attr.name="type" attr.type="string">
+	</key>
+	<key id="docID" for="edge" attr.name="docID" attr.type="string">
+	</key>
+  <graph id="A" edgedefault="undirected">
+		
+		<!--Document CM12 -->
+		<node id="per.000" >
+			<data key="name">Anu-belšunu</data>
+			<data key="father">Nana-iddin</data>
+		</node>
+		<node id="per.001" >
+			<data key="name">Nidintu-Anu</data>
+			<data key="father">Tanittu-Anu</data>
+			<data key="clan">Ah-utu</data>
+		</node>
+		<node id="per.002" >
+			<data key="name">Anu-ahhe-iddin</data>
+			<data key="father">Nana-iddin</data>
+			<data key="clan">Ah-utu</data>
+		</node>
+		<node id="per.003" >
+			<data key="name">Nana-iddin</data>
+			<data key="father">Tanittu-Anu</data>
+			<data key="clan">Ah-utu</data>
+		</node>
+		<node id="per.004" >
+			<data key="name">Anu-ittannu</data>
+			<data key="father">Saniqqâ</data>
+			<data key="status">slave</data>
+		</node>
+		
+		<!--Document P342446 -->
+		<node id="per.005" >
+			<data key="name">Hanna</data>
+			<data key="father">Tattannu-Nana</data>
+			<data key="gender">F</data>
+		</node>
+		
+		<node id="per.006" >
+			<data key="name">Kidin-Anu</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.007" >
+			<data key="name">Anu-ah-ittannu</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.008" >
+			<data key="name">Tattannu-Nana</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.009" >
+			<data key="name">Anu-uballit</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.010" >
+			<data key="name">Labaši</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.011" >
+			<data key="name">Ana-rabuti-Nana</data>
+			<data key="status">slave</data>
+			<data key="gender">F</data>
+		</node>
+
+		
+		<!--Document VS15 - P342456 -->
+		<node id="per.012" >
+			<data key="name">Šibqat-Bel</data>
+			<data key="status">slave</data>
+		</node>
+		
+		<node id="per.013" >
+			<data key="name">Sida</data>
+			<data key="status">slave</data>
+		</node>
+		
+		<node id="per.014" >
+			<data key="name">Amat-Bel</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.015" >
+			<data key="name">Ṭabat-Nana</data>
+			<data key="father">Hanin-esi</data>
+		</node>
+		
+		<!--Document VS15 51 - P342504 -->
+		<!--Sellers-->
+		<node id="per.016" >
+			<data key="name">Anu-zer-lišir</data>
+		</node>
+		<node id="per.017" >
+			<data key="name">Anu-zer-lišir</data>
+		</node>
+		<node id="per.018" >
+			<data key="name">Ana-rabutika-anu</data>
+			<data key="father">Anu-ah-ušabši</data>
+			<data key="clan">Ah-utu</data>
+		</node>
+		
+		<!--Neigbours-->
+		<node id="per.019" >
+			<data key="name">Anu-balassu-iqi</data>
+		</node>
+		<node id="per.020" >
+			<data key="name">Anu-ab-uṭir</data>
+			<data key="father">Anu-ah-ušabši</data>
+			<data key="clan">Ah-utu</data>
+		</node>
+		<node id="per.021" >
+			<data key="name">Nidintu-Anu</data>
+			<data key="father">Labaši</data>
+			<data key="clan">H</data>
+		</node>
+		
+		<!--Document YOS 20,002 - P296769 -->
+		<node id="per.022" >
+			<data key="name">Rahmat-Anu</data>
+			<data key="status">slave</data>
+		</node>
+		
+		<node id="per.023" >
+			<data key="name">Atalihan</data>
+			<data key="status">slave</data>
+		</node>
+		
+		<node id="per.024" >
+			<data key="name">Anu-ah-tuqqin</data>
+			<data key="status">slave</data>
+		</node>
+		<node id="per.025" >
+			<data key="name">Mannu-ki-Dilbat</data>
+			<data key="father">Anu-ah-tuqqin</data>
+		</node>
+		
+		
+		
+	    <!--Document CM12 -->
+		<edge directed="true" source="per.001" target="per.002">
+		 <data key="type">Slave Sale</data>
+		 <data key="docID">CM12</data>
+		</edge>
+		<edge directed="true" source="per.002" target="per.004">
+		 <data key="type">Ownership</data>
+		 <data key="docID">CM12</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.004">
+		 <data key="type">Ownership</data>
+		 <data key="docID">CM12</data>
+		</edge>
+		<edge directed="true" source="per.000" target="per.004">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">CM12</data>
+		</edge>
+		
+		<!--Document P342446 -->
+		<edge directed="true" source="per.005" target="per.003">
+		 <data key="type">Slave Sale</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.006">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.007">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.008">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.009">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.010">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.011">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<edge directed="true" source="per.005" target="per.011">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P342446</data>
+		</edge>
+		<!--Document VS15 - P342456 -->
+		
+		<edge directed="true" source="per.003" target="per.012">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.013">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.014">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		<edge directed="true" source="per.015" target="per.012">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		<edge directed="true" source="per.015" target="per.013">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		<edge directed="true" source="per.015" target="per.014">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		<edge directed="true" source="per.015" target="per.003">
+		 <data key="type">Slave Sale</data>
+		 <data key="docID">P342456</data>
+		</edge>
+		
+			<!--Document VS15 51 - P342504 -->
+		<edge directed="true" source="per.016" target="per.003">
+			<data key="type">House Sale</data>
+			<data key="docID">P342504</data>
+		</edge>
+		<edge directed="true" source="per.017" target="per.003">
+			<data key="type">House Sale</data>
+			<data key="docID">P342504</data>
+		</edge>
+		<edge directed="true" source="per.018" target="per.003">
+			<data key="type">House Sale</data>
+			<data key="docID">P342504</data>
+		</edge>
+		<edge directed="true" source="per.001" target="per.003">
+			<data key="type">Neighbourhood</data>
+			<data key="docID">P342504</data>
+		</edge>
+		<edge directed="true" source="per.019" target="per.003">
+			<data key="type">Neighbourhood</data>
+			<data key="docID">P342504</data>
+		</edge>
+		<edge directed="true" source="per.020" target="per.003">
+			<data key="type">Neighbourhood</data>
+			<data key="docID">P342504</data>
+		</edge>
+		<edge directed="true" source="per.021" target="per.003">
+			<data key="type">Neighbourhood</data>
+			<data key="docID">P342504</data>
+		</edge>
+		
+		<!--Document YOS 20,002 - P296769 -->
+		<edge directed="true" source="per.003" target="per.022">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.023">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		<edge directed="true" source="per.003" target="per.024">
+		 <data key="type">Ownership</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		<edge directed="true" source="per.025" target="per.022">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		<edge directed="true" source="per.025" target="per.023">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		<edge directed="true" source="per.025" target="per.024">
+		 <data key="type">Slave mark</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		<edge directed="true" source="per.025" target="per.003">
+		 <data key="type">Slave Sale</data>
+		 <data key="docID">P296769</data>
+		</edge>
+		
+
+		
+		</edge>
+		
+	</graph>
+</graphml>

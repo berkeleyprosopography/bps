@@ -53,6 +53,13 @@
     RewriteRule   ^docs/(.*)$ modules/docs/$1
     </Directory>
 
+    #SNA rules
+    RewriteRule   ^SNA/{0,1}$ modules/SNA/SNA.php
+    RewriteRule   ^SNA/data.json$ modules/SNA/SNA.json.php
+
+    #Temporary tree layout
+    RewriteRule   ^SNA/tree/{0,1}$ modules/SNA/TreeLayout/tree.php
+
     ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
     <Directory "/usr/lib/cgi-bin">
         AllowOverride None
