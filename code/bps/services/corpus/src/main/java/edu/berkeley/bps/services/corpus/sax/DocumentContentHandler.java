@@ -1,6 +1,7 @@
 package edu.berkeley.bps.services.corpus.sax;
 
 import java.sql.Connection;
+import java.text.ParseException;
 
 import org.jboss.resteasy.annotations.cache.Cache;
 import org.xml.sax.Attributes;
@@ -9,6 +10,7 @@ import org.xml.sax.XMLReader;
 
 import edu.berkeley.bps.services.common.hbtin.HBTIN_Constants;
 import edu.berkeley.bps.services.common.sax.StackedContentHandler;
+import edu.berkeley.bps.services.common.time.TimeUtils;
 import edu.berkeley.bps.services.corpus.Activity;
 import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.CachedEntity;
@@ -100,6 +102,22 @@ public class DocumentContentHandler extends StackedContentHandler {
 				onBack = true;
 				inWitnesses = false;
 			} else if(localName.equals("div")) {
+				String type = attrList.getValue("", "type");  
+				if("activity".equalsIgnoreCase(type)) {
+					String activityType = attrList.getValue("", "subtype");  
+					logger.trace("Found activity of type: "+activityType);
+					activity = corpus.findOrCreateActivity(activityType, dbConn);
+				}
+				String fulldate = attrList.getValue("", "full_date");
+				if(fulldate!=null && !fulldate.isEmpty()) {
+					try {
+						long datelong = TimeUtils.parseISO_G_DateToMillis(fulldate);
+						document.setDate_norm(datelong);
+					} catch (ParseException e) {
+						logger.warn(e.getLocalizedMessage());
+					}
+					document.setDate_str(fulldate);	// Set date string even if unparsable
+				}
 				if(onBack){
 					String subtype = attrList.getValue("", "subtype");  
 					if("witnesses".equalsIgnoreCase(subtype))

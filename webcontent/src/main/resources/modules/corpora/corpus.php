@@ -234,7 +234,7 @@ function getCorpus($CFG,$id){
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id;
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$id;
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -262,7 +262,7 @@ function getCorpusDocs($CFG,$cid,$nid,$role,$order,$medianDocDate) {
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/documents";
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$cid."/documents";
 	$qch = "?";
 	if(!empty($nid)) {
 		$url .= "?name=".$nid;
@@ -309,7 +309,7 @@ function getNameInCorpus($CFG,$cid, $nid) {
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/names/".$nid;
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$cid."/names/".$nid;
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -332,7 +332,7 @@ function getCorpusNames($CFG,$id,$roleFilter,$genderFilter,$typeFilter,$orderBy)
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id."/names";
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$id."/names";
 	$first = true;
 	if(!empty($typeFilter)) {
 		$url .= "?type=".$typeFilter;
@@ -377,7 +377,7 @@ function getCorpusRoles($CFG,$cid){
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/activityRoles";
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$cid."/activityRoles";
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();

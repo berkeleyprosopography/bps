@@ -14,7 +14,8 @@ public class StackedContentHandler extends DefaultHandler implements ContentHand
 	final Logger logger = LoggerFactory.getLogger(StackedContentHandler.class);
 
 	protected StringBuffer accumulator;		// Accumulate text
-	protected StringStack elPath;				// Keep track of path in this context
+	protected StringStack elPath;			// Keep track of path in this context
+	protected StringStack elContent;		// Keep track of content in this context
 	protected XMLReader parser;
 	protected ContentHandler previous;
 	protected Locator locator = null;
@@ -23,12 +24,14 @@ public class StackedContentHandler extends DefaultHandler implements ContentHand
 		super();
 		accumulator = new StringBuffer();
 		elPath = new StringStack();
+		elContent = new StringStack();
 		this.parser = parser;
 		this.previous = previous;
 	}
 
 	protected void pop() {
 		elPath.clear();
+		elContent.clear();
 		parser.setContentHandler(previous);
 	}
 
@@ -54,7 +57,8 @@ public class StackedContentHandler extends DefaultHandler implements ContentHand
 	@Override
 	public void startElement(String namespaceURI, String localName, String qName, 
 			Attributes attrList) {
-		accumulator.setLength(0);
+		elContent.push(accumulator.toString());	// Save any text content found so far
+		accumulator.setLength(0);	// And reset the accumulator to empty
 		elPath.push(localName);
 	}
 
@@ -68,8 +72,12 @@ public class StackedContentHandler extends DefaultHandler implements ContentHand
 			logger.error(err);
 			throw new RuntimeException(err);
 		}
-		if(elPath.isEmpty()) {
+		if(elPath.isEmpty()) {	// At the base of the stack, we clean up
 			pop();
+		} else {
+			// If we are restoring to another element, restore its saved text content
+			accumulator.setLength(0);
+			accumulator.append(elContent.pop());
 		}
 	}
 

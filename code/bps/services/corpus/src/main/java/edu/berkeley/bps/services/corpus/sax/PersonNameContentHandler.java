@@ -9,6 +9,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
 
 import edu.berkeley.bps.services.common.LinkType;
+import edu.berkeley.bps.services.common.hbtin.HBTIN_Constants;
 import edu.berkeley.bps.services.common.sax.StackedContentHandler;
 import edu.berkeley.bps.services.corpus.Activity;
 import edu.berkeley.bps.services.corpus.ActivityRole;
@@ -48,37 +49,48 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	protected static final int T_FEMININE = 0x2; 
 	protected static final int T_UNMARKED = 0x4;
 	protected static final int T_PRIMARY = (T_MASCULINE|T_FEMININE|T_UNMARKED); 
+	protected static final int T_CLEAR_GENDER_MASK = ~(T_MASCULINE|T_FEMININE|T_UNMARKED); 
 	protected static final int T_PATRONYM = 0x8;
 	protected static final int T_GRANDFATHER = T_PATRONYM|0x10;
 	protected static final int T_ANCESTOR = T_PATRONYM|0x20;
-	protected static final int T_MALE = (T_MASCULINE|T_PATRONYM); 
-	protected static final int T_FEMALE = (T_FEMININE); 
+	protected static final int T_IS_MALE = (T_MASCULINE|T_PATRONYM); 
+	protected static final int T_IS_FEMALE = (T_FEMININE); 
 	
 	// TODO this should be configured or set in UI.
-	protected static final String MISSING_NAME_MARKER = "NENNI";
+	protected static final String CDLI_MISSING_NAME_MARKER = "NENNI";
+
+	protected static final String MISSING_NAME = "(Missing Name)";
 
 	protected ActivityRole fatherAR;
 	protected ActivityRole grandfatherAR;
 	protected ActivityRole ancestorAR;
 	protected ActivityRole clanAR;
 	
-	protected NameRoleActivity baseForename, father, grandfather, clan;
+	protected Name forename = null;
+	protected int forenameType = T_MISSING;
+	protected String forenameStateType = null;
+	protected String forenameXMLId = null;
+	
+	protected Name addname = null;
+	protected String addnameXMLId = null;
+
+	protected NameRoleActivity baseForenameNRAD, father, grandfather, clan;
 	protected List<NameRoleActivity> ancestors;
 
 	public PersonNameContentHandler(Connection dbConn, Corpus corpus, Document document,
-			Activity activity, ActivityRole actRole, 
+			Activity activity, ActivityRole defaultActRole, 
 			XMLReader parser, ContentHandler previous) {
 		super(parser, previous);
 		this.dbConn = dbConn;
 		this.corpus = corpus;
 		this.document = document;
 		this.activity = activity;
-		this.activityRole = actRole;
+		this.activityRole = defaultActRole;
 		fatherAR = corpus.findOrCreateActivityRole(ActivityRole.FATHER_ROLE, dbConn);
 		grandfatherAR = corpus.findOrCreateActivityRole(ActivityRole.GRANDFATHER_ROLE, dbConn);
 		ancestorAR = corpus.findOrCreateActivityRole(ActivityRole.ANCESTOR_ROLE, dbConn);
 		clanAR = corpus.findOrCreateActivityRole(ActivityRole.CLAN_ROLE, dbConn);
-		baseForename = null;
+		baseForenameNRAD = null;
 		father = null;
 		grandfather = null;
 		clan = null;
@@ -88,14 +100,172 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	public void startElement(String namespaceURI, String localName, String qName, 
 			Attributes attrList) {
 		super.startElement(namespaceURI, localName, qName, attrList);
-		if(localName.equals("forename")) {
+		if(localName.equals(TEI_Constants.PERSNAME_EL)) {
+			if( elPath.size()>1 ) {
+				String xmlid = attrList.getValue(TEI_Constants.XMLID_ATTR);
+				generateParseWarning(xmlid, "Illegal persName element within persName!");
+			} else {
+				handlePersname(attrList);
+			}
+		} else if(localName.equals(TEI_Constants.FORENAME_EL)) {
 			handleForename(attrList);
-		} else if(localName.equals("addName")) {
+		} else if(localName.equals(TEI_Constants.ADDNAME_EL)) {
 			handleAddname(attrList);
-		} else if(localName.equals("persName") && (elPath.size()>1)) {
-			String xmlid = attrList.getValue("xml:id");
-			generateParseWarning(xmlid, "Illegal persName element within persName!");
-		} 
+		} else if(localName.equals(TEI_Constants.STATE_EL)) {	// Handle gender, features metadata
+			if( TEI_Constants.FORENAME_EL.equals(elPath.peek(2))){	// but only on forenames
+				handleForenameStateStartEl(attrList);
+			}
+		}
+	}
+	
+	public void endElement(String namespaceURI, String localName, String qName) {
+		// final String myName = ".endElement: ";
+		try {
+			// Handle forenames where name can be in attrs or text (text only available on endEl)
+			if(localName.equals(TEI_Constants.FORENAME_EL)) {
+				handleForenameEndEl();
+			} else if(localName.equals(TEI_Constants.STATE_EL)) {			// Handle features metadata
+				// stack top is this element, so have to look up two to see parent
+				if( TEI_Constants.FORENAME_EL.equals(elPath.peek(2))){		// but only on forenames
+					handleForenameStateEndEl(forenameStateType);
+				}
+			} else if(localName.equals(TEI_Constants.ADDNAME_EL)) {			// Handle clan names
+				handleAddnameEndEl();
+			} 
+			super.endElement(namespaceURI, localName, qName);
+		} catch(RuntimeException re) {
+			generateParseWarning(forenameXMLId, re.getLocalizedMessage());
+			throw re;
+		}
+	}
+	
+	public void handleForenameEndEl() {
+		int forenameGender = isMale(forenameType)?Name.GENDER_MALE:
+			(isFemale(forenameType)?Name.GENDER_FEMALE:
+				Name.GENDER_UNKNOWN);
+		if(forename==null) {
+			String cleanNameStr = getCurrentText().trim().replaceAll("\\[.*\\]$", "");
+			// Do not include missing name markers in the names 
+			if(cleanNameStr!=null && !cleanNameStr.isEmpty()
+				&& !CDLI_MISSING_NAME_MARKER.equalsIgnoreCase(cleanNameStr)) {
+				forename = corpus.findOrCreateName(cleanNameStr, null,
+								Name.NAME_TYPE_PERSON, forenameGender, dbConn);
+			} else {
+				// Ensures we have a name even if it is missing in corpus
+				forename = corpus.findOrCreateName(MISSING_NAME, null,
+						Name.NAME_TYPE_PERSON, Name.GENDER_UNKNOWN, dbConn);
+			}
+		} else {
+			// This may be a no-op if gender was marked on the forename, 
+			// but it may also come in sub-element and so get set here.
+			forename.checkAndUpdateGender(forenameGender);
+		}
+		if(forename!=null) {
+			forename.addCitation(document.getId());
+		}
+		if(isPrimaryOrMissing(forenameType)) {
+			NameRoleActivity nra = 
+				new NameRoleActivity(forename, activityRole, activity, forenameXMLId, document);
+			if(state!=S_INIT) { 
+				generateParseWarning(forenameXMLId, 
+						"Found multiple primary names in person declaration");
+			} else if(baseForenameNRAD!=null){
+				generateParseWarning(forenameXMLId, 
+				"Internal error - state is INIT but baseForename not null!");
+			} else {
+				baseForenameNRAD = nra;
+			}
+        	document.addNameRoleActivity(nra);
+        	state = S_FOUND_FORENAME;
+		} else { // Handle all patronyms
+			// Note that this needs to handle matronyms as well. 
+			if(state==S_INIT) {		// patronym w/o forename
+				// Add the missing primary nrad
+	        	NameRoleActivity nra = 
+	        		new NameRoleActivity(null, activityRole, activity, 
+	        				null, document, "(synthesized)");
+				if(baseForenameNRAD!=null){
+					generateParseWarning(forenameXMLId, 
+					"Internal error - state is INIT but baseForename not null!");
+				} else {
+					baseForenameNRAD = nra;
+				}
+	        	document.addNameRoleActivity(nra);
+	        	// Now add a father role
+	        	father = new NameRoleActivity(forename, fatherAR, activity, 
+	        			forenameXMLId, document);
+	        	document.addNameRoleActivity(father);
+	        	state = S_FOUND_PATRONYM;
+			} else if(state==S_FOUND_FORENAME) { // typical case
+				if(forenameType!=T_PATRONYM) {
+					generateParseWarning(forenameXMLId, 
+					"Assuming name \""+forename.getName()+
+						"\" is patronym although type is:"+forenameType);
+				}
+	        	// Add a father role
+	        	father = new NameRoleActivity(forename, fatherAR, activity, 
+	        			forenameXMLId, document);
+	        	document.addNameRoleActivity(father);
+	        	state = S_FOUND_PATRONYM;
+			} else if(state==S_FOUND_PATRONYM) { // extra patronym
+				if(forenameType==T_GRANDFATHER) {
+		        	// Add a grandfather role
+		        	grandfather = 
+		        		new NameRoleActivity(forename, grandfatherAR, activity, 
+		        				forenameXMLId, document);
+		        	document.addNameRoleActivity(grandfather);
+				} else {
+					NameRoleActivity ancestor =
+						new NameRoleActivity(forename, ancestorAR, activity, 
+								forenameXMLId, document);
+					ancestors.add(ancestor);
+		        	document.addNameRoleActivity(ancestor);
+		        	if(forenameType!=T_ANCESTOR)
+		        		generateParseWarning(forenameXMLId, 
+							"Too many patronyms (not marked grandfather). Treating as ANCESTOR:\""
+							+forename.getName()+"\"");
+				}
+			} else {	// found clan - out of order
+				generateParseWarning(forenameXMLId, "Found names after clan in person declaration");
+			}
+		}
+
+	}
+
+	protected void handleForenameStateEndEl(String typeStr ) {
+		// Note that while we may get a gender here, we may already
+		// have gotten other declarations (like patronymic) that we need to preserve
+		if(TEI_Constants.GENDER_TYPE_VAL.equalsIgnoreCase(typeStr)) {
+			String genderString = getCurrentText().trim();
+			if(TEI_Constants.TYPE_GENDER_MALE.equalsIgnoreCase(genderString)
+				|| TEI_Constants.TYPE_GENDER_MASCULINE.equalsIgnoreCase(genderString)) {
+				// Okay if unknown - just can't declare feminine in attrs and Male in state element
+				if(isFemale(forenameType)) {
+					generateParseWarning(forenameXMLId, "Conflicting gender declarations");
+				} else if(!isMale(forenameType)) {
+					// If already male (e.g., patronym, leave as is; otherwise, fix
+					forenameType = (forenameType & T_CLEAR_GENDER_MASK)| T_MASCULINE;
+				}
+			} else if(TEI_Constants.TYPE_GENDER_FEMALE.equalsIgnoreCase(typeStr)
+					|| TEI_Constants.TYPE_GENDER_FEMININE.equalsIgnoreCase(genderString)) {
+				// Okay if unknown - just can't declare masculine in attrs and Feale in state element
+				if(isMale(forenameType)) {
+					generateParseWarning(forenameXMLId, "Conflicting gender declarations");
+				} else if(!isFemale(forenameType)) {
+					// If already female (e.g., matronym, leave as is; otherwise, set
+					forenameType = (forenameType & T_CLEAR_GENDER_MASK)| T_FEMININE;
+				}
+			} else {
+				generateParseWarning(forenameXMLId, "Ignoring unknown gender type in state declaration: "+genderString);
+				// forenameType = T_MISSING;  Leave forenameType as set already
+			}
+		/* Could warn on unknown <state> types but will change this to handle general features later.
+		} else {
+			generateParseWarning(xmlid, "Ignoring unknown <state @type> in person declaration: "+typeStr);
+		*/
+		}
+
+		
 	}
 	
 	private static boolean isPrimary(int type) {
@@ -107,58 +277,70 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	}
 	
 	private static boolean isMale(int type) {
-		return (type&T_MALE)!=0;
+		return (type&T_IS_MALE)!=0;
 	}
 	
 	private static boolean isFemale(int type) {
-		return (type&T_FEMALE)!=0;
+		return (type&T_IS_FEMALE)!=0;
+	}
+	
+	protected void handlePersname(Attributes attrList) {
+		String xmlid = attrList.getValue(TEI_Constants.XMLID_ATTR);
+		try {
+			String roleStr = attrList.getValue("", TEI_Constants.ROLE_ATTR);
+			if(roleStr != null && !roleStr.isEmpty()) {
+				this.activityRole = corpus.findOrCreateActivityRole(roleStr, dbConn);
+			}
+		} catch(RuntimeException re) {
+			generateParseWarning(xmlid, re.getLocalizedMessage());
+			throw re;
+		}
 	}
 	
 	protected void handleForename(Attributes attrList) {
-		String xmlid = attrList.getValue("xml:id");
+		forenameXMLId = attrList.getValue(TEI_Constants.XMLID_ATTR);
 		try {
-			String nameAttr = attrList.getValue("", "n");
-			String nymRefAttr = attrList.getValue("", "nymRef");
-			Name name = null;
-			String typeStr = attrList.getValue("", "type");
-			String subTypeStr = attrList.getValue("", "subtype");
-			int type = 0;
+			String nameAttr = attrList.getValue("", TEI_Constants.N_ATTR);
+			String nymRefAttr = attrList.getValue("", TEI_Constants.NYMREF_ATTR);
+			String typeStr = attrList.getValue("", TEI_Constants.TYPE_ATTR);
+			String subTypeStr = attrList.getValue("", TEI_Constants.SUBTYPE_ATTR);
+			forenameType = T_MISSING;
 			if("masculine".equalsIgnoreCase(typeStr)) {
-				type = T_MASCULINE;
+				forenameType = T_MASCULINE;
 			} else if("feminine".equalsIgnoreCase(typeStr)) {
-				type = T_FEMININE;
+				forenameType = T_FEMININE;
 			} else if("patronymic".equalsIgnoreCase(typeStr)) {
 				if("grandfather".equalsIgnoreCase(subTypeStr)) {
-					type = (grandfather==null)?T_GRANDFATHER:T_ANCESTOR;
+					forenameType = (grandfather==null)?T_GRANDFATHER:T_ANCESTOR;
 				} else { 
-					type = T_PATRONYM;
+					forenameType = T_PATRONYM;
 				}
 			} else if("unmarked".equalsIgnoreCase(typeStr)) {
-				type = T_UNMARKED;
+				forenameType = T_UNMARKED;
 			} else if(typeStr==null) {
-				type = T_MISSING;
+				// forenameType = T_MISSING; Set above
 			} else {
-				generateParseWarning(xmlid, "Ignoring unknown forname type in person declaration: "+typeStr);
-				type = T_MISSING;
+				generateParseWarning(forenameXMLId, "Ignoring unknown forname type in person declaration: "+forenameType);
+				// forenameType = T_MISSING; Set above
 			}
-			int gender = isMale(type)?Name.GENDER_MALE:
-								(isFemale(type)?Name.GENDER_FEMALE:
-									Name.GENDER_UNKNOWN);
+			forename=null;	// Clear state from handling previous forenames (e.g., before patronym)
+			
 			if(nymRefAttr!=null) {
 				nymRefAttr = nymRefAttr.trim();
 				nymRefAttr = nymRefAttr.replaceAll("#", "");
 				if(nymRefAttr.isEmpty()) {
 					nymRefAttr = null;
 				} else {
-					name = corpus.findNym(nymRefAttr);
-					if(name!=null) {
-						name.checkAndUpdateGender(gender);
-						name.addCitation(document.getId());
-					}
+					forename = corpus.findNym(nymRefAttr);
 				}
 			}
-			if(name==null && nameAttr!=null) {
-				String cleanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
+			// state = S_FOUND_FORENAME; // We saw the element, even if we may have errors pending
+			/*  This happens in the endElement handler now
+			if(forename==null) {
+				String cleanNameStr;
+				if(nameAttr!=null) {
+					cleanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
+				}
 				// Do not include missing name markers in the names 
 				if(!MISSING_NAME_MARKER.equalsIgnoreCase(cleanNameStr)) {
 					name = corpus.findOrCreateName(cleanNameStr, nymRefAttr,
@@ -166,17 +348,19 @@ public class PersonNameContentHandler extends StackedContentHandler {
 					name.addCitation(document.getId());
 				}
 			}
+			*/
+			/*
 			if(isPrimaryOrMissing(type)) {
 				NameRoleActivity nra = 
 					new NameRoleActivity(name, activityRole, activity, xmlid, document);
 				if(state!=S_INIT) {
 					generateParseWarning(xmlid, 
 							"Found multiple primary names in person declaration");
-				} else if(baseForename!=null){
+				} else if(baseForenameNRAD!=null){
 					generateParseWarning(xmlid, 
 					"Internal error - state is INIT but baseForename not null!");
 				} else {
-					baseForename = nra;
+					baseForenameNRAD = nra;
 				}
 	        	document.addNameRoleActivity(nra);
 	        	state = S_FOUND_FORENAME;
@@ -186,11 +370,11 @@ public class PersonNameContentHandler extends StackedContentHandler {
 		        	NameRoleActivity nra = 
 		        		new NameRoleActivity(null, activityRole, activity, 
 		        				null, document, "(synthesized)");
-					if(baseForename!=null){
+					if(baseForenameNRAD!=null){
 						generateParseWarning(xmlid, 
 						"Internal error - state is INIT but baseForename not null!");
 					} else {
-						baseForename = nra;
+						baseForenameNRAD = nra;
 					}
 		        	document.addNameRoleActivity(nra);
 		        	// Now add a father role
@@ -231,6 +415,17 @@ public class PersonNameContentHandler extends StackedContentHandler {
 					generateParseWarning(xmlid, "Found names after clan in person declaration");
 				}
 			}
+				*/
+		} catch(RuntimeException re) {
+			generateParseWarning(forenameXMLId, re.getLocalizedMessage());
+			throw re;
+		}
+	}
+	
+	protected void handleForenameStateStartEl(Attributes attrList) {
+		String xmlid = attrList.getValue(TEI_Constants.XMLID_ATTR);
+		try {
+			forenameStateType = attrList.getValue("", TEI_Constants.TYPE_ATTR);
 		} catch(RuntimeException re) {
 			generateParseWarning(xmlid, re.getLocalizedMessage());
 			throw re;
@@ -238,84 +433,115 @@ public class PersonNameContentHandler extends StackedContentHandler {
 	}
 	
 	protected void handleAddname(Attributes attrList) {
-		String xmlid = attrList.getValue("xml:id");
+		addnameXMLId = attrList.getValue(TEI_Constants.XMLID_ATTR);
 		try {
-			String nameAttr = attrList.getValue("", "n");
-			String nymRefAttr = attrList.getValue("", "nymRef");
-			Name name = null;
+			String nameAttr = attrList.getValue("", TEI_Constants.N_ATTR);
+			String nymRefAttr = attrList.getValue("", TEI_Constants.NYMREF_ATTR);
+			addname = null;
 			if(nymRefAttr!=null) {
 				nymRefAttr = nymRefAttr.trim();
 				nymRefAttr = nymRefAttr.replaceAll("#", "");
 				if(nymRefAttr.isEmpty()) {
 					nymRefAttr = null;
 				} else {
-					name = corpus.findNym(nymRefAttr);
-					if(name!=null) {
+					addname = corpus.findNym(nymRefAttr);
+					if(addname!=null) {
 						// Since this is a clan name, we do not bother with gender checks.
-						name.addCitation(document.getId());
+						addname.addCitation(document.getId());
 					}
 				}
 			}
-			if(name==null && nameAttr!=null) {
+			if(addname==null && nameAttr!=null) {
 				String clanNameStr = nameAttr.replaceAll("\\[.*\\]$", "");
-				name = corpus.findOrCreateName(clanNameStr, nymRefAttr,
+				addname = corpus.findOrCreateName(clanNameStr, nymRefAttr,
 						Name.NAME_TYPE_CLAN, Name.GENDER_UNKNOWN, dbConn);
-				name.addCitation(document.getId());
 			}
-			String typeStr = attrList.getValue("", "type");
+			
+			String typeStr = attrList.getValue("", TEI_Constants.TYPE_ATTR);
 			if(!("clan".equalsIgnoreCase(typeStr))) {
-				generateParseWarning(xmlid, "Unknown addname type in person declaration");
+				generateParseWarning(addnameXMLId, "Unknown addname type in person declaration");
 				return;
 			}
+		} catch(RuntimeException re) {
+			generateParseWarning(addnameXMLId, re.getLocalizedMessage());
+			throw re;
+		}
+	}
+	
+	/**
+	 * AddName elements can have the name in the body, so we may have to gather it here. 
+	 * In any case, we do the bulk of the work here once we have the name.
+	 */
+	protected void handleAddnameEndEl() {
+		try {
+			if(addname==null) {
+				String cleanNameStr = getCurrentText().trim().replaceAll("\\[.*\\]$", "");
+				// Do not include missing name markers in the names 
+				if(cleanNameStr!=null && !cleanNameStr.isEmpty()
+					&& !CDLI_MISSING_NAME_MARKER.equalsIgnoreCase(cleanNameStr)) {
+					addname = corpus.findOrCreateName(cleanNameStr, null,
+									Name.NAME_TYPE_CLAN, Name.GENDER_UNKNOWN, dbConn);
+				} else {
+					// Ensures we have a name even if it is missing in corpus
+					addname = corpus.findOrCreateName(MISSING_NAME, null,
+							Name.NAME_TYPE_CLAN, Name.GENDER_UNKNOWN, dbConn);
+				}
+			}
+			if(addname!=null) {
+				addname.addCitation(document.getId());
+			}
+
 			if(state==S_INIT) {		// clan w/o forename?
 	        	NameRoleActivity nra = 
+	        			// Should we use the ID of the addname element?
 	        		new NameRoleActivity(null, activityRole, activity, 
 	        				null, document, "(synthesized)");
-				if(baseForename!=null){
-					generateParseWarning(xmlid, 
+				if(baseForenameNRAD!=null){
+					generateParseWarning(addnameXMLId, 
 					"Internal error - state is INIT but baseForename not null!");
 				} else {
-					baseForename = nra;
+					baseForenameNRAD = nra;
 				}
 	        	document.addNameRoleActivity(nra);
 			} else if((state==S_FOUND_FORENAME)
 					|| (state==S_FOUND_PATRONYM)) { // normal case - ignore
 			} else if(state==S_FOUND_CLAN) {
-				generateParseWarning(xmlid, "Found multiple clan names in person declaration");
+				generateParseWarning(addnameXMLId, "Found additional clan name: ["+addname.getName()
+											+"] in person declaration");
 				return;
 			}
 			// TODO add clan name family links to all proceeding names
 			if(clan!=null){
-				generateParseWarning(xmlid, 
+				generateParseWarning(addnameXMLId, 
 						"Internal error - state is "+state
 						+" (not FOUND_CLAN) but clan not null!");
 			} else {
-				clan = new NameRoleActivity(name, clanAR, activity, 
-	    				xmlid, document, null);
+				clan = new NameRoleActivity(addname, clanAR, activity, 
+						addnameXMLId, document, null);
 	        	document.addNameRoleActivity(clan);
 			}
 	    	state = S_FOUND_CLAN;
 		} catch(RuntimeException re) {
-			generateParseWarning(xmlid, re.getLocalizedMessage());
+			generateParseWarning(addnameXMLId, re.getLocalizedMessage());
 			throw re;
 		}
 	}
 	
 	private void addNameFamilyLinks() {
-		if(baseForename!=null) {	// Add to found forenames
+		if(baseForenameNRAD!=null) {	// Add to found forenames
 			if(clan!=null) {
-				baseForename.addNameFamilyLink(clan, 
+				baseForenameNRAD.addNameFamilyLink(clan, 
 						LinkType.Type.LINK_TO_CLAN);
 			}
 			if(father!=null) {
-				baseForename.addNameFamilyLink(father, 
+				baseForenameNRAD.addNameFamilyLink(father, 
 							LinkType.Type.LINK_TO_FATHER);
 				if(clan!=null) {
 					father.addNameFamilyLink(clan, 
 							LinkType.Type.LINK_TO_CLAN);
 				}
 				if(grandfather!=null) {
-					baseForename.addNameFamilyLink(grandfather, 
+					baseForenameNRAD.addNameFamilyLink(grandfather, 
 							LinkType.Type.LINK_TO_GRANDFATHER);
 					father.addNameFamilyLink(grandfather, 
 							LinkType.Type.LINK_TO_FATHER);
@@ -329,7 +555,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 					int nAncestors = ancestors.size();
 					if(nAncestors>=1) {
 						NameRoleActivity anc1 = ancestors.get(0);
-						baseForename.addNameFamilyLink(anc1, 
+						baseForenameNRAD.addNameFamilyLink(anc1, 
 								LinkType.Type.LINK_TO_ANCESTOR);
 						father.addNameFamilyLink(anc1, 
 								LinkType.Type.LINK_TO_ANCESTOR);
@@ -341,7 +567,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 						}
 						if(nAncestors>=2) {
 							NameRoleActivity anc2 = ancestors.get(1);
-							baseForename.addNameFamilyLink(anc2, 
+							baseForenameNRAD.addNameFamilyLink(anc2, 
 									LinkType.Type.LINK_TO_ANCESTOR);
 							father.addNameFamilyLink(anc2, 
 									LinkType.Type.LINK_TO_ANCESTOR);
@@ -352,7 +578,7 @@ public class PersonNameContentHandler extends StackedContentHandler {
 										LinkType.Type.LINK_TO_CLAN);
 							}
 							if(nAncestors>=3) {
-								generateParseWarning(baseForename.getXmlID(), 
+								generateParseWarning(baseForenameNRAD.getXmlID(), 
 									"persName has more than 2 ancestors declared - ignoring some");
 							}
 						}

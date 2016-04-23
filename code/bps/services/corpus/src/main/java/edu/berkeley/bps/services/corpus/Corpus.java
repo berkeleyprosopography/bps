@@ -635,8 +635,8 @@ public class Corpus extends CachedEntity {
 	
 	@XmlElement(name="medianDocDate")
 	public String getMedianDocumentDateStr() {
-		long medianDate = getMedianDocumentDate();
-		return (medianDate==0)?null:
+		long medianDate = getMedianDocumentDate();  // BUG? There is a reasonable date at 0, in theory...
+		return (medianDate==0)?"":					// Return empty string instead of null
 			TimeUtils.millisToSimpleYearString(medianDate);
 	}
 	

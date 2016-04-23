@@ -219,7 +219,7 @@ GET ALL CORPORA IN SYSTEM
 **********************************/
 
 $rest = new RESTclient();
-$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
+$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/";
 $rest->createRequest($url,"GET");
 // Get the results in JSON for easier manipulation
 $rest->setJSONMode();
@@ -243,10 +243,10 @@ if($rest->sendRequest()) {
 	$opmsg = $rest->getError();
 }
 
-if($corpora)
+if(!empty($corpora))
 	$t->assign('corpora', $corpora);
-else if($ServCorpOutput != "")
-	$t->assign('opmsg', $ServCorpOutput);
+else if(!empty($ServCorpOutput)&&($ServCorpOutput!="[]"))
+	$t->assign('opmsg', $ServCorpOutput."(URL:".$url.")");
 
 if(isset($opmsg))
 	$t->assign('opmsg', $opmsg);

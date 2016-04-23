@@ -2,6 +2,10 @@ package edu.berkeley.bps.services.common.utils;
 
 import java.util.ArrayList;
 
+/**
+ * @author pschmitz
+ *
+ */
 public class StringStack extends ArrayList<String> {
 	public static final String WILDCARD = "*";
 	public static final String ROOT_RELATIVE = ".";
@@ -31,7 +35,16 @@ public class StringStack extends ArrayList<String> {
 	}
 
 	public String peek() {
-		return get(size() - 1);
+		return peek(1);
+	}
+	
+	/**
+	 * Get the indicated String looking from the top of the stack. 
+	 * @param offset
+	 * @return
+	 */
+	public String peek(int offset) {
+		return get(size() - offset);
 	}
 	
 	public boolean matches(String[] path) {

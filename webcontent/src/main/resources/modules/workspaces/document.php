@@ -43,7 +43,7 @@ $opmsg = false;
 unset($errmsg);
 
 function getDocUrl($CFG,$wid,$did){
-	return $CFG->wwwroot.$CFG->svcsbase."/workspaces/".$wid."/documents/".$did;
+	return $CFG->serverwwwroot.$CFG->svcsbase."/workspaces/".$wid."/documents/".$did;
 }
 
 function getDocNRADsUrl($CFG,$wid,$did){
@@ -54,7 +54,7 @@ function getWorkspaceMedianDocDate($CFG,$id){
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id;
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$id;
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -121,16 +121,17 @@ function getDocNRADs($CFG,$wid,$did,$linkListMap){
 			$nradId = $nradObj['id'];
 			$nrads[] = array(	
 				'id' => $nradObj['id'],
-			  'xmlId' => $nradObj['xmlID'],
-			 	'nameId' => $nradObj['nameId'], 
-			 	'name' => $nradObj['name'], 
-			 	'normalNameId' => $nradObj['normalNameId'], 
-			 	'normalName' => $nradObj['normalName'], 
-			 	'activityRoleId' => $nradObj['activityRoleId'], 
-			 	'activityRole' => $nradObj['activityRole'], 
-			 	'activityRoleIsFamily' => ($nradObj['activityRoleIsFamily']=='true'), 
-			 	'activityId' => $nradObj['activityId'], 
-			 	'activity' => $nradObj['activity'],
+				'xmlId' => isset($nradObj['xmlID'])?($nradObj['xmlID']):null,
+				'nameId' => isset($nradObj['nameId'])?($nradObj['nameId']):null, 
+				'name' => isset($nradObj['name'])?($nradObj['name']):null, 
+				'normalNameId' => isset($nradObj['normalNameId'])?($nradObj['normalNameId']):null, 
+				'normalName' => isset($nradObj['normalName'])?($nradObj['normalName']):null, 
+				'activityRoleId' => isset($nradObj['activityRoleId'])?($nradObj['activityRoleId']):null, 
+				'activityRole' => isset($nradObj['activityRole'])?($nradObj['activityRole']):null, 
+				'activityRoleIsFamily' => (isset($nradObj['activityRoleIsFamily'])
+																	&&($nradObj['activityRoleIsFamily']=='true')), 
+				'activityId' => isset($nradObj['activityId'])?($nradObj['activityId']):null, 
+				'activity' => isset($nradObj['activity'])?($nradObj['activity']):null ,
 			 	'links' => $linkListMap[$nradId]
 			);
 			// Supposed to help with efficiency (dangling refs?)
