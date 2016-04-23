@@ -27,6 +27,9 @@
 		<copy todir="${env.BPS_WEBROOT}/images">
 			<fileset dir="${basedir}/images"/>
 		</copy>
+		<copy todir="${env.BPS_WEBROOT}/data">
+			<fileset dir="${basedir}/data"/>
+		</copy>
 		<copy todir="${env.BPS_WEBROOT}/libs">
 			<fileset dir="${basedir}/libs"/>
 		</copy>
@@ -50,6 +53,7 @@
 		<delete dir="${env.BPS_WEBROOT}/api"/>
 		<delete dir="${env.BPS_WEBROOT}/libs"/>
 		<delete dir="${env.BPS_WEBROOT}/images"/>
+		<delete dir="${env.BPS_WEBROOT}/data"/>
 		<delete dir="${env.BPS_WEBROOT}/modules"/>
 		<delete dir="${env.BPS_WEBROOT}/scripts"/>
 		<delete dir="${env.BPS_WEBROOT}/style"/>

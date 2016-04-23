@@ -2,6 +2,7 @@ package edu.berkeley.bps.services.workspace;
 
 import edu.berkeley.bps.services.common.BaseResource;
 import edu.berkeley.bps.services.common.ServiceContext;
+import edu.berkeley.bps.services.common.SystemProperties;
 import edu.berkeley.bps.services.corpus.Activity;
 import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.CachedEntity;
@@ -9,8 +10,15 @@ import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
+import edu.berkeley.bps.services.sna.context.ContextManager;
+import edu.berkeley.bps.services.sna.context.GraphContext;
+import edu.berkeley.bps.services.sna.exceptions.ParsingErrorException;
+import edu.berkeley.bps.services.sna.graph.GraphWrapper;
 import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -1080,4 +1088,74 @@ public class WorkspaceResource extends BaseResource {
 		}
 	}
 	 */
+
+	/*********************************************************************************
+	 * Begin Graph Sub-resource declarations
+	 *********************************************************************************/
+
+		/**
+		 * Returns a graph for the specified workspace, subject to passed filter params.
+		 * @return GraphWrapper with graph metadata, decorated and suitable for viz 
+		 */
+		@GET
+		@Produces({"application/xml", "application/json"})
+		@Path("{id}/graph")
+		public GraphWrapper getGraph(@Context ServletContext srvc, @PathParam("id") int id) {
+			try {
+				GraphContext gc = getHackGraphFromFile(id, "graph.graphml");
+				return gc.getGraph();
+			} catch (ParsingErrorException pee){
+				String tmp = myClass+".getGraph(): Problem parsing graph file.\n"+ pee.getLocalizedMessage();
+				logger.error(tmp);
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+			} catch(RuntimeException re) {
+				String tmp = myClass+".getGraph(): Problem querying DB.\n"+ re.getLocalizedMessage();
+				logger.error(tmp);
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+			}
+		}
+		// Manages the exception handling in case a bad POST payload is received
+		private GraphContext getHackGraphFromFile(int id, String filename) throws ParsingErrorException{
+	    	String datafiles_base = SystemProperties.getProperty(SystemProperties.WEBROOT_DIR);
+	    	if(datafiles_base==null||datafiles_base.isEmpty()) {
+				String tmp = myClass+": No webfiles base specified in properties!";
+				logger.error(tmp);
+	        	throw new RuntimeException(tmp);
+	    	}
+        	String graphmlpath = datafiles_base+"/data/"+filename;
+
+			try{
+				/* Once we get java7 this is the nice way to do this.
+				byte[] encoded = Files.readAllBytes(Paths.get(graphmlpath));
+				String payload = new String(encoded, StandardCharsets.UTF_8);
+				*/
+				String payload = readFile(graphmlpath);
+				GraphContext gc=ContextManager.getContext(payload);
+				return gc;
+				}
+			catch (Exception e){
+				throw new ParsingErrorException(e.getMessage());
+			}
+			
+		}
+		private String readFile( String file ) throws IOException {
+		    BufferedReader reader = new BufferedReader( new FileReader (file));
+		    String         line = null;
+		    StringBuilder  stringBuilder = new StringBuilder();
+		    String         ls = System.getProperty("line.separator");
+
+		    try {
+		        while( ( line = reader.readLine() ) != null ) {
+		            stringBuilder.append( line );
+		            stringBuilder.append( ls );
+		        }
+		        return stringBuilder.toString();
+		    } finally {
+		        reader.close();
+		    }
+		}		
 }
