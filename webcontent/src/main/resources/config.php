@@ -56,7 +56,11 @@ $CFG->prefix    = '';        // Prefix to use for all table names (not working y
 //
 // Do not include a trailing slash!
 
-$CFG->wwwroot   = 'http://'.$_SERVER['SERVER_NAME'];
+$CFG->wwwroot   = 'http://'.$_SERVER['HTTP_HOST'];
+
+// When we are on a vm that maps ports, the above root is from the browser, and
+// this is from the server side. 
+$CFG->serverwwwroot   = 'http://'.$_SERVER['SERVER_NAME'];
 
 
 //=========================================================================

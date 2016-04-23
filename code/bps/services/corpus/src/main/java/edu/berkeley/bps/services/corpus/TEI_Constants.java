@@ -14,12 +14,22 @@ public class TEI_Constants {
 	public static final String PERSNAME_EL = "persName";
 	public static final String FORENAME_EL = "forename";
 	public static final String ADDNAME_EL = "addName";
+	public static final String STATE_EL = "state";
+
 
 	public static final String XMLID_ATTR = "xml:id";
 	public static final String TYPE_ATTR = "type";
+	public static final String SUBTYPE_ATTR = "subtype";
+	public static final String NYMREF_ATTR = "nymref";
+	public static final String N_ATTR = "n";			// Generic proper name as attribute
+	public static final String ROLE_ATTR = "role";
+
+	public static final String GENDER_TYPE_VAL = "gender";
 
 	public static final String TYPE_GENDER_MASCULINE = "masculine";
 	public static final String TYPE_GENDER_FEMININE = "feminine";
+	public static final String TYPE_GENDER_MALE = "male";
+	public static final String TYPE_GENDER_FEMALE = "female";
 	public static final String TYPE_GENDER_UNMARKED = "unmarked";
 	public static final String TYPE_PATRONYMIC = "patronymic";
 	public static final String TYPE_CLAN = "clan";

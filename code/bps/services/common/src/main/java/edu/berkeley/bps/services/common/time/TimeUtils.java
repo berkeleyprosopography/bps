@@ -2,13 +2,19 @@ package edu.berkeley.bps.services.common.time;
 
 import java.util.Date;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TimeUtils {
+	static final Logger logger = LoggerFactory.getLogger(TimeUtils.class);
 	private static GregorianCalendar cal = new GregorianCalendar();
 	private static SimpleDateFormat simpleYearFormatter = new SimpleDateFormat("y GG");
+	private static SimpleDateFormat simpleISODateFormatter = new SimpleDateFormat("yyyy-MM-dd GGG");
 	private static StringBuilder out = new StringBuilder(8);
 
 	public static final long DAY_IN_MILLIS = 24L*60L*60L*1000L;
@@ -28,6 +34,18 @@ public class TimeUtils {
 	 */
 	public static long getTimeInMillisForYear(int year) {
         return getTimeInMillisForYMD(year, Calendar.JULY, 1);
+	}
+
+	/**
+	 * @param dateString a standard ISO yyyy-mm-dd string with an optional era suffix
+	 * @return standard milliseconds from epoch
+	 * @throws ParseException 
+	 */
+	public static long parseISO_G_DateToMillis(String dateString) throws ParseException {
+		Date parsed = simpleISODateFormatter.parse(dateString);
+        cal.clear();
+		cal.setTime(parsed);
+	    return cal.getTimeInMillis();
 	}
 
 	/**

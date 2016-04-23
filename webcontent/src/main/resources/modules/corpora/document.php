@@ -41,7 +41,7 @@ $opmsg = false;
 unset($errmsg);
 
 function getDocUrl($CFG,$cid,$did){
-	return $CFG->wwwroot.$CFG->svcsbase."/corpora/".$cid."/documents/".$did;
+	return $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$cid."/documents/".$did;
 }
 
 function getDocNRADsUrl($CFG,$cid,$did){
@@ -52,7 +52,7 @@ function getCorpusMediaDocDate($CFG,$id){
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/".$id;
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/".$id;
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
@@ -118,17 +118,17 @@ function getDocNRADs($CFG,$cid,$did){
 			$nradObj = &$result['nameRoleActivity'];
 			$nrad = array(	
 				'id' => $nradObj['id'],
-			  'xmlId' => isset($nradObj['xmlID'])?($nradObj['xmlID']):null,
-			 	'nameId' => isset($nradObj['nameId'])?($nradObj['nameId']):null, 
-			 	'name' => isset($nradObj['name'])?($nradObj['name']):null, 
-			 	'normalNameId' => isset($nradObj['normalNameId'])?($nradObj['normalNameId']):null, 
-			 	'normalName' => isset($nradObj['normalName'])?($nradObj['normalName']):null, 
-			 	'activityRoleId' => isset($nradObj['activityRoleId'])?($nradObj['activityRoleId']):null, 
-			 	'activityRole' => isset($nradObj['activityRole'])?($nradObj['activityRole']):null, 
+				'xmlId' => isset($nradObj['xmlID'])?($nradObj['xmlID']):null,
+				'nameId' => isset($nradObj['nameId'])?($nradObj['nameId']):null, 
+				'name' => isset($nradObj['name'])?($nradObj['name']):null, 
+				'normalNameId' => isset($nradObj['normalNameId'])?($nradObj['normalNameId']):null, 
+				'normalName' => isset($nradObj['normalName'])?($nradObj['normalName']):null, 
+				'activityRoleId' => isset($nradObj['activityRoleId'])?($nradObj['activityRoleId']):null, 
+				'activityRole' => isset($nradObj['activityRole'])?($nradObj['activityRole']):null, 
 				'activityRoleIsFamily' => (isset($nradObj['activityRoleIsFamily'])
 																	&&($nradObj['activityRoleIsFamily']=='true')), 
-			 	'activityId' => isset($nradObj['activityId'])?($nradObj['activityId']):null, 
-			 	'activity' => isset($nradObj['activity'])?($nradObj['activity']):null 
+				'activityId' => isset($nradObj['activityId'])?($nradObj['activityId']):null, 
+				'activity' => isset($nradObj['activity'])?($nradObj['activity']):null 
 			);
 			array_push($nrads, $nrad);
 			// Supposed to help with efficiency (dangling refs?)

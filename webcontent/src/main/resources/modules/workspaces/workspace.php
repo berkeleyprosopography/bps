@@ -215,7 +215,7 @@ function getWorkspace($CFG,$user_id, $wkspid){
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/workspaces";
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/workspaces";
 	if(isset($wkspid)) {
 		$url = $url."/".$wkspid;
 	} else {
@@ -267,7 +267,7 @@ function getWorkspaceDocs($CFG,$id,$order,$medianDocDate) {
 	global $opmsg;
 
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/workspaces/".$id."/documents";
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/workspaces/".$id."/documents";
 	if(!empty($order))
 		$url .= "?o=".$order;
 	$rest->createRequest($url,"GET");
@@ -304,7 +304,7 @@ function getCorpora($CFG) {
 	global $opmsg;
 	
 	$rest = new RESTclient();
-	$url = $CFG->wwwroot.$CFG->svcsbase."/corpora/";
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/corpora/";
 	$rest->createRequest($url,"GET");
 	// Get the results in JSON for easier manipulation
 	$rest->setJSONMode();
