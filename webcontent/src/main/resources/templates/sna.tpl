@@ -73,7 +73,7 @@
   </div>
 
 
-  <script>window.jQuery || document.write('<script src="/scripts/SNA/libs/jquery-1.7.2.min.js"><\/script>')</script>
+  <script src="https://code.jquery.com/jquery-1.12.3.js"></script>
 	<script defer src="/scripts/SNA/libs/plugins.js"></script>
   <script defer src="/scripts/SNA/force.js"></script>
   <script src="/scripts/SNA/Tooltip.js"></script>
