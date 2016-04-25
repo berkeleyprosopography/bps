@@ -20,6 +20,7 @@ import edu.berkeley.bps.services.workspace.collapser.RoleMatrixDiscountRule;
 import edu.berkeley.bps.services.workspace.collapser.UnqualifiedCompatibleNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.UnqualifiedEqualNameShiftRule;
 
+import java.security.Permissions;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -98,6 +99,8 @@ public class Workspace extends CachedEntity {
 	private HashMap<Integer, ArrayList<Person>> personListsByName;
 	// Map indexed by Name, of Clans in the workspace
 	private HashMap<Integer, Clan> clansByName;
+	// Map indexed by docId to Map indexed by Name (forename), to list of clans
+	private HashMap<Integer, ArrayList<Clan>> clanListsByDoc;
 
 	// Map indexed by nrad, of the weights to persons or clans
 	private HashMap<Integer, EntityLinkSet<NameRoleActivity>> nradToEntityLinks;
@@ -129,6 +132,7 @@ public class Workspace extends CachedEntity {
 		this.personListsByName =
 			new HashMap<Integer, ArrayList<Person>>();
 		this.clansByName = new HashMap<Integer, Clan>();
+		this.clanListsByDoc = new HashMap<Integer, ArrayList<Clan>>(); 
 		this.nradToEntityLinks = 
 			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
 		this.personToEntityLinkSets = 
@@ -680,8 +684,8 @@ public class Workspace extends CachedEntity {
 	/**
 	 * Fetches the map from the main map indexed by docId. If the main map
 	 * does not yet have such a map, creates one and adds it to the main map.
-	 * @param docId
-	 * @return a hashmap indexed by Name of lists of Persons. 
+	 * @param docId		the document of interest
+	 * @return 			hashmap of lists of Persons, indexed by Name (id) 
 	 */
 	protected HashMap<Integer, ArrayList<Person>> getPersonListMapForDoc(int docId) {
 		HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
@@ -696,8 +700,24 @@ public class Workspace extends CachedEntity {
 	/**
 	 * Fetches the map from the main map indexed by docId. If the main map
 	 * does not yet have such a map, creates one and adds it to the main map.
-	 * @param docId
-	 * @return a hashmap indexed by Name of lists of Persons. 
+	 * @param docId		the document of interest
+	 * @return 			hashmap of lists of Persons, indexed by Name (id) 
+	 */
+	protected ArrayList<Clan> getClanListForDoc(int docId) {
+		ArrayList<Clan> clanListForDoc = clanListsByDoc.get(docId);
+		if(clanListForDoc==null) {
+			clanListForDoc = new ArrayList<Clan>();
+			clanListsByDoc.put(docId, clanListForDoc);
+		}
+		return clanListForDoc;
+	}
+
+	/**
+	 * Fetches the List of Persons for a given forename, from a map of such lists. If the map
+	 * does not yet have such a list, creates one and adds it to the main map.
+	 * @param personListMap	the map of Lists of Persons for each forename
+	 * @param nameId		the id of the forename of interest
+	 * @return				the list of Persons
 	 */
 	protected ArrayList<Person> getPersonListName(
 			HashMap<Integer, ArrayList<Person>> personListMap, int nameId) {
@@ -707,6 +727,134 @@ public class Workspace extends CachedEntity {
 			personListMap.put(nameId, personList);
 		}
 		return personList;
+	}
+	
+	/**
+	 * Fetches the List of Persons associated to NRADS in a doc.
+	 * @param docId			the document of interest
+	 * @return				the list of Persons
+	 */
+	public List<Person> getPersonsForDoc(int docId) {
+		List<Person> personList = new ArrayList<Person>(); 
+		
+		// Need to get unique persons, so we build a map indexed by the original NRAD id
+		// Various names could be multiply linked to the same persons, so can't just aggregate
+		// all the lists.
+		HashMap<Integer, Person> personsForDoc = new HashMap<Integer, Person>();
+
+		// Get all the maps of Persons linked to NRADs (forenames) in this doc
+		HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
+				getPersonListMapForDoc(docId);
+		// Loop across all the forenames
+		for(ArrayList<Person> personsByName:personListMapForDoc.values()) {
+			// Loop across all the Persons linked to that name
+			for(Person person:personsByName) {
+				int origNRAD = person.getOriginalNRAD().getId();
+				if(!personsForDoc.containsKey(origNRAD)) {
+					personsForDoc.put(origNRAD, person);
+				}
+			}
+		}
+		// Add all the collected Persons to the array list and sort by displayName
+		personList.addAll(personsForDoc.values());
+		Collections.sort(personList, new Person.DisplayNameComparator());		
+
+		return personList;
+	}
+
+	/**
+	 * Fetches the List of Persons associated to NRADS in all docs in the workspace.
+	 * @param docId			the document of interest
+	 * @return				the list of Persons
+	 */
+	public List<Person> getPersonsForAllDocs() {
+		List<Person> personList = new ArrayList<Person>(); 
+		
+		// Need to get unique persons, so we build a map indexed by the original NRAD id
+		// Various names could be multiply linked to the same persons, so can't just aggregate
+		// all the lists.
+		HashMap<Integer, Person> personsInWorkspace = new HashMap<Integer, Person>();
+
+		// Get all the maps of Persons linked to NRADs (forenames) in this doc
+		for(HashMap<Integer, ArrayList<Person>> personListMapForDoc:personListsByNameByDoc.values()) {
+			// Loop across all the forenames
+			for(ArrayList<Person> personsByName:personListMapForDoc.values()) {
+				// Loop across all the Persons linked to that name
+				for(Person person:personsByName) {
+					int origNRAD = person.getOriginalNRAD().getId();
+					if(!personsInWorkspace.containsKey(origNRAD)) {
+						personsInWorkspace.put(origNRAD, person);
+					}
+				}
+			}
+		}
+		// Add all the collected Persons to the array list and sort by displayName
+		personList.addAll(personsInWorkspace.values());
+		Collections.sort(personList, new Person.DisplayNameComparator());		
+
+		return personList;
+	}
+
+	/**
+	 * Fetches the List of Clans associated to NRADS in a doc.
+	 * @param docId			the document of interest
+	 * @return				the list of Persons
+	public List<Clan> getClansForDoc(int docId) {
+		List<Clan> clanList = new ArrayList<Clan>(); 
+		
+		// Need to get unique clans, so we build a map indexed by the original NRAD id
+		// Various names could be multiply linked to the same clans, so can't just aggregate
+		// all the lists.
+		HashMap<Integer, Clan> clansForDoc = new HashMap<Integer, Clan>();
+
+		// Get all the maps of Clans linked to NRADs (forenames) in this doc
+		HashMap<Integer, ArrayList<Clan>> clanListMapForDoc = 
+				getClanListMapForDoc(docId);
+		// Loop across all the forenames
+		for(ArrayList<Clan> clansByName:clanListMapForDoc.values()) {
+			// Loop across all the Clans linked to that name
+			for(Clan clan:clansByName) {
+				int origNRAD = clan.getOriginalNRAD().getId();
+				if(!clansForDoc.containsKey(origNRAD)) {
+					clansForDoc.put(origNRAD, clan);
+				}
+			}
+		}
+		// Add all the collected Clans to the array list and sort by displayName
+		clanList.addAll(clansForDoc.values());
+		Collections.sort(clanList, new Clan.DisplayNameComparator());		
+
+		return clanList;
+	}
+	 */
+
+	/**
+	 * Fetches the List of Clans associated to NRADS in all docs in the workspace.
+	 * @return				the list of Clans
+	 */
+	public List<Clan> getClansForAllDocs() {
+		List<Clan> clanList = new ArrayList<Clan>(); 
+		
+		// Need to get unique clans, so we build a map indexed by the original NRAD id
+		// Various names could be multiply linked to the same clans, so can't just aggregate
+		// all the lists.
+		HashMap<Integer, Clan> clansInWorkspace = new HashMap<Integer, Clan>();
+
+		// Get all the maps of clans linked to NRADs (forenames) in this doc
+		for(ArrayList<Clan> clanListForDoc:clanListsByDoc.values()) {
+			// Loop across all the Clans linked to that name
+			for(Clan clan:clanListForDoc) {
+				int origNRAD = clan.getOriginalNRAD().getId();
+				if(!clansInWorkspace.containsKey(origNRAD)) {
+					clansInWorkspace.put(origNRAD, clan);
+				}
+			}
+		}
+		// Add all the collected Clans to the array list and sort by displayName
+		clanList.addAll(clansInWorkspace.values());
+		Collections.sort(clanList, new Clan.DisplayNameComparator());		
+
+		return clanList;
 	}
 
 	/*
@@ -742,7 +890,7 @@ public class Workspace extends CachedEntity {
 					activeLifeStdDev, activeLifeWindow);
 		Person person = new Person(nrad, ts);
 		if(forenameId>=0) {
-			// If no declare forename, no list to add to.
+			// If no declared forename, no list to add to.
 			// TODO figure out what to do about unknowns, since they are
 			// essentially compatible (on forename) with everything.
 			// OTOH, is it really worth collapsing? Maybe only if qualified...
@@ -830,7 +978,8 @@ public class Workspace extends CachedEntity {
 		return father;
 	}
 	
-	private Clan addClanForNRAD(NameRoleActivity nrad) {
+	private Clan addClanForNRAD(NameRoleActivity nrad,
+			ArrayList<Clan> clanListForDoc) {
 		Clan clan = findOrCreateClan(nrad);
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
 		if(links==null) {
@@ -840,6 +989,9 @@ public class Workspace extends CachedEntity {
 		NRADEntityLink link = 
 			new NRADEntityLink(nrad, clan, 1.0, LinkType.Type.LINK_TO_CLAN);
 		links.put(clan, link);
+
+		if(!clanListForDoc.contains(clan))
+			clanListForDoc.add(clan);
 		return clan;
 	}
 	
@@ -886,7 +1038,9 @@ public class Workspace extends CachedEntity {
 			if(baseNRADs.size()>0) {
 				// Ensure we have a map for this doc
 				HashMap<Integer, ArrayList<Person>> personListMapForDoc = 
-								getPersonListMapForDoc(doc.getId());
+						getPersonListMapForDoc(doc.getId());
+				ArrayList<Clan> clanListForDoc = 
+								getClanListForDoc(doc.getId());
 				for(NameRoleActivity nrad:baseNRADs) {
 					Person person = addPersonForNRAD(nrad, center, personListMapForDoc);
 					// Now we have to add persons for the Family-linked NRADs
@@ -899,7 +1053,7 @@ public class Workspace extends CachedEntity {
 					}
 					NameRoleActivity clanNRAD = nrad.getClan();
 					if(clanNRAD!=null)
-						addClanForNRAD(clanNRAD);
+						addClanForNRAD(clanNRAD, clanListForDoc);
 				}
 			}
 		}

@@ -38,5 +38,10 @@ public interface TimeSpan {
 	 * @return likelihood in the range of 0 to 1
 	 */
 	public abstract double computeMutualProbability(TimeSpan span);
+	
+	/**
+	 * @return a reasonable string expressing the TimeSpan
+	 */
+	public abstract String getDisplayString();
 
 }

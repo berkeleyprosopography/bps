@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import edu.berkeley.bps.services.common.LinkType;
 /**
  * @author pschmitz
- *
+ * Represents a link of two entities with a weight and a link type.
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="entityLink")
@@ -21,7 +21,7 @@ public class EntityLink<O> extends Object {
 	protected LinkType.Type type;
 	
 	protected EntityLink() {
-		throw new RuntimeException("No-arg Ctor shold not be called");
+		throw new RuntimeException("No-arg Ctor should not be called");
 	}
 
 	public EntityLink(O fromObj, Entity linkTo, double weight, LinkType.Type linkType) {
@@ -96,11 +96,20 @@ public class EntityLink<O> extends Object {
 	}
 
 	/**
-	 * @return the nradId
+	 * @return the display name of the linked to entity
 	 */
 	@XmlElement(name="linkTo")
 	public String getLinkTo() {
 		return getEntity().getDisplayName();
+	}
+
+	/**
+	 * @return the relative URL of the linked to entity. Encompasses the type and the ID
+	 * TODO Create proper persisted entities for the entities, so that we can fetch them. 
+	 */
+	@XmlElement(name="linkToRelPath")
+	public String getLinkToID() {
+		return "persons/"+"??? (NYI)";
 	}
 
 	/**

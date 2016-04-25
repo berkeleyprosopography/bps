@@ -76,12 +76,15 @@ public abstract class BaseTimeSpan implements TimeSpan {
 		}
 	}
 	
-	public String toString() {
-		return getClass().getName()+": "
-				+TimeUtils.millisToSimpleYearString(getCenterPoint())
+	public String getDisplayString() {
+		return TimeUtils.millisToSimpleYearString(getCenterPoint())
 				+" +/- "
 				+TimeUtils.millisToYearOffsetString(halfWindow)
 				+ " yrs";
+	}
+	
+	public String toString() {
+		return getClass().getName()+": " + getDisplayString();
 	}
 
 }

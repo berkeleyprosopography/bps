@@ -300,6 +300,72 @@ function getWorkspaceDocs($CFG,$id,$order,$medianDocDate) {
 	return false;
 }
 
+function getWorkspacePeople($CFG,$id,$order) {
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/workspaces/".$id."/persons";
+	if(!empty($order))
+		$url .= "?o=".$order;
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServWkspPeopleOutput = $rest->getResponse();
+		$results = json_decode($ServWkspPeopleOutput, true);
+		$persons = array();
+		foreach($results as &$result) {
+			$personObj = &$result['person'];
+			$personInfo = array(
+				'id' => $personObj['id'],
+				'displayName' => isset($personObj['displayName'])?($personObj['displayName']):null,
+				'declaredName' => isset($personObj['declaredName'])?($personObj['declaredName']):null,
+				'floruit' => isset($personObj['floruit'])?($personObj['floruit']):null
+			);
+			array_push($persons, $personInfo);
+			// Supposed to help with efficiency (dangling refs?)
+			unset($result);
+			unset($personObj);
+		}
+		return $persons;
+	}
+	$opmsg = $rest->getError();
+	return false;
+}
+
+function getWorkspaceClans($CFG,$id,$order) {
+	global $opmsg;
+
+	$rest = new RESTclient();
+	$url = $CFG->serverwwwroot.$CFG->svcsbase."/workspaces/".$id."/clans";
+	if(!empty($order))
+		$url .= "?o=".$order;
+	$rest->createRequest($url,"GET");
+	// Get the results in JSON for easier manipulation
+	$rest->setJSONMode();
+	if($rest->sendRequest()) {
+		$ServWkspClansOutput = $rest->getResponse();
+		$results = json_decode($ServWkspClansOutput, true);
+		$clans = array();
+		foreach($results as &$result) {
+			$clanObj = &$result['clan'];
+			$clanInfo = array(
+				'id' => $clanObj['id'],
+				'displayName' => isset($clanObj['displayName'])?($clanObj['displayName']):null,
+				'declaredName' => isset($clanObj['declaredName'])?($clanObj['declaredName']):null
+			);
+			array_push($clans, $clanInfo);
+			// Supposed to help with efficiency (dangling refs?)
+			unset($result);
+			unset($clanObj);
+		}
+		return $clans;
+	}
+	$opmsg = $rest->getError();
+	return false;
+}
+
+
 function getCorpora($CFG) {
 	global $opmsg;
 	
@@ -352,6 +418,22 @@ if(!isset($user_id)) {
 					$t->assign('documents', $docs);
 				} else if($opmsg){
 					$errmsg = "Problem getting Workspace documents: ".$opmsg;
+				}
+			} else if($view=='people') {
+				$people = getWorkspacePeople($CFG,$workspace['id'],
+											isset($_GET['o'])?$_GET['o']:null);
+				if($people) {
+					$t->assign('people', $people);
+				} else if($opmsg){
+					$errmsg = "Problem getting Workspace people: ".$opmsg;
+				}
+			} else if($view=='clans') {
+				$clans = getWorkspaceClans($CFG,$workspace['id'],
+											isset($_GET['o'])?$_GET['o']:null);
+				if($clans) {
+					$t->assign('clans', $clans);
+				} else if($opmsg){
+					$errmsg = "Problem getting Workspace clans: ".$opmsg;
 				}
 			}
 		} else {
