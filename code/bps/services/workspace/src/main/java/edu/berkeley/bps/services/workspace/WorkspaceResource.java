@@ -12,8 +12,11 @@ import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
 import edu.berkeley.bps.services.sna.context.ContextManager;
 import edu.berkeley.bps.services.sna.context.GraphContext;
+import edu.berkeley.bps.services.sna.exceptions.NotFoundVertexException;
 import edu.berkeley.bps.services.sna.exceptions.ParsingErrorException;
 import edu.berkeley.bps.services.sna.graph.GraphWrapper;
+import edu.berkeley.bps.services.sna.graph.utils.Pair;
+import edu.berkeley.bps.services.sna.math.Sna;
 import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 
 import java.io.BufferedReader;
@@ -52,6 +55,9 @@ public class WorkspaceResource extends BaseResource {
 	static final Logger logger = LoggerFactory.getLogger(WorkspaceResource.class);
 	
 	private static final String myClass = "WorkspaceResource";
+
+	//Instance of the SNA module 
+	private Sna SnaInstance = new Sna();	
 	
 	private int getUserIdFromParams(UriInfo ui) {
 		MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
@@ -551,9 +557,12 @@ public class WorkspaceResource extends BaseResource {
     }
 	
 	/**
-     * Gets documents associated with a given corpus.
-	 * @param id the id of the corpus
-	 * @return
+     * Gets the weighted links to persons (and clans) for each NRAD (citation) in a document.
+	 * @param id 		Specifies workspace
+	 * @param docId		Document in workspace
+	 * @return			List of NRADEntityLinks, each of which has the citation, weight, and linked 
+	 * 					entity (Person or Clan) by displayName. 
+	 * 					TODO Needs to expand upon what is provided for the 
 	 */
 	@GET
 	@Produces({"application/xml;charset=UTF-8", "application/json;charset=UTF-8"})
@@ -589,7 +598,8 @@ public class WorkspaceResource extends BaseResource {
 
 	/**
      * Returns a listing of all activities.
-	 * @return Full (shallow) details of all activities
+	 * @param id 		Specifies workspace
+	 * @return 			Full (shallow) details of all activities
 	 */
 	@GET
 	@Produces({"application/xml", "application/json"})
@@ -616,7 +626,9 @@ public class WorkspaceResource extends BaseResource {
 
 	/**
      * Returns an Activity SubResource for a given activity
-	 * @return ActivityResource for the given id
+	 * @param id 		Specifies workspace
+	 * @param aid		Activity within workspace
+	 * @return 			Full (shallow) details of activity
 	 */
 	@GET
 	@Produces({"application/xml", "application/json"})
@@ -644,9 +656,11 @@ public class WorkspaceResource extends BaseResource {
     }
 
     /**
-     * Creates a new activity.
-     * @param activity the representation of the new activity
-     * @return Response, with the path (and so id) of the newly created activity
+     * Creates a new activity. This may be needed when asserting the activity in a workspace, 
+     * and a new activity must be created.
+	 * @param id 		Specifies workspace
+     * @param activity	The representation of the new activity
+     * @return			Standard POST response - status and resource of new activity
      */
     @POST
 	@Consumes("application/xml")
@@ -757,7 +771,8 @@ public class WorkspaceResource extends BaseResource {
 
 	/**
 	 * Returns a listing of all activityRoles.
-	 * @return Full (shallow) details of all activityRoles
+	 * @param id 		Specifies workspace
+	 * @return			Full (shallow) details of all activityRoles
 	 */
 	@GET
 	@Produces({"application/xml", "application/json"})
@@ -813,7 +828,8 @@ public class WorkspaceResource extends BaseResource {
 	}
 
 	/**
-	 * Creates a new activityRole.
+	 * Creates a new activityRole. This may be needed when asserting an activity or Role in a workspace, 
+     * and a new activityRole must be created.
 	 * @param activityRole the representation of the new activityRole
 	 * @return Response, with the path (and so id) of the newly created activityRole
 	 */
@@ -854,78 +870,18 @@ public class WorkspaceResource extends BaseResource {
 
 
 	/**
-	 * Updates an existing activityRole
-	 * @param id the id of the activityRole of interest
-	 * @param activityRole the representation of the new activityRole
-	 * @return Response, with the path (and so id) of the newly created activityRole
-	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
-	@PUT
-	@Consumes("application/xml")
-	@Path("{id}/activityRoles/{aid}")
-	public Response updateActivityRole(@Context ServletContext srvc, 
-			@PathParam("id") int id, @PathParam("aid") int aid, ActivityRole activityRole){
-		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-			if(!ActivityRole.Exists(dbConn, corpus, aid)) {
-				throw new WebApplicationException( 
-						Response.status(
-								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
-			}
-			activityRole.setId(aid);		// Enforce payload and resource coherence
-			activityRole.setCorpus(corpus);	// Ensure we have proper linkage
-			activityRole.persist(dbConn);
-			// Set the response's status and entity
-			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
-			path.path(id + "/activityRoles/" + aid);
-			Response response = Response.ok(path.build().toString()).build();
-			return response;
-		} catch(RuntimeException re) {
-			String tmp = myClass+".updateActivityRole(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			logger.error(tmp);
-			throw new WebApplicationException( 
-					Response.status(
-							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
-		}
-	}
+	 * Note we do not expose PUT to update an existing activityRole. We only create. 
+	 * Note we do not expose DELETE for an existing activityRole. If a corpus is deleted, all 
+	 * associated entities will be deleted, but only then.
 	 */
 
-	/**
-	 * Deletes a given activityRole.
-	 * @param id the id of the activityRole to delete
-	 * @return
-	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
-	@DELETE
-	@Produces("application/xml")
-	@Path("{id}/activityRoles/{aid}")
-	public Response deleteActivityRole(@Context ServletContext srvc, 
-			@PathParam("id") int id, @PathParam("aid") int aid) {
-		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-			if(!ActivityRole.Exists(dbConn, corpus, aid)) {
-				throw new WebApplicationException( 
-						Response.status(
-								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
-			}
-			ActivityRole.DeletePersistence(dbConn, corpus, aid);
-			return Response.ok().build();
-		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteActivityRole(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			logger.error(tmp);
-			throw new WebApplicationException( 
-					Response.status(
-							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
-		}
-	}
-	 */
 	
 /*********************************************************************************
- * Begin Name Sub-resource declarations
+ * Begin Name sub-resource declarations
  *********************************************************************************/
 
 	/**
-	 * Returns a listing of all activityRoles.
+	 * Returns a listing of all names in the workspace.
 	 * @return Full (shallow) details of all activityRoles
 	 */
 	@GET
@@ -1023,72 +979,102 @@ public class WorkspaceResource extends BaseResource {
 
 
 	/**
-	 * Updates an existing Name
-	 * @param id the id of the activityRole of interest
-	 * @param name the representation of the new Name
-	 * @return Response, with the path (and so id) of the updated name
-	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
-	@PUT
-	@Consumes("application/xml")
-	@Path("{id}/names/{nid}")
-	public Response updateName(@Context ServletContext srvc, 
-			@PathParam("id") int id, @PathParam("nid") int nid, Name name){
-		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-			if(!Name.Exists(dbConn, corpus, nid)) {
-				throw new WebApplicationException( 
-						Response.status(
-								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
-			}
-			name.setId(nid);		// Enforce payload and resource coherence
-			name.setCorpusId(id);	// Ensure we have proper linkage
-			name.persist(dbConn);
-			// Set the response's status and entity
-			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
-			path.path(id + "/names/" + nid);
-			Response response = Response.ok(path.build().toString()).build();
-			return response;
-		} catch(RuntimeException re) {
-			String tmp = myClass+".updateName(): Problem updating DB.\n"+ re.getLocalizedMessage();
-			logger.error(tmp);
-			throw new WebApplicationException( 
-					Response.status(
-							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
-		}
-	}
+	 * Note we do not expose PUT to update an existing name. We only create. 
+	 * Note we do not expose DELETE for an existing name. If a corpus is deleted, all 
+	 * associated entities will be deleted, but only then.
 	 */
+
+	/*********************************************************************************
+	 * Begin Persons/Clans sub-resource declarations
+	 *********************************************************************************/
 
 	/**
-	 * Deletes a given name.
-	 * @param id the id of the name to delete
-	 * @return
-	 * WE SHOULD NOT EXPOSE THIS - IT SHOULD BE DONE WITH ASSERTIONS
-	@DELETE
-	@Produces("application/xml")
-	@Path("{id}/names/{nid}")
-	public Response deleteName(@Context ServletContext srvc, 
-			@PathParam("id") int id, @PathParam("nid") int nid) {
-		try {
-			Connection dbConn = getServiceContext(srvc).getConnection();
-			Corpus corpus = getWorkspaceCorpus(dbConn, id, FAIL_ON_NO_CORPUS);
-			if(!Name.Exists(dbConn, corpus, nid)) {
-				throw new WebApplicationException( 
-						Response.status(
-								Response.Status.NOT_FOUND).entity("No activityRole found with id: "+id).build());
-			}
-			Name.DeletePersistence(dbConn, id, nid);
-			return Response.ok().build();
-		} catch(RuntimeException re) {
-			String tmp = myClass+".deleteName(): Problem querying DB.\n"+ re.getLocalizedMessage();
-			logger.error(tmp);
-			throw new WebApplicationException( 
-					Response.status(
-							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
-		}
-	}
+     * Gets the persons declared in the workspace
+	 * @param id 		Specifies workspace
+	 * @param docId		Document in workspace
+	 * @return			List of Person info 
 	 */
+	@GET
+	@Produces({"application/xml;charset=UTF-8", "application/json;charset=UTF-8"})
+	@Wrapped(element="persons")
+	@Path("{wid}/persons")
+	public List<Person> getPersons(
+			@Context ServletContext srvc, @Context UriInfo ui,
+			@PathParam("wid") int wid) {
+        try {
+        	Workspace workspace = getWorkspace(srvc, wid);
+        	MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+        	String docIdStr = queryParams.getFirst("docId");
+        	int docId = -1;
+        	if(docIdStr != null) {
+        		try {
+        			docId = Integer.parseInt(docIdStr);
+        			if(docId>=0) {
+        				return workspace.getPersonsForDoc(docId);
+        			}
+        		} catch( NumberFormatException nfe) {
+        			String tmp = myClass+".getPersons(): Ignoring docId.\n"+ nfe.getLocalizedMessage();
+        			logger.error(tmp);
+        		}
+        	}
+        	return workspace.getPersonsForAllDocs();
+		} catch(RuntimeException re) {
+			String tmp = myClass+".getPersons(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			logger.error(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+    }
 
+	
+	/**
+     * Gets the clans declared in the workspace
+	 * @param id 		Specifies workspace
+	 * @param docId		Document in workspace
+	 * @return			List of Clan info 
+	 */
+	@GET
+	@Produces({"application/xml;charset=UTF-8", "application/json;charset=UTF-8"})
+	@Wrapped(element="clans")
+	@Path("{wid}/clans")
+	public List<Clan> getClans(
+			@Context ServletContext srvc, @Context UriInfo ui,
+			@PathParam("wid") int wid) {
+        try {
+        	Workspace workspace = getWorkspace(srvc, wid);
+        	MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+        	/* NYI, and may never be
+         	String docIdStr = queryParams.getFirst("docId");
+        	int docId = -1;
+        	if(docIdStr != null) {
+        		try {
+        			docId = Integer.parseInt(docIdStr);
+        			if(docId>=0) {
+        				return workspace.getClansForDoc(docId);
+        			}
+        		} catch( NumberFormatException nfe) {
+        			String tmp = myClass+".getPersons(): Ignoring docId.\n"+ nfe.getLocalizedMessage();
+        			logger.error(tmp);
+        		}
+        	}
+        	 */
+        	return workspace.getClansForAllDocs();
+		} catch(RuntimeException re) {
+			String tmp = myClass+".getPersons(): Problem querying DB.\n"+ re.getLocalizedMessage();
+			logger.error(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+    }
+
+	
+
+	
+	
+	
+	
 	/*********************************************************************************
 	 * Begin Graph Sub-resource declarations
 	 *********************************************************************************/
@@ -1100,10 +1086,42 @@ public class WorkspaceResource extends BaseResource {
 		@GET
 		@Produces({"application/xml", "application/json"})
 		@Path("{id}/graph")
-		public GraphWrapper getGraph(@Context ServletContext srvc, @PathParam("id") int id) {
+		public GraphWrapper getGraph(
+				@Context ServletContext srvc, @Context UriInfo ui,
+				@PathParam("id") int id) {
 			try {
-				GraphContext gc = getHackGraphFromFile(id, "graph.graphml");
+	        	MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+	        	String stubGraphNameStr = queryParams.getFirst("stub");
+	        	if(stubGraphNameStr == null) {
+	        		stubGraphNameStr = "graph.graphml";
+	        	}
+	        	boolean addSNAMetrics = true;
+	        	{
+		        	String addSNAMetricsStr = queryParams.getFirst("addSNA");
+		        	if(addSNAMetricsStr != null) {
+		        		try {
+		        			addSNAMetrics = Integer.parseInt(addSNAMetricsStr)>0;
+		        		} catch( NumberFormatException nfe) {
+		        			String tmp = myClass+".getGraph(): Ignoring bad addSNA value.\n"+ nfe.getLocalizedMessage();
+		        			logger.error(tmp);
+		        		}
+		        	}
+	        	}
+				GraphContext gc = getHackGraphFromFile(id, stubGraphNameStr);
+				GraphWrapper graph = gc.getGraph();
+				if(addSNAMetrics) {
+					// Decorate graph with Centrality, Kmeans clustering, and Degree
+					SnaInstance.ComputeBetweennessCentrality(graph);
+					SnaInstance.ComputeKmeansClusterSet(graph, 1);
+					SnaInstance.ComputeDegree(graph);
+				}
 				return gc.getGraph();
+			} catch (NotFoundVertexException nfve){
+				String tmp = myClass+".getGraph(): Problem computing Degree.\n"+ nfve.getLocalizedMessage();
+				logger.error(tmp);
+				throw new WebApplicationException( 
+						Response.status(
+								Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 			} catch (ParsingErrorException pee){
 				String tmp = myClass+".getGraph(): Problem parsing graph file.\n"+ pee.getLocalizedMessage();
 				logger.error(tmp);

@@ -2,6 +2,7 @@ package edu.berkeley.bps.services.workspace;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -33,6 +34,17 @@ import edu.berkeley.bps.services.common.time.*;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="clan")
 public class Clan extends Entity {
+
+	public static class DisplayNameComparator implements Comparator<Clan> {
+		public int compare(Clan clan1, Clan clan2) {
+			return clan1.displayName.compareTo(clan2.displayName);
+		}
+	}
+	
+	protected Clan() {
+		// Entity superclass Ctor with no args will throw a RuntimeException (MUST have an NRAD)
+		//throw new RuntimeException("No-arg Ctor should not be called");
+	}
 
 	public Clan(NameRoleActivity nrad) {
 		super( nrad );

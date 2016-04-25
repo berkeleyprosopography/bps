@@ -8,6 +8,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
 
+/**
+ * @author pschmitz
+ * Represents a link of two entities by virtue of co-participation in an activity.
+ * This is representing the weighted link of an NRAD (a name citation) to a Person or Clan.  
+ */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="nradToEntityLink")
 public class NRADEntityLink extends EntityLink<NameRoleActivity> {
