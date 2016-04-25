@@ -8,13 +8,8 @@
       <div id="song_selection" class="control">
         <h3>Views</h3>
         <select id="source_select">
-          <option value="data.json?file=nana">Curated Nana-Iddin corpus</option>
-          <option value="data.json?file=fb">Facebook network</option>
-		  <option value="data.json?file=bignet">Non-cohese network</option>
-		  <option value="data.json?file=neuro">Neural network</option>
-		  <option value="data.json?file=collaboration">Collaboration network</option>
-      <option value="data.json?file=stuff">Stuff network</option>
-      <option value="data.json?file=myfb">My Facebook network</option>
+          <option value="data.json">Corpus</option>
+          <option value="data.json?raw=True">Corpus (RAW)</option>
         </select>
       </div>
     <div id="controls">
