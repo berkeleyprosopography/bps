@@ -121,17 +121,18 @@ function getDocNRADs($CFG,$wid,$did,$linkListMap){
 			$nradId = $nradObj['id'];
 			$nrads[] = array(	
 				'id' => $nradObj['id'],
-				'xmlId' => isset($nradObj['xmlID'])?($nradObj['xmlID']):null,
-				'nameId' => isset($nradObj['nameId'])?($nradObj['nameId']):null, 
-				'name' => isset($nradObj['name'])?($nradObj['name']):null, 
-				'normalNameId' => isset($nradObj['normalNameId'])?($nradObj['normalNameId']):null, 
-				'normalName' => isset($nradObj['normalName'])?($nradObj['normalName']):null, 
+				'xmlId' =>			isset($nradObj['xmlID'])?($nradObj['xmlID']):null,
+				'nameId' =>			isset($nradObj['nameId'])?($nradObj['nameId']):null, 
+				'displayName' => 	isset($nradObj['displayName'])?($nradObj['displayName']):null,
+				'name' =>			isset($nradObj['name'])?($nradObj['name']):null, 
+				'normalNameId' => 	isset($nradObj['normalNameId'])?($nradObj['normalNameId']):null, 
+				'normalName' => 	isset($nradObj['normalName'])?($nradObj['normalName']):null, 
 				'activityRoleId' => isset($nradObj['activityRoleId'])?($nradObj['activityRoleId']):null, 
-				'activityRole' => isset($nradObj['activityRole'])?($nradObj['activityRole']):null, 
+				'activityRole' => 	isset($nradObj['activityRole'])?($nradObj['activityRole']):null, 
 				'activityRoleIsFamily' => (isset($nradObj['activityRoleIsFamily'])
 																	&&($nradObj['activityRoleIsFamily']=='true')), 
-				'activityId' => isset($nradObj['activityId'])?($nradObj['activityId']):null, 
-				'activity' => isset($nradObj['activity'])?($nradObj['activity']):null ,
+				'activityId' => 	isset($nradObj['activityId'])?($nradObj['activityId']):null, 
+				'activity' => 		isset($nradObj['activity'])?($nradObj['activity']):null ,
 			 	'links' => $linkListMap[$nradId]
 			);
 			// Supposed to help with efficiency (dangling refs?)

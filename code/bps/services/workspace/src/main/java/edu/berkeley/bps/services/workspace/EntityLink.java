@@ -50,7 +50,8 @@ public class EntityLink<O> extends Object {
 	}
 
 	/**
-	 * @param weight the weight to set
+	 * @param weight	the weight to set
+	 * @return			the delta from the previous weight
 	 */
 	public double setWeight(double weight) {
 		double delta = weight - this.weight;
@@ -105,7 +106,8 @@ public class EntityLink<O> extends Object {
 
 	/**
 	 * @return the relative URL of the linked to entity. Encompasses the type and the ID
-	 * TODO Create proper persisted entities for the entities, so that we can fetch them. 
+	 * TODO Create proper persisted entities for the entities, so that we can fetch them.
+	 * TODO - this assumes usage, and really does not belong here!!! 
 	 */
 	@XmlElement(name="linkToRelPath")
 	public String getLinkToID() {

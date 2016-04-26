@@ -1085,16 +1085,14 @@ public class WorkspaceResource extends BaseResource {
 		 */
 		@GET
 		@Produces({"application/xml", "application/json"})
-		@Path("{id}/graph")
+		@Path("{wid}/graph")
 		public GraphWrapper getGraph(
 				@Context ServletContext srvc, @Context UriInfo ui,
-				@PathParam("id") int id) {
+				@PathParam("wid") int wid) {
 			try {
+				GraphWrapper graph = null;
+	        	Workspace workspace = getWorkspace(srvc, wid);
 	        	MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
-	        	String stubGraphNameStr = queryParams.getFirst("stub");
-	        	if(stubGraphNameStr == null) {
-	        		stubGraphNameStr = "graph.graphml";
-	        	}
 	        	boolean addSNAMetrics = true;
 	        	{
 		        	String addSNAMetricsStr = queryParams.getFirst("addSNA");
@@ -1107,15 +1105,21 @@ public class WorkspaceResource extends BaseResource {
 		        		}
 		        	}
 	        	}
-				GraphContext gc = getHackGraphFromFile(id, stubGraphNameStr);
-				GraphWrapper graph = gc.getGraph();
+				
+	        	String stubGraphNameStr = queryParams.getFirst("stub");
+	        	if(stubGraphNameStr != null) {
+					GraphContext gc = getHackGraphFromFile(wid, stubGraphNameStr);
+					graph = gc.getGraph();
+	        	} else {
+	        		graph = workspace.getFullGraph();
+	        	}
 				if(addSNAMetrics) {
 					// Decorate graph with Centrality, Kmeans clustering, and Degree
 					SnaInstance.ComputeBetweennessCentrality(graph);
 					SnaInstance.ComputeKmeansClusterSet(graph, 1);
 					SnaInstance.ComputeDegree(graph);
 				}
-				return gc.getGraph();
+				return graph;
 			} catch (NotFoundVertexException nfve){
 				String tmp = myClass+".getGraph(): Problem computing Degree.\n"+ nfve.getLocalizedMessage();
 				logger.error(tmp);
@@ -1129,7 +1133,7 @@ public class WorkspaceResource extends BaseResource {
 						Response.status(
 								Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
 			} catch(RuntimeException re) {
-				String tmp = myClass+".getGraph(): Problem querying DB.\n"+ re.getLocalizedMessage();
+				String tmp = myClass+".getGraph(): Problem getting graph.\n"+ re.getLocalizedMessage();
 				logger.error(tmp);
 				throw new WebApplicationException( 
 						Response.status(

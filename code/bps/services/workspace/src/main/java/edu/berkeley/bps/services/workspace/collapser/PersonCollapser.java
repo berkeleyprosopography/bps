@@ -96,6 +96,16 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 				// Consider this Person against all the following ones.
 				for(int iFromPers=iToPers+1; iFromPers<nPersons;iFromPers++) {
 					Person fromPerson = (Person)entities.get(iFromPers);
+					// First, if we are within a doc and either person is an ancestor
+					// of the other, skip any consideration of shifting. 
+					// We use the originalNRAD for this. 
+					if(intraDocument) {
+						NameRoleActivity fromNRAD = fromPerson.getOriginalNRAD();
+						NameRoleActivity toNRAD = toPerson.getOriginalNRAD();
+						if(fromNRAD.hasFamilyLinkFor(toNRAD) ||
+								toNRAD.hasFamilyLinkFor(fromNRAD))
+							continue;
+					}
 					// Now, we run through the rules. 
 					// First try the shift rules, taking the
 					// first match we get - we should only get one.

@@ -420,6 +420,18 @@ public class NameRoleActivity
 	}
 
 	/**
+	 * @param linkType one of LinkTypes.LINK_TO_*
+	 * @return name of the first family link matching linkType
+	 */
+	public boolean hasFamilyLinkFor(NameRoleActivity toCheck) {
+		for(NameFamilyLink nfl:nameFamilyLinks) {
+			if(nfl.getLinkTo()==toCheck)
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * @param linkType one of NameFamilyLink.LINK_TO_*
 	 * @return array of names for family links matching linkType
 	 */

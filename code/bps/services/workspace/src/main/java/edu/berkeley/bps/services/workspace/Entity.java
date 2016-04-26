@@ -42,6 +42,13 @@ public abstract class Entity {
 		displayName = nrad.getDisplayName();
 	}
 
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
 	public Name getDeclaredName() {
 		return declaredName;
 	}
@@ -67,6 +74,9 @@ public abstract class Entity {
 	 * @param displayName the displayName to set
 	 */
 	public void setDisplayName(String displayName) {
+		// Update the display name of the original NRAD so we can easily recognize the Person
+		// in the doc listings.
+		this.getOriginalNRAD().setDisplayName(displayName);
 		this.displayName = displayName;
 	}
 

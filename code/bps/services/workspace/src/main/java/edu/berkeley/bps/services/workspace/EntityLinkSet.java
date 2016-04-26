@@ -4,6 +4,7 @@ import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.utils.SortedQueue;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.ArrayList;
 
 /*
@@ -29,7 +30,7 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 	public O getFromObj() {
 		return fromObj;
 	}
-
+	
 	public EntityLink<O> put(Entity toEntity, EntityLink<O> link) {
 		if(get(toEntity)!= null)
 			throw new IllegalArgumentException("Already have a link to Entity: "+toEntity);

@@ -28,6 +28,7 @@ public class ActivityRole {
 	public static final String GRANDFATHER_ROLE = "Grandfather";
 	public static final String ANCESTOR_ROLE = "Ancestor";
 	public static final String CLAN_ROLE = "Clan";
+	public static final String ROLE_UNKNOWN = "Unknown Role";
 
 	private final static String myClass = "ActivityRole";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
@@ -84,11 +85,11 @@ public class ActivityRole {
 		this.name = name;
 		this.corpus = corpus;
 		this.description = description;
-		familyRole = (name.equals(FATHER_ROLE)
-		 || name.equals(MOTHER_ROLE)
-		 || name.equals(GRANDFATHER_ROLE)
-		 || name.equals(ANCESTOR_ROLE)
-		 || name.equals(CLAN_ROLE));
+		familyRole = (name.equalsIgnoreCase(FATHER_ROLE)
+		 || name.equalsIgnoreCase(MOTHER_ROLE)
+		 || name.equalsIgnoreCase(GRANDFATHER_ROLE)
+		 || name.equalsIgnoreCase(ANCESTOR_ROLE)
+		 || name.equalsIgnoreCase(CLAN_ROLE));
 	}
 
 	public ActivityRole cloneInCorpus(Connection dbConn, Corpus newCorpus) {

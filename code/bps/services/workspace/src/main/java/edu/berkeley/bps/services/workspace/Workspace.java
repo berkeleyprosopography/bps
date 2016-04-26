@@ -8,6 +8,10 @@ import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
 import edu.berkeley.bps.services.corpus.Name;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
+import edu.berkeley.bps.services.sna.graph.GraphWrapper;
+import edu.berkeley.bps.services.sna.graph.components.EdgeFactory;
+import edu.berkeley.bps.services.sna.graph.components.Vertex;
+import edu.berkeley.bps.services.sna.graph.components.VertexFactory;
 import edu.berkeley.bps.services.workspace.collapser.Collapser;
 import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRule;
@@ -27,11 +31,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -72,8 +78,9 @@ public class Workspace extends CachedEntity {
 	// Not clear yet how we'll use this
 	//@XmlElement
 	//private double		fatherhoodStdDev;
-	@XmlElement
-	private double		wholeLifeStdDev;
+	// Need clear use-cases befoer we can properly define this.
+	// @XmlElement
+	// private double		wholeLifeStdDev;
 	
 	/**
 	 * Represents the assumed offset from a child's timespan to a
@@ -109,6 +116,9 @@ public class Workspace extends CachedEntity {
 	private HashMap<Person, List<EntityLinkSet<NameRoleActivity>>> 
 												personToEntityLinkSets;
 
+	// Map of person-pair strings (id-pairs) to constructed Graph links
+	private HashMap<String, GraphPersonsLink> graphLinks;
+	
 	public Workspace() {
 		this(Workspace.nextId--,null,null,0);
 	}
@@ -127,6 +137,7 @@ public class Workspace extends CachedEntity {
 		this.corpus = null;
 		this.activeLifeStdDev = Person.DEFAULT_ACTIVE_LIFE_STDDEV;
 		this.activeLifeWindow = Person.DEFAULT_ACTIVE_LIFE_WINDOW;
+		this.generationOffset = Person.DEFAULT_GENERATION_OFFSET;
 		this.personListsByNameByDoc = 
 			new HashMap<Integer, HashMap<Integer, ArrayList<Person>>>();
 		this.personListsByName =
@@ -137,6 +148,8 @@ public class Workspace extends CachedEntity {
 			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
 		this.personToEntityLinkSets = 
 			new HashMap<Person, List<EntityLinkSet<NameRoleActivity>>>();
+		this.graphLinks = new HashMap<String, GraphPersonsLink>();
+
 		logger.debug("Workspace.ctor, created: "+this.toString());
 	}
 	
@@ -609,6 +622,7 @@ public class Workspace extends CachedEntity {
 //
 // HACK HACK HACK - this must be initialized, or set by a project-specific class
 //
+		// TODO - Remove or 
 		// Principle, Witness, Father, Mother, Grandfather, Ancestor
 		// All the family roles can combine with anything, so we will skip them, 
 		// and just put in the conflicts between Principle and Witness.
@@ -645,12 +659,108 @@ public class Workspace extends CachedEntity {
 		
 	}
 	
+	public GraphWrapper getFullGraph() {
+		//	It appears that some code in the SNA libs assume that the ids for vertices and edges
+		// are 0 based, so we must create factories each time we build a graphWrapper graph. 
+		VertexFactory vertexFactory= new VertexFactory();  
+		EdgeFactory edgeFactory= new EdgeFactory();
+		GraphWrapper graph = new GraphWrapper();
+		HashMap<String, Vertex> existingVertices = new HashMap<String, Vertex>(); 
+		for(GraphPersonsLink gpl:graphLinks.values()) {
+			gpl.addToGraph(graph, existingVertices, vertexFactory, edgeFactory);
+		}
+		return graph;
+	}
+	
+	public void buildGraphLinks() {
+		// We loop over the docs, getting sets of nrads. 
+		// Then for each nrad we consider each Person it is linked to
+		// From this we build a set of Persons linked to the doc, 
+		//   and where we see multiple links for the same Person, keep the highest weight (and associated role)
+		// Then we build the combinatorial set of GraphPersonsLinks through the Persons
+		List<Document> docList = corpus.getDocuments();
+		// Map of person Links, indexed by the Person id
+		Map<Integer, EntityLink<NameRoleActivity>> personLinksToDoc = new HashMap<Integer, EntityLink<NameRoleActivity>>(); 
+		for(Document doc:docList) {
+			personLinksToDoc.clear();
+			List<NameRoleActivity> nrads = doc.getNonFamilyNameRoleActivities();
+			for(NameRoleActivity nrad:nrads) {
+				// For the nrad, we need to get the Person Links
+				EntityLinkSet<NameRoleActivity> personsForNRAD = nradToEntityLinks.get(nrad.getId());
+				if(personsForNRAD!=null) {	// This would be strange, but be careful anyway
+					Collection<EntityLink<NameRoleActivity>> links = personsForNRAD.values();
+					if(links!=null) {		// Again, just for safety
+						for(EntityLink<NameRoleActivity> linkToPerson:links) {
+							if(linkToPerson.getType() == LinkType.Type.LINK_TO_PERSON) { // skip clans, etc.
+								// Check the Person linked to, see if we have a stronger weight already
+								int personId = linkToPerson.entity.getId();
+								EntityLink<NameRoleActivity> existingLink = personLinksToDoc.get(personId);
+								if((existingLink == null) 	// None yet, so add this one
+										|| (existingLink.getWeight() < linkToPerson.getWeight())) {
+									// OR the existing one is less weight => replace with the new one
+									personLinksToDoc.put(personId, linkToPerson);
+								}
+							}
+						}
+					}
+				}
+			} // close loop over all nrads in doc
+			// Now we consider each pair of persons
+			ArrayList<Integer> personList = new ArrayList<Integer>(personLinksToDoc.keySet());
+			// Sort by personID so we get consistent pairs
+			Collections.sort(personList);	// Will use the natural integer sorting
+			int listLen = personList.size();
+			for(int i=0; i<listLen-1; i++) {	// Note that we do not iterate for the last item
+				int fromId = personList.get(i);
+				EntityLink<NameRoleActivity> fromELink = personLinksToDoc.get(fromId);
+				// Loop over the following persons
+				for(int j=i+1; j<listLen; j++) {
+					int toId = personList.get(j);
+					EntityLink<NameRoleActivity> toELink = personLinksToDoc.get(toId);
+					// Now we can add a link for these two
+					addGraphLink(fromELink, toELink);
+				}
+			}
+		}
+	}
+	
+	protected void addGraphLink(EntityLink<NameRoleActivity> nradLink1, 
+								EntityLink<NameRoleActivity> nradLink2 ) {
+		/* Assume that the two persons are ordered for undirected hashing (first id < second)
+		// We order by ID, since the links or undirected, and this simplifies lookup.
+		if( pers1.getId() > pers2.getId()) {
+			Person ptemp = pers1;
+			pers1 = pers2;
+			pers2 = ptemp;
+			EntityLink<NameRoleActivity> nradLinkTmp = nradLink1;
+			nradLink1 = nradLink2;
+			nradLink2 = nradLinkTmp;
+		} */
+		String role1 = nradLink1.fromObj.getRoleString();
+		String role2 = nradLink2.fromObj.getRoleString();
+		Person pers1 = (Person)nradLink1.getEntity();
+		Person pers2 = (Person)nradLink2.getEntity();
+		String gplHash = GraphPersonsLink.createARIntHash(pers1, pers2);
+		double weight = nradLink1.getWeight() * nradLink2.getWeight();
+		GraphPersonsLink gpl = graphLinks.get(gplHash);
+		if(gpl == null) {
+			gpl = new GraphPersonsLink(pers1, role1, pers2, role2, weight);
+			graphLinks.put(gplHash, gpl);
+		} else {
+			// Already there, so we add in the additional weight and role-interaction 
+			gpl.addLink(role1, role2, weight);
+		}
+	}
+	
 	private void clearEntityMaps() {
 		// GC will deal with the lists, etc.
 		personListsByNameByDoc.clear();
 		personListsByName.clear();
+		personToEntityLinkSets.clear();
+		clanListsByDoc.clear();
 		clansByName.clear();
 		nradToEntityLinks.clear();
+		graphLinks.clear();
 	}
 	
 	/**
@@ -1018,6 +1128,7 @@ public class Workspace extends CachedEntity {
 		createEntitiesFromCorpus(sc);
 		collapseWithinDocuments();
 		collapseAcrossDocuments();
+		buildGraphLinks();
 	}
 
 	public void createEntitiesFromCorpus(ServiceContext sc) {

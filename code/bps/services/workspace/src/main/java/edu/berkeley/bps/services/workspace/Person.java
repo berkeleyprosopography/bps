@@ -37,10 +37,11 @@ import edu.berkeley.bps.services.common.time.*;
 public class Person extends Entity {
 	private static final String myClass = "Person";
 
-	private static final String FILIATION_SEPARATOR = " / ";
+	private static final String FILIATION_SEPARATOR = "/";
 	
 	public static final int DEFAULT_ACTIVE_LIFE_YRS = 15;
-	public static final double DEFAULT_GENERATION = 15.0*TimeUtils.APPROX_YEAR_IN_MILLIS;
+	public static final long DEFAULT_GENERATION_OFFSET = 
+								TimeUtils.convertYearsToMillis(DEFAULT_ACTIVE_LIFE_YRS);
 	public static final double DEFAULT_ACTIVE_LIFE_WINDOW = 
 		TimeUtils.getDefaultWindowForActiveLife(DEFAULT_ACTIVE_LIFE_YRS);
 	public static final double DEFAULT_ACTIVE_LIFE_STDDEV =
@@ -210,17 +211,17 @@ public class Person extends Entity {
 	 * @return
 	 */
 	public Person createPersonForDeclaredFather(
-			long activeTimeSpanOffset, // long lifeTimeSpanOffset,
-			double activeTimeSpanStdDev, // double lifeTimeSpanStdDev,
+			long generationOffset, 			// long lifeTimeSpanOffset,
+			double activeTimeSpanStdDev,	// double lifeTimeSpanStdDev,
 			double activeTimeSpanWindow,
 			boolean addToFatherLinks) {
-		//if(declaredFather==null)		// There can be fathers with missing names...
+		//if(declaredFather==null)			// There can be fathers with missing names...
 		//	return null;
 		NameRoleActivity nradFather = originalNRAD.getFather(); 
 		if(nradFather==null)
 			throw new RuntimeException(myClass+"Internal logic error in Person");
 		DerivedTimeSpan fatherActiveTimeSpan =
-			new DerivedTimeSpan(activeTimeSpan, activeTimeSpanOffset, 
+			new DerivedTimeSpan(activeTimeSpan, generationOffset, 
 					activeTimeSpanStdDev, activeTimeSpanWindow);
 		//DerivedTimeSpan fatherLifeTimeSpan =
 		//	new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);
@@ -389,6 +390,10 @@ public class Person extends Entity {
 
 	public Name getDeclaredGrandFather() {
 		return declaredGrandFather;
+	}
+
+	public Name getDeclaredClan() {
+		return declaredClan;
 	}
 
 	/**
