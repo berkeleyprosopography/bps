@@ -4,93 +4,21 @@
 require_once("../../libs/env.php");
 /*************************************/
 
-
-if ($_GET["file"] == "fb"){
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/xml\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/demlong.graphml')
-	    )
-	);
-}
-else if ($_GET["file"] == "bignet"){
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/xml\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/bignet.graphml')
-	    )
-	);
-}
-else if ($_GET["file"] == "stuff"){
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/xml\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/stuff.graphml')
-	    )
-	);
-}
-else if ($_GET["file"] == "neuro"){
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/xml\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/neuro.graphml')
-	    )
-	);
-}
-else if ($_GET["file"] == "collaboration"){
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/xml\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/collaboration.graphml')
-	    )
-	);
-}
-
-else if ($_GET["file"] == "myfb"){
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/xml\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/myfb.graphml')
-	    )
-	);
-}
-else{
-	$opts = array('http' =>
-	    array(
-	        'method'  => 'POST',
-	        'header'  => "Content-type: application/json\n"
-	                   . "Accept: application/json",
-	        'content' => file_get_contents('/Applications/MAMP/htdocs/data/graph.graphml')
-	    )
-	);
-}
+$opts = array('http' =>
+    array(
+        'method'  => 'GET',
+	'header'  => "Content-type: application/xml\n"
+                   . "Accept: application/json",
+    )
+);
 
 $context  = stream_context_create($opts);
 
-header('Content-Type: application/json');
+
+$jjson = file_get_contents($CFG->serverwwwroot.$CFG->svcsbase."/workspaces/1/graph", false, $context);
 
 
-
-if ($_GET["id"] != null){
-	
-	
-	$json = file_get_contents($CFG->wwwroot.$CFG->svcsbase."/sna/cluster/neighborhood/".$_GET["id"], false, $context);
-}
-else{$json = file_get_contents($CFG->wwwroot.$CFG->svcsbase."/sna/all", false, $context);}
-
-$json = json_decode($json);
+$json = json_decode($jjson);
 
 $output_json = array(
 	'directed' => true,
@@ -108,7 +36,6 @@ foreach ($json->graph->node as $node) {
 	);
 	foreach ($node->data as $node_data) {
 		$output_node[$node_data->{'@key'}] = $node_data->{'$'};
-		
 		if ($node_data->{'@key'} == 'GMLid') {
 			$internal_ids[$node_data->{'$'}] = (int) $node->{'@id'};
 		}
@@ -129,6 +56,5 @@ foreach ($json->graph->edge as $edge) {
 }
 
 print json_encode($output_json);
-	
 
 ?>
