@@ -1105,13 +1105,40 @@ public class WorkspaceResource extends BaseResource {
 		        		}
 		        	}
 	        	}
+				// Allow callers to specify qualified names or simple names in the produced graph
+	        	boolean useQNameForNames = true;
+	        	{
+		        	String useQNameForNamesStr = queryParams.getFirst("qnames");
+		        	if(useQNameForNamesStr != null) {
+		        		try {
+		        			useQNameForNames = Integer.parseInt(useQNameForNamesStr)>0;
+		        		} catch( NumberFormatException nfe) {
+		        			String tmp = myClass+".getGraph(): Ignoring bad qnames value.\n"+ nfe.getLocalizedMessage();
+		        			logger.error(tmp);
+		        		}
+		        	}
+	        	}
+				
+				// Allow callers to specify qualified names or simple names in the produced graph
+	        	double minWeightOnGraphLinks = 0.05;
+	        	{
+		        	String minWeightOnGraphLinksStr = queryParams.getFirst("minWt");
+		        	if(minWeightOnGraphLinksStr != null) {
+		        		try {
+		        			minWeightOnGraphLinks = Double.parseDouble(minWeightOnGraphLinksStr);
+		        		} catch( NumberFormatException nfe) {
+		        			String tmp = myClass+".getGraph(): Ignoring bad minWt value.\n"+ nfe.getLocalizedMessage();
+		        			logger.error(tmp);
+		        		}
+		        	}
+	        	}
 				
 	        	String stubGraphNameStr = queryParams.getFirst("stub");
 	        	if(stubGraphNameStr != null) {
 					GraphContext gc = getHackGraphFromFile(wid, stubGraphNameStr);
 					graph = gc.getGraph();
 	        	} else {
-	        		graph = workspace.getFullGraph();
+	        		graph = workspace.getFullGraph(useQNameForNames, minWeightOnGraphLinks);
 	        	}
 				if(addSNAMetrics) {
 					// Decorate graph with Centrality, Kmeans clustering, and Degree

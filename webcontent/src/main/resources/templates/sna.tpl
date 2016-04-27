@@ -8,8 +8,9 @@
       <div id="song_selection" class="control">
         <h3>Views</h3>
         <select id="source_select">
-          <option value="data.json?wid={$wkspId}">Corpus</option>
-          <option value="data.json?raw=True&wid={$wkspId}">Corpus (RAW)</option>
+          <option value="data.json?wid={$wkspId}">Workspace Corpus</option>
+          <option value="data.json?gmlf=graph.graphml&wid={$wkspId}">Dummy corpus</option>
+          <option value="data.json?gmlf=neuro.graphml&wid={$wkspId}">Neuro corpus</option>
         </select>
       </div>
     <div id="controls">

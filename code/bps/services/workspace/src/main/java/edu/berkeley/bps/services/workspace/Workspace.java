@@ -659,7 +659,7 @@ public class Workspace extends CachedEntity {
 		
 	}
 	
-	public GraphWrapper getFullGraph() {
+	public GraphWrapper getFullGraph(boolean fUseQNameForNames, double minWeightOnLink) {
 		//	It appears that some code in the SNA libs assume that the ids for vertices and edges
 		// are 0 based, so we must create factories each time we build a graphWrapper graph. 
 		VertexFactory vertexFactory= new VertexFactory();  
@@ -667,7 +667,8 @@ public class Workspace extends CachedEntity {
 		GraphWrapper graph = new GraphWrapper();
 		HashMap<String, Vertex> existingVertices = new HashMap<String, Vertex>(); 
 		for(GraphPersonsLink gpl:graphLinks.values()) {
-			gpl.addToGraph(graph, existingVertices, vertexFactory, edgeFactory);
+			if(gpl.weight >=  minWeightOnLink )
+				gpl.addToGraph(graph, existingVertices, vertexFactory, edgeFactory, fUseQNameForNames);
 		}
 		return graph;
 	}
