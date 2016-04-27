@@ -447,6 +447,7 @@ if(!isset($user_id)) {
 			}
 		}
 		$t->assign('workspace', $workspace);
+		$t->assign('wkspId', $workspace['id']);	// Needed for links to SNA
 	}
 }
 

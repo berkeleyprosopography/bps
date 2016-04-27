@@ -8,8 +8,8 @@
       <div id="song_selection" class="control">
         <h3>Views</h3>
         <select id="source_select">
-          <option value="data.json">Corpus</option>
-          <option value="data.json?raw=True">Corpus (RAW)</option>
+          <option value="data.json?wid={$wkspId}">Corpus</option>
+          <option value="data.json?raw=True&wid={$wkspId}">Corpus (RAW)</option>
         </select>
       </div>
     <div id="controls">

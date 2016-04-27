@@ -430,9 +430,12 @@ Network = function() {
 
   network.updateData = function(newData) {
     allData = setupData(newData);
-    link.remove();
-    node.remove();
-    legend.remove();
+	if(link)
+		link.remove();
+	if(node)
+		node.remove();
+	if(legend)
+		legend.remove();
     return update();
   };
 

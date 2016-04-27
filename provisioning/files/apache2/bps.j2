@@ -55,7 +55,7 @@
 
     #SNA rules
     RewriteRule   ^SNA/{0,1}$ modules/SNA/SNA.php
-    RewriteRule   ^SNA/data.json$ modules/SNA/SNA.json.php
+    RewriteRule   ^SNA/data.json{0,1}$ modules/SNA/SNA.json.php
 
     #Temporary tree layout
     RewriteRule   ^SNA/tree/{0,1}$ modules/SNA/TreeLayout/tree.php
