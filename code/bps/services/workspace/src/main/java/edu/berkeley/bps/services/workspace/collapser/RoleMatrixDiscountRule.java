@@ -60,6 +60,23 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 					this.getClass().getName(), corpus.getId());
 			return;			// Nothing to do
 		}
+		// We should consider all the roles, ignore the family ones, and
+		// try to find witness to exclude. That is a hack...
+		ActivityRole witnessAR = null;
+		for(ActivityRole ar:corpusRoles) {
+			if(ar.isFamilyRole())
+				continue;
+			if(ar.getName().equalsIgnoreCase("witness")) {
+				witnessAR = ar;
+				break;
+			}
+		}
+		if(witnessAR!=null) {
+			for(ActivityRole ar:corpusRoles) {
+				if(!ar.isFamilyRole())
+					setPairWeight(witnessAR.getName(), ar.getName(), 0);
+			}
+		}
 	}
 	
 	@Override
@@ -129,7 +146,8 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	private String getKeyForPair(ActivityRole role1, ActivityRole role2) {
 		//Normalize the pair based upon the IDs (original creation order);
 		return (role1.getId()<role2.getId())?
-				(role1.getName()+"-"+role2.getName()):(role2.getName()+"-"+role1.getName());
+				(role1.getName().toLowerCase()+"-"+role2.getName().toLowerCase())
+				:(role2.getName().toLowerCase()+"-"+role1.getName().toLowerCase());
 	}
 
 	/* sets the discount weight for a pair of Roles, by name. 

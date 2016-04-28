@@ -601,7 +601,7 @@ public class Workspace extends CachedEntity {
 		collapser.addRule(rule);
 		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.ACROSS_DOCUMENTS);
 		collapser.addRule(rule);
-		rule = new PartlyQualifiedEqualNameShiftRule(0.3, CollapserRule.WITHIN_DOCUMENTS);
+		rule = new PartlyQualifiedEqualNameShiftRule(0.75, CollapserRule.WITHIN_DOCUMENTS);
 		collapser.addRule(rule);
 		rule = new PartlyQualifiedEqualNameShiftRule(0.75, CollapserRule.ACROSS_DOCUMENTS);
 		collapser.addRule(rule);
@@ -619,15 +619,8 @@ public class Workspace extends CachedEntity {
 		collapser.addRule(rule);
 		RoleMatrixDiscountRule rmdRule = new RoleMatrixDiscountRule();	// Only applies within docs now...
 		rmdRule.initialize(this);
-//
-// HACK HACK HACK - this must be initialized, or set by a project-specific class
-//
-		// TODO - Remove or 
-		// Principle, Witness, Father, Mother, Grandfather, Ancestor
-		// All the family roles can combine with anything, so we will skip them, 
-		// and just put in the conflicts between Principle and Witness.
-		rmdRule.setPairWeight("Principal", "Witness", 0);
-		rmdRule.setPairWeight("Witness", "Witness", 0);
+		// RoleMatrixDiscountRule.init tries to find and add roles for witness and preclude
+		// collapsing with other non-family roles.
 		collapser.addRule(rmdRule);
 	}
 	

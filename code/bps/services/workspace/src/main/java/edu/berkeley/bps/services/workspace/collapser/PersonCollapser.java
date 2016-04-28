@@ -1,5 +1,7 @@
 package edu.berkeley.bps.services.workspace.collapser;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +12,9 @@ import javax.management.RuntimeErrorException;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.corpus.NameRoleActivity;
@@ -22,7 +27,8 @@ import edu.berkeley.bps.services.workspace.Person;
 @XmlRootElement
 public class PersonCollapser extends CollapserBase implements Collapser {
 	private final static String myClass = "PersonCollapser";
-	
+	static final Logger logger = LoggerFactory.getLogger(PersonCollapser.class);
+
 	public PersonCollapser() {
 		super();
 	}
@@ -32,10 +38,15 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 	}
 
 	public static class EntitySortByNQuals implements Comparator<Entity> {
+		boolean ascending = false;
+		public EntitySortByNQuals(boolean asc) {
+			ascending = asc;
+		}
 		public int compare(Entity p1, Entity p2) {
-			// Note that we invert the normal subtraction direction to 
-			// get a descending sort.
-			return p2.getNumQualifiers()-p1.getNumQualifiers();
+			int diff = (p1.getNumQualifiers()-p2.getNumQualifiers());
+			if(!ascending)
+				diff *= -1;
+			return diff;
 		}
 	}
 	
@@ -86,19 +97,30 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 		if(nradToEntityLinks==null || nradToEntityLinks.isEmpty())
 			throw new IllegalArgumentException("Missing/invalid entityToNRADLinks map");
 
-		// First, sort the list by #qualifications, descending
-		Collections.sort(entities, new EntitySortByNQuals());
+		// First, sort the list by #qualifications, ascending
+		Collections.sort(entities, new EntitySortByNQuals(true));
+		
+		// We are going to consider each less-qualified person against all
+		// the more qualified persons. We will then divide the shift for
+		// the *from* Person, by the number of matches we get for each rule
 		
 		try {
 			int nPersons = entities.size();
-			for(int iToPers=0; iToPers<nPersons;iToPers++) {
-				Person toPerson = (Person)entities.get(iToPers);
-				// Consider this Person against all the following ones.
-				for(int iFromPers=iToPers+1; iFromPers<nPersons;iFromPers++) {
-					Person fromPerson = (Person)entities.get(iFromPers);
+			double[] personShifts = new double[nPersons]; 
+			for(int iFromPers=0; iFromPers<nPersons-1;iFromPers++) {	// Loop over n-1 persons to get pairs
+				Person fromPerson = (Person)entities.get(iFromPers);
+				int nTotalPersonsWithShift = 0;
+				Arrays.fill(personShifts, 0);
+				// Consider this Person against all the following (more qualified) ones.
+				for(int iToPers=iFromPers+1; iToPers<nPersons;iToPers++) {
+					Person toPerson = (Person)entities.get(iToPers);
+					logger.trace("Collapser considering from {} to {}",
+							fromPerson.getDisplayName(),toPerson.getDisplayName());
 					// First, if we are within a doc and either person is an ancestor
 					// of the other, skip any consideration of shifting. 
 					// We use the originalNRAD for this. 
+					// Thus, Joe son-of Bob son-of Joe, should skip trying to
+					// collapse the two Joes. 
 					if(intraDocument) {
 						NameRoleActivity fromNRAD = fromPerson.getOriginalNRAD();
 						NameRoleActivity toNRAD = toPerson.getOriginalNRAD();
@@ -108,22 +130,31 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 					}
 					// Now, we run through the rules. 
 					// First try the shift rules, taking the
-					// first match we get - we should only get one.
+					// best match we get - we may get more than one
 					double totalShift = 0;
 					List<CollapserRuleBase> ruleList = 
 						getRules(CollapserRule.SHIFT_RULE, intraDocument);
 					for(CollapserRule rule:ruleList) {
 						double shift = rule.evaluate(fromPerson, toPerson);
 						if(shift!=0) {	// we have a match. Can go either direction.
+							logger.trace("Shift Rule: {} shifts:{} from {} to {}",
+									new Object[] { rule.getName(), shift, fromPerson.getDisplayName(),toPerson.getDisplayName()});
 							if(shift<-1 || shift>1)
 								throw new RuntimeException(
 										"Shift CollapserRule "+rule.getName()
 										+"returned value out of range:"+shift);
-							totalShift = shift;
-							break;
+							if(shift < 0)
+								logger.debug("Shift Rule: {} returned a negative shift!",rule.getName());
+							// TODO If we can prove that we get no negative shifts, then we can remove the Math.abs calls
+							if(Math.abs(shift)>Math.abs(totalShift))
+								totalShift = shift;
+							// break;	Keep going to find the biggest shift
 						}
 					}
 					if(totalShift!=0) {	// any match in the set?
+						/* NO - Not clear that this simplifies anything,
+						 * and it messes up our loop (since the inner loop assumes
+						 * that toPerson is invariant!
 						// normalize the shift direction for simplicity
 						if(totalShift<0) {
 							Person temp = fromPerson;
@@ -131,12 +162,15 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 							toPerson = temp;
 							totalShift = -totalShift;
 						}
+						 */
 						// Look for matching discount rules, using all that match
 						ruleList = 
 							getRules(CollapserRule.DISCOUNT_RULE, intraDocument);
 						for(CollapserRule rule:ruleList) {
 							double discount = rule.evaluate(fromPerson, toPerson);
 							if(discount==0) {	// we have a match
+								logger.trace("Discount Rule: {} discounts ALL from {} to {}",
+										new Object[] { rule.getName(), fromPerson.getDisplayName(),toPerson.getDisplayName()});
 								totalShift = 0;
 								break;			// We can stop here
 							} else if(discount>0) {		// match
@@ -145,9 +179,12 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 											"Discount CollapserRule "+rule.getName()
 											+"returned value out of range:"+discount);
 								totalShift *= discount;
+								if(discount<1)
+									logger.trace("Discount Rule: {} discounts:{} for from {} to {}",
+										new Object[] { rule.getName(), discount, fromPerson.getDisplayName(),toPerson.getDisplayName()});
 							} // if < 0, indicates no match
 						}
-						if(totalShift!=0) { // Any shift left?
+						if(totalShift!=0) { // Any shift left to discount? Skip if already 0
 							// Look for matching boost rules, using all that match
 							ruleList = 
 								getRules(CollapserRule.BOOST_RULE, intraDocument);
@@ -155,6 +192,8 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 								double boost = rule.evaluate(fromPerson, toPerson);
 								if(boost > 1) {	// we have a match
 									// Apply the boost, but max out at 1
+									logger.trace("Boost Rule: {} boosts:{} for from {} to {}",
+											new Object[] { rule.getName(), boost, fromPerson.getDisplayName(),toPerson.getDisplayName()});
 									totalShift = Math.min(1, totalShift*boost);
 								} else if(boost<1) { // bad value
 									throw new RuntimeException(
@@ -167,15 +206,38 @@ public class PersonCollapser extends CollapserBase implements Collapser {
 								double likelihood = 
 									fromPerson.getDateOverlapLikelihood(toPerson);
 								totalShift *= likelihood;
+								logger.trace("Date likelihood:{} for from {} and {}",
+										new Object[] { likelihood, fromPerson.getDisplayName(),toPerson.getDisplayName()});
 							}
 						}
 					}
+					
+					logger.trace("Net shift:{} for from {} and {}",
+							new Object[] { totalShift, fromPerson.getDisplayName(),toPerson.getDisplayName()});
+					// We need to model the shift from the same basis across the loop
+					// So we keep track of the shift for each from
 					if(totalShift!=0) {	// any shift to do?
-						// Perform the shift on the nrad links
-						handleShift( fromPerson, toPerson, totalShift,
-								nradToEntityLinks, 
-								personToEntityLinkSets );
+						// Hold this shift for this person
+						personShifts[iToPers] = totalShift;
+						nTotalPersonsWithShift++;
 					}
+				}
+				// Now we handle all the accumulated shifts
+				if(nTotalPersonsWithShift>0) {
+					for(int iToPers=iFromPers+1; iToPers<nPersons;iToPers++) {
+						Person toPerson = (Person)entities.get(iToPers);
+						// We will divide each shift by the number of total shifts
+						// to reasonably split the rule across multiple matches
+						// Perform the shift on the nrad links
+						//for()
+						if(personShifts[iToPers]!=0) { 
+							double shift = personShifts[iToPers]/nTotalPersonsWithShift;
+							handleShift( fromPerson, toPerson, shift,
+									nradToEntityLinks, 
+									personToEntityLinkSets );
+						}
+					}
+					
 				}
 			}
 		} catch(ClassCastException cce) {
