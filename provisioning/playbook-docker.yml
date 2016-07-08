@@ -117,6 +117,9 @@
     - name: Change permissions.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}
 
+    - name: Change for corpora dir.
+      shell: chown -R {{ user }}:{{ user }} {{ project_root }}/corpora
+
     - name: Copy sources from shared folder to local /opt folder
       copy: src=/bps dest={{ project_root }}
       sudo_user: "{{ user }}"
