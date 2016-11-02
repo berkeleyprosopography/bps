@@ -34,8 +34,12 @@
 						</td>
 					{if isset($canDeleteCorpus) }
 						<td class="corpus" width="100px">
+						{if $curruser==$corpora[corpus].ownerId }
 							<input id="deleteCorpButton_{$corpora[corpus].id}" type="button" value="Delete Corpus"
 										onclick="deleteCorpus({$corpora[corpus].id})" />
+						{else}
+							<span><em>(not owner)</em></span>
+						{/if}
 						</td>
 					{/if}
 					</tr>
