@@ -62,3 +62,25 @@ SHOW WARNINGS;
 -- CUD operations (READ not meaningful), individual
 -- What does this mean, however, e.g., to map a nameref to an individual? CREATE/UPDATE? 
 -- Need to define the resource model more clearly!!!
+
+-----------------------  Clan Definition --------------------------
+
+DROP TABLE IF EXISTS `clan`;
+CREATE TABLE `clan` (
+  `id`             INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
+  `workspace_id`      INT(10) UNSIGNED NOT NULL,
+  `name`           VARCHAR(255) NOT NULL,
+  `nrad_id`      INT(10) UNSIGNED default NOT NULL,
+  `name_id`      INT(10) UNSIGNED default NOT NULL,
+  `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
+  `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
+        on update CURRENT_TIMESTAMP,
+  CONSTRAINT `clan_wsfk_1` FOREIGN KEY (`workspace_id`)
+      REFERENCES `workspace` (`id`),
+  CONSTRAINT `clan_nrfk_2` FOREIGN KEY (`nrad_id`)
+      REFERENCES `name_role_activity_doc` (`id`),
+  CONSTRAINT `clan_nafk_3` FOREIGN KEY (`name_id`)
+      REFERENCES `name` (`id`)
+)ENGINE=MyIsam;
+SHOW WARNINGS;
+
