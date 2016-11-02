@@ -25,7 +25,6 @@ $t->assign('maxfilesizeAssertions', $maxfilesizeAssertions);
 $canUpdateCorpus = false;
 if(currUserHasPerm( 'CorpusUpdate' )) {
 	$canUpdateCorpus = true;
-	$t->assign('canUpdateCorpus', 1);
 }
 
 $style_block = "<style>
@@ -49,185 +48,6 @@ $t->assign("style_block", $style_block);
 // $themebase = $CFG->wwwroot.'/themes/'.$CFG->theme;
 unset($errmsg);
 
-if(!isset($_GET['view'])) {
-	$view = 'docs';
-} else {
-	$view = $_GET['view'];
-	if($view!='docs'&&$view!='pnames'&&$view!='cnames'&&$view!='admin')
-		$view = 'docs';
-	else if($view=='admin' && !$canUpdateCorpus)
-		$view = 'docs';
-}
-$t->assign("currSubNav", $view);
-
-if($view=='docs') {
-	$script_block = '';
-} else if($view!='admin') {
-$script_block = '
-<script>
-function filterNames(corpId,orderBy) {
-	var url = "/corpora/corpus?id="+corpId+"&view='.$view.'&o="+orderBy;
-	var roleFilterSelEl = document.getElementById("RoleFilterSel");
-	var index = roleFilterSelEl.selectedIndex;
-	var roleFilter = roleFilterSelEl.options[index].value;
-	if(roleFilter!="All")
-		url += "&role="+roleFilter;
-	var genderFilterSelEl = document.getElementById("GenderFilterSel");
-	if(genderFilterSelEl != null ) {
-		index = genderFilterSelEl.selectedIndex;
-		var genderFilter = genderFilterSelEl.options[index].value;
-		if(genderFilter!="All")
-			url += "&gender="+genderFilter;
-	}
-	//alert( "Navigating to: " + url );
-	window.location.href = url;
-}
-
-function filterDocsByName(corpId,nameId) {
-	var url = "/corpora/corpus?id="+corpId+"&view=docs&name="+nameId;
-	var roleFilterSelEl = document.getElementById("RoleFilterSel");
-	var index = roleFilterSelEl.selectedIndex;
-	var roleFilter = roleFilterSelEl.options[index].value;
-	if(roleFilter!="All")
-		url += "&role="+roleFilter;
-	//alert( "Navigating to: " + url );
-	window.location.href = url;
-}
-
-</script>';
-} else {
-$script_block = '
-<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
-<script type="text/javascript" src="/scripts/corpus.js"></script>
-<script>
-
-// The ready state change callback method for update.
-function updateCorpusRSC() {
-  if (xmlhttp.readyState==4) {
-		if( xmlhttp.status == 200 ) {
-			// Maybe this should change the cursor or something
-			setStatusP("Corpus updated.");
-	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-		} else {
-			alert( "Error encountered when trying to update corpus.\nResponse: "
-			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
-		}
-	}
-}
-
-
-function updateCorpus(corpusID, name) {
-	// Could change cursor and disable button until get response
-	var descTextEl = document.getElementById("D_"+corpusID);
-	var desc = descTextEl.value;
-	if( desc.length <= 2 ) {
-		alert( "You must enter a description that is at least 3 characters long" );
-		return;
-	}
-	if( !xmlhttp ) {
-		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
-		return;
-	}
-	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID;
-	var args = prepareCorpusXML(corpusID, name, desc,"");
-	//alert( "Preparing request: PUT: "+url+"?"+args );
-	xmlhttp.open("PUT", url, true);
-	xmlhttp.setRequestHeader("Content-Type",
-														"application/xml" );
-	xmlhttp.onreadystatechange=updateCorpusRSC;
-	xmlhttp.send(args);
-	//window.status = "request sent: POST: "+url+"?"+args;
-	enableElement( "U_"+corpusID, false );
-}
-
-// The ready state change callback method for the processTEI method
-function processTEIRSC() {
-  if (xmlhttp.readyState==4) {
-		if( xmlhttp.status == 200 ) {
-			// Maybe this should change the cursor or something
-			setStatusP("Corpus rebuilt.");
-			//alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			//window.location.reload();
-		} else {
-			alert( "Error encountered when trying to rebuild corpus.\nResponse: "
-			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
-		}
-	enableElement( "processTEIBtn", true );
-	}
-}
-
-
-function processTEI(corpusID) {
-	if( !xmlhttp ) {
-		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
-		return;
-	}
-	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/tei";
-	//alert( "Preparing request: PUT: "+url);
-	xmlhttp.open("PUT", url, true);
-	xmlhttp.onreadystatechange=processTEIRSC;
-	xmlhttp.send(null);
-	enableElement( "processTEIBtn", false );
-}
-
-// The ready state change callback method for the processDates method
-function processDatesRSC() {
-  if (xmlhttp.readyState==4) {
-		if( xmlhttp.status == 200 ) {
-			// Maybe this should change the cursor or something
-			setStatusP("Date Assertions processed.");
-	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			//window.location.reload();
-		} else {
-			alert( "Error encountered when trying to process date assertions.\nResponse: "
-			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
-		}
-	enableElement( "processDatesBtn", true );
-	}
-}
-
-
-function processDates(corpusID) {
-	if( !xmlhttp ) {
-		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
-		return;
-	}
-	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/dates";
-	//alert( "Preparing request: PUT: "+url);
-	xmlhttp.open("PUT", url, true);
-	xmlhttp.onreadystatechange=processDatesRSC;
-	xmlhttp.send(null);
-	enableElement( "processDatesBtn", false );
-}
-
-//
-// This should go into a utils.js - how to include?
-function enableElement( elID, sense ) {
-	var el = document.getElementById(elID);
-	el.disabled = !sense;
-}
-
-
-function setStatusP(str) {
-	var el = document.getElementById("statusP");
-	el.innerHTML = str;
-}
-
-function limitChars( field, maxlimit ) {
-  if ( field.value.length > maxlimit )
-  {
-    field.value = field.value.substring( 0, maxlimit-1 );
-    alert( "Description can only be 255 characters in length." );
-    return false;
-  }
-	return true;
-}
-
-</script>';
-}
-
-$t->assign("script_block", $script_block);
-
 $opmsg = false;
 
 function getCorpus($CFG,$id){
@@ -245,6 +65,7 @@ function getCorpus($CFG,$id){
 		$corpus = array(
 			'id' => $corpObj['id'],
 			'name' => $corpObj['name'], 
+			'ownerId' => $corpObj['ownerId'], 
 			'nDocs' => $corpObj['ndocs'],
 			'medianDocDate' => $corpObj['medianDocDate'],
 			'description' => $corpObj['description']);
@@ -398,6 +219,16 @@ function getCorpusRoles($CFG,$cid){
 	return false;
 }
 
+if(!isset($_GET['view'])) {
+	$view = 'docs';
+} else {
+	$view = $_GET['view'];
+	if($view!='docs'&&$view!='pnames'&&$view!='cnames'&&$view!='admin')
+		$view = 'docs';
+	else if($view=='admin' && !$canUpdateCorpus)
+		$view = 'docs';
+}
+
 if(!isset($_GET['id'])) {
 	$errmsg = "Missing corpus specifier. ";
 } else {
@@ -412,6 +243,15 @@ if(!isset($_GET['id'])) {
 	} else {
 		$t->assign('corpusID', $corpusID);
 		$t->assign('corpus', $corpus);
+
+		// Verify that the current user is the owner, if the view is admin; if not, switch to docs view
+		$owner_id = getCurrUser();
+		if( $owner_id != $corpus['ownerId'] ) {
+			$canUpdateCorpus = false;
+			if($view=='admin') {
+				$view = 'docs';
+			}
+		}
 		if($view=='admin') {
 			$corp_file = $CFG->corpusdir.'/'.$corpusID.'/tei/corpus.xml';
 			if(file_exists($corp_file)) {
@@ -493,8 +333,183 @@ if(!isset($_GET['id'])) {
 	}
 }
 
+$t->assign('canUpdateCorpus', ($canUpdateCorpus?1:0));
+$t->assign("currSubNav", $view);
+
+$filter_script_block = '
+<script>
+function filterNames(corpId,orderBy) {
+	var url = "/corpora/corpus?id="+corpId+"&view='.$view.'&o="+orderBy;
+	var roleFilterSelEl = document.getElementById("RoleFilterSel");
+	var index = roleFilterSelEl.selectedIndex;
+	var roleFilter = roleFilterSelEl.options[index].value;
+	if(roleFilter!="All")
+		url += "&role="+roleFilter;
+	var genderFilterSelEl = document.getElementById("GenderFilterSel");
+	if(genderFilterSelEl != null ) {
+		index = genderFilterSelEl.selectedIndex;
+		var genderFilter = genderFilterSelEl.options[index].value;
+		if(genderFilter!="All")
+			url += "&gender="+genderFilter;
+	}
+	//alert( "Navigating to: " + url );
+	window.location.href = url;
+}
+
+function filterDocsByName(corpId,nameId) {
+	var url = "/corpora/corpus?id="+corpId+"&view=docs&name="+nameId;
+	var roleFilterSelEl = document.getElementById("RoleFilterSel");
+	var index = roleFilterSelEl.selectedIndex;
+	var roleFilter = roleFilterSelEl.options[index].value;
+	if(roleFilter!="All")
+		url += "&role="+roleFilter;
+	//alert( "Navigating to: " + url );
+	window.location.href = url;
+}
+
+</script>';
+$admin_script_block = '
+<script type="text/javascript" src="/scripts/setupXMLHttpObj.js"></script>
+<script type="text/javascript" src="/scripts/corpus.js"></script>
+<script>
+
+// The ready state change callback method for update.
+function updateCorpusRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Corpus updated.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to update corpus.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+
+function updateCorpus(corpusID, name) {
+	// Could change cursor and disable button until get response
+	var descTextEl = document.getElementById("D_"+corpusID);
+	var desc = descTextEl.value;
+	if( desc.length <= 2 ) {
+		alert( "You must enter a description that is at least 3 characters long" );
+		return;
+	}
+	if( !xmlhttp ) {
+		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID;
+	var args = prepareCorpusXML(corpusID, name, desc,"");
+	//alert( "Preparing request: PUT: "+url+"?"+args );
+	xmlhttp.open("PUT", url, true);
+	xmlhttp.setRequestHeader("Content-Type",
+														"application/xml" );
+	xmlhttp.onreadystatechange=updateCorpusRSC;
+	xmlhttp.send(args);
+	//window.status = "request sent: POST: "+url+"?"+args;
+	enableElement( "U_"+corpusID, false );
+}
+
+// The ready state change callback method for the processTEI method
+function processTEIRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Corpus rebuilt.");
+			//alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			//window.location.reload();
+		} else {
+			alert( "Error encountered when trying to rebuild corpus.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	enableElement( "processTEIBtn", true );
+	}
+}
+
+
+function processTEI(corpusID) {
+	if( !xmlhttp ) {
+		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/tei";
+	//alert( "Preparing request: PUT: "+url);
+	xmlhttp.open("PUT", url, true);
+	xmlhttp.onreadystatechange=processTEIRSC;
+	xmlhttp.send(null);
+	enableElement( "processTEIBtn", false );
+}
+
+// The ready state change callback method for the processDates method
+function processDatesRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Date Assertions processed.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			//window.location.reload();
+		} else {
+			alert( "Error encountered when trying to process date assertions.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	enableElement( "processDatesBtn", true );
+	}
+}
+
+
+function processDates(corpusID) {
+	if( !xmlhttp ) {
+		alert( "Cannot update corpus - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/corpora/"+corpusID+"/dates";
+	//alert( "Preparing request: PUT: "+url);
+	xmlhttp.open("PUT", url, true);
+	xmlhttp.onreadystatechange=processDatesRSC;
+	xmlhttp.send(null);
+	enableElement( "processDatesBtn", false );
+}
+
+//
+// This should go into a utils.js - how to include?
+function enableElement( elID, sense ) {
+	var el = document.getElementById(elID);
+	el.disabled = !sense;
+}
+
+
+function setStatusP(str) {
+	var el = document.getElementById("statusP");
+	el.innerHTML = str;
+}
+
+function limitChars( field, maxlimit ) {
+  if ( field.value.length > maxlimit )
+  {
+    field.value = field.value.substring( 0, maxlimit-1 );
+    alert( "Description can only be 255 characters in length." );
+    return false;
+  }
+	return true;
+}
+
+</script>';
+
 if(isset($errmsg))
 	$t->assign('errmsg', $errmsg);
+
+if($view=='docs') {
+	$script_block = '';
+} else if($view=='admin') {
+	$script_block = $admin_script_block;
+} else {
+	$script_block = $filter_script_block;
+}
+
+$t->assign("script_block", $script_block);
+
 
 if($view=='docs') {
 	$t->display('corpus_docs.tpl');

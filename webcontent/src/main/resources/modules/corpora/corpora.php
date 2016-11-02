@@ -29,6 +29,7 @@ unset($opmsg);
 
 $t->assign('page_title', 'Corpora Management'.$CFG->page_title_default);
 
+$curruser = getCurrUser();
 $canAddCorpus = false;
 $canUpdateCorpus = false;
 $canDeleteCorpus = false;
@@ -67,7 +68,7 @@ $script_block = '
 <script type="text/javascript" src="/scripts/corpus.js"></script>
 <script>
 
-var curr_user_id = '.$_SESSION['id'].';
+var curr_user_id = '.$curruser.';
 	
 // The ready state change callback method that waits for a response.
 function addCorpusRSC() {
@@ -231,6 +232,7 @@ if($rest->sendRequest()) {
 		$corpObj = &$result['corpus'];
 		$corpus = array(
 			'id' => $corpObj['id'],
+			'ownerId' => $corpObj['ownerId'],
 			'name' => isset($corpObj['name'])?$corpObj['name']:null, 
 			'nDocs' => isset($corpObj['ndocs'])?$corpObj['ndocs']:null,
 			'description' => isset($corpObj['description'])?$corpObj['description']:null);
@@ -243,10 +245,12 @@ if($rest->sendRequest()) {
 	$opmsg = $rest->getError();
 }
 
-if(!empty($corpora))
+$t->assign('curruser', $curruser);
+if(!empty($corpora)) {
 	$t->assign('corpora', $corpora);
-else if(!empty($ServCorpOutput)&&($ServCorpOutput!="[]"))
+} else if(!empty($ServCorpOutput)&&($ServCorpOutput!="[]")) {
 	$t->assign('opmsg', $ServCorpOutput."(URL:".$url.")");
+}
 
 if(isset($opmsg))
 	$t->assign('opmsg', $opmsg);
