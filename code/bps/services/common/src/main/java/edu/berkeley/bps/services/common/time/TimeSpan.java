@@ -22,15 +22,6 @@ public interface TimeSpan {
 	public abstract void setStdDev(double value);
 
 	/**
-	 * Computes the likelihood that the passed time is within this TimeSpan
-	 * Will return 1 if it is within the window, and will return a value
-	 * between 0 and 1 otherwise.
-	 * @param time
-	 * @return likelihood in the range of 0 to 1
-	 */
-	public abstract double computeProbabilityForTime(long time);
-
-	/**
 	 * Computes the likelihood that the passed time span overlaps with this TimeSpan
 	 * Will return 1 if the windows overlap, and otherwise will use the closest
 	 * window time in the passed span with computeProbabilityForTime()

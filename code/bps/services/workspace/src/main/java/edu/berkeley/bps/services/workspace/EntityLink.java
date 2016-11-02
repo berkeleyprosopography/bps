@@ -60,7 +60,7 @@ public class EntityLink<O> extends Object {
 	}
 
 	/**
-	 * @param weight the weight to set
+	 * @param delta how much to adjust the current weight
 	 */
 	public double adjustWeight(double delta) {
 		this.weight += delta;

@@ -50,20 +50,31 @@ public abstract class BaseTimeSpan implements TimeSpan {
 		
 	}
 
-	public double computeProbabilityForTime(long time) {
-		double delta = Math.max(0, time-getCenterPoint()-halfWindow);
+	/**
+	 * Computes the likelihood that the passed time is within this TimeSpan
+	 * Will return 1 if it is within the window, and will return a value
+	 * between 0 and 1 otherwise.
+	 * @param time the time to consider
+	 * @return likelihood in the range of 0 to 1
+	 */
+	private double computeProbabilityForTime(long time) {
+		// Get the distance from our center point.
+		double delta = Math.abs(time-getCenterPoint());
+		// Reduce that by our half-window, to see how close time is to our edge
+		// If the time is within the window, force delta to 0;
+		delta = Math.max(0, delta-halfWindow);
 		// within window, probability is 1.0
-		return (delta==0)?1.0:Math.pow(Math.E, (-delta*delta/twoVariance));
+		return (delta==0)?1.0 : Math.pow(Math.E, (-delta*delta/twoVariance));
 	}
 
 	public double computeMutualProbability(TimeSpan span) {
 		long center = getCenterPoint();
 		long earliest = (long)(center-halfWindow);
-		long latest = (long)(center-halfWindow);
+		long latest = (long)(center+halfWindow);
 		long otherCenter = span.getCenterPoint();
 		double otherHalfWindow = span.getWindow()/2;
 		long otherEarliest = (long)(otherCenter-otherHalfWindow);
-		long otherLatest = (long)(otherCenter-otherHalfWindow);
+		long otherLatest = (long)(otherCenter+otherHalfWindow);
 		if(otherLatest<earliest) {
 			// Earlier span - use otherLatest in computation
 			return computeProbabilityForTime(otherLatest);

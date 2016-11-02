@@ -642,14 +642,25 @@ public class Workspace extends CachedEntity {
 			for(ArrayList<Person> personsByName:personListMapForDoc.values()) {
 				// Do not bother if there is only 1 of a given name
 				if(personsByName.size() > 1)
-					collapser.evaluateList(personsByName, nradToEntityLinks, 
+					collapser.evaluateList(personsByName,
 						personToEntityLinkSets, CollapserRule.WITHIN_DOCUMENTS);
 			}
 		}
 	}
 	
 	public void collapseAcrossDocuments() {
-		
+		// This needs to run before we call collapseAcrossDocuments
+		if(collapser==null)
+			return;
+		if(corpus==null)
+			return;
+		for(ArrayList<Person> personsByName:personListsByName.values()) {
+			// Do not bother if there is only 1 of a given name
+			// Note that evaluateList will skip all the intraDoc cases in this list
+			if(personsByName.size() > 1)
+				collapser.evaluateList(personsByName, // UNUSED nradToEntityLinks, 
+					personToEntityLinkSets, CollapserRule.ACROSS_DOCUMENTS);
+		}
 	}
 	
 	public GraphWrapper getFullGraph(boolean fUseQNameForNames, double minWeightOnLink) {
@@ -998,14 +1009,17 @@ public class Workspace extends CachedEntity {
 			// TODO figure out what to do about unknowns, since they are
 			// essentially compatible (on forename) with everything.
 			// OTOH, is it really worth collapsing? Maybe only if qualified...
-			ArrayList<Person> personList = 
-				getPersonListName(personListMapForDoc, forenameId);
-			personList.add(person);
+			ArrayList<Person> docPersonList = 
+					getPersonListName(personListMapForDoc, forenameId);
+				docPersonList.add(person);
+			ArrayList<Person> globalPersonList = 
+				getPersonListName(personListsByName, forenameId);
+			globalPersonList.add(person);
 			// Now, we'll remap the displayName of the person to something more sensible.
 			{
 				String forename = (name==null)?"(unknown)":name.getName();
 				String displayName = forename+
-								"["+nrad.getDocument().getAlt_id()+"."+personList.size()+"]";
+								"["+nrad.getDocument().getAlt_id()+"."+docPersonList.size()+"]";
 				person.setDisplayName(displayName);
 			}
 		}
@@ -1050,14 +1064,17 @@ public class Workspace extends CachedEntity {
 			// TODO figure out what to do about unknowns, since they are
 			// essentially compatible (on forename) with everything.
 			// OTOH, is it really worth collapsing? Maybe only if qualified...
-			ArrayList<Person> personList = 
+			ArrayList<Person> docPersonList = 
 				getPersonListName(personListMapForDoc, forenameId);
-			personList.add(father);
+			docPersonList.add(father);
+			ArrayList<Person> globalPersonList = 
+				getPersonListName(personListsByName, forenameId);
+			globalPersonList.add(father);
 			// Now, we'll remap the displayName of the person to something more sensible.
 			{
 				String forename = (name==null)?"(unknown)":name.getName();
 				String displayName = forename+
-								"["+nradFather.getDocument().getAlt_id()+"."+personList.size()+"]";
+								"["+nradFather.getDocument().getAlt_id()+"."+docPersonList.size()+"]";
 				father.setDisplayName(displayName);
 			}
 		}
@@ -1149,6 +1166,8 @@ public class Workspace extends CachedEntity {
 				for(NameRoleActivity nrad:baseNRADs) {
 					Person person = addPersonForNRAD(nrad, center, personListMapForDoc);
 					// Now we have to add persons for the Family-linked NRADs
+					// Note that we chain fathers so this will pick up grandfathers.
+					// TODO What about ancestors???
 					NameRoleActivity fatherNRAD = nrad.getFather();
 					while(fatherNRAD!=null) {
 						Person father = addFatherForPerson(person, fatherNRAD,

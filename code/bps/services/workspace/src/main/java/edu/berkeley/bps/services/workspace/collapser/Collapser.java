@@ -22,7 +22,6 @@ public interface Collapser {
 	 * 				false if this is corpora-wide
 	 */
 	public void evaluateList(List<? extends Entity> entities, 
-			HashMap<Integer, EntityLinkSet<NameRoleActivity>> nradToEntityLinks, 
 			HashMap<Person, List<EntityLinkSet<NameRoleActivity>>> personTopersonToEntityLinkSets,
 			boolean intraDocument);
 	
