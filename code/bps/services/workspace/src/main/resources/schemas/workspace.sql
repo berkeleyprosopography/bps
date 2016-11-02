@@ -70,8 +70,8 @@ CREATE TABLE `clan` (
   `id`             INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
   `workspace_id`      INT(10) UNSIGNED NOT NULL,
   `name`           VARCHAR(255) NOT NULL,
-  `nrad_id`      INT(10) UNSIGNED default NOT NULL,
-  `name_id`      INT(10) UNSIGNED default NOT NULL,
+  `nrad_id`      INT(10) UNSIGNED default NULL,
+  `name_id`      INT(10) UNSIGNED default NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
