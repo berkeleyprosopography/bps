@@ -157,7 +157,7 @@ public class Corpus extends CachedEntity {
 			ActivityRole actRole = activityRolesById.get(id);
 			ActivityRole clone = actRole.cloneInCorpus(dbConn,newCorpus);
 			newCorpus.activityRolesById.put(clone.getId(), clone);
-			newCorpus.activityRolesByName.put(clone.getName(), clone);
+			newCorpus.activityRolesByName.put(clone.getName().toLowerCase(), clone);
 		}
 		// Clone Names, and build maps
 		// TODO Need to first clone all normal forms, build an association map, 
@@ -269,7 +269,7 @@ public class Corpus extends CachedEntity {
 		activityRolesById.clear();
 		List<ActivityRole> activityRolesList = ActivityRole.ListAllInCorpus(dbConn, this);
 		for(ActivityRole actRole:activityRolesList) {
-			activityRolesByName.put(actRole.getName(), actRole);
+			activityRolesByName.put(actRole.getName().toLowerCase(), actRole);
 			activityRolesById.put(actRole.getId(), actRole);
 		}
 		logger.trace("Corpus.initAEMaps() Built roles list. Count: "+activityRolesByName.size());
@@ -934,7 +934,7 @@ public class Corpus extends CachedEntity {
 	}
 
 	public ActivityRole findOrCreateActivityRole(String name, Connection dbConn) {
-		ActivityRole instance = activityRolesByName.get(name);
+		ActivityRole instance = activityRolesByName.get(name.toLowerCase());
 		if(instance == null) {
 			instance = ActivityRole.CreateAndPersist(dbConn, this, name, null);
 			instance.persist(dbConn);
@@ -944,16 +944,16 @@ public class Corpus extends CachedEntity {
 	}
 
 	public void addActivityRole(ActivityRole toAdd) {
-		if(activityRolesByName.get(toAdd.getName())!=null)
+		if(activityRolesByName.get(toAdd.getName().toLowerCase())!=null)
 			throw new RuntimeException("addActivityRole: duplicate (name).");
 		if(activityRolesById.get(toAdd.getId())!=null)
 			throw new RuntimeException("addActivityRole: duplicate (id).");
-		activityRolesByName.put(toAdd.getName(), toAdd);
+		activityRolesByName.put(toAdd.getName().toLowerCase(), toAdd);
 		activityRolesById.put(toAdd.getId(), toAdd);
 	}
 
 	public ActivityRole findActivityRole(String name) {
-		ActivityRole instance = activityRolesByName.get(name);
+		ActivityRole instance = activityRolesByName.get(name.toLowerCase());
 		return instance;
 	}
 

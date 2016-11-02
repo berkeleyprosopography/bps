@@ -4,6 +4,7 @@ import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.utils.SortedQueue;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.ArrayList;
 
 /*
@@ -29,7 +30,7 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 	public O getFromObj() {
 		return fromObj;
 	}
-
+	
 	public EntityLink<O> put(Entity toEntity, EntityLink<O> link) {
 		if(get(toEntity)!= null)
 			throw new IllegalArgumentException("Already have a link to Entity: "+toEntity);
@@ -70,11 +71,13 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 	}
 
 	/**
+	 * Scales the weight of the link to the entity by the scaleFactor, and returns the computed delta.
+	 * Does not normalize - caller must do so. Does adjust the summed weight, to support normalization.
 	 * @param toEntity
-	 * @param scaleFacter factor to multiple the current weight by for the link 
-	 * 					to toEntity. Must be >=0 and <= 1.
+	 * @param scaleFacter factor to scale the current link weight.	Must be >=0 and <= 1.
+	 * @return change in link weight
 	 */
-	public double scaleLink(Entity toEntity, double scaleFactor) {
+	public double scaleLinkWeight(Entity toEntity, double scaleFactor) {
 		EntityLink<O> link = get(toEntity);
 		if(link == null)
 			throw new IllegalArgumentException("No link found to Entity: "+toEntity);

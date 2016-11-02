@@ -10,6 +10,7 @@ public class SystemProperties {
 	final Logger logger = LoggerFactory.getLogger(SystemProperties.class);
 	
 	public static final String CORPUS_DIR = "corpus_dir";
+	public static final String WEBROOT_DIR = "webroot_dir";
 	
 	protected static SystemProperties instance = null;
 	

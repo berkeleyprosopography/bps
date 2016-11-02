@@ -57,7 +57,11 @@
 							{if $nrads[nrad].activityRoleIsFamily}
 								<span class="familyIndent">&nbsp;</span>
 							{/if}
-							{$nrads[nrad].name}
+							{if isset($nrads[nrad].displayName)}
+								{$nrads[nrad].displayName}
+							{else}
+								{$nrads[nrad].name}
+							{/if}
 						</td>
 						<td class="nrad" style="padding-top:6px">
 							{if $nrads[nrad].normalNameId != $nrads[nrad].nameId}

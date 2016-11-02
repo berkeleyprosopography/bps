@@ -12,11 +12,16 @@ import edu.berkeley.bps.services.corpus.NameRoleActivity;
 public abstract class Entity {
 
 	@XmlElement
+	protected int id = -1;
+
+	@XmlElement
 	protected NameRoleActivity originalNRAD = null;
-	@XmlElement
 	protected Name declaredName = null;
-	@XmlElement
 	protected String displayName = null;
+
+	protected Entity() {
+		throw new RuntimeException("No-arg Ctor should not be called");
+	}
 
 	public Entity(NameRoleActivity nrad) {
 		super();
@@ -31,13 +36,26 @@ public abstract class Entity {
 			)
 			throw new IllegalArgumentException(
 				this.getClass().getName()+"Entity ctor must have valid name.");
+		this.id = originalNRAD.getId();		// Tied to base - simplifies mapping
 		declaredName=originalNRAD.getName();
 		//displayName = declaredName.getName();
 		displayName = nrad.getDisplayName();
 	}
 
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
 	public Name getDeclaredName() {
 		return declaredName;
+	}
+
+	@XmlElement(name="declaredName")
+	public String getDeclaredNameString() {
+		return declaredName.getName();
 	}
 
 	public void setDeclaredName(Name declaredName) {
@@ -47,6 +65,7 @@ public abstract class Entity {
 	/**
 	 * @return the displayName
 	 */
+	@XmlElement(name="displayName")
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -55,6 +74,9 @@ public abstract class Entity {
 	 * @param displayName the displayName to set
 	 */
 	public void setDisplayName(String displayName) {
+		// Update the display name of the original NRAD so we can easily recognize the Person
+		// in the doc listings.
+		this.getOriginalNRAD().setDisplayName(displayName);
 		this.displayName = displayName;
 	}
 

@@ -1,0 +1,20 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - variables.yml
+
+  tasks:
+  - name: Build WAR with maven
+    shell: mvn clean install -DskipTests chdir={{ source_root }}/code/bps/services
+    #ignore_errors: yes
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+      BPS_JEESERVER_HOME: /var/lib/tomcat6/
+      BPS_WEBROOT: "/var/www/{{ project_name }}"
+      DB_USER: "{{ db_user }}"
+      DB_PASSWORD: "{{ db_password }}"
+      DB_PASSWORD_BPS: "{{ db_password }}"
+      BPS_CORPORA : "{{ project_root }}/corpora"
+      CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH

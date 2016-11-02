@@ -1,7 +1,15 @@
 package edu.berkeley.bps.services.workspace;
 
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import java.util.ArrayList;
+import java.util.Comparator;
+
 import edu.berkeley.bps.services.corpus.*;
 import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.time.*;
@@ -24,11 +32,16 @@ import edu.berkeley.bps.services.common.time.*;
  * @author pschmitz
  *
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(name="person")
 public class Person extends Entity {
 	private static final String myClass = "Person";
+
+	private static final String FILIATION_SEPARATOR = "/";
 	
 	public static final int DEFAULT_ACTIVE_LIFE_YRS = 15;
-	public static final double DEFAULT_GENERATION = 15.0*TimeUtils.APPROX_YEAR_IN_MILLIS;
+	public static final long DEFAULT_GENERATION_OFFSET = 
+								TimeUtils.convertYearsToMillis(DEFAULT_ACTIVE_LIFE_YRS);
 	public static final double DEFAULT_ACTIVE_LIFE_WINDOW = 
 		TimeUtils.getDefaultWindowForActiveLife(DEFAULT_ACTIVE_LIFE_YRS);
 	public static final double DEFAULT_ACTIVE_LIFE_STDDEV =
@@ -39,11 +52,14 @@ public class Person extends Entity {
 	public static final int COMPAT_MORE_INFO = 1;
 	public static final int COMPATIBLE = Integer.MIN_VALUE;
 	public static final int INCOMPATIBLE = Integer.MAX_VALUE;
+	// @XmlElement
 	private Name declaredFather = null;
+	// @XmlElement
 	private Name declaredGrandFather = null;
 	private ArrayList<Name> declaredAncestors = null;
 	// TODO?? Do we need to model the clan and link to it? What if we are inferring
 	// it from various other rules?
+	// @XmlElement
 	private Name declaredClan = null;
 	// Note that we do not link beyond our fathers, since they should link 
 	// to their own fathers.
@@ -56,6 +72,20 @@ public class Person extends Entity {
 	// lifeTimeSpan should generally be a DerivedTimeSpan linked to activeTimeSpan.
 	//private TimeSpan lifeTimeSpan = null;
 	
+	
+	public static class DisplayNameComparator implements Comparator<Person> {
+		public int compare(Person pers1, Person pers2) {
+			return pers1.displayName.compareTo(pers2.displayName);
+		}
+	}
+	
+
+	
+	protected Person() {
+		// Entity superclass Ctor with no args will throw a RuntimeException (MUST have an NRAD)
+		//throw new RuntimeException("No-arg Ctor should not be called");
+	}
+
 	public static Person CreatePersonFromNRADAsEvidence(NameRoleActivity nrad) {
 		long center = nrad.getDocument().getDate_norm();
 		EvidenceBasedTimeSpan ts = 
@@ -76,17 +106,19 @@ public class Person extends Entity {
 			NameRoleActivity nradFather=nrad.getFather();
 			declaredFather = (nradFather==null)?null:nradFather.getName();
 			if(declaredFather!=null) {
-				String temp = declaredFather.getName();
-				if(temp==null||temp.isEmpty())
+				String fatherNameStr = declaredFather.getName();
+				if(fatherNameStr==null||fatherNameStr.isEmpty()) {
 					declaredFather = null;
+				}
 			}
 		}{
 			NameRoleActivity nradGrandFather =nrad.getGrandFather();
 			declaredGrandFather = (nradGrandFather==null)?null:nradGrandFather.getName();
 			if(declaredGrandFather!=null) {
-				String temp=declaredGrandFather.getName();
-				if(temp==null||temp.isEmpty())
+				String grFatherNameStr=declaredGrandFather.getName();
+				if(grFatherNameStr==null||grFatherNameStr.isEmpty()) {
 					declaredGrandFather = null;
+				}
 			}
 		}{
 			List<NameRoleActivity> ancestorNRADs = nrad.getAncestors();
@@ -96,8 +128,9 @@ public class Person extends Entity {
 					Name ancName = nradA.getName();
 					if(ancName!=null) {
 						String temp=ancName.getName();
-						if(temp!=null&&!temp.isEmpty())
+						if(temp!=null&&!temp.isEmpty()) {
 							declaredAncestors.add(ancName);
+						}
 					}
 				}
 			}
@@ -105,16 +138,66 @@ public class Person extends Entity {
 			NameRoleActivity nradClan=nrad.getClan();
 			declaredClan = (nradClan==null)?null:nradClan.getName();
 			if(declaredClan!=null) {
-				String temp=declaredClan.getName();
-				if(temp==null||temp.isEmpty())
+				String clanNameStr=declaredClan.getName();
+				if(clanNameStr==null||clanNameStr.isEmpty()) {
 					declaredClan = null;
+				}
 			}
 		}
+		updateDisplayName();
 		fatherLinks = new EntityLinkSet<Person>(this, LinkType.Type.LINK_TO_FATHER);
+	}
+	
+	public void setDisplayName(String displayName) {
+		super.setDisplayName(displayName);
+		updateDisplayName();
+	}
+
+	
+	protected void updateDisplayName() {
+		if(displayName.contains(FILIATION_SEPARATOR))
+			return;
+		if(declaredFather!=null) {
+			String fatherNameStr = declaredFather.getName();
+			if(fatherNameStr!=null && !fatherNameStr.isEmpty()) {
+				displayName = displayName + FILIATION_SEPARATOR + fatherNameStr; 
+			}
+		}
+		if(declaredGrandFather!=null) {
+			String grFatherNameStr=declaredGrandFather.getName();
+			if(grFatherNameStr!=null && !grFatherNameStr.isEmpty()) {
+				displayName = displayName + FILIATION_SEPARATOR + grFatherNameStr; 
+			}
+		}
+		List<NameRoleActivity> ancestorNRADs = originalNRAD.getAncestors();
+		declaredAncestors = new ArrayList<Name>();
+		if(ancestorNRADs!=null) {
+			for(NameRoleActivity nradA:ancestorNRADs) {
+				Name ancName = nradA.getName();
+				if(ancName!=null) {
+					String temp=ancName.getName();
+					if(temp!=null && !temp.isEmpty()) {
+						displayName = displayName + FILIATION_SEPARATOR + ancName; 
+					}
+				}
+			}
+		}
+		if(declaredClan!=null) {
+			String clanNameStr=declaredClan.getName();
+			if(clanNameStr!=null && !clanNameStr.isEmpty()) {
+				displayName = displayName + FILIATION_SEPARATOR + clanNameStr; 
+			}
+		}
+
 	}
 	
 	public double getDateOverlapLikelihood(Person other) {
 		return this.activeTimeSpan.computeMutualProbability(other.activeTimeSpan);
+	}
+	
+	@XmlElement(name="floruit")
+	public String getFloruit() {
+		return this.activeTimeSpan.getDisplayString();
 	}
 
 	/**
@@ -128,17 +211,17 @@ public class Person extends Entity {
 	 * @return
 	 */
 	public Person createPersonForDeclaredFather(
-			long activeTimeSpanOffset, // long lifeTimeSpanOffset,
-			double activeTimeSpanStdDev, // double lifeTimeSpanStdDev,
+			long generationOffset, 			// long lifeTimeSpanOffset,
+			double activeTimeSpanStdDev,	// double lifeTimeSpanStdDev,
 			double activeTimeSpanWindow,
 			boolean addToFatherLinks) {
-		//if(declaredFather==null)		// There can be fathers with missing names...
+		//if(declaredFather==null)			// There can be fathers with missing names...
 		//	return null;
 		NameRoleActivity nradFather = originalNRAD.getFather(); 
 		if(nradFather==null)
 			throw new RuntimeException(myClass+"Internal logic error in Person");
 		DerivedTimeSpan fatherActiveTimeSpan =
-			new DerivedTimeSpan(activeTimeSpan, activeTimeSpanOffset, 
+			new DerivedTimeSpan(activeTimeSpan, generationOffset, 
 					activeTimeSpanStdDev, activeTimeSpanWindow);
 		//DerivedTimeSpan fatherLifeTimeSpan =
 		//	new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);
@@ -307,6 +390,10 @@ public class Person extends Entity {
 
 	public Name getDeclaredGrandFather() {
 		return declaredGrandFather;
+	}
+
+	public Name getDeclaredClan() {
+		return declaredClan;
 	}
 
 	/**

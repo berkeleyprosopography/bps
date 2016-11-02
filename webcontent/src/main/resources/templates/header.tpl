@@ -47,6 +47,7 @@
 				<a class="navLink" href="/">Home</a>
 				<a class="navLink" href="/corpora/">Corpora</a>
 				<a class="navLink" href="/workspace">Workspace</a>
+				<!-- <a class="navLink" href="/SNA">SNA</a> -->
 			</div>
 			<!--
 			<div id="navBarSearchBox">
