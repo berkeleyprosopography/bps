@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Person;
+import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
@@ -38,4 +39,9 @@ public class PartlyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 		}
 	}
 
+	@Override
+	public void initialize(Workspace workspace) {
+		super.initialize(workspace);
+		initSettings();						// Set up the user settings.
+	}
 }

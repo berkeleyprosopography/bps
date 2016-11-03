@@ -8,6 +8,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.slf4j.Logger;
@@ -17,8 +18,6 @@ import edu.berkeley.bps.services.corpus.ActivityRole;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Workspace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
@@ -46,7 +45,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	@Override
 	public void initialize(Workspace workspace) {
 		// Get the roles from the workspace, and build the derived Pairs
-		super.initialize(workspace);
+		super.initialize(workspace, false);		// Skip adding user weights, as we do not use them
 		
 		corpus = workspace.getCorpus();
 		if(corpus==null) {
@@ -101,7 +100,8 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	}
 
 	@Override
-	@XmlElement(name="matrixAxisValues")
+	@XmlElementWrapper(name="matrixAxisValues")
+	@XmlElement(name = "axisValue")
 	public List<String> getMatrixAxisValues() {
 		ArrayList<String> strings = new ArrayList<String>();
 		for(ActivityRole role:corpus.getActivityRoles()) {
@@ -110,7 +110,8 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		return strings;
 	}
 
-	@XmlElement(name="matrixValues")
+	//@XmlElementWrapper(name="matrixItems")
+	//@XmlElement(name = "matrixItemInfo")
 	public List<MatrixItemInfo> getMatrixValues() {
 		ArrayList<MatrixItemInfo> values = new ArrayList<MatrixItemInfo>();
 		for(String pairKey:rolePairWeights.keySet()) {
@@ -121,7 +122,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		return values;
 	}
 
-	@XmlElement(name="matrixValues")
+	// @XmlElement(name="matrixValues")
 	public void setMatrixValues(List<MatrixItemInfo> values) {
 		rolePairWeights.clear();
 		for(MatrixItemInfo item:values) {

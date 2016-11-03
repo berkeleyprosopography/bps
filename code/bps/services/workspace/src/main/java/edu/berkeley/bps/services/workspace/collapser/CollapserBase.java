@@ -17,7 +17,8 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 		PartlyQualifiedEqualNameShiftRule.class,
 		UnqualifiedEqualNameShiftRule.class,
 		PartlyQualifiedCompatibleNameShiftRule.class,
-		UnqualifiedCompatibleNameShiftRule.class})
+		UnqualifiedCompatibleNameShiftRule.class,
+		RoleMatrixDiscountRule.class})
 @XmlRootElement
 public abstract class CollapserBase implements Collapser {
 	
@@ -26,6 +27,8 @@ public abstract class CollapserBase implements Collapser {
 	@XmlElementWrapper
 	@XmlAnyElement
 	protected List<CollapserRuleBase> intraDocShiftRules;
+	@XmlElementWrapper
+	@XmlAnyElement
 	protected List<CollapserRuleBase> intraDocDiscountRules;
 	@XmlElementWrapper
 	@XmlAnyElement

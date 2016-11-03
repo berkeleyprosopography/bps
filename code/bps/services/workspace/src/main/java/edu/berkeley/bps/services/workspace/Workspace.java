@@ -16,6 +16,8 @@ import edu.berkeley.bps.services.workspace.collapser.Collapser;
 import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRule;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRuleBase;
+import edu.berkeley.bps.services.workspace.collapser.CollapserRuleBaseWithUI;
+import edu.berkeley.bps.services.workspace.collapser.CollapserRuleUI;
 import edu.berkeley.bps.services.workspace.collapser.FullyQualifiedEqualNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedCompatibleNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedEqualNameShiftRule;
@@ -599,25 +601,45 @@ public class Workspace extends CachedEntity {
 		
 		// TODO - we need to think about collapse rules for missing forename cases
 		CollapserRuleBase rule;
-		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.WITHIN_DOCUMENTS);
+		rule = new FullyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_ALWAYS, 
+													CollapserRule.WITHIN_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new FullyQualifiedEqualNameShiftRule(1.0, CollapserRule.ACROSS_DOCUMENTS);
+		rule = new FullyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_ALWAYS,
+													CollapserRule.ACROSS_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new PartlyQualifiedEqualNameShiftRule(0.75, CollapserRule.WITHIN_DOCUMENTS);
+		rule = new PartlyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
+													CollapserRule.WITHIN_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new PartlyQualifiedEqualNameShiftRule(0.75, CollapserRule.ACROSS_DOCUMENTS);
+		rule = new PartlyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
+													CollapserRule.ACROSS_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new UnqualifiedEqualNameShiftRule(0.75, CollapserRule.WITHIN_DOCUMENTS);
+		rule = new UnqualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
+													CollapserRule.WITHIN_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new UnqualifiedEqualNameShiftRule(0.5, CollapserRule.ACROSS_DOCUMENTS);
+		rule = new UnqualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_CONSERVATIVE,
+													CollapserRule.ACROSS_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new PartlyQualifiedCompatibleNameShiftRule(0.3, CollapserRule.WITHIN_DOCUMENTS);
+		rule = new PartlyQualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_CONSERVATIVE,
+													CollapserRule.WITHIN_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new PartlyQualifiedCompatibleNameShiftRule(0.75, CollapserRule.ACROSS_DOCUMENTS);
+		rule = new PartlyQualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
+													CollapserRule.ACROSS_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new UnqualifiedCompatibleNameShiftRule(0.75, CollapserRule.WITHIN_DOCUMENTS);
+		rule = new UnqualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
+													CollapserRule.WITHIN_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
-		rule = new UnqualifiedCompatibleNameShiftRule(0.3, CollapserRule.ACROSS_DOCUMENTS);
+		rule = new UnqualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_CONSERVATIVE,
+													CollapserRule.ACROSS_DOCUMENTS);
+		rule.initialize(this);
 		collapser.addRule(rule);
 		RoleMatrixDiscountRule rmdRule = new RoleMatrixDiscountRule();	// Only applies within docs now...
 		rmdRule.initialize(this);

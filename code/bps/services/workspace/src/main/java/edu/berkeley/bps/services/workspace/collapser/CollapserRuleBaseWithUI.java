@@ -6,25 +6,30 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 import edu.berkeley.bps.services.workspace.Entity;
+import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
 public class CollapserRuleBaseWithUI extends CollapserRuleBase
 		implements CollapserRule, CollapserRuleUI {
 	
-	protected static final Double WEIGHT_ALWAYS = 1.0;
-	protected static final Double WEIGHT_AGGRESSIVE = 0.7;
-	protected static final Double WEIGHT_CONSERVATIVE = 0.3;
-	protected static final Double WEIGHT_IGNORE = 0.0;
+	public static final Double WEIGHT_ALWAYS = 1.0;
+	public static final Double WEIGHT_AGGRESSIVE = 0.7;
+	public static final Double WEIGHT_CONSERVATIVE = 0.3;
+	public static final Double WEIGHT_IGNORE = 0.0;
 
-	protected static final String LABEL_ALWAYS = "Always";
-	protected static final String LABEL_AGGRESSIVE = "Aggressive";
-	protected static final String LABEL_CONSERVATIVE = "Conservative";
-	protected static final String LABEL_IGNORE = "Never";
+	public static final String LABEL_ALWAYS = "Always";
+	public static final String LABEL_AGGRESSIVE = "Aggressive";
+	public static final String LABEL_CONSERVATIVE = "Conservative";
+	public static final String LABEL_IGNORE = "Never";
 
+	@XmlElementWrapper(name = "userWeights")
+	@XmlElement(name = "userWeight")
 	protected List<UserWeightSetting> settingsList;
 	
 	public CollapserRuleBaseWithUI() {
@@ -39,11 +44,26 @@ public class CollapserRuleBaseWithUI extends CollapserRuleBase
 	}
 
 	public void initSettings() {
-		settingsList.add(new UserWeightSetting(LABEL_ALWAYS, WEIGHT_ALWAYS)); 
-		settingsList.add(new UserWeightSetting(LABEL_AGGRESSIVE, WEIGHT_AGGRESSIVE)); 
-		settingsList.add(new UserWeightSetting(LABEL_CONSERVATIVE, WEIGHT_CONSERVATIVE)); 
-		settingsList.add(new UserWeightSetting(LABEL_IGNORE, WEIGHT_IGNORE)); 
+		if(settingsList.isEmpty()) {
+			settingsList.add(new UserWeightSetting(LABEL_ALWAYS, WEIGHT_ALWAYS)); 
+			settingsList.add(new UserWeightSetting(LABEL_AGGRESSIVE, WEIGHT_AGGRESSIVE)); 
+			settingsList.add(new UserWeightSetting(LABEL_CONSERVATIVE, WEIGHT_CONSERVATIVE)); 
+			settingsList.add(new UserWeightSetting(LABEL_IGNORE, WEIGHT_IGNORE)); 
+		}
 	}
+	
+	@Override
+	public void initialize(Workspace workspace) {
+		super.initialize(workspace);
+		initSettings();
+	}
+
+	public void initialize(Workspace workspace, boolean initUserSettings) {
+		super.initialize(workspace);
+		if(initUserSettings)
+			initSettings();
+	}
+
 
 	@XmlElement
 	protected String description;
