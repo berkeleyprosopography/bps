@@ -1,0 +1,53 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - variables.yml
+
+  tasks:
+
+    - name: update apt cache
+      apt: update_cache=yes
+
+    - name: install required packages
+      apt: name={{ item }} state=present
+      with_items:
+        - mysql-server
+        - apache2
+        - php5
+        - php5-mysql
+        - tomcat6
+        - tomcat6-admin
+        - openjdk-6-jre
+        - openjdk-6-jdk
+        - libapache2-mod-jk
+        - libmysql-java
+        - php-pear
+        - git
+        - maven
+        - python-pip
+        - python-mysqldb
+
+    - name: install MDB2 mysql support via PEAR
+      command: pear install -a MDB2_Driver_mysql
+      ignore_errors: yes
+
+    - name: install HTTP_Request2 support via PEAR
+      command: pear install HTTP_Request2
+      ignore_errors: yes
+
+    - name: enabled mod_rewrite
+      apache2_module: name=rewrite state=present
+      notify:
+        - restart apache2
+
+    - name: enabled mod_proxy
+      apache2_module: name=proxy state=present
+      notify:
+        - restart apache2
+
+    - name: enabled mod_proxy_http
+      apache2_module: name=proxy_http state=present
+      notify:
+        - restart apache2

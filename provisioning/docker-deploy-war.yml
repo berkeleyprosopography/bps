@@ -6,48 +6,6 @@
     - variables.yml
 
   tasks:
-    #- hostname: name=bpsdev
-    - name: Add NewRelic deb
-      apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present
-      when: newrelic_license_key is defined
-
-    - name: Add NewRelic key
-      shell: wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
-      when: newrelic_license_key is defined
-
-    - name: update apt cache
-      apt: update_cache=yes
-
-    - name: install required packages
-      apt: name={{ item }} state=present
-      with_items:
-        - mysql-server
-        - apache2
-        - php5
-        - php5-mysql
-        - tomcat6
-        - tomcat6-admin
-        - openjdk-6-jre
-        - openjdk-6-jdk
-        - libapache2-mod-jk
-        - libmysql-java
-        - php-pear
-        - git
-        - maven
-        - python-pip
-        - python-mysqldb
-
-
-    - name: Install NewRelic monitor
-      apt: name={{ item }} state=present
-      with_items:
-        - newrelic-sysmond
-      when: newrelic_license_key is defined
-
-    - name: Configure NewRelic
-      shell: nrsysmond-config --set license_key={{newrelic_license_key}}
-      notify: start_newrelic
-      when: newrelic_license_key is defined
 
     - name: Set enviroment variables
       lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
@@ -60,6 +18,9 @@
         - { key: '^BPS_CORPORA', value : 'BPS_CORPORA={{ project_root }}/corpora'}
         - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
       notify: source environment
+
+    - name: Stop Tomcat
+      service: name=tomcat6 state=stopped
 
     - name: Start MySQL Database server
       shell: service mysql start
@@ -75,29 +36,6 @@
         priv: "*.*:ALL,GRANT"
         state: present
         check_implicit_admin: True
-
-    - name: install MDB2 mysql support via PEAR
-      command: pear install -a MDB2_Driver_mysql
-      ignore_errors: yes
-
-    - name: install HTTP_Request2 support via PEAR
-      command: pear install HTTP_Request2
-      ignore_errors: yes
-
-    - name: enabled mod_rewrite
-      apache2_module: name=rewrite state=present
-      notify:
-        - restart apache2
-
-    - name: enabled mod_proxy
-      apache2_module: name=proxy state=present
-      notify:
-        - restart apache2
-
-    - name: enabled mod_proxy_http
-      apache2_module: name=proxy_http state=present
-      notify:
-        - restart apache2
 
     - name: Create the project directory.
       file: state=directory path={{ project_root }}
@@ -117,8 +55,8 @@
     - name: Change permissions.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}
 
-    - name: Pull sources from the repository.
-      git: repo={{ project_repo }} dest={{ project_root }}/code version={{ branch }} accept_hostkey=yes
+    - name: Copy sources from shared folder to local /opt folder
+      copy: src=/bps dest={{ project_root }}
       sudo_user: "{{ user }}"
 
     - name: Create the webroot directory.
@@ -128,7 +66,7 @@
       file: group={{ user }} owner={{ user }} mode=755 state=directory path=/var/www/{{ project_name }}
 
     - name: Build WAR with maven
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/code/code/bps/services
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
       #ignore_errors: yes
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
@@ -141,7 +79,7 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Copy webroot files
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/webcontent
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
@@ -155,14 +93,14 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Create missing db directory
-      file: path={{project_root}}/code/code/bps/services/common/target/db state=directory
+      file: path={{project_root}}/bps/code/bps/services/common/target/db state=directory
 
     - name: Copy db init file
-      copy: src=files/db/initdb.sql  dest={{ project_root }}/code/code/bps/services/common/target/db/initdb.sql
+      copy: src=files/db/initdb.sql  dest={{ project_root }}/bps/code/bps/services/common/target/db/initdb.sql
 
 
     - name: Create the DB
-      shell: ant create_db chdir={{ project_root }}/code/code/bps/services
+      shell: ant create_db chdir={{ project_root }}/bps/code/bps/services
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
@@ -200,6 +138,7 @@
     - name: Apache | Enable bps site
       action: command a2ensite {{ project_name }}.conf
       tags: common
+      notify: restart apache2
 
     - name: Upload tomcat users file
       template: src=files/tomcat/tomcat-users.conf dest=/etc/tomcat6/tomcat-users.xml #mode=0600
@@ -215,7 +154,8 @@
     - name: Setup tomcat server configuration
       copy: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
       sudo: true
-      notify: restart tomcat
+      #notify: restart tomcat
+        
 
 
   handlers:
@@ -231,17 +171,7 @@
       BPS_CORPORA : "{{ project_root }}/corpora"
       CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
-  - name: restart tomcat
-    service: name=tomcat6 state=restarted
-    environment:
-        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
-        BPS_JEESERVER_HOME: /var/lib/tomcat6/
-        BPS_WEBROOT: "/var/www/{{ project_name }}"
-        DB_USER: "{{ db_user }}"
-        DB_PASSWORD: "{{ db_password }}"
-        DB_PASSWORD_BPS: "{{ db_password }}"
-        BPS_CORPORA : "{{ project_root }}/corpora"
-        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+  
 
   - name: source environment
     shell: sudo -iu {{user}} . /etc/environment

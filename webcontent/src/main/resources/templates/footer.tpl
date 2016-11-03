@@ -5,7 +5,9 @@
 			<a href="https://wikihub.berkeley.edu/display/istds/Berkeley+Prosopography+Services+Wiki+Home">BPS</a> |
 			<a href="/privacy">Privacy Policy</a> |
 			<a href="/contact">Contact us</a>
-		</div>
+			<div align="right">
+				<img src="images/neh.jpg"></a> 
+			</div>
 	</div> <!-- Close contentContainer -->
 </body>
 </html>

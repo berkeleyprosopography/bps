@@ -117,8 +117,11 @@
     - name: Change permissions.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}
 
-    - name: Pull sources from the repository.
-      git: repo={{ project_repo }} dest={{ project_root }}/code version={{ branch }} accept_hostkey=yes
+    - name: Change for corpora dir.
+      shell: chown -R {{ user }}:{{ user }} {{ project_root }}/corpora
+
+    - name: Copy sources from shared folder to local /opt folder
+      copy: src=/bps dest={{ project_root }}
       sudo_user: "{{ user }}"
 
     - name: Create the webroot directory.
@@ -128,7 +131,7 @@
       file: group={{ user }} owner={{ user }} mode=755 state=directory path=/var/www/{{ project_name }}
 
     - name: Build WAR with maven
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/code/code/bps/services
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
       #ignore_errors: yes
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
@@ -141,7 +144,7 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Copy webroot files
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/webcontent
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
@@ -155,14 +158,14 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Create missing db directory
-      file: path={{project_root}}/code/code/bps/services/common/target/db state=directory
+      file: path={{project_root}}/bps/code/bps/services/common/target/db state=directory
 
     - name: Copy db init file
-      copy: src=files/db/initdb.sql  dest={{ project_root }}/code/code/bps/services/common/target/db/initdb.sql
+      copy: src=files/db/initdb.sql  dest={{ project_root }}/bps/code/bps/services/common/target/db/initdb.sql
 
 
     - name: Create the DB
-      shell: ant create_db chdir={{ project_root }}/code/code/bps/services
+      shell: ant create_db chdir={{ project_root }}/bps/code/bps/services
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
@@ -215,7 +218,7 @@
     - name: Setup tomcat server configuration
       copy: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
       sudo: true
-      notify: restart tomcat
+      
 
 
   handlers:
@@ -232,6 +235,7 @@
       CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
   - name: restart tomcat
+    sudo: yes
     service: name=tomcat6 state=restarted
     environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
