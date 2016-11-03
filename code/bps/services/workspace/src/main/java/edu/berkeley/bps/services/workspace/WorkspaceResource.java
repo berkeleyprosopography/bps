@@ -347,9 +347,10 @@ public class WorkspaceResource extends BaseResource {
 	}
 
     /**
-     * Creates a new activity.
-     * @param activity the representation of the new activity
-     * @return Response, with the path (and so id) of the newly created activity
+     * Adds a corpus to the workspace.
+     * @param wkspId	the workspace to work with
+     * @param payload	the XML (TEI) for the corpus
+     * @return Response, with the path (and so id) of the workspace corpus
      */
     @POST
 	@Consumes("text/plain")
@@ -361,10 +362,10 @@ public class WorkspaceResource extends BaseResource {
 
 
     /**
-     * Updates an existing activity
-	 * @param id the id of the activity of interest
-     * @param activity the representation of the new activity
-     * @return Response, with the path (and so id) of the newly created activity
+     * Updates a corpus in the workspace.
+     * @param wkspId	the workspace to work with
+     * @param payload	the XML (TEI) for the corpus
+     * @return Response, with the path (and so id) of the workspace corpus
      */
     @PUT
 	@Consumes("text/plain")
@@ -372,6 +373,36 @@ public class WorkspaceResource extends BaseResource {
     public Response refreshFromCorpus(@Context ServletContext srvc, 
     		@PathParam("id") int wkspId, String payload) {
     	return addFromCorpusInt( srvc, wkspId, payload, MATCH_EXISTING_CORPUS);
+	}
+	
+    /**
+     * Deletes all corpora in the workspace.
+     * @param wkspId	the workspace to work with
+     * @return Response, with the path of the workspace
+     */
+    @DELETE
+	@Consumes("text/plain")
+	@Path("{id}/corpora")
+    public Response deleteCorpora(@Context ServletContext srvc, 
+    		@PathParam("id") int wkspId ) {
+        try {
+        	ServiceContext sc = getServiceContext(srvc);
+			Workspace workspace = getWorkspace(sc, wkspId);
+			// setCorpus() will clear out all existing resources.
+			workspace.setCorpus(sc, null);
+			UriBuilder path = UriBuilder.fromResource(WorkspaceResource.class);
+			path.path(wkspId + "/corpora/");
+            Response response = Response.ok(path.build().toString()).build();
+	        return response;
+		} catch(WebApplicationException wae) {
+			throw wae;
+		} catch(Exception e) {
+			String tmp = myClass+".addFromCorpus(): Problem deleting Corpora\n"+ e.getLocalizedMessage();
+			logger.error(tmp);
+	    	throw new WebApplicationException( 
+				Response.status(
+					Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+	    }
 	}
 	
 	private final static boolean FAIL_ON_NO_CORPUS = true;
@@ -392,6 +423,8 @@ public class WorkspaceResource extends BaseResource {
 	
     /**
      * HACK - rebuilds the maps of Persons and Clans from the corpus
+     * This is no longer needed by the app, as setCorpus takes care of the work.
+     * We leave it for now, for development and testing.
 	 * @param id the id of the activity of interest
      * @param activity the representation of the new activity
      * @return Response, with the path (and so id) of the newly created activity

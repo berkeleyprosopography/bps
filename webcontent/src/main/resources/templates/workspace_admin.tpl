@@ -81,8 +81,8 @@
 						<input id="importCorpButton_{$workspace.importedCorpusId}" type="button" value="Rebuild from Corpus"
 									onclick="workspaceSetCorpus({$workspace.id}, {$workspace.importedCorpusId},true)" />
 						&nbsp; &nbsp;
-						<input id="rebuildEntitiesButton" type="button" value="Rebuild Entities"
-									onclick="workspaceRebuildEntities({$workspace.id})" />
+						<input id="clearCorporaButton" type="button" value="Clear Corpora"
+									onclick="workspaceClearCorpora({$workspace.id})" />
 					</td>
 				</tr>
 			</table>

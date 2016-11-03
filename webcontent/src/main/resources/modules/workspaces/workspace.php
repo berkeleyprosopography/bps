@@ -46,6 +46,13 @@ if(!isset($_GET['view'])) {
 }
 $t->assign("currSubNav", $view);
 
+if(!isset($_GET['wid'])) {
+	$widSpec = '';	// default wid will use users' primary
+} else {
+	$wid = $_GET['wid'];
+	$widSpec = '&wid='.$wid;
+}
+
 if($view!='admin') {
 	$script_block = '';
 } else {
@@ -102,9 +109,13 @@ function workspaceSetCorpusRSC() {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
 			setBuildingP("Corpus imported to Workspace.");
-	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			if(!refreshingCorpus)
-				window.location.reload();
+		    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+			//if(!refreshingCorpus)
+			//	window.location.reload();
+			// Go to the Docs view, since the setCCorpus call now parses and builds entities as well
+			// Include a workspace id if one was specified on this call
+			var url = "/workspace?view=docs'.$widSpec.'";
+			window.location.href = url;
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
@@ -141,39 +152,40 @@ function workspaceSetCorpus(workspaceID, corpusId, fRefresh) {
 	enableElement("importCorpButton_"+corpusId,false);
 }
 
-// The ready state change callback method for update.
-function workspaceRebuildEntitiesRSC() {
+// The ready state change callback method for clearCorpora.
+function workspaceClearCorporaRSC() {
   if (xmlhttp.readyState==4) {
 		if( xmlhttp.status == 200 ) {
 			// Maybe this should change the cursor or something
-			setBuildingP("Entities rebuilt for Workspace.");
+			setBuildingP("Corpora cleared from Workspace.");
 	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
-			// window.location.reload();
+			// Need to rebuild the UI to import a corpus
+			window.location.reload();
 		} else {
 			alert( "Error encountered when trying to import corpus into workspace.\nResponse: "
 			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
-			setBuildingP("Entities not rebuilt for Workspace.");
+			setBuildingP("Corpora not cleared from Workspace.");
 		}
 		clearWaitCursor();
 	}
 }
 
-function workspaceRebuildEntities(workspaceID) {
+function workspaceClearCorpora(workspaceID) {
 	if( !xmlhttp ) {
-		alert( "Cannot rebuild entities for workspace - no http obj!\n Please advise BPS support." );
+		alert( "Cannot clear corpora from workspace - no http obj!\n Please advise BPS support." );
 		return;
 	}
-	var url = "'.$CFG->svcsbase.'/workspaces/"+workspaceID+"/corpora/entities";
+	var url = "'.$CFG->svcsbase.'/workspaces/"+workspaceID+"/corpora";
 	var args = "";
-	var verb = "PUT";
+	var verb = "DELETE";
 	//alert( "Preparing request: "+verb+": "+url+"?"+args );
 	xmlhttp.open(verb, url, true);
 	xmlhttp.setRequestHeader("Content-Type", "text/plain" );
-	xmlhttp.onreadystatechange=workspaceRebuildEntitiesRSC;
+	xmlhttp.onreadystatechange=workspaceClearCorporaRSC;
 	xmlhttp.send(args);
-	setBuildingP("Rebuilding entities for workspace...");
+	setBuildingP("Clearing Corpora from workspace...");
 	setWaitCursor();
-	enableElement(rebuildEntitiesButton,false);
+	enableElement(clearCorporaButton,false);
 }
 
 //
