@@ -577,8 +577,10 @@ public class Workspace extends CachedEntity {
 			this.corpus.deletePersistence(sc);
 		clearEntityMaps();
 		this.corpus = newCorpus;
-		if(this.corpus!=null)
+		if(this.corpus!=null) {
 			setupCollapser();
+			rebuildEntitiesFromCorpus(sc);
+		}
 	}
 	
 	public CollapserBase getCollapser() {
