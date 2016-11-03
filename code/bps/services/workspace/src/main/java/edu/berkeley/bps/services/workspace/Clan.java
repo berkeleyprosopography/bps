@@ -42,9 +42,12 @@ public class Clan extends Entity {
 	@XmlElement
 	private String		name;
 	
+	// name should not be in the database but resolved thorugh the NRAD
+	// name_id also not in database as retriveved via a JOIN of NRAD and NAME tables
 	
 	@XmlElement
-	private int			name_id;			
+	private int			name_id;
+	
 	@XmlElement
 	private int			nrad_id;
 	@XmlElement
@@ -66,7 +69,7 @@ public class Clan extends Entity {
 	public void CreateAndPersist(Connection dbConn) {
 		final String myName = ".CreateAndPersist: ";
 		// this is the call that actually does things
-		id = persistNew(dbConn, workspace_id, name, nrad_id, name_id);
+		id = persistNew(dbConn, workspace_id,  nrad_id);
 	}
 	
 	// this is a factory
@@ -79,11 +82,11 @@ public class Clan extends Entity {
 	
 	// This is it, the big one
 	private static int persistNew(Connection dbConn,
-			int workspace_id, String name, 
-			int nrad_id, int name_id) {
+			int workspace_id,
+			int nrad_id) {
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
-			"INSERT INTO clan(workspace_id, name, nrad_id, name_id, creation_time)"
+			"INSERT INTO clan(workspace_id, nrad_id, creation_time)"
 			+" VALUES(?,?,?,?,now())";
 		int newId = 0;
 		try {
@@ -93,9 +96,7 @@ public class Clan extends Entity {
 			
 			// prevent SQL inj (escapes + type safety)
 			stmt.setInt(1, workspace_id);
-			stmt.setString(2, name);
-			stmt.setInt(3, nrad_id);
-			stmt.setInt(4, name_id);
+			stmt.setInt(2, nrad_id);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
@@ -118,7 +119,7 @@ public class Clan extends Entity {
 		final String myName = ".persist: ";
 		// this should never be called, only here for safety
 		if(id<=CachedEntity.UNSET_ID_VALUE) {
-			id = persistNew(dbConn, workspace_id, name, nrad_id, name_id);
+			id = persistNew(dbConn, workspace_id, nrad_id);
 		} else {
 			// Note that we do not update the corpus_id - moving them is not allowed 
 			final String UPDATE_STMT = 
@@ -126,9 +127,7 @@ public class Clan extends Entity {
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setInt(1, workspace_id);
-				stmt.setString(2, name);
-				stmt.setInt(3, nrad_id);
-				stmt.setInt(4, name_id);
+				stmt.setInt(2, nrad_id);
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();

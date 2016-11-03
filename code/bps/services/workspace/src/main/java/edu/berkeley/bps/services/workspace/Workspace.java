@@ -850,6 +850,7 @@ public class Workspace extends CachedEntity {
 											+nrad.getDisplayName());
 		int clannameId = name.getId();	// get Name
 		Clan clan = clansByName.get(clannameId);
+		
 		if(clan==null) {
 			clan = new Clan(nrad);
 			clansByName.put(clannameId, clan);

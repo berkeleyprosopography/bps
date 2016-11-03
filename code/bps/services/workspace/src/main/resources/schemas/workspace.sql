@@ -69,9 +69,7 @@ DROP TABLE IF EXISTS `clan`;
 CREATE TABLE `clan` (
   `id`             INT(10) UNSIGNED PRIMARY KEY auto_increment NOT NULL,
   `workspace_id`      INT(10) UNSIGNED NOT NULL,
-  `name`           VARCHAR(255) NOT NULL,
   `nrad_id`      INT(10) UNSIGNED NOT NULL,
-  `name_id`      INT(10) UNSIGNED NOT NULL,
   `creation_time`  timestamp NOT NULL default '0000-00-00 00:00:00',
   `mod_time`       timestamp NOT NULL default CURRENT_TIMESTAMP
         on update CURRENT_TIMESTAMP,
@@ -79,8 +77,6 @@ CREATE TABLE `clan` (
       REFERENCES `workspace` (`id`),
   CONSTRAINT `clan_nrfk_2` FOREIGN KEY (`nrad_id`)
       REFERENCES `name_role_activity_doc` (`id`),
-  CONSTRAINT `clan_nafk_3` FOREIGN KEY (`name_id`)
-      REFERENCES `name` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
