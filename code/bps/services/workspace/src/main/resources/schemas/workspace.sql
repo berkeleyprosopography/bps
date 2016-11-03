@@ -76,7 +76,7 @@ CREATE TABLE `clan` (
   CONSTRAINT `clan_wsfk_1` FOREIGN KEY (`workspace_id`)
       REFERENCES `workspace` (`id`),
   CONSTRAINT `clan_nrfk_2` FOREIGN KEY (`nrad_id`)
-      REFERENCES `name_role_activity_doc` (`id`),
+      REFERENCES `name_role_activity_doc` (`id`)
 )ENGINE=MyIsam;
 SHOW WARNINGS;
 
