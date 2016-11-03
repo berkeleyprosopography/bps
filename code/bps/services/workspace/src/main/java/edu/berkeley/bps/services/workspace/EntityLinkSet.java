@@ -94,7 +94,7 @@ public class EntityLinkSet<O> extends HashMap<Entity, EntityLink<O>> {
 		for(EntityLink<O> link:values()) {
 			calcSum += link.getWeight();
 		}
-		if(calcSum!=summedWeight)
+		if(Math.abs(calcSum-summedWeight) > 0.001)
 			throw new RuntimeException("Summed weight: "+summedWeight
 					+" != calculated sum: "+calcSum);
 
