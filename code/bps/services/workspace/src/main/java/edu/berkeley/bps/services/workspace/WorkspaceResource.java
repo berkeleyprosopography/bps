@@ -22,6 +22,7 @@ import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,9 +247,26 @@ public class WorkspaceResource extends BaseResource {
         try {
         	ServiceContext sc = getServiceContext(srvc);
 			Workspace workspace = getWorkspace(sc, id);
-			return workspace.getCollapser();
+			CollapserBase collapser = workspace.getCollapser();
+			/*
+			if(logger.isTraceEnabled()) { // marshalling debug code
+			    JAXBContext JAXB_CONTEXT = JAXBContext.newInstance(CollapserBase.class); 
+			    StringWriter stringWriter = new StringWriter();
+		        Marshaller marshaller = JAXB_CONTEXT.createMarshaller();
+		        marshaller.marshal(collapser, stringWriter);
+		        logger.debug(stringWriter.toString());
+			} */
+			return collapser;
 		} catch(WebApplicationException wae) {
 			throw wae;
+		/*
+	    } catch (JAXBException jaxbe) {
+			String tmp = myClass+".getCollapser(): Problem iwth JAXB.\n"+ jaxbe.getLocalizedMessage();
+			logger.error(tmp);
+        	throw new WebApplicationException( 
+        			Response.status(
+        				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        */
 		} catch(Exception e) {
 			String tmp = myClass+".getCollapser(): Problem getting Collapser info.\n"+ e.getLocalizedMessage();
 			logger.error(tmp);

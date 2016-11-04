@@ -37,12 +37,6 @@
 			<scope>test</scope>
 		</dependency><!--$NO-MVN-MAN-VER$ -->
 		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>saxon</artifactId>
-			<version>8.7</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.13</version>

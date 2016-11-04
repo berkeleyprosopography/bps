@@ -110,13 +110,13 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		return strings;
 	}
 
-	//@XmlElementWrapper(name="matrixItems")
-	//@XmlElement(name = "matrixItemInfo")
+	@XmlElementWrapper(name="matrixItems")
+	@XmlElement(name = "matrixItemInfo")
 	public List<MatrixItemInfo> getMatrixValues() {
 		ArrayList<MatrixItemInfo> values = new ArrayList<MatrixItemInfo>();
 		for(String pairKey:rolePairWeights.keySet()) {
 			String[] pair = pairKey.split("-");
-			MatrixItemInfo item = new MatrixItemInfo(pair[1], pair[2], rolePairWeights.get(pairKey));
+			MatrixItemInfo item = new MatrixItemInfo(pair[0], pair[1], rolePairWeights.get(pairKey));
 			values.add(item);
 		}
 		return values;
@@ -126,8 +126,8 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	public void setMatrixValues(List<MatrixItemInfo> values) {
 		rolePairWeights.clear();
 		for(MatrixItemInfo item:values) {
-			String key = item.value1+"-"+item.value2;
-			rolePairWeights.put(key, item.weight);
+			String key = item.getRow()+"-"+item.getCol();
+			rolePairWeights.put(key, item.getWeight());
 		}
 	}
 

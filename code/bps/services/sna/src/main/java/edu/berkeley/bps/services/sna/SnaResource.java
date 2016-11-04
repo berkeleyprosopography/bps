@@ -33,6 +33,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 
 import org.jboss.resteasy.annotations.providers.jaxb.Wrapped;
+import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.*;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;

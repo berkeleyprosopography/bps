@@ -704,9 +704,14 @@ public class Corpus extends CachedEntity {
 		return list;
 	}
 	
+	/**
+	 * @return List of Activity Roles, sorted by the roleRank
+	 */
 	public List<ActivityRole> getActivityRoles() {
 		ArrayList<ActivityRole> list = 
 			new ArrayList<ActivityRole>(activityRolesByName.values());
+		Comparator<ActivityRole> c = new ActivityRole.RoleRankComparator();
+		Collections.sort(list, c);
 		return list;
 	}
 	

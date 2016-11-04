@@ -23,12 +23,22 @@ import org.slf4j.LoggerFactory;
 public class ActivityRole {
 	final static Logger logger = LoggerFactory.getLogger(ActivityRole.class);
 	
-	public static final String FATHER_ROLE = "Father";
-	public static final String MOTHER_ROLE = "Mother";
-	public static final String GRANDFATHER_ROLE = "Grandfather";
-	public static final String ANCESTOR_ROLE = "Ancestor";
-	public static final String CLAN_ROLE = "Clan";
-	public static final String ROLE_UNKNOWN = "Unknown Role";
+	public static final String 	BROTHER_ROLE = "Brother";
+	public static final int 	BROTHER_ROLE_RANK = 1;
+	public static final String	SISTER_ROLE = "Sister";
+	public static final int 	SISTER_ROLE_RANK = 2;
+	public static final String	FATHER_ROLE = "Father";
+	public static final int 	FATHER_ROLE_RANK = 3;
+	public static final String	MOTHER_ROLE = "Mother";
+	public static final int 	MOTHER_ROLE_RANK = 4;
+	public static final String	GRANDFATHER_ROLE = "Grandfather";
+	public static final int 	GRANDPARENT_ROLE_RANK = 5;
+	public static final String	ANCESTOR_ROLE = "Ancestor";
+	public static final int 	ANCESTOR_ROLE_RANK = 6;
+	public static final String	CLAN_ROLE = "Clan";
+	public static final int 	CLAN_ROLE_RANK = 7;
+	public static final String	ROLE_UNKNOWN = "Unknown Role";
+	public static final int 	NON_FAMILY_ROLE_RANK = 0;
 
 	private final static String myClass = "ActivityRole";
 	private static int nextId = CachedEntity.UNSET_ID_VALUE;	// temp IDs before we serialize
@@ -41,11 +51,21 @@ public class ActivityRole {
 	@XmlElement
 	private String		description;
 	
-	private boolean		familyRole;
+	private int			roleRank = 0;
 
 	public static class IdComparator implements	Comparator<ActivityRole> {
 		public int compare(ActivityRole role1, ActivityRole role2) {
 			return role1.id-role2.id;
+		}
+	}
+	
+	public static class RoleRankComparator implements	Comparator<ActivityRole> {
+		public int compare(ActivityRole role1, ActivityRole role2) {
+			int sort = role1.roleRank-role2.roleRank;
+			if(sort!=0)
+				return sort;
+			sort = role1.getName().toLowerCase().compareTo(role2.getName().toLowerCase());
+			return sort;
 		}
 	}
 	
@@ -85,11 +105,22 @@ public class ActivityRole {
 		this.name = name;
 		this.corpus = corpus;
 		this.description = description;
-		familyRole = (name.equalsIgnoreCase(FATHER_ROLE)
-		 || name.equalsIgnoreCase(MOTHER_ROLE)
-		 || name.equalsIgnoreCase(GRANDFATHER_ROLE)
-		 || name.equalsIgnoreCase(ANCESTOR_ROLE)
-		 || name.equalsIgnoreCase(CLAN_ROLE));
+		if(name.equalsIgnoreCase(BROTHER_ROLE))
+			roleRank = BROTHER_ROLE_RANK;
+		else if(name.equalsIgnoreCase(SISTER_ROLE))
+			roleRank = SISTER_ROLE_RANK;
+		else if(name.equalsIgnoreCase(FATHER_ROLE))
+			roleRank = FATHER_ROLE_RANK;
+		else if(name.equalsIgnoreCase(MOTHER_ROLE))
+			roleRank = MOTHER_ROLE_RANK;
+		else if(name.equalsIgnoreCase(GRANDFATHER_ROLE))
+			roleRank = GRANDPARENT_ROLE_RANK;
+		else if(name.equalsIgnoreCase(ANCESTOR_ROLE))
+			roleRank = ANCESTOR_ROLE_RANK;
+		else if(name.equalsIgnoreCase(CLAN_ROLE))
+			roleRank = CLAN_ROLE_RANK;
+		else
+			roleRank = NON_FAMILY_ROLE_RANK;
 	}
 
 	public ActivityRole cloneInCorpus(Connection dbConn, Corpus newCorpus) {
@@ -146,7 +177,7 @@ public class ActivityRole {
 	}
 	
 	public boolean isFamilyRole() {
-		return familyRole;
+		return roleRank!=0;
 	}
 
 	/**

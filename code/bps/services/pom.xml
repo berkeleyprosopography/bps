@@ -29,6 +29,13 @@
 
     <repositories>
         <repository>
+            <id>jboss</id>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+		<repository>
             <id>repo1</id>
             <name>Maven repo1</name>
             <url>http://repo1.maven.org/maven2</url>
