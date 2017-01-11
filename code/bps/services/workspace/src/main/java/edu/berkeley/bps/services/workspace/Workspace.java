@@ -3,6 +3,7 @@ package edu.berkeley.bps.services.workspace;
 import edu.berkeley.bps.services.common.LinkType;
 import edu.berkeley.bps.services.common.ServiceContext;
 import edu.berkeley.bps.services.common.time.EvidenceBasedTimeSpan;
+import edu.berkeley.bps.services.common.time.TimeUtils;
 import edu.berkeley.bps.services.corpus.CachedEntity;
 import edu.berkeley.bps.services.corpus.Corpus;
 import edu.berkeley.bps.services.corpus.Document;
@@ -71,11 +72,7 @@ public class Workspace extends CachedEntity {
 	private String		description;
 	@XmlElement
 	private int			owner_id;			// Each workspace is tied to a user
-	// TODO - we need to work in Years in the UI, but these are millis
-	@XmlElement
 	private double		activeLifeStdDev;
-	// TODO - we need to work in Years in the UI, but these are millis
-	@XmlElement
 	private double		activeLifeWindow;
 	// Not clear yet how we'll use this
 	//@XmlElement
@@ -89,8 +86,6 @@ public class Workspace extends CachedEntity {
 	 * declared parent's timespan. Used for deriving a parent's timespan
 	 * from an actual date of activity for the child.
 	 */
-	// TODO - we need to work in Years in the UI, but these are millis
-	@XmlElement
 	private long		generationOffset;
 	
 	private Corpus		corpus;
@@ -483,6 +478,35 @@ public class Workspace extends CachedEntity {
 	public String getDescription() {
 		return description;
 	}
+	
+	@XmlElement(name="generationOffset")
+	public double getGenerationOffsetYears() {
+		return TimeUtils.convertMillisToYears(generationOffset);
+	}
+
+	public void setGenerationOffsetYears(double years) {
+		generationOffset = TimeUtils.convertYearsToMillis(years);
+	}
+
+	@XmlElement(name="activeLife")
+	public double getActiveLifeYears() {
+		return TimeUtils.computeActiveLifeYearsFromWindow(activeLifeWindow);
+	}
+
+	public void setActiveLifeWindowYears(double years) {
+		activeLifeWindow = TimeUtils.getDefaultWindowForActiveLife(years);
+		activeLifeStdDev = TimeUtils.getDefaultStdDevForActiveLife(years);
+	}
+
+	// @XmlElement(name="activeLifeStdDev") Not clear why UI needs this
+	public double getActiveLifeStdDevYears() {
+		return TimeUtils.convertMillisToYears(Math.round(activeLifeStdDev));
+	}
+
+	/* This is dangerous - we compute it from the Life Window 
+	public void setActiveLifeStdDevYears(double years) {
+		activeLifeStdDev = TimeUtils.convertYearsToMillis(years);
+	} */
 
 	/**
 	 * @param description the description to set
@@ -598,6 +622,14 @@ public class Workspace extends CachedEntity {
 		collapser = new PersonCollapser();
 		// Add the basic rules - 
 		// TODO - this should be configured somehow, but how?
+		
+		collapser.addUIGroup("Step1A", "Step 1A: Consider equally qualified names");
+		collapser.addUIGroup("Step2A", "Step 2A: Consider equally qualified names");
+		collapser.addUIGroup("Step1B", "Step 1B: Consider compatible, but not equally qualified names");
+		collapser.addUIGroup("Step2B", "Step 2B: Consider compatible, but not equally qualified names");
+		collapser.addUIGroup("Step1C", "Step 1C: Consider the roles of persons");
+		// If we make the role matrix work across docs, add this 
+		// collapser.addUIGroup("Step2C", "Step 2C: Consider the roles of persons");
 		
 		// TODO - we need to think about collapse rules for missing forename cases
 		CollapserRuleBase rule;
@@ -799,12 +831,12 @@ public class Workspace extends CachedEntity {
 		return activeLifeStdDev;
 	}
 
-	/**
+	/** This should be set from the ActiveLife.
 	 * @param activeLifeStdDev the activeLifeStdDev to set
-	 */
 	public void setActiveLifeStdDev(double activeLifeStdDev) {
 		this.activeLifeStdDev = activeLifeStdDev;
 	}
+	 */
 
 	/**
 	 * @return the activeLifeWindow
@@ -815,6 +847,7 @@ public class Workspace extends CachedEntity {
 
 	/**
 	 * @param activeLifeWindow the activeLifeWindow to set
+	 * @see   setActiveLifeWindowYears for the typical setter from a UI or config.
 	 */
 	public void setActiveLifeWindow(double activeLifeWindow) {
 		this.activeLifeWindow = activeLifeWindow;

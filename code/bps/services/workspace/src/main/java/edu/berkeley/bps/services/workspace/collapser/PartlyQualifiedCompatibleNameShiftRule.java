@@ -15,13 +15,16 @@ public class PartlyQualifiedCompatibleNameShiftRule extends CollapserRuleBaseWit
 	private static final String DESCRIPTION = 
 		"Collapse partly qualified citations with compatible, fully qualified citations"
 		+" (e.g., \"PNa, son-of PNb\" and \"PNa, son-of PNb, in-clan CNc\")";
+	private static final String UIGROUP_INTRA = "Step1B";
+	private static final String UIGROUP_INTER = "Step2B";
 
 	public PartlyQualifiedCompatibleNameShiftRule() {
 		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
 	}
 
 	public PartlyQualifiedCompatibleNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);
+		super(SHIFT_RULE, ComputeDefaultName(myClass,intraDocument), DESCRIPTION, (intraDocument?UIGROUP_INTRA:UIGROUP_INTER),
+				weight, intraDocument);
 	}
 
 	@Override

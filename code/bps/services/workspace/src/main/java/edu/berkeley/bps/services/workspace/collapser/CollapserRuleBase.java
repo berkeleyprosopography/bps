@@ -31,6 +31,7 @@ public class CollapserRuleBase implements CollapserRule {
 	@XmlElement
 	protected double weight;
 	
+	// TODO Should think about auto-create unique name to find by name will work. Use auto-inc int
 	public CollapserRuleBase() {
 		this(SHIFT_RULE, "Unknown", 1.0, WITHIN_DOCUMENTS);
 	}

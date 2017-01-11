@@ -1,6 +1,7 @@
 package edu.berkeley.bps.services.workspace.collapser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -10,6 +11,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+
+import edu.berkeley.bps.services.common.utils.Pair;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlSeeAlso({CollapserRuleBaseWithUI.class,
@@ -22,7 +25,29 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 @XmlRootElement
 public abstract class CollapserBase implements Collapser {
 	
+	@XmlAccessorType(XmlAccessType.NONE)
+	@XmlRootElement	
+	public static class CollapserUIGroup {
+		@XmlElement
+		String name;
+		@XmlElement
+		String header;
+		
+		public CollapserUIGroup() {
+			this(null, null);
+		}
+
+		public CollapserUIGroup(String name, String header) {
+			this.name = name;
+			this.header = header;
+		}
+	}
 	
+	@XmlElementWrapper
+	protected List<CollapserUIGroup> uiGroups;
+
+	protected HashMap<String, CollapserRuleBase> allRulesByName;
+
 	protected List<CollapserRuleBase> allIntraDocRules;
 	@XmlElementWrapper
 	@XmlAnyElement
@@ -46,17 +71,21 @@ public abstract class CollapserBase implements Collapser {
 	protected List<CollapserRuleBase> corpusWideBoostRules;
 	
 	public CollapserBase() {
-		allIntraDocRules = new ArrayList<CollapserRuleBase>();
-		intraDocShiftRules = new ArrayList<CollapserRuleBase>();
-		intraDocDiscountRules = new ArrayList<CollapserRuleBase>();
-		intraDocBoostRules = new ArrayList<CollapserRuleBase>();
-		allCorpusWideRules = new ArrayList<CollapserRuleBase>();
-		corpusWideShiftRules = new ArrayList<CollapserRuleBase>();
-		corpusWideDiscountRules = new ArrayList<CollapserRuleBase>();
-		corpusWideBoostRules = new ArrayList<CollapserRuleBase>();
+		uiGroups = 					new ArrayList<CollapserUIGroup>();
+		allRulesByName = 			new HashMap<String, CollapserRuleBase>();
+		allIntraDocRules = 			new ArrayList<CollapserRuleBase>();
+		intraDocShiftRules = 		new ArrayList<CollapserRuleBase>();
+		intraDocDiscountRules = 	new ArrayList<CollapserRuleBase>();
+		intraDocBoostRules = 		new ArrayList<CollapserRuleBase>();
+		allCorpusWideRules = 		new ArrayList<CollapserRuleBase>();
+		corpusWideShiftRules = 		new ArrayList<CollapserRuleBase>();
+		corpusWideDiscountRules = 	new ArrayList<CollapserRuleBase>();
+		corpusWideBoostRules = 		new ArrayList<CollapserRuleBase>();
 	}
 	
 	public CollapserBase(CollapserBase base) {
+		uiGroups = base.uiGroups;
+		allRulesByName = base.allRulesByName;
 		allIntraDocRules = base.allIntraDocRules;
 		intraDocShiftRules = base.intraDocShiftRules;
 		intraDocDiscountRules = base.intraDocDiscountRules;
@@ -67,7 +96,23 @@ public abstract class CollapserBase implements Collapser {
 		corpusWideBoostRules = base.corpusWideBoostRules;
 	}
 
-
+	/**
+	 * Defines a group of rules for the UI 
+	 * @param rule the new rule to add
+	 */
+	public void addUIGroup(String groupName, String groupHeader) {
+		if(hasUIGroup(groupName))
+			throw new IllegalArgumentException("A UI Group with the name ["+groupName+"] already exists.");
+		uiGroups.add(new CollapserUIGroup(groupName, groupHeader));
+	}
+	
+	protected boolean hasUIGroup(String uiGroupName) {
+		for(CollapserUIGroup uig : uiGroups ) {
+			if(uig.name.equals(uiGroupName))
+				return true;
+		}
+		return false;
+	}
 
 	@Override
 	public void addRule(CollapserRuleBase rule) {
@@ -78,6 +123,14 @@ public abstract class CollapserBase implements Collapser {
 	public void addRule(CollapserRuleBase rule, String insertBefore) {
 		if(insertBefore!=null)
 			throw new UnsupportedOperationException("insertBefore support is NYI");
+		if(rule instanceof CollapserRuleBaseWithUI) {
+			String uig = ((CollapserRuleBaseWithUI)rule).getUIGroup();
+			if(!hasUIGroup(uig))
+				throw new IllegalArgumentException("Unknown UI Group specified for rule: "+uig);
+		}
+		if(allRulesByName.containsKey(rule.name)) {
+			throw new IllegalArgumentException("Collapser already has a rule with name: "+rule.name);
+		}
 		switch(rule.getType()) {
 		case CollapserRule.SHIFT_RULE:
 			if(rule.appliesWithinDocument())
@@ -102,6 +155,7 @@ public abstract class CollapserBase implements Collapser {
 			allIntraDocRules.add(rule);
 		else
 			allCorpusWideRules.add(rule);
+		allRulesByName.put(rule.name, rule);
 	}
 
 	@Override

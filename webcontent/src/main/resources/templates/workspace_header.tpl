@@ -9,7 +9,7 @@
 		{if $currSubNav!='clans'}<a href="/workspace?view=clans&wid={$wkspId}">
 		{else}<span class="currNav">{/if} 
 			Clans{if $currSubNav!='clans'}</a>{else}</span>{/if}
-		{if $currSubNav!='params'}<a href="/workspace?view=params&wid={$wkspId}">
+		{if $currSubNav!='params'}<a href="/workspaceparams?wid={$wkspId}">
 		{else}<span class="currNav">{/if} 
 			Settings{if $currSubNav!='params'}</a>{else}</span>{/if}
 		{if $currSubNav!='admin'}<a href="/workspace?view=admin&wid={$wkspId}">

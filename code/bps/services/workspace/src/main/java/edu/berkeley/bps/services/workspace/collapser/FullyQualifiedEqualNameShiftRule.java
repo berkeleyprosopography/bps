@@ -16,13 +16,16 @@ public class FullyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 		"Collapse equal, fully qualified citations" 
 		+" (e.g., \"PNa, son-of PNb, in-clan CNc\""
 		+" and \"PNa, son-of PNb, in-clan CNc\")";
+	private static final String UIGROUP_INTRA = "Step1A";
+	private static final String UIGROUP_INTER = "Step2A";
 
 	public FullyQualifiedEqualNameShiftRule() {
 		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
 	}
 
 	public FullyQualifiedEqualNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, DESCRIPTION,  weight, intraDocument);
+		super(SHIFT_RULE, ComputeDefaultName(myClass,intraDocument), DESCRIPTION, (intraDocument?UIGROUP_INTRA:UIGROUP_INTER), 
+				weight, intraDocument);
 	}
 
 	@Override

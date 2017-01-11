@@ -20,15 +20,23 @@ public class TimeUtils {
 	public static final long DAY_IN_MILLIS = 24L*60L*60L*1000L;
 	public static final long APPROX_YEAR_IN_MILLIS = (long)(365.25*(DAY_IN_MILLIS));
 	
-	public static long convertYearsToMillis(long years) {
-		return 	years*APPROX_YEAR_IN_MILLIS;
+	public static long convertYearsToMillis(double years) {
+		return 	Math.round(years*APPROX_YEAR_IN_MILLIS);
 	}
 	
-	public static double getDefaultWindowForActiveLife(int activeYears) {
+	public static double convertMillisToYears(long millis) {
+		return 	millis/APPROX_YEAR_IN_MILLIS;
+	}
+	
+	public static double getDefaultWindowForActiveLife(double activeYears) {
 		return 	activeYears*APPROX_YEAR_IN_MILLIS*2/3;
 	}
 	
-	public static double getDefaultStdDevForActiveLife(int activeYears) {
+	public static double computeActiveLifeYearsFromWindow(double window) {
+		return convertMillisToYears(Math.round(window*3/2));
+	}
+	
+	public static double getDefaultStdDevForActiveLife(double activeYears) {
 		return 	activeYears*APPROX_YEAR_IN_MILLIS*2;
 	}
 

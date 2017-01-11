@@ -14,13 +14,16 @@ public class PartlyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "PartlyQualifiedEqualNameShiftRule";
 	private static final String DESCRIPTION = "Collapse equal, partly qualified citations" 
 			+" (e.g., \"PNa, son-of PNb\" and \"PNa, son-of PNb\")";
+	private static final String UIGROUP_INTRA = "Step1A";
+	private static final String UIGROUP_INTER = "Step2A";
 
 	public PartlyQualifiedEqualNameShiftRule() {
 		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
 	}
 
 	public PartlyQualifiedEqualNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);
+		super(SHIFT_RULE, ComputeDefaultName(myClass,intraDocument), DESCRIPTION, (intraDocument?UIGROUP_INTRA:UIGROUP_INTER),
+				weight, intraDocument);
 	}
 
 	@Override

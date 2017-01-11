@@ -26,6 +26,12 @@ public interface Collapser {
 			boolean intraDocument);
 	
 	/**
+	 * Defines a group of rules for the UI 
+	 * @param rule the new rule to add
+	 */
+	public void addUIGroup(String groupName, String groupHeader);
+
+	/**
 	 * Adds a rule to this Collapser, at the end of the list 
 	 * @param rule the new rule to add
 	 */

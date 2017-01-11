@@ -26,26 +26,30 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	static final Logger logger = LoggerFactory.getLogger(RoleMatrixDiscountRule.class);
 	
 	private final static String myClass = "RoleMatrixDiscountRule";
-	private static final String DESCRIPTION = "TO DO";
+	private static final String DESCRIPTION = 
+			"Can two instances of the same name within a document possibly be the same,"
+			+" just given the associated roles for the two names?";
+	private static final String UIGROUP_INTRA = "Step1C";
+	private static final String UIGROUP_INTER = "Step2C";
 
 	protected Corpus corpus = null;
 
 	protected HashMap<String, Double> rolePairWeights = new HashMap<String, Double>();
 	
 	public RoleMatrixDiscountRule() {
-		this(myClass);
+		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
 	}
 
-	public RoleMatrixDiscountRule(String name) {
-		super(CollapserRule.DISCOUNT_RULE, name, DESCRIPTION, 1.0, 
-					CollapserRule.WITHIN_DOCUMENTS);
+	public RoleMatrixDiscountRule(double weight, boolean intraDocument) {
+		super(CollapserRule.DISCOUNT_RULE, ComputeDefaultName(myClass,intraDocument), DESCRIPTION, (intraDocument?UIGROUP_INTRA:UIGROUP_INTER), 
+				1.0, CollapserRule.WITHIN_DOCUMENTS);
 	}
 
 	
 	@Override
 	public void initialize(Workspace workspace) {
 		// Get the roles from the workspace, and build the derived Pairs
-		super.initialize(workspace, false);		// Skip adding user weights, as we do not use them
+		super.initialize(workspace, true);
 		
 		corpus = workspace.getCorpus();
 		if(corpus==null) {
@@ -93,11 +97,13 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		return discount;
 	}
 
+	/*
 	@Override
 	public List<UserWeightSetting> getUserSettingsForWeight() {
-		// We do not have this kind of UI
+		// Use those from Base - the list applies to each cell in the matrix 
 		return null;
 	}
+	*/
 
 	@Override
 	@XmlElementWrapper(name="matrixAxisValues")

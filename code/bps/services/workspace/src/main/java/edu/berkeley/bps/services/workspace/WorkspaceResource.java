@@ -184,7 +184,7 @@ public class WorkspaceResource extends BaseResource {
     @PUT
 	@Consumes("application/xml")
 	@Path("{id}")
-    public Response updateWorkspace(@Context ServletContext srvc, 
+    public Response updateWorkspace(@Context ServletContext srvc,  
     		@PathParam("id") int id, Workspace workspace){
         try {
         	ServiceContext sc = getServiceContext(srvc);
@@ -204,6 +204,69 @@ public class WorkspaceResource extends BaseResource {
             return response;
 		} catch(RuntimeException re) {
 			String tmp = myClass+".updateWorkspace(): Problem updating DB.\n"+ re.getLocalizedMessage();
+			logger.error(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+	}
+
+    /**
+     * Updates an existing workspace param or params
+	 * @param id the id of the workspace of interest
+     * @param ui the URI context with query params and values to update
+     * @return Response, with the path (and so id) of the newly created workspace
+     */
+    @PUT
+	//@Consumes("application/xml") No Payload - just params
+	@Path("{id}/params")
+    public Response updateWorkspaceParams(@Context ServletContext srvc,  @Context UriInfo ui,
+    		@PathParam("id") int id ){
+        try {
+        	ServiceContext sc = getServiceContext(srvc);
+    		Workspace workspace = Workspace.FindByID(sc, id);
+    		if(workspace==null) {
+            	throw new WebApplicationException( 
+        			Response.status(Response.Status.NOT_FOUND).entity(
+        				"No workspace found with id: "+id).build());
+       		}
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			// look for active business life setting (years)
+			String activeLifeParam = queryParams.getFirst("life");
+			// If set, parse and set the new ActiveLifeWindow (in years).
+			if(activeLifeParam!=null) {
+				try {
+				double activeLife = Double.parseDouble(activeLifeParam);
+				workspace.setActiveLifeWindowYears(activeLife);
+				} catch( NumberFormatException nfe ) {
+					String tmp = myClass+".updateWorkspaceParams(): Ignoring bad argument for life param:"
+								+activeLifeParam;
+					logger.error(tmp);
+					logger.debug(nfe.getLocalizedMessage());
+	            	throw new WebApplicationException( 
+	            			Response.status( Response.Status.BAD_REQUEST).entity( tmp ).build());
+				}
+			}
+			// look for generation gap setting (years)
+			String generationParam = queryParams.getFirst("gen");
+			// If set, parse and set the new ActiveLifeWindow (in years).
+			if(generationParam!=null) {
+				try {
+				double generation = Double.parseDouble(generationParam);
+				workspace.setGenerationOffsetYears(generation);
+				} catch( NumberFormatException nfe ) {
+					String tmp = myClass+".updateWorkspaceParams(): Ignoring bad argument for generation param:"
+								+generationParam;
+					logger.error(tmp);
+					logger.debug(nfe.getLocalizedMessage());
+	            	throw new WebApplicationException( 
+	            			Response.status( Response.Status.BAD_REQUEST).entity( tmp ).build());
+				}
+			}
+            Response response = Response.ok().build();
+            return response;
+		} catch(RuntimeException re) {
+			String tmp = myClass+".updateWorkspaceParams(): Problem updating Params.\n"+ re.getLocalizedMessage();
 			logger.error(tmp);
         	throw new WebApplicationException( 
     			Response.status(

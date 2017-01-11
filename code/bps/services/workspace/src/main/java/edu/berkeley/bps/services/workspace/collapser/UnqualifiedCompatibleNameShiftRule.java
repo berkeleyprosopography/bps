@@ -15,13 +15,16 @@ public class UnqualifiedCompatibleNameShiftRule extends CollapserRuleBaseWithUI 
 		"Collapse unqualified citations with compatible, more qualified citations"
 		+" (e.g., \"PNa\" and \"PNa, son-of PNb, in-clan CNc\","
 		+" OR, \"PNa\" and \"PNa, son-of PNb\")";
+	private static final String UIGROUP_INTRA = "Step1B";
+	private static final String UIGROUP_INTER = "Step2B";
 
 	public UnqualifiedCompatibleNameShiftRule() {
 		this(WEIGHT_ALWAYS, WITHIN_DOCUMENTS);
 	}
 
 	public UnqualifiedCompatibleNameShiftRule(double weight, boolean intraDocument) {
-		super(SHIFT_RULE, myClass, DESCRIPTION, weight, intraDocument);
+		super(SHIFT_RULE, ComputeDefaultName(myClass,intraDocument), DESCRIPTION, (intraDocument?UIGROUP_INTRA:UIGROUP_INTER),
+				weight, intraDocument);
 	}
 
 	@Override

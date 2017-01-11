@@ -32,14 +32,18 @@ public class CollapserRuleBaseWithUI extends CollapserRuleBase
 	@XmlElement(name = "userWeight")
 	protected List<UserWeightSetting> settingsList;
 	
+	@XmlElement
+	protected String uiGroupName;
+	
 	public CollapserRuleBaseWithUI() {
 		super();
 		settingsList = new ArrayList<UserWeightSetting>();
 	}
 	
-	public CollapserRuleBaseWithUI(int type, String name, String description, double weight, boolean intraDocument) {
+	public CollapserRuleBaseWithUI(int type, String name, String description, String uiGroupName, double weight, boolean intraDocument) {
 		super(type, name, weight, intraDocument);
 		this.description = description;
+		this.uiGroupName = uiGroupName;
 		settingsList = new ArrayList<UserWeightSetting>();
 	}
 
@@ -86,6 +90,23 @@ public class CollapserRuleBaseWithUI extends CollapserRuleBase
 	}
 	
 	/**
+	 * @return a group name for this rule. Matches the name of a Collapser.CollapserUIGroup.
+	 */
+	@Override
+	public String getUIGroup() {
+		return uiGroupName;
+	}
+	
+	/**
+	 * Sets the group name for this rule. Matches the name of a Collapser.CollapserUIGroup.
+	 * @param uiGroupName
+	 */
+	@Override
+	public void setUIGroup(String uiGroupName) {
+		this.uiGroupName = uiGroupName;
+	}
+	
+	/**
 	 * Provides a list of names and values that can be used in a SELECT
 	 * or equivalent list of options for the weight to use on a CollapserRule
 	 * @return a list of named values for the weight of this rule,
@@ -101,5 +122,8 @@ public class CollapserRuleBaseWithUI extends CollapserRuleBase
 		throw new RuntimeException("CollapserRuleBaseWithUI.evaluate should always be overridden");
 	}
 
+	protected static String ComputeDefaultName(String base, boolean intraDoc) {
+		return base+"_"+(intraDoc?"I":"A");
+	}
 
 }

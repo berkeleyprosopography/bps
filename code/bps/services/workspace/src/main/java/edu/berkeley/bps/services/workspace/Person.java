@@ -41,7 +41,7 @@ public class Person extends Entity {
 	
 	public static final int DEFAULT_ACTIVE_LIFE_YRS = 15;
 	public static final long DEFAULT_GENERATION_OFFSET = 
-								TimeUtils.convertYearsToMillis(DEFAULT_ACTIVE_LIFE_YRS);
+								TimeUtils.convertYearsToMillis((double)DEFAULT_ACTIVE_LIFE_YRS);
 	public static final double DEFAULT_ACTIVE_LIFE_WINDOW = 
 		TimeUtils.getDefaultWindowForActiveLife(DEFAULT_ACTIVE_LIFE_YRS);
 	public static final double DEFAULT_ACTIVE_LIFE_STDDEV =
@@ -266,6 +266,7 @@ public class Person extends Entity {
 		return nQuals;
 	}
 
+	// TODO Need to make this more general, and respect the configuration for #qualifications
 	/**
 	 * @return true if this has a declared forename, and 1 and only one qualifier
 	 */
@@ -275,6 +276,7 @@ public class Person extends Entity {
 			((declaredFather!=null) != (declaredClan!=null));
 	}
 
+	// TODO Need to make this more general, and respect the configuration for #qualifications
 	/**
 	 * @return true if this has a declared forename, and at least two qualifiers
 	 */

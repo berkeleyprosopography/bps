@@ -1,7 +1,7 @@
 {include file="header.tpl"}
 {include file="workspace_header.tpl"}
 
-<h1>Set Model Parameters</h1>
+<h1>Set Model Parameters for Workspace: {$workspace.name}</h1>
 <h3>Background on the model </h3>
 <p>The BPS analyzer will try to disambiguate among citations using the same name(s). To do this, it will basically model a new citation-person for each name it finds in a document (including fathers, grandfathers, etc. that are mentioned as qualifiers to the named actors). Then, it will attempt to collapse some of those citation-persons to get to the set of actual (real world) persons mentioned in all the corpus documents. Each citation-person is compared to other citation-persons, and a set of rules is applied to determine how likely it is that the two citations are the same person. The analyzer proceeds in two steps: first it considers all the citation-persons within each single document (<em>intra-document</em>), and then it considers the citation-persons across the entire corpus (<em>inter-document</em>). </p>
 <p>When comparing two citation-persons, the analyzer will first require that there is no conflicting information about the two citation-persons - e.g., if they have different declared fathers, they will be considered as distinct, and will not be collapsed. The rules below allow you to configure whether specific roles must be considered to be distinct, and to control how strong the likelihood that two persons with partial matching name information are the same real world person. </p>
@@ -12,14 +12,28 @@
   <tr><td class="paramDesc"><i><b>Number of qualifications (father/grandfather/ancestor/clan) in
       addition to forename required to consider a name citation &quot;fully
       qualified&quot;</b></i></td>
-    <td width="150px" class="paramDesc" style="text-align:right;"><input type="text" value="2" size="5" style="text-align:right;"  class="bpsFormInput"/></td>
+    <td width="150px" class="paramDesc" style="text-align:right;"><input type="text" value="2" size="5" style="text-align:right;" disabled="disabled" class="bpsFormInput"/></td>
   </tr>
   <tr><td class="paramDesc"><b><i>Assumed typical length of active business life (years)</i></b></td>
-    <td width="150px" class="paramDesc" style="text-align:right;"><input type="text" value="25" size="5" style="text-align:right;"  class="bpsFormInput"/></td>
+    <td width="150px" class="paramDesc" style="text-align:right;">
+		<input id="I_ALife" type="text" value="{$workspace.activeLife}" size="5"
+			style="text-align:right;"  class="bpsFormInput" onkeyup="enableElement('U_gen',true)"/>
+	</td>
   </tr>
   <tr><td class="paramDesc"><b><i>Assumed typical separation of generations (years)</i></b></td>
-    <td width="150px" class="paramDesc" style="text-align:right;"><input type="text" value="15" size="5" style="text-align:right;"  class="bpsFormInput"/></td>
+    <td width="150px" class="paramDesc" style="text-align:right;">
+		<input id="I_GenSep" type="text" value="{$workspace.generationOffset}" size="5" style="text-align:right;"
+			class="bpsFormInput" onkeyup="enableElement('U_gen',true)"/>
+	</td>
   </tr>
+  <tr>
+    <td class="paramDesc"></td>
+    <td width="150px" class="paramDesc" style="text-align:right;">
+		<input disabled id="U_gen" type="button" value=" Update " size="5" style="text-align:right;" 
+				class="bpsFormInput" onclick="updateGenParams('{$workspace.id}','I_ALife','I_GenSep')" />
+	</td>
+  </tr>
+
 </table>
 
 <h1>Step 1: Intra-document rules:</h1>
