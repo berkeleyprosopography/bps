@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5"> -->
+<web-app>
+	<display-name>BPSResteasyServlet</display-name>
+	
+	<!-- db connect info -->
+	<context-param>
+		<param-name>bps.db.host</param-name>
+		<!-- <param-value>bpsdev.db.6836812.hostedresource.com</param-value> -->
+		<param-value>localhost</param-value>
+	</context-param>
+	<context-param>
+		<param-name>bps.db.dbname</param-name>
+		<param-value>bpsdev</param-value>
+	</context-param>
+	<context-param>
+		<param-name>bps.db.dbuser</param-name>
+		<param-value>bpsdev</param-value>
+	</context-param>
+	<context-param>
+		<param-name>bps.db.dbpass</param-name>
+		<param-value>G0Names!</param-value>
+	</context-param>
+	<context-param>
+		<param-name>bps.db.dburl</param-name>
+		<param-value>jdbc:mysql://localhost/bpsdev?user=bpsdev&amp;password=G0Names!</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>resteasy.scan</param-name>
+		<param-value>true</param-value>
+	</context-param>         
+	<listener>
+		<listener-class>
+       org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
+		</listener-class>
+	</listener>
+	<listener>
+		<listener-class>
+       edu.berkeley.bps.services.webapp.BPSServletContextListener
+		</listener-class>
+	</listener>
+	<servlet>
+		<servlet-name>Resteasy</servlet-name>
+		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+	</servlet>         
+	<!-- Catch all requests -->
+	<servlet-mapping>
+		<servlet-name>Resteasy</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+

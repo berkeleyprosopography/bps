@@ -1,0 +1,301 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>New Page 1</title>
+</head>
+
+<body>
+
+<p>Rules to apply:</p>
+<p>Collapse rules. These are expressed as a transfer of weight from one Person
+to another. Here, &quot;weight&quot; is the amount of uniqueness weight.
+Modifiers may boost or discount the transfer. Once all rules have been applied,
+we normalize the weights for the Person under consideration. If the resulting
+remaining weight on the Person under consideration is less than the minimum
+threshold for uniqueness, the Person under consideration will be eliminated
+(weight fully transferred to the others proportionate to the just completed
+transfers) and linked to the others. In any case, we only consider each Person
+once for collapse into others (the operation is directional and factorial, not n<sup>2</sup>).</p>
+<h4>Exclusive Rule Set around Names:</h4>
+<p>For each primary Person in the context (local or global), consider later
+candidates in the context (assuming a list, consider candidates <i>after </i>this
+Person in the list, so that each pair is considered just once). Can filter to
+compatible candidates (matching forename). Logically match first rule for each other candidate, skip rest of rules.
+After considering all other candidates, will have a weight distribution set for
+the Person. Normalize this weight distribution. When we shift weight, should
+also shift weight for any corresponding Father/Grandfather etc. Persons. Once
+done with primaries, consider the fathers, grandfathers, etc. Could treat
+&quot;father&quot; as a role in the doc, and just use existing rules.</p>
+<p>Assume that we consider most qualified persons first (does this matter?).</p>
+<p>Once we are done considering a Person against all other candidates, a
+post-rule evaluator can be applied to filter noise from the results. This will
+remove all remaining weight from a Person below a given weight threshold, and
+renormalize the context.&nbsp;</p>
+<p>Once we are done with a Person in a context, we have a set of redirects for
+that Person.&nbsp;</p>
+<h3>Intra-document rules:</h3>
+<p>Note that intra-document rules ignore dates, since all the references
+implicitly share the same date range, and do not (yet) have any other date info.</p>
+<p>In all the following:</p>
+<ul>
+  <li>&quot;<b>simple</b>&quot; references are those with only a forename</li>
+  <li>&quot;<b>partially qualified</b>&quot; references are those with a
+    forename and at least one qualifier (patronym, ancestor, clan), but fewer
+    than the minimum to be &quot;fully qualified&quot;</li>
+  <li>&quot;<b>fully qualified</b>&quot; references are those with a forename
+    and at least <i>N</i> qualifiers (patronym, ancestor, clan), where <i>N</i>
+    is a parameter set for the current corpus. <i>[NB: The default for N in
+    HBTIN is 2 (tri-partate identification), but in certain contexts with a
+    limited population, a value of 1 may be sufficient to reasonably
+    disambiguate persons (given the additional constraints of dates)].</i></li>
+</ul>
+<p>Note also that if a Person was declared with a forename/patronym/clan name,
+etc., but the associated name is not recognizable due to damage, the Person is
+still considered to have that name for the purposes of defining the level of
+qualification. However, the associated name is marked as &quot;<i>unknown</i>&quot;,
+and in comparing names, will be considered <i>compatible</i> with other names,
+but <i>less-specified</i>. Thus, for example, [<i>Joe-bob</i> son-of <i>Unknown</i>
+in-clan <i>Flintstone]</i> is considered fully qualified; it is compatible and
+less qualified (but not equal) to [<i>Joe-bob</i> son-of <i>Fred</i> in-clan <i>Flintstone</i>].</p>
+<ol>
+  <li><i><b>Collapse partially or fully qualified Persons with same generational
+    rank in the document, with equal references, in the same document, with
+    compatible roles for the generational rank.<br>
+    </b>We consider the generationalRank in considering the roles, since the
+    primary persons cannot collapse across certain roles, but fathers often can.</i><br>
+    If roleInNRAD==other.roleInNRAD and !isDeclaredSimple() and
+    Roles.areCompatible(declaredRole, other.declaredRole, roleInNRAD) and
+    EQUAL==compareNames(declaredName, other.declaredName), collapse the two.
+    Collapse the lower weight Person into the higher weight person. Settings are:
+    <ol>
+      <li>Always: 100%
+        (<i>default for HBTIN</i>)</li>
+      <li>Aggressive: 75%</li>
+      <li>Moderate: 50%</li>
+      <li>Conservative: 30%</li>
+      <li>Ignore/No: 0%<br>
+      </li>
+    </ol>
+  </li>
+  <li><b><i>Collapse simple references into more qualified references in the same
+    document, with the same generational rank in the document, and with a
+    compatible role.</i></b><br>
+    If roleInNRAD==other.roleInNRAD and isDeclaredSimple() and
+    Roles.areCompatible(declaredRole, other.declaredRole) and COMPAT_LESS_INFO==compareNames(declaredName,
+    other.declaredName), collapse into others. Settings are:
+    <ol>
+      <li>Always: 100%
+        (<i>default for HBTIN</i>)</li>
+      <li>Aggressive: 75%</li>
+      <li>Moderate: 50%</li>
+      <li>Conservative: 30%</li>
+      <li>Ignore/No: 0%<br>
+      </li>
+    </ol>
+  </li>
+  <li><b><i>Collapse less qualified references into more qualified references in the
+    same document, with the same generational rank in the document, and with a
+    compatible role.</i></b><br>
+    If roleInNRAD==other.roleInNRAD and&nbsp; !isDeclaredSimple() and
+    Roles.areCompatible(declaredRole, other.declaredRole) and COMPAT_LESS_INFO==compareNames(declaredName,
+    other.declaredName), collapse into other. Settings are:
+    <ol>
+      <li>Always: 100%</li>
+      <li>Aggressive: 75%</li>
+      <li>Moderate: 50%</li>
+      <li>Conservative: 30%</li>
+      <li>Ignore/No: 0% <i>(default for HBTIN?)</i>
+      </li>
+    </ol>
+  </li>
+</ol>
+<h3>Inter-document rules:</h3>
+<ol>
+  <li><b><i>Collapse fully qualified and equal references across documents.</i></b><br>
+    If !declaredInSameDoc(other) and isDeclaredFullyQualified() &amp;&amp;
+    EQUAL==compareNames(declaredName, other.declaredName), collapse into other.
+    Settings are:
+    <ol>
+      <li>Always - transfer all weight to other <i>(default for test)</i></li>
+      <li>Probably - transfer 75%</li>
+      <li>Maybe - transfer 50%</li>
+      <li>Ignore/No - transfer 0%<br>
+      </li>
+    </ol>
+  </li>
+  <li><b><i>Collapse simple references into more qualified names in other
+    documents.</i></b><br>
+    If !declaredInSameDoc(other) and isDeclaredSimple() and COMPAT_LESS_INFO==compareNames(declaredName,
+    other.declaredName), collapse into other. Settings are a&nbsp; function of
+    the number of qualifiers on other. Allow both multiplier and max settings in
+    raw mode, but simplify as:
+    <ol>
+      <li>Always without preference: 100% * (# of qualifiers on other), Max 100%</li>
+      <li>Aggressive, prefer more qualified Persons: 25% * (# of qualifiers on
+        other), Max 100%</li>
+      <li>Moderate, prefer more qualified Persons: 20% * (# of qualifiers on
+        other), Max 60%</li>
+      <li>Conservative, prefer more qualified Persons: 10% * (# of qualifiers on
+        other), Max 30%</li>
+      <li>Ignore/No - transfer 0%, Max 0%<br>
+      </li>
+    </ol>
+  </li>
+  <li><b><i>Collapse less qualified references into more qualified names in
+    other documents.</i></b><br>
+    If !declaredInSameDoc(other) and !isDeclaredSimple() and COMPAT_LESS_INFO==compareNames(declaredName,
+    other.declaredName), collapse into other. Settings are a&nbsp; function of
+    the number of shared names/ qualifiers (includes forename as well as
+    others):
+    <ol>
+      <li>Always: 100% * (# of shared qualifiers), Max 100%</li>
+      <li>Aggressive: 30% * (# of shared qualifiers), Max 100%</li>
+      <li>Moderate: 20% * (# of shared qualifiers), Max 80%</li>
+      <li>Conservative: 15% * (# of shared qualifiers), Max 60%</li>
+      <li>Ignore/No - transfer 0%, Max 0%</li>
+    </ol>
+  </li>
+</ol>
+<h4>Independent Rule Set around Dates:</h4>
+<p>This is a discount on transfer based upon dates. If we use a probability
+density function with user-defined standard deviation values (which will
+initially be rough estimates), then we can estimate the probability that two dates
+could reasonably occur within a single life-/work-span. The equation for
+probability P is: </p>
+<blockquote>
+  <p>P = f(<font face="Symbol">d</font>,<font face="Symbol">s</font>)<font face="Symbol">/</font>f<sub>max</sub>(<font face="Symbol">d</font>,<font face="Symbol">s</font>)</p>
+</blockquote>
+<p>where:</p>
+<blockquote>
+  <ul>
+    <li><font face="Symbol">d</font> is the delta (in years) between two citations</li>
+    <li><font face="Symbol">s</font> is the standard deviation (in years) for the given life-/work-span</li>
+    <li>f(<font face="Symbol">d</font>,<font face="Symbol">s</font>) is a probability
+  density function for the delta <font face="Symbol">d</font>, given the
+  standard deviation <font face="Symbol">s</font>. This is computed as:
+      <ul>
+        <li>(1/<font face="Symbol">s</font>)e<sup>-<font face="Symbol">d</font><sup>2</sup>/(2<font face="Symbol">s</font><sup>2</sup>))</sup></li>
+      </ul>
+    </li>
+    <li>f<sub>max</sub>(<font face="Symbol">d</font>,<font face="Symbol">s</font>) is
+  the maximum value for f(<font face="Symbol">d</font>,<font face="Symbol">s</font>),
+  used to normalize the probability P.</li>
+  </ul>
+</blockquote>
+<p>There are three different spans of interest: </p>
+<ol>
+  <li>Workspan W, the duration over which someone can be expected to be a
+    principle in transactions (activities within the documents).</li>
+  <li>Lifespan L, generally inferred from the active workspan, but with
+    constraints</li>
+  <li>Fathering-span F, the range over which someone can be expected to have
+    fathered children.</li>
+</ol>
+<p>Some reasonable estimates for the standard deviations for these three spans,
+assuming a common workspan of age 20 to 30, a fathering- span of 15-35 and a
+lifespan ranging commonly to 40 and less commonly into the 50s (the larger
+values below are for outliers up to 70), would be: </p>
+<ul>
+  <li><font face="Symbol">
+  s</font><sub><font face="Courier New">W</font></sub> ~= 5&nbsp;</li>
+  <li><font face="Symbol">
+  s</font><font face="Courier New"><sub>F</sub></font> ~= 7-8&nbsp;</li>
+  <li><font face="Symbol">
+  s</font><font face="Courier New"><sub>L</sub></font> ~= 11-15&nbsp;</li>
+</ul>
+<p>Given two citations, e.g, two Persons from original texts, we can multiply
+any transfer of weight by the obtained probability. More generally, we can apply
+these discounts to all the possibilities for weight transfer, and then normalize
+the results to get a revised weight transfer that accounts for the dates.&nbsp; </p>
+<h3>Modeling dates for collapsed Persons </h3>
+<p>If we have multiple dates for a person from different citations that have
+been collapsed, we get a defined span for each of the spans of interest.
+However, a question arises about whether we should consider the date from a
+partial transfer the same as for the original citation or a full transfer. If
+the partial date is within the span otherwise defined by full-weight dates, it
+should not matter. However, if the partial-weight date would extend the range of
+the span, how much should we trust this? Degenerate case with 5% transfer at
+extreme range of likely dates should not move span much.&nbsp; </p>
+<p>The inferred span is a range over the data, centered on the explicit dates.
+These need to be considered with their associated weights. The center point of
+the dates is given by: </p>
+<blockquote>
+  <p>d<sub>center</sub> = (<font face="Symbol">S</font><sub>1..n</sub>(d<sub>i</sub>*w<sub>i</sub>))
+  /<font face="Symbol">S</font><sub>1..n</sub>w<sub>i</sub>&nbsp; </p>
+</blockquote>
+<p>where </p>
+<ul>
+  <li>d<sub>i</sub> is the i<i>th</i> date value</li>
+  <li>w<sub>i</sub> is the weight associated with the i<i>th</i> date value.</li>
+</ul>
+<p>Thus an inferred span of duration dur runs from d<sub>center</sub>-dur/2 to d<sub>center</sub>+dur/2.&nbsp; </p>
+<p>To consider the reasonableness of collapsing a new Person with date d<sub>new</sub>
+with an inferred span, we compute the probability function given above using d<sub>new</sub>
+and d<sub>center</sub> for the span. If the computed probability is above some
+threshold, then we add it to the span, weighted with the probability. For two
+computed spans, we just consider the delta of the two weighted center
+points.&nbsp; </p>
+<p>Note: this means that a span can have computed years for output, but what
+we're really working with are just the weighted values and the computed
+centerpoint. We should cache the two sums, so we can add new values quickly. For
+derived spans, we are just using the centerpoint from the source span, and a
+different <font face="Symbol">
+  s</font> value. If we derive live from fathering, we may have to consider the
+asymmetric overlap (since fathering cannot really occur before about 14, but can
+occur until nearly the end of life (for these ranges)). However, we can probably
+ignore that for the near future. </p>
+<p>To compute the span of a father based upon the citation of the son, we will
+just shift the centerpoint by a configured mean for length of a generation. This
+somewhat inaccurate, but is about all we can do. We <i>could</i> consider
+adjusting the <font face="Symbol">
+  s</font> value for the derived span to reflect the decreased confidence in our
+numbers. This would require that the probability function be computed for both
+Persons (when they do not have a common <font face="Symbol">
+  s</font> value), and we then take the midpoint of the two values.&nbsp; </p>
+<p>Derived spans will thus need to model the centerpoint like an
+evidence-based span, but will use the referenced span as the first evidence
+date. Collapsed Persons will contribute new dates as for evidence-based
+spans.&nbsp;<b><i>Done.</i></b> </p>
+<p><b>Should we loop over all Persons and first deal with the evidence-based
+spans, before we attempt to consider the derived ones? Probably yes.&nbsp;</b> </p>
+<h2><b>Newest:</b> </h2>
+<p><b>For each name, consider all the equal citations. Apply collapse rules,
+pushing weight around, considering dates, etc.&nbsp; Then, for each of the
+associated docs, adjust the link weights to the resulting set. If adjust these
+weights, then should adjust the weights for the associated fathers as well (if
+fold P1 into P2, then P1-&gt;F1 must be folded into P2-&gt;F2, since the P-F
+links are asserted facts).&nbsp; Fathers' dates derived from sons', so need not
+add any times. However, if merge Fathers as declared into principles, then start
+adding dates. Can consider first filtering the low weights.&nbsp; Implies a map
+that associates forename to citations.&nbsp;</b> </p>
+<p><b>Should we do the fathers later? Would be better to have better date range
+before try to do fathers, etc. Can then treat each father as a new posited
+Person that we consider against all the existing Persons. Since we favor the
+ones with more weight, the fathers will either remain, or merge into some
+existing Person.</b> </p>
+<p><b>Should do the most qualified names first, since they have the highest
+probability of being right, and so we expand date ranges with some confidence.
+Probably need a rule that combine if likelihood &gt; 0.5 or something, or boost
+the probability (1-((1-p)**B)) where B is between 1 and n; start with something
+like 1.5.</b> </p>
+<p>&nbsp; </p>
+<p>&nbsp; </p>
+<p>Constraints:<br>
+If some test, can preclude above rule. Settings are: </p>
+<ol>
+  <li>Constrain completely (ignore constrained rule) (multiply transfer by 0)</li>
+  <li>Constrain mostly (reduce most of impact of rule) (multiply transfer by
+    0.25)</li>
+  <li>Constrain somewhat (reduce some of impact of rule) (multiply transfer by
+    0.75)</li>
+  <li>Not an issue. Do not constrain or reduce impact of rule (multiply transfer
+    by 1).</li>
+</ol>
+
+</body>
+
+</html>

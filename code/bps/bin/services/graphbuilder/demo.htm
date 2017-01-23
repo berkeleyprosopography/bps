@@ -1,0 +1,118 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Intra</title>
+</head>
+
+<body>
+
+<h2>General settings:</h2>
+
+<table cellpadding="10px" style="background-color:#e8941a; margin-left:20px;">
+  <tr><td><i><b>Number of qualifications (father/grandfather/ancestor/clan) in
+      addition to forename required to consider a name citation &quot;fully
+      qualified&quot;</b></i></td>
+    <td width="150px"><input type="text" value="2" size="5" style="text-align:right;" /></td>
+  </tr>
+  <tr><td><b><i>Assumed typical length of active business life (years)</i></b></td>
+    <td width="150px"><input type="text" value="25" size="5" style="text-align:right;" /></td>
+  </tr>
+  <tr><td><b><i>Assumed typical length of whole life (years)</i></b></td>
+    <td width="150px"><input type="text" value="40" size="5" style="text-align:right;" /></td>
+  </tr>
+</table>
+
+<h2>Intra-document rules:</h2>
+
+
+<table cellpadding="10px" style="background-color:#eee; margin-left:20px;">
+  <tr><td><h3><i>These rules are applied first, to collapse Persons within a single document.</i></h3></td>
+    <td width="150px"></td>
+  </tr>
+  <tr><td><b>Collapse partially or fully qualified Persons with same generational
+    rank in the document, with equal references, in the same document, with
+    compatible roles for the generational rank.
+    </b>
+      <p>We consider the generationalRank in considering the roles, since the
+    primary persons cannot collapse across certain roles, but fathers often can.</p>
+    </td>
+    <td width="150px"><select>
+      <option selected="1">Always: 100%</option>
+      <option>Aggressive: 75%</option>
+      <option>Moderate: 50%</option>
+      <option>Conservative: 30%</option>
+      <option>Ignore/No: 0%</option>
+    </select></td>
+  </tr>
+  <tr><td><b>Collapse simple references into more qualified references in the same
+    document, with the same generational rank in the document, and with a
+    compatible role.</b></td>
+    <td width="150px"><select>
+      <option>Always: 100%</option>
+      <option selected="1">Aggressive: 75%</option>
+      <option>Moderate: 50%</option>
+      <option>Conservative: 30%</option>
+      <option>Ignore/No: 0%</option>
+    </select>
+    </td>
+  </tr>
+  <tr><td><b>Collapse less qualified references into more qualified references in the
+    same document, with the same generational rank in the document, and with a
+    compatible role.</b></td>
+    <td width="150px"><select>
+      <option>Always: 100%</option>
+      <option>Aggressive: 75%</option>
+      <option>Moderate: 50%</option>
+      <option>Conservative: 30%</option>
+      <option selected="1">Ignore/No: 0%</option>
+    </select>
+    </td>
+  </tr>
+</table>
+
+<h2>Inter-document rules:</h2>
+
+<table cellpadding="10px" style="background-color:#eee; margin-left:20px;">
+  <tr><td><h3><i>These rules are applied next, to collapse Persons across
+      documents within a corpus.</i></h3></td>
+    <td width="150px"></td>
+  </tr>
+  <tr><td><b>Collapse fully qualified and equal references across documents.</b></td>
+    <td width="150px"><select>
+      <option selected="1">Always: 100%</option>
+      <option>Aggressive: 75%</option>
+      <option>Moderate: 50%</option>
+      <option>Conservative: 30%</option>
+      <option>Ignore/No: 0%</option>
+    </select></td>
+  </tr>
+  <tr><td><b>Collapse simple references into more qualified names in other
+    documents.</b></td>
+    <td width="150px"><select>
+      <option>Always: 100%</option>
+      <option>Aggressive: 75%</option>
+      <option>Moderate: 50%</option>
+      <option selected="1">Conservative: 30%</option>
+      <option>Ignore/No: 0%</option>
+    </select>
+    </td>
+  </tr>
+  <tr><td><b>Collapse less qualified references into more qualified names in
+    other documents.</b></td>
+    <td width="150px"><select>
+      <option>Always: 100%</option>
+      <option>Aggressive: 75%</option>
+      <option selected="1">Moderate: 50%</option>
+      <option>Conservative: 30%</option>
+      <option>Ignore/No: 0%</option>
+    </select>
+    </td>
+  </tr>
+</table>
+
+</body>
+
+</html>
