@@ -74,6 +74,37 @@ function updateGenParams(workspaceID, ALifeElName, GenSepElName) {
 	enableElement( "U_gen", false );
 }
 
+// The ready state change callback method for update.
+function updateSimpleRuleWeightRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Workspace Collapser Rule weight updated.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to update Workspace Collapser Rule weight.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+
+function updateSimpleRuleWeight(workspaceID, RuleName, Weight) {
+	var weightVal = checkNumberRange( Weight, 0, 1.0, "an active life duration" );
+	if( isNaN(weightVal))
+		return;
+
+	if( !xmlhttp ) {
+		alert( "Cannot update Workspace Collapser Rule - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/workspaces/"+workspaceID+"/collapserrule?name="+RuleName+"&weight="+weightVal;
+	// alert( "Preparing request: PUT: "+url);
+	xmlhttp.open("PUT", url, true);
+	xmlhttp.onreadystatechange=updateSimpleRuleWeightRSC;
+	xmlhttp.send();
+}
+
 function setStatusP(str) {
 	var el = document.getElementById("statusP");
 	if(el != null)

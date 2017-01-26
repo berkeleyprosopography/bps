@@ -57,14 +57,17 @@
           <tr>
               <td class="paramDesc">{$collapser.intra_groups[group].rules[rule].description}</td>
               <td class="paramDesc" style="text-align:right;">
-                <select name="select1_{$collapser.intra_groups[group].name}_{$collapser.intra_groups[group].rules[rule].name}" class="bpsFormInput">
+                <select name="select1_{$collapser.intra_groups[group].name}_{$collapser.intra_groups[group].rules[rule].name}"
+                    class="bpsFormInput"
+                    onchange="updateSimpleRuleWeight('{$workspace.id}',
+                                '{$collapser.intra_groups[group].rules[rule].name}',this.value);" >
                   {section name=userWeight loop=$collapser.intra_groups[group].rules[rule].userWeights}
                     <option 
                       value="{$collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight}"
                       {if $collapser.intra_groups[group].rules[rule].weight
                         == $collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight }
                          selected="1" 
-                      {/if}>
+                      {/if} >
                      {$collapser.intra_groups[group].rules[rule].userWeights[userWeight].label}
                     </option>
                   {/section}
@@ -96,7 +99,10 @@
           <tr>
               <td class="paramDesc">{$collapser.inter_groups[group].rules[rule].description}</td>
               <td class="paramDesc" style="text-align:right;">
-                <select name="select1_{$collapser.inter_groups[group].name}_{$collapser.inter_groups[group].rules[rule].name}" class="bpsFormInput">
+                <select name="select1_{$collapser.inter_groups[group].name}_{$collapser.inter_groups[group].rules[rule].name}"
+                    class="bpsFormInput"
+                    onchange="updateSimpleRuleWeight('{$workspace.id}',
+                                '{$collapser.inter_groups[group].rules[rule].name}',this.value);" ">
                   {section name=userWeight loop=$collapser.inter_groups[group].rules[rule].userWeights}
                     <option 
                       value="{$collapser.inter_groups[group].rules[rule].userWeights[userWeight].weight}"
