@@ -31,43 +31,39 @@ public abstract class CollapserBase implements Collapser {
 		@XmlElement
 		String name;
 		@XmlElement
+		protected boolean intraDocument;
+		@XmlElement
 		String header;
 		
 		public CollapserUIGroup() {
-			this(null, null);
+			this(null, true, null);
 		}
 
-		public CollapserUIGroup(String name, String header) {
+		public CollapserUIGroup(String name, boolean intraDocument, String header) {
 			this.name = name;
+			this.intraDocument = intraDocument;
 			this.header = header;
 		}
 	}
 	
 	@XmlElementWrapper
+	@XmlElement(name="uiGroup")
 	protected List<CollapserUIGroup> uiGroups;
 
 	protected HashMap<String, CollapserRuleBase> allRulesByName;
 
+	@XmlElementWrapper
+	@XmlAnyElement
 	protected List<CollapserRuleBase> allIntraDocRules;
-	@XmlElementWrapper
-	@XmlAnyElement
 	protected List<CollapserRuleBase> intraDocShiftRules;
-	@XmlElementWrapper
-	@XmlAnyElement
 	protected List<CollapserRuleBase> intraDocDiscountRules;
-	@XmlElementWrapper
-	@XmlAnyElement
 	protected List<CollapserRuleBase> intraDocBoostRules;
 	
+	@XmlElementWrapper
+	@XmlAnyElement
 	protected List<CollapserRuleBase> allCorpusWideRules;
-	@XmlElementWrapper
-	@XmlAnyElement
 	protected List<CollapserRuleBase> corpusWideShiftRules;
-	@XmlElementWrapper
-	@XmlAnyElement
 	protected List<CollapserRuleBase> corpusWideDiscountRules;
-	@XmlElementWrapper
-	@XmlAnyElement
 	protected List<CollapserRuleBase> corpusWideBoostRules;
 	
 	public CollapserBase() {
@@ -100,10 +96,10 @@ public abstract class CollapserBase implements Collapser {
 	 * Defines a group of rules for the UI 
 	 * @param rule the new rule to add
 	 */
-	public void addUIGroup(String groupName, String groupHeader) {
+	public void addUIGroup(String groupName, boolean intraDocument, String groupHeader) {
 		if(hasUIGroup(groupName))
 			throw new IllegalArgumentException("A UI Group with the name ["+groupName+"] already exists.");
-		uiGroups.add(new CollapserUIGroup(groupName, groupHeader));
+		uiGroups.add(new CollapserUIGroup(groupName, intraDocument, groupHeader));
 	}
 	
 	protected boolean hasUIGroup(String uiGroupName) {
@@ -157,6 +153,11 @@ public abstract class CollapserBase implements Collapser {
 			allCorpusWideRules.add(rule);
 		allRulesByName.put(rule.name, rule);
 	}
+	
+	public CollapserRuleBase findRuleByName(String name) {
+		return allRulesByName.get(name);
+	}
+
 
 	@Override
 	public List<CollapserRuleBase> getRules(int typeFilter, boolean intraDocument) {

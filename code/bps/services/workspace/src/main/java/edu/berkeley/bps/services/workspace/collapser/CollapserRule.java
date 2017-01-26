@@ -17,6 +17,13 @@ public interface CollapserRule {
 	public static final double BOOST_RULE_NO_MATCH = 1;
 
 	/**
+	 * For standard (not Matrix) rules, the DB persistence uses a token for the item
+	 * specifier (DB uses a three-way key on workspace, rule, and item). 
+	 */
+	public final static String NO_ITEM_SPEC = ".";
+
+
+	/**
 	 * Provides a means for CollapserRules to set up state based upon
 	 * workspace or corpus information.
 	 * Will be called when the rule is instantiated, and before

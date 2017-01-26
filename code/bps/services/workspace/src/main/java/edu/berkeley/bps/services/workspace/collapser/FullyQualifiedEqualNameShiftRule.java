@@ -9,13 +9,19 @@ import edu.berkeley.bps.services.workspace.Person;
 import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+@XmlRootElement(name = "Rule")
 public class FullyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "FullyQualifiedEqualNameShiftRule";
-	private static final String DESCRIPTION = 
+	private static final String DESCRIPTION_OLD = 
 		"Collapse equal, fully qualified citations" 
 		+" (e.g., \"PNa, son-of PNb, in-clan CNc\""
 		+" and \"PNa, son-of PNb, in-clan CNc\")";
+	
+	private static final String DESCRIPTION =
+		"<b>Collapse equal, fully qualified citations<br />"
+		+"(e.g., &quot;<i>PN<sub>a</sub>, son-of PN<sub>b</sub>,  in-clan CN<sub>c</sub></i>&quot;<br />"
+		+"and &quot;<i>PN<sub>a</sub>, son-of PN<sub>b</sub>,  in-clan CN<sub>c</sub></i>&quot;)</b>";
+    
 	private static final String UIGROUP_INTRA = "Step1A";
 	private static final String UIGROUP_INTER = "Step2A";
 

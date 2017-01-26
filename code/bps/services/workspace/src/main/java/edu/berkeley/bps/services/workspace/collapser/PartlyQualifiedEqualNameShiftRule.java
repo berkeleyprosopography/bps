@@ -9,11 +9,15 @@ import edu.berkeley.bps.services.workspace.Person;
 import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+@XmlRootElement(name = "Rule")
 public class PartlyQualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "PartlyQualifiedEqualNameShiftRule";
-	private static final String DESCRIPTION = "Collapse equal, partly qualified citations" 
+	private static final String DESCRIPTION_OLD = "Collapse equal, partly qualified citations" 
 			+" (e.g., \"PNa, son-of PNb\" and \"PNa, son-of PNb\")";
+	
+	private static final String DESCRIPTION = "<b>Collapse equal, partly qualified citations<br />"
+			+"(e.g., &quot;<i>PN<sub>a</sub>, son-of PN<sub>b</sub></i>&quot; and &quot;<i>PN<sub>a</sub>,"
+			+"son-of PN<sub>b</sub></i>&quot;)</b>";
 	private static final String UIGROUP_INTRA = "Step1A";
 	private static final String UIGROUP_INTER = "Step2A";
 

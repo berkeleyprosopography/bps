@@ -3,6 +3,9 @@ package edu.berkeley.bps.services.workspace.collapser;
 import java.util.List;
 
 public interface CollapserRulePairMatrixUI extends CollapserRuleUI {
+	
+	public static final String ROW_COL_KEY_SEP = "|";
+	public static final String ROW_COL_KEY_SEP_REGEX = "\\|";	// Need to escape the regex meaning of pipe
 
 	/**
 	 * @return the list of values that are paired to construct the

@@ -18,8 +18,10 @@ import edu.berkeley.bps.services.workspace.collapser.CollapserBase;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRule;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRuleBase;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRuleBaseWithUI;
+import edu.berkeley.bps.services.workspace.collapser.CollapserRulePairMatrixUI;
 import edu.berkeley.bps.services.workspace.collapser.CollapserRuleUI;
 import edu.berkeley.bps.services.workspace.collapser.FullyQualifiedEqualNameShiftRule;
+import edu.berkeley.bps.services.workspace.collapser.MatrixItemInfo;
 import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedCompatibleNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.PartlyQualifiedEqualNameShiftRule;
 import edu.berkeley.bps.services.workspace.collapser.PersonCollapser;
@@ -42,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.management.RuntimeErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -72,8 +75,9 @@ public class Workspace extends CachedEntity {
 	private String		description;
 	@XmlElement
 	private int			owner_id;			// Each workspace is tied to a user
-	private double		activeLifeStdDev;
-	private double		activeLifeWindow;
+	// Note that we do not serialize these millisecond values, but rather the year equivalents
+	private double		activeLifeWindow;	// Active life parameter, in millis (for ease of date math)
+	private double		activeLifeStdDev;	// Active life std deviation, in millis (for ease of date math)
 	// Not clear yet how we'll use this
 	//@XmlElement
 	//private double		fatherhoodStdDev;
@@ -85,11 +89,14 @@ public class Workspace extends CachedEntity {
 	 * Represents the assumed offset from a child's timespan to a
 	 * declared parent's timespan. Used for deriving a parent's timespan
 	 * from an actual date of activity for the child.
+	 * Note that we do not serialize the millisecond value, but rather the year equivalent
+	 * @see getGenerationOffsetYears
 	 */
 	private long		generationOffset;
 	
 	private Corpus		corpus;
 	
+	// The collapser used to create and disambiguate persons. Not serialized as part of workspace.
 	private PersonCollapser collapser;
 	
 	// We hold Persons in lists, where each list shares a forename (Name ID).
@@ -127,14 +134,33 @@ public class Workspace extends CachedEntity {
 	 * @param owner_id The user that owns this workspace
 	 */
 	private Workspace(int id, String name, String description, int owner_id) {
+		this(id, name, description, owner_id,
+				Person.DEFAULT_ACTIVE_LIFE_WINDOW, Person.DEFAULT_ACTIVE_LIFE_STDDEV, 
+				Person.DEFAULT_GENERATION_OFFSET);
+	}
+
+	/**
+	 * @param id
+	 * @param name A shorthand name for use in UI, etc.
+	 * @param description Any description useful to users.
+	 * @param owner_id The user that owns this workspace
+	 * @param activeLifeWindow  The default activeLife for persons in milliseconds. If <=0, set to default.
+	 * @param activeLifeStdDev  The default standard deviation for activeLife for persons in milliseconds. 
+	 * 							If <=0, set to default.
+	 * @param generationOffset  The default offset between generations in milliseconds. If <=0, set to default.
+	 */
+	private Workspace(int id, String name, String description, int owner_id,
+						double activeLifeWindow, double activeLifeStdDev, long generationOffset ) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.owner_id = owner_id;
 		this.corpus = null;
-		this.activeLifeStdDev = Person.DEFAULT_ACTIVE_LIFE_STDDEV;
-		this.activeLifeWindow = Person.DEFAULT_ACTIVE_LIFE_WINDOW;
-		this.generationOffset = Person.DEFAULT_GENERATION_OFFSET;
+		// We need to handle legacy workspaces, which may have default 0 values for these settings.
+		this.activeLifeWindow = (activeLifeWindow>0)?activeLifeWindow:Person.DEFAULT_ACTIVE_LIFE_WINDOW;
+		this.activeLifeStdDev = (activeLifeStdDev>0)?activeLifeStdDev:
+									TimeUtils.getDefaultStdDevForActiveLife(this.activeLifeWindow);
+		this.generationOffset = (generationOffset>0)?generationOffset:Person.DEFAULT_GENERATION_OFFSET;
 		this.personListsByNameByDoc = 
 			new HashMap<Integer, HashMap<Integer, ArrayList<Person>>>();
 		this.personListsByName =
@@ -150,10 +176,10 @@ public class Workspace extends CachedEntity {
 		logger.debug("Workspace.ctor, created: "+this.toString());
 	}
 	
-	private void init(ServiceContext sc) {
+	private void init(ServiceContext sc, boolean fSetupCollapser) {
 		AddToMaps(sc, this);
-		if(corpus!=null)
-			setupCollapser();
+		if(fSetupCollapser && corpus!=null)
+			setupCollapser(sc);
 	}
 
 	protected static void AddToMaps(ServiceContext sc, Workspace workspace) {
@@ -195,25 +221,30 @@ public class Workspace extends CachedEntity {
 	}
 
 
+	/*
 	public void CreateAndPersist(ServiceContext sc) {
 		//final String myName = ".CreateAndPersist: ";
 		id = persistNew(sc.getConnection(), name, description, owner_id);
 	}
+	*/
 		
 	public static Workspace CreateAndPersist(ServiceContext sc, 
 			String name, String description, int owner_id) {
 		//final String myName = ".CreateAndPersist: ";
-		int newId = persistNew(sc.getConnection(),name, description, owner_id);
-		Workspace workspace = new Workspace(newId, name, description, owner_id); 
+		// This will create with default life windows and generation values.
+		Workspace workspace = new Workspace(CachedEntity.UNSET_ID_VALUE, name, description, owner_id); 
+		workspace.persist(sc.getConnection(), CachedEntity.SHALLOW_PERSIST);
 		return workspace;
 	}
 	
 	private static int persistNew(Connection dbConn, 
-			String name, String description, int owner_id) {
+			String name, String description, int owner_id, 
+			double activeLifeWindow, double activeLifeStdDev, long generationOffset) {
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
-			"INSERT INTO workspace(name, description, owner_id, creation_time)"
-			+" VALUES(?,?,?,now())";
+			"INSERT INTO workspace(name, description, owner_id, "
+			+ " activeLifeWindow, activeLifeStdDev, generationOffset, creation_time)"
+			+" VALUES(?,?,?,?,?,?,now())";
 		int newId = 0;
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(INSERT_STMT, 
@@ -221,6 +252,9 @@ public class Workspace extends CachedEntity {
 			stmt.setString(1, name);
 			stmt.setString(2, description);
 			stmt.setInt(3, owner_id);
+			stmt.setDouble(4, activeLifeWindow);
+			stmt.setDouble(5, activeLifeStdDev);
+			stmt.setLong(6, generationOffset);
 			int nRows = stmt.executeUpdate();
 			if(nRows==1){
 				ResultSet rs = stmt.getGeneratedKeys();
@@ -242,16 +276,21 @@ public class Workspace extends CachedEntity {
 	public void persist(Connection dbConn, boolean shallow) {
 		final String myName = ".persist: ";
 		if(id<=CachedEntity.UNSET_ID_VALUE) {
-			id = persistNew(dbConn, name, description, owner_id);
+			id = persistNew(dbConn, name, description, owner_id, activeLifeWindow, activeLifeStdDev, generationOffset);
 		} else {
 			// Note that we do not update the owner_id - moving them is not allowed 
 			final String UPDATE_STMT = 
-				"UPDATE workspace SET name=?, description=? WHERE id=?";
+				"UPDATE workspace SET name=?, description=?, "
+				+" activeLifeWindow=?, activeLifeStdDev=?, generationOffset=?"
+				+" WHERE id=?";
 			try {
 				PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
 				stmt.setString(1, name);
 				stmt.setString(2, description);
-				stmt.setInt(3, id);
+				stmt.setDouble(3, activeLifeWindow);
+				stmt.setDouble(4, activeLifeStdDev);
+				stmt.setLong(5, generationOffset);
+				stmt.setInt(6, id);
 				stmt.executeUpdate();
 			} catch(SQLException se) {
 				String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -261,6 +300,170 @@ public class Workspace extends CachedEntity {
 		}
 		if(shallow==CachedEntity.DEEP_PERSIST)
 			persistAttachedEntities(dbConn);
+	}
+	
+	/**
+	 * This ensures that a CollapserRule persistence is created, or if it exists, updates
+	 * the passed rule.
+	 * @param dbConn
+	 * @param rule	The rule to create or update-from-DB
+	 */
+	protected void persistCheckCollapserRule(Connection dbConn, CollapserRuleBase rule) {
+		final String myName = ".persistCheckCollapserRule: ";
+		// First, try to find the rule in the DB, and if found, update the passed rule from the DB
+		final String SELECT_STMT = 
+				"SELECT weight FROM wksp_collapser_rule"
+				+" WHERE wksp_id=? AND name=? AND item='"+CollapserRule.NO_ITEM_SPEC+"'";
+		// If we have to persist, set the rule weight, associating it to the workspace and the rule name
+		final String INSERT_STMT = 
+			"INSERT INTO wksp_collapser_rule(wksp_id, name, item, weight, creation_time)"
+			+" VALUES(?,?,'"+CollapserRule.NO_ITEM_SPEC+"',?,now())";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_STMT);
+			stmt.setInt(1, this.id);
+			stmt.setString(2, rule.getName());
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				rule.setWeight(rs.getDouble("weight"));
+				return;
+			}
+			rs.close();	// Release this before doing more DB work.
+			stmt.close();
+			// We found no row for this rule, so create one.
+			stmt = dbConn.prepareStatement(INSERT_STMT);
+			stmt.setInt(1, this.id);
+			stmt.setString(2, rule.getName());
+			stmt.setDouble(3, rule.getWeight());
+			stmt.executeUpdate();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			logger.error(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return;
+	}
+	
+	protected void persistCollapserRule(Connection dbConn, CollapserRuleBase rule) {
+		// We persist the rule weight, keying on the workspace and the rule name
+		final String myName = ".persistCollapserRule: ";
+		final String UPDATE_STMT = 
+				"UPDATE wksp_collapser_rule SET weight=?"
+				+" WHERE wksp_id=? AND name=? AND item='"+CollapserRule.NO_ITEM_SPEC+"'";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+			stmt.setDouble(1, rule.getWeight());
+			stmt.setInt(2, this.id);
+			stmt.setString(3, rule.getName());
+			stmt.executeUpdate();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			logger.error(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return;
+	}
+	
+	protected void persistCheckCollapserMatrixRuleItemPairs(Connection dbConn, CollapserRuleBase rule) {
+		final String myName = ".persistCheckCollapserMatrixRuleItemPairs: ";
+		// First, try to find the rule pairs in the DB, and if any found, update the passed rule pairs from the DB
+		final String SELECT_STMT = 
+				"SELECT weight, item FROM wksp_collapser_rule"
+				//Need to exclude the one entry for the rule weight, inthe same table 
+				+" WHERE wksp_id=? AND name=? AND item!='"+CollapserRule.NO_ITEM_SPEC+"'";
+		final String INSERT_STMT = 
+			"INSERT INTO wksp_collapser_rule(wksp_id, name, item, weight, creation_time)"
+			+" VALUES(?,?,?,?,now())";
+		
+		if(!(rule instanceof RoleMatrixDiscountRule)) {
+			String tmp = myClass+myName+"Rule: "+ rule.getName()+" is not a Matrix rule!";
+			throw new RuntimeException(tmp);
+		}
+		// Get the matrix pairs, and either update them from the DB, or insert them. 
+		// We have to add any we find that are missing, since adding a new corpus to a
+		// workspace could introduce new rows/columns
+		List<MatrixItemInfo> pairWeights = ((RoleMatrixDiscountRule)rule).getMatrixValues();
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(SELECT_STMT);
+			stmt.setInt(1, this.id);
+			stmt.setString(2, rule.getName());
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				String itemSpec = rs.getString("item");
+				double weight = rs.getDouble("weight");
+				findAndUpdateMatrixPair(((RoleMatrixDiscountRule)rule), pairWeights, itemSpec, weight);	// Will remove matched matrixPair
+			}
+			if(pairWeights.isEmpty())	// We found all the pairs in the DB - we're done!
+				return;
+			logger.debug(myClass+myName+"Matrix Rule: "+ rule.getName()+" needs to persist some pairs.");
+			rs.close();	// Release this before doing more DB work.
+			stmt.close();
+			// Now we have to add pair weights we did not already find
+			// We found no row for this rule, so create one.
+			stmt = dbConn.prepareStatement(INSERT_STMT);
+			stmt.setInt(1, this.id);
+			stmt.setString(2, rule.getName());
+			for(MatrixItemInfo miInfo : pairWeights) {
+				String key = RoleMatrixDiscountRule.getKeyForRowCol(miInfo.getRow(), miInfo.getCol());
+				stmt.setString(3, key);
+				stmt.setDouble(4, rule.getWeight());
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			logger.error(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return;
+	}
+	
+	// TODO Make rule be a MatrixBaseClass once this is refactored
+	private void findAndUpdateMatrixPair(RoleMatrixDiscountRule rule, List<MatrixItemInfo> pairWeights, 
+			String itemSpec, double weight) {
+		final String myName = ".findAndUpdateMatrixPair: ";
+		for(MatrixItemInfo miInfo : pairWeights) {
+			String[] substrings = RoleMatrixDiscountRule.getRowColFromKey(itemSpec);
+			if(substrings.length != 2) {
+				String tmp = myClass+myName+"itemSpec did produce row-col names!: "+ itemSpec;
+				throw new RuntimeException(tmp);
+			}
+			if(miInfo.getRow().equalsIgnoreCase(substrings[0]) 
+				&& miInfo.getCol().equalsIgnoreCase(substrings[1])) {
+				rule.setPairWeight(substrings[0], substrings[1], weight);
+				pairWeights.remove(miInfo);	// So caller knows we found this one
+				return;
+			}
+		}
+	}
+	
+	protected void persistCollapserMatrixRuleItemPair(Connection dbConn, 
+			CollapserRuleBase rule, String item, double itemWeight ) {
+		// We persist the rule weight, keying on the workspace and the rule name
+		final String myName = ".persistCollapserMatrixRuleItemPair: ";
+		final String UPDATE_STMT = 
+				"UPDATE wksp_collapser_rule SET weight=?"
+				+" WHERE wksp_id=? AND name=? AND item=?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(UPDATE_STMT);
+			stmt.setDouble(1, itemWeight);
+			stmt.setInt(2, this.id);
+			stmt.setString(3, rule.getName());
+			stmt.setString(4, item);
+			stmt.executeUpdate();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			logger.error(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return;
 	}
 	
 	public void persistAttachedEntities(Connection dbConn) {
@@ -274,8 +477,8 @@ public class Workspace extends CachedEntity {
 	public static List<Workspace> ListAllForUser(ServiceContext sc, int user_id) {
 		// TODO Add pagination support
 		final String SELECT_ALL = 
-				//"SELECT id, name, description FROM workspace WHERE owner_id=?";
-				"SELECT w.id wid, w.owner_id, w.name, w.description, c.id cid"
+				"SELECT w.id wid, w.owner_id, w.name, w.description, c.id cid,"
+				+" w.activeLifeWindow, w.activeLifeStdDev, w.generationOffset"
 				+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id";
 		final String WHERE_USER = " WHERE w.owner_id=?";
 		ArrayList<Workspace> wkspList = new ArrayList<Workspace>();
@@ -299,11 +502,14 @@ public class Workspace extends CachedEntity {
 					workspace = new Workspace(wid, 
 						rs.getString("name"), 
 						rs.getString("description"),
-						rs.getInt("owner_id"));
+						rs.getInt("owner_id"),
+						rs.getDouble("activeLifeWindow"),
+						rs.getDouble("activeLifeStdDev"),
+						rs.getLong("generationOffset") );
 					int cid = rs.getInt("cid");
 					if(cid>0)
 						workspace.corpus = Corpus.FindByID(sc, cid);
-					workspace.init(sc);
+					workspace.init(sc, cid>0);	// If have a corpus, set up a collapser
 				}
 				wkspList.add(workspace);
 			}
@@ -347,8 +553,8 @@ public class Workspace extends CachedEntity {
 	public static Workspace FindByID(ServiceContext sc, int id) {
 		final String myName = ".FindByID: ";
 		final String SELECT_BY_ID = 
-			//"SELECT id, name, description, owner_id FROM workspace WHERE id = ?";
-			"SELECT w.id wid, w.name, w.description, w.owner_id, c.id cid"
+			"SELECT w.id wid, w.name, w.description, w.owner_id, c.id cid,"
+			+" w.activeLifeWindow, w.activeLifeStdDev, w.generationOffset"
 			+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id"
 			+" WHERE w.id=?";
 		Workspace workspace = null;
@@ -366,14 +572,17 @@ public class Workspace extends CachedEntity {
 							rs.getInt("wid"), 
 							rs.getString("name"), 
 							rs.getString("description"), 
-							rs.getInt("owner_id"));
+							rs.getInt("owner_id"),
+							rs.getDouble("activeLifeWindow"),
+							rs.getDouble("activeLifeStdDev"),
+							rs.getLong("generationOffset") );
 					int cid = rs.getInt("cid");
 					if(cid>0)
 						workspace.corpus = Corpus.FindByID(sc, cid);
 				}
 				rs.close();
 				stmt.close();
-				workspace.init(sc);
+				workspace.init(sc, true);
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -387,8 +596,8 @@ public class Workspace extends CachedEntity {
 	public static Workspace FindByName(ServiceContext sc, int user_id, String name) {
 		final String myName = ".FindByName: ";
 		final String SELECT_BY_NAME = 
-			//"SELECT id, name, description FROM workspace WHERE name = ? and owner_id = ?";
-			"SELECT w.id wid, w.name, w.description, c.id cid"
+			"SELECT w.id wid, w.name, w.description, c.id cid,"
+			+" w.activeLifeWindow, w.activeLifeStdDev, w.generationOffset"
 			+" FROM workspace w LEFT JOIN corpus c ON c.wksp_id=w.id"
 			+" WHERE w.name=? AND w.owner_id=?";
 		Workspace workspace = null;
@@ -403,15 +612,21 @@ public class Workspace extends CachedEntity {
 				stmt.setInt(2, user_id);
 				ResultSet rs = stmt.executeQuery();
 				if(rs.next()){
-					workspace = new Workspace(rs.getInt("wid"), rs.getString("name"), 
-										rs.getString("description"), user_id); 
+					workspace = new Workspace(
+							rs.getInt("wid"), 
+							rs.getString("name"), 
+							rs.getString("description"), 
+							user_id,
+							rs.getDouble("activeLifeWindow"),
+							rs.getDouble("activeLifeStdDev"),
+							rs.getLong("generationOffset") );
 					int cid = rs.getInt("cid");
 					if(cid>0)
 						workspace.corpus = Corpus.FindByID(sc, cid);
 				}
 				rs.close();
 				stmt.close();
-				workspace.init(sc);
+				workspace.init(sc, true);
 			}
 		} catch(SQLException se) {
 			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
@@ -441,7 +656,18 @@ public class Workspace extends CachedEntity {
 		}
 	}
 	
-	public void deleteAttachedEntities(Connection dbConn) {
+	public void deleteAttachedEntities(Connection dbConn) { // TODO delete all the collapser rules
+		final String DELETE_STMT = "DELETE FROM wksp_collapser_rule WHERE wksp_id=?";
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
+			stmt.setInt(1, id);
+			stmt.executeUpdate();
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+".deleteAttachedEntities: Problem querying DB.\n"+ se.getMessage();
+			logger.error(tmp);
+			throw new RuntimeException( tmp );
+		}
 	}
 	
 	/**
@@ -485,7 +711,7 @@ public class Workspace extends CachedEntity {
 	}
 
 	public void setGenerationOffsetYears(double years) {
-		generationOffset = TimeUtils.convertYearsToMillis(years);
+		generationOffset = TimeUtils.convertYearsToMillis(Math.abs(years));
 	}
 
 	@XmlElement(name="activeLife")
@@ -494,6 +720,7 @@ public class Workspace extends CachedEntity {
 	}
 
 	public void setActiveLifeWindowYears(double years) {
+		years = Math.abs(years);
 		activeLifeWindow = TimeUtils.getDefaultWindowForActiveLife(years);
 		activeLifeStdDev = TimeUtils.getDefaultStdDevForActiveLife(years);
 	}
@@ -604,7 +831,8 @@ public class Workspace extends CachedEntity {
 		clearEntityMaps();
 		this.corpus = newCorpus;
 		if(this.corpus!=null) {
-			setupCollapser();
+			if(collapser==null)
+				setupCollapser(sc);
 			rebuildEntitiesFromCorpus(sc);
 		}
 	}
@@ -617,17 +845,19 @@ public class Workspace extends CachedEntity {
 		collapser = new PersonCollapser(updatedCollapser);
 	}
 	
-	public void setupCollapser() {
+	public void setupCollapser(ServiceContext sc) {
+		
+		Connection dbConn = sc.getConnection();
 		// Create our collapser instance.
 		collapser = new PersonCollapser();
 		// Add the basic rules - 
 		// TODO - this should be configured somehow, but how?
 		
-		collapser.addUIGroup("Step1A", "Step 1A: Consider equally qualified names");
-		collapser.addUIGroup("Step2A", "Step 2A: Consider equally qualified names");
-		collapser.addUIGroup("Step1B", "Step 1B: Consider compatible, but not equally qualified names");
-		collapser.addUIGroup("Step2B", "Step 2B: Consider compatible, but not equally qualified names");
-		collapser.addUIGroup("Step1C", "Step 1C: Consider the roles of persons");
+		collapser.addUIGroup("Step1A", true, "Step 1A: Consider equally qualified names");
+		collapser.addUIGroup("Step1B", true, "Step 1B: Consider compatible, but not equally qualified names");
+		collapser.addUIGroup("Step1C", true, "Step 1C: Consider the roles of persons");
+		collapser.addUIGroup("Step2A", false, "Step 2A: Consider equally qualified names");
+		collapser.addUIGroup("Step2B", false, "Step 2B: Consider compatible, but not equally qualified names");
 		// If we make the role matrix work across docs, add this 
 		// collapser.addUIGroup("Step2C", "Step 2C: Consider the roles of persons");
 		
@@ -637,47 +867,121 @@ public class Workspace extends CachedEntity {
 													CollapserRule.WITHIN_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		// TODO consider refactoring this to get all the rules for this workspace in one query,
+		// and setting the weights. If not found, can create them all. 
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new FullyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_ALWAYS,
 													CollapserRule.ACROSS_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new PartlyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
 													CollapserRule.WITHIN_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new PartlyQualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
 													CollapserRule.ACROSS_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new UnqualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
 													CollapserRule.WITHIN_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new UnqualifiedEqualNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_CONSERVATIVE,
 													CollapserRule.ACROSS_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new PartlyQualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_CONSERVATIVE,
 													CollapserRule.WITHIN_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new PartlyQualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
 													CollapserRule.ACROSS_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new UnqualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_AGGRESSIVE,
 													CollapserRule.WITHIN_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		persistCheckCollapserRule(dbConn, rule);
+		
 		rule = new UnqualifiedCompatibleNameShiftRule(CollapserRuleBaseWithUI.WEIGHT_CONSERVATIVE,
 													CollapserRule.ACROSS_DOCUMENTS);
 		rule.initialize(this);
 		collapser.addRule(rule);
+		
 		RoleMatrixDiscountRule rmdRule = new RoleMatrixDiscountRule();	// Only applies within docs now...
 		rmdRule.initialize(this);
 		// RoleMatrixDiscountRule.init tries to find and add roles for witness and preclude
 		// collapsing with other non-family roles.
 		collapser.addRule(rmdRule);
+		persistCheckCollapserRule(dbConn, rmdRule);
+		// Persist the matrix cell settings - will update the rule if they already exist. 
+		persistCheckCollapserMatrixRuleItemPairs(dbConn, rmdRule);
+		
+	}
+	
+	public void updateWeightForCollapserRule(ServiceContext sc, double weight, String collapserRuleName ) {
+		final String myName = ".updateWeightForCollapserRule: ";
+		if(collapser == null) {
+			String tmp = myClass+myName+"Workspace has no collapser.";
+			logger.error(tmp);
+			throw new RuntimeException(tmp);
+		}
+		CollapserRuleBase rule = collapser.findRuleByName(collapserRuleName);
+		if(rule == null) {
+			String tmp = myClass+myName+"Workspace collapser has no rule named: "+collapserRuleName;
+			logger.error(tmp);
+			throw new RuntimeException(tmp);
+		}
+		rule.setWeight(weight);
+		persistCollapserRule(sc.getConnection(), rule);
+	}
+	
+	/**
+	 * @param sc
+	 * @param itemWeight The weight to apply when for the combination of row and column
+	 * @param collapserRuleName	The name of the Matrix rule
+	 * @param rowName  The name of the row for the item to be set
+	 * @param colName  The name of the column for the item to be set
+	 */
+	public void updateItemWeightForCollapserMatrixRule(ServiceContext sc, double itemWeight, 
+						String collapserRuleName, String rowName, String colName ) {
+		final String myName = ".updateItemWeightForCollapserMatrixRule: ";
+		if(collapser == null) {
+			String tmp = myClass+myName+"Workspace has no collapser.";
+			logger.error(tmp);
+			throw new RuntimeException(tmp);
+		}
+		CollapserRuleBase rule = collapser.findRuleByName(collapserRuleName);
+		if(rule == null) {
+			String tmp = myClass+myName+"Workspace collapser has no rule named: "+collapserRuleName;
+			logger.error(tmp);
+			throw new RuntimeException(tmp);
+		}
+		if(!(rule instanceof CollapserRulePairMatrixUI)) {
+			String tmp = myClass+myName+"Workspace collapser rule: "+collapserRuleName+
+							" is not a matrix rule.";
+			logger.error(tmp);
+			throw new RuntimeException(tmp);
+		}
+		((CollapserRulePairMatrixUI)rule).setPairWeight(rowName, colName, itemWeight);
+		String itemSpec = RoleMatrixDiscountRule.getKeyForRowCol(rowName, colName);
+		persistCollapserMatrixRuleItemPair(sc.getConnection(), rule, itemSpec, itemWeight);
 	}
 	
 	public void collapseWithinDocuments() {

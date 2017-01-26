@@ -14,18 +14,19 @@ import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+@XmlRootElement(name = "Rule")
 public class CollapserRuleBaseWithUI extends CollapserRuleBase
 		implements CollapserRule, CollapserRuleUI {
 	
 	public static final Double WEIGHT_ALWAYS = 1.0;
 	public static final Double WEIGHT_AGGRESSIVE = 0.7;
+	public static final Double WEIGHT_MAYBE = 0.5;
 	public static final Double WEIGHT_CONSERVATIVE = 0.3;
 	public static final Double WEIGHT_IGNORE = 0.0;
 
 	public static final String LABEL_ALWAYS = "Always";
-	public static final String LABEL_AGGRESSIVE = "Aggressive";
-	public static final String LABEL_CONSERVATIVE = "Conservative";
+	public static final String LABEL_AGGRESSIVE = "Mostly";
+	public static final String LABEL_CONSERVATIVE = "Rarely";
 	public static final String LABEL_IGNORE = "Never";
 
 	@XmlElementWrapper(name = "userWeights")

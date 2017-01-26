@@ -29,7 +29,7 @@ public interface Collapser {
 	 * Defines a group of rules for the UI 
 	 * @param rule the new rule to add
 	 */
-	public void addUIGroup(String groupName, String groupHeader);
+	public void addUIGroup(String groupName, boolean intraDocument, String groupHeader);
 
 	/**
 	 * Adds a rule to this Collapser, at the end of the list 
@@ -44,6 +44,12 @@ public interface Collapser {
 	 * 				of a rule before which this should be added.
 	 */
 	public void addRule(CollapserRuleBase rule, String insertBefore);
+
+	/**
+	 * Find a rule in this Collapser, by name 
+	 * @param name
+	 */
+	public CollapserRuleBase findRuleByName(String name);
 
 	/**
 	 * Return the rules for this Collapser

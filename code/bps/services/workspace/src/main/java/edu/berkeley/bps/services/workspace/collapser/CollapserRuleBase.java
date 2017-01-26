@@ -11,7 +11,7 @@ import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlSeeAlso({CollapserRuleBaseWithUI.class})
-@XmlRootElement
+@XmlRootElement(name = "Rule")
 public class CollapserRuleBase implements CollapserRule {
 	
 	protected Workspace owner = null;

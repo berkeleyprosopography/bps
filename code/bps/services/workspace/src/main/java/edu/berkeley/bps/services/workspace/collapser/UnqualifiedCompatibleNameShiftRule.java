@@ -8,13 +8,21 @@ import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Person;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+@XmlRootElement(name = "Rule")
 public class UnqualifiedCompatibleNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "UnqualifiedCompatibleNameShiftRule";
-	private static final String DESCRIPTION = 
+	private static final String DESCRIPTION_OLD = 
 		"Collapse unqualified citations with compatible, more qualified citations"
 		+" (e.g., \"PNa\" and \"PNa, son-of PNb, in-clan CNc\","
 		+" OR, \"PNa\" and \"PNa, son-of PNb\")";
+	
+	private static final String DESCRIPTION = 
+	"<b>Collapse unqualified citations with compatible, more qualified citations <br />"
+    +"(e.g., &quot;<i>PN<sub>a</sub></i>&quot; and &quot;<i>PN<sub>a</sub>, son-of PN<sub>b</sub>,"
+	+"  in-clan CN<sub>c</sub></i>&quot;,<br />"
+    +"OR, &quot;<i>PN<sub>a</sub></i>&quot; and &quot;<b><i>PN<sub>a</sub>,"
+	+" son-of PN<sub>b</sub></i>&quot;)</b>";
+	
 	private static final String UIGROUP_INTRA = "Step1B";
 	private static final String UIGROUP_INTER = "Step2B";
 

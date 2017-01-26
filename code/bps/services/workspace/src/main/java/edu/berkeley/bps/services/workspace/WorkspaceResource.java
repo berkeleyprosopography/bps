@@ -263,6 +263,77 @@ public class WorkspaceResource extends BaseResource {
 	            			Response.status( Response.Status.BAD_REQUEST).entity( tmp ).build());
 				}
 			}
+            workspace.persist(sc.getConnection(), CachedEntity.SHALLOW_PERSIST);
+            Response response = Response.ok().build();
+            return response;
+		} catch(RuntimeException re) {
+			String tmp = myClass+".updateWorkspaceParams(): Problem updating Params.\n"+ re.getLocalizedMessage();
+			logger.error(tmp);
+        	throw new WebApplicationException( 
+    			Response.status(
+    				Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+        }
+	}
+
+    /**
+     * Updates an existing workspace param or params
+	 * @param id the id of the workspace of interest
+     * @param ui the URI context with query params and values to update
+     * @return Response, with the path (and so id) of the newly created workspace
+     */
+    @PUT
+	//@Consumes("application/xml") No Payload - just params
+	@Path("{id}/collapserrule")
+    public Response updateCollapserRule(@Context ServletContext srvc,  @Context UriInfo ui,
+    		@PathParam("id") int id ){
+        try {
+        	ServiceContext sc = getServiceContext(srvc);
+    		Workspace workspace = Workspace.FindByID(sc, id);
+    		if(workspace==null) {
+            	throw new WebApplicationException( 
+        			Response.status(Response.Status.NOT_FOUND).entity(
+        				"No workspace found with id: "+id).build());
+       		}
+			MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+			// Must have a rule name, and a weight. May have a row/col pair if a Matrix rule item
+			String ruleName = queryParams.getFirst("name");
+			// If set, parse and set the new ActiveLifeWindow (in years).
+			if(ruleName==null) {
+				String tmp = myClass+".updateCollapserRule(): Missing rule name.";
+				logger.error(tmp);
+				throw new WebApplicationException( 
+        			Response.status( Response.Status.BAD_REQUEST).entity( tmp ).build());
+			}
+			String weightParam = queryParams.getFirst("weight");
+			// If set, parse and set the new ActiveLifeWindow (in years).
+			if(weightParam==null) {
+				String tmp = myClass+".updateCollapserRule(): Missing weight param.";
+				logger.error(tmp);
+				throw new WebApplicationException( 
+        			Response.status( Response.Status.BAD_REQUEST).entity( tmp ).build());
+			}
+			double weight = 1;
+			try {
+				weight = Double.parseDouble(weightParam);
+			} catch( NumberFormatException nfe ) {
+				String tmp = myClass+".updateWorkspaceParams(): Bad argument for weight param:"
+							+weightParam;
+				logger.error(tmp);
+				logger.debug(nfe.getLocalizedMessage());
+            	throw new WebApplicationException( 
+            			Response.status( Response.Status.BAD_REQUEST).entity( tmp ).build());
+			}
+			// Have name and weight. See if there is a row/col pair for a matrix item
+			String rowParam = queryParams.getFirst("row");
+			String colParam = queryParams.getFirst("col");
+			// If set, parse and set the new ActiveLifeWindow (in years).
+			if(rowParam==null || colParam==null) {
+				// Just set the rule weight. This will persist the value as well.
+				workspace.updateWeightForCollapserRule(sc, weight, ruleName);
+			} else {
+				// Matrix rule param - set the row-col weight and persist
+				workspace.updateItemWeightForCollapserMatrixRule(sc, weight, ruleName, rowParam, colParam);
+			}
             Response response = Response.ok().build();
             return response;
 		} catch(RuntimeException re) {
@@ -324,7 +395,7 @@ public class WorkspaceResource extends BaseResource {
 			throw wae;
 		/*
 	    } catch (JAXBException jaxbe) {
-			String tmp = myClass+".getCollapser(): Problem iwth JAXB.\n"+ jaxbe.getLocalizedMessage();
+			String tmp = myClass+".getCollapser(): Problem with JAXB.\n"+ jaxbe.getLocalizedMessage();
 			logger.error(tmp);
         	throw new WebApplicationException( 
         			Response.status(

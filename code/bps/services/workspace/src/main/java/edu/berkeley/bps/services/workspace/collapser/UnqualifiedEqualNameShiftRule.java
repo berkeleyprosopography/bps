@@ -8,11 +8,15 @@ import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Person;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+@XmlRootElement(name="Rule")
 public class UnqualifiedEqualNameShiftRule extends CollapserRuleBaseWithUI {
 	private static final String myClass = "UnqualifiedEqualNameShiftRule";
-	private static final String DESCRIPTION = 
+	private static final String DESCRIPTION_OLD = 
 		"Collapse equal, unqualified citations (e.g., \"PNa\" and \"PNa\")";
+	
+	private static final String DESCRIPTION = "<b>Collapse equal, unqualified citations&nbsp;<br />"
+			+"(e.g., &quot;<i>PN<sub>a</sub></i>&quot; and &quot;<i>PN<sub>a</sub></i>&quot;)</b>";
+	
 	private static final String UIGROUP_INTRA = "Step1A";
 	private static final String UIGROUP_INTER = "Step2A";
 

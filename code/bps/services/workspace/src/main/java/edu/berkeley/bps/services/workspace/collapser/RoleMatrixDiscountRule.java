@@ -20,7 +20,7 @@ import edu.berkeley.bps.services.workspace.Entity;
 import edu.berkeley.bps.services.workspace.Workspace;
 
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement
+@XmlRootElement(name = "Rule")
 public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI 
 		implements CollapserRule, CollapserRuleUI, CollapserRulePairMatrixUI{
 	static final Logger logger = LoggerFactory.getLogger(RoleMatrixDiscountRule.class);
@@ -45,10 +45,18 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 				1.0, CollapserRule.WITHIN_DOCUMENTS);
 	}
 
+	public static final String LABEL_YES = "Yes";
+	public static final String LABEL_MAYBE = "Maybe";
+	public static final String LABEL_NO = "No";
 	
 	@Override
 	public void initialize(Workspace workspace) {
-		// Get the roles from the workspace, and build the derived Pairs
+		// Set our own labels, to preclude superclass defaults
+		if(settingsList.isEmpty()) {
+			settingsList.add(new UserWeightSetting(LABEL_YES, WEIGHT_ALWAYS)); 
+			settingsList.add(new UserWeightSetting(LABEL_MAYBE, WEIGHT_MAYBE)); 
+			settingsList.add(new UserWeightSetting(LABEL_NO, WEIGHT_IGNORE)); 
+		}
 		super.initialize(workspace, true);
 		
 		corpus = workspace.getCorpus();
@@ -63,6 +71,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 					this.getClass().getName(), corpus.getId());
 			return;			// Nothing to do
 		}
+		//TODO - initialize the UI to allow all role interactions until user says otherwise
 		// We should consider all the roles, ignore the family ones, and
 		// try to find witness to exclude. That is a hack...
 		ActivityRole witnessAR = null;
@@ -116,12 +125,13 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		return strings;
 	}
 
+	// TODO This should be refactored into a base class so other matrix rules can share it
 	@XmlElementWrapper(name="matrixItems")
 	@XmlElement(name = "matrixItemInfo")
 	public List<MatrixItemInfo> getMatrixValues() {
 		ArrayList<MatrixItemInfo> values = new ArrayList<MatrixItemInfo>();
 		for(String pairKey:rolePairWeights.keySet()) {
-			String[] pair = pairKey.split("-");
+			String[] pair = getRowColFromKey(pairKey);
 			MatrixItemInfo item = new MatrixItemInfo(pair[0], pair[1], rolePairWeights.get(pairKey));
 			values.add(item);
 		}
@@ -132,10 +142,18 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	public void setMatrixValues(List<MatrixItemInfo> values) {
 		rolePairWeights.clear();
 		for(MatrixItemInfo item:values) {
-			String key = item.getRow()+"-"+item.getCol();
+			String key = getKeyForRowCol(item.getRow(), item.getCol());
+			// Does not assert the roles, as this comes from persistence
 			rolePairWeights.put(key, item.getWeight());
 		}
 	}
+	
+	public void setMatrixValue(MatrixItemInfo item) {
+		String key = getKeyForRowCol(item.getRow(), item.getCol());
+		rolePairWeights.put(key, item.getWeight());
+	}
+
+
 
 	/* gets the discount weight for a pair of Roles. 
 	 */
@@ -150,11 +168,22 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		}
 	}
 	
-	private String getKeyForPair(ActivityRole role1, ActivityRole role2) {
+	// TODO This should be refactored into a base class so other matrix rules can share it
+	private static String getKeyForPair(ActivityRole role1, ActivityRole role2) {
 		//Normalize the pair based upon the IDs (original creation order);
 		return (role1.getId()<role2.getId())?
-				(role1.getName().toLowerCase()+"-"+role2.getName().toLowerCase())
-				:(role2.getName().toLowerCase()+"-"+role1.getName().toLowerCase());
+				getKeyForRowCol(role1.getName().toLowerCase(), role2.getName().toLowerCase())
+				:getKeyForRowCol(role2.getName().toLowerCase(), role1.getName().toLowerCase());
+	}
+
+	public static String getKeyForRowCol(String rowName, String colName ) {
+		//Normalize the pair based upon the IDs (original creation order);
+		return rowName+ROW_COL_KEY_SEP+colName;
+	}
+
+	public static String[] getRowColFromKey(String pairKey) {
+		//Normalize the pair based upon the IDs (original creation order);
+		return pairKey.split(ROW_COL_KEY_SEP_REGEX);
 	}
 
 	/* sets the discount weight for a pair of Roles, by name. 
