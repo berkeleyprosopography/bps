@@ -14,7 +14,7 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 	die();
 }
 
-// $t->debugging = true;
+//$t->debugging = true;
 
 $t->assign('page_title', $CFG->page_title_default.': Workspace Parameter Settings');
 
@@ -90,7 +90,7 @@ function updateSimpleRuleWeightRSC() {
 
 
 function updateSimpleRuleWeight(workspaceID, RuleName, Weight) {
-	var weightVal = checkNumberRange( Weight, 0, 1.0, "an active life duration" );
+	var weightVal = checkNumberRange( Weight, 0, 1.0, "a collapser rule weight" );
 	if( isNaN(weightVal))
 		return;
 
@@ -102,6 +102,38 @@ function updateSimpleRuleWeight(workspaceID, RuleName, Weight) {
 	// alert( "Preparing request: PUT: "+url);
 	xmlhttp.open("PUT", url, true);
 	xmlhttp.onreadystatechange=updateSimpleRuleWeightRSC;
+	xmlhttp.send();
+}
+
+// The ready state change callback method for update.
+function updateMatrixRuleWeightRSC() {
+  if (xmlhttp.readyState==4) {
+		if( xmlhttp.status == 200 ) {
+			// Maybe this should change the cursor or something
+			setStatusP("Workspace Collapser Rule weight updated.");
+	    //alert( "Response: " + xmlhttp.status + " Body: " + xmlhttp.responseText );
+		} else {
+			alert( "Error encountered when trying to update Workspace Collapser Rule weight.\nResponse: "
+			 				+ xmlhttp.status + "\nBody: " + xmlhttp.responseText );
+		}
+	}
+}
+
+
+function updateMatrixRuleWeight(workspaceID, RuleName, row, col, Weight) {
+	var weightVal = checkNumberRange( Weight, 0, 1.0, "a collapser rule weight" );
+	if( isNaN(weightVal))
+		return;
+
+	if( !xmlhttp ) {
+		alert( "Cannot update Workspace Collapser Rule - no http obj!\n Please advise BPS support." );
+		return;
+	}
+	var url = "'.$CFG->svcsbase.'/workspaces/"+workspaceID+"/collapserrule?name="+RuleName+"&weight="+weightVal
+				+"&row="+row+"&col="+col;
+	// alert( "Preparing request: PUT: "+url);
+	xmlhttp.open("PUT", url, true);
+	xmlhttp.onreadystatechange=updateMatrixRuleWeightRSC;
 	xmlhttp.send();
 }
 
@@ -243,6 +275,29 @@ function processRule(&$ruleObj ) {
 				'label' => $uw['label'], 
 				'weight' => isset($uw['weight'])?($uw['weight']):"1",
 				);
+		}
+	}
+	if(isset($ruleObj['matrixAxisValues'])) {
+		$newRule['matrixAxisValues'] = array();
+		$newRule['matrixAxisValuesLower'] = array();
+		foreach($ruleObj['matrixAxisValues']['axisValue'] as &$axis) {
+			$newRule['matrixAxisValues'][] = $axis;
+			$newRule['matrixAxisValuesLower'][] = strtolower($axis);
+		}
+		if(isset($ruleObj['matrixItems'])) {
+			$matrixItemsArray = array();
+			foreach($ruleObj['matrixItems']['matrixItemInfo'] as &$axis) {
+				if(!isset($axis['row']) || !isset($axis['col']) || !isset($axis['weight'])) {
+					$opmsg = "UI Rule: ".$newRule['name'].
+								" has a matrix Item that is missing values (passed back in collapser). ";
+					return false;
+				}
+				$matrixItemsArray[$axis['row']][$axis['col']] = $axis['weight'];
+			}
+			$newRule['matrixItems'] = $matrixItemsArray;
+		} else {
+			$opmsg = "UI Rule: ".$newRule['name']." has matrixAxisValues with no matrixItems! ";
+			return false;
 		}
 	}
 	return $newRule;

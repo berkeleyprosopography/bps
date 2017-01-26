@@ -65,7 +65,8 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 					this.getClass().getName(), workspace.getId());
 			return;			// Nothing to do
 		}
-		List<ActivityRole> corpusRoles = corpus.getActivityRoles();
+		// Skip all the family roles, but set up pairs for the others.
+		List<ActivityRole> corpusRoles = corpus.getActivityRoles(true);
 		if(corpusRoles==null||corpusRoles.isEmpty()) {
 			logger.error("{}.initialize(): No roles found in corpus: ", 
 					this.getClass().getName(), corpus.getId());
@@ -74,19 +75,13 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		//TODO - initialize the UI to allow all role interactions until user says otherwise
 		// We should consider all the roles, ignore the family ones, and
 		// try to find witness to exclude. That is a hack...
-		ActivityRole witnessAR = null;
-		for(ActivityRole ar:corpusRoles) {
-			if(ar.isFamilyRole())
-				continue;
-			if(ar.getName().equalsIgnoreCase("witness")) {
-				witnessAR = ar;
-				break;
-			}
-		}
-		if(witnessAR!=null) {
-			for(ActivityRole ar:corpusRoles) {
-				if(!ar.isFamilyRole())
-					setPairWeight(witnessAR.getName(), ar.getName(), 0);
+		for(int i=0; i<corpusRoles.size(); i++ ) {
+			// For each activity role in the list
+			ActivityRole ar_i = corpusRoles.get(i);
+			// Pair up the first activity role with itself, and all later ones in the list
+			for(int j=i; j<corpusRoles.size(); j++ ) {
+				ActivityRole ar_j = corpusRoles.get(j);
+				setPairWeight(ar_i, ar_j, WEIGHT_ALWAYS);	// Until we know otherwise, assume all good
 			}
 		}
 	}
@@ -119,7 +114,7 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	@XmlElement(name = "axisValue")
 	public List<String> getMatrixAxisValues() {
 		ArrayList<String> strings = new ArrayList<String>();
-		for(ActivityRole role:corpus.getActivityRoles()) {
+		for(ActivityRole role:corpus.getActivityRoles(true)) { // Note that we skip the family roles
 			strings.add(role.getName());
 		}
 		return strings;
@@ -169,9 +164,11 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 	}
 	
 	// TODO This should be refactored into a base class so other matrix rules can share it
+	private static final ActivityRole.RoleRankComparator roleRankCmp = new ActivityRole.RoleRankComparator();
+
 	private static String getKeyForPair(ActivityRole role1, ActivityRole role2) {
-		//Normalize the pair based upon the IDs (original creation order);
-		return (role1.getId()<role2.getId())?
+		// Normalize the pair based upon the roleRanks
+		return (roleRankCmp.compare(role1, role2)<0)?
 				getKeyForRowCol(role1.getName().toLowerCase(), role2.getName().toLowerCase())
 				:getKeyForRowCol(role2.getName().toLowerCase(), role1.getName().toLowerCase());
 	}
@@ -204,6 +201,10 @@ public class RoleMatrixDiscountRule extends CollapserRuleBaseWithUI
 		if(role2==null)
 			throw new IllegalArgumentException(myClass+
 					".setPairWeight: Unrecognized role: "+value2);
+		setPairWeight(role1, role2, weight);
+	}
+
+	public void setPairWeight(ActivityRole role1, ActivityRole role2, double weight) {
 		if(weight<0||weight>1)
 			throw new IllegalArgumentException(myClass+
 					".setPairWeight: Illegal weight: "+weight);

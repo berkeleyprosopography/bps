@@ -708,8 +708,21 @@ public class Corpus extends CachedEntity {
 	 * @return List of Activity Roles, sorted by the roleRank
 	 */
 	public List<ActivityRole> getActivityRoles() {
-		ArrayList<ActivityRole> list = 
-			new ArrayList<ActivityRole>(activityRolesByName.values());
+		return getActivityRoles(false);
+	}
+	/**
+	 * @return List of Activity Roles, sorted by the roleRank
+	 */
+	public List<ActivityRole> getActivityRoles(boolean skipFamilyRoles) {
+		ArrayList<ActivityRole> list = new ArrayList<ActivityRole>();
+		if(!skipFamilyRoles) {
+			list.addAll(activityRolesByName.values());
+		} else {
+			for(ActivityRole ar:activityRolesByName.values()) {
+				if(!ar.isFamilyRole())
+					list.add(ar);
+			}
+		}
 		Comparator<ActivityRole> c = new ActivityRole.RoleRankComparator();
 		Collections.sort(list, c);
 		return list;

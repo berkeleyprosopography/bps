@@ -54,26 +54,81 @@
       {else}
         {* Loop over each rule in the group *}
         {section name=rule loop=$collapser.intra_groups[group].rules}
-          <tr>
-              <td class="paramDesc">{$collapser.intra_groups[group].rules[rule].description}</td>
-              <td class="paramDesc" style="text-align:right;">
-                <select name="select1_{$collapser.intra_groups[group].name}_{$collapser.intra_groups[group].rules[rule].name}"
-                    class="bpsFormInput"
-                    onchange="updateSimpleRuleWeight('{$workspace.id}',
-                                '{$collapser.intra_groups[group].rules[rule].name}',this.value);" >
-                  {section name=userWeight loop=$collapser.intra_groups[group].rules[rule].userWeights}
-                    <option 
-                      value="{$collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight}"
-                      {if $collapser.intra_groups[group].rules[rule].weight
-                        == $collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight }
-                         selected="1" 
-                      {/if} >
-                     {$collapser.intra_groups[group].rules[rule].userWeights[userWeight].label}
-                    </option>
-                  {/section}
-                </select>
-              </td>
-          </tr>
+          {if isset($collapser.intra_groups[group].rules[rule].matrixAxisValues) }
+            {* Row with the description spanning all columns *}
+            <tr>
+              {section name=mAxisVDummy loop=$collapser.intra_groups[group].rules[rule].matrixAxisValues}
+                {if $smarty.section.mAxisVDummy.first}
+                  <td class="paramDesc" colspan="{$smarty.section.mAxisVDummy.total+1}">
+                      {$collapser.intra_groups[group].rules[rule].description}</td>
+                {/if}
+              {/section}
+            </tr>
+            {* Row with the column names *}
+            <tr>
+              {* Empty item for the row names column *}
+              <td class="paramDesc"></td>
+              {* Loop over the columns backwards for the columns labels *}
+              {section start=-1 step=-1 name=column loop=$collapser.intra_groups[group].rules[rule].matrixAxisValues}
+                <td class="paramDesc colName" >
+                    {$collapser.intra_groups[group].rules[rule].matrixAxisValues[column]}</td>
+              {/section}
+            </tr>
+            {* Now, the rows proper. Loop over the axis names, and produce a row for each *}
+            {section name=row loop=$collapser.intra_groups[group].rules[rule].matrixAxisValues}
+              <tr>
+                {assign var='currRowVal' value=`$collapser.intra_groups[group].rules[rule].matrixAxisValues[row]`}
+                {assign var='currRowValL' value=`$collapser.intra_groups[group].rules[rule].matrixAxisValuesLower[row]`}
+                <td class="paramDesc rowName" >{$currRowVal}</td>
+                {section start=-1 step=-1 name=col loop=$collapser.intra_groups[group].rules[rule].matrixAxisValues}
+                  {assign var='currColVal' value=`$collapser.intra_groups[group].rules[rule].matrixAxisValues[col]`}
+                  {assign var='currColValL' value=`$collapser.intra_groups[group].rules[rule].matrixAxisValuesLower[col]`}
+                  <td class="paramDesc" style="text-align:right;">
+                    {if isset($collapser.intra_groups[group].rules[rule].matrixItems[$currRowValL][$currColValL])}
+                      <select name="select1_{$currRowVal}_{$currColVal}" class="bpsFormInput"
+                          onchange="updateMatrixRuleWeight('{$workspace.id}',
+                                      '{$collapser.intra_groups[group].rules[rule].name}',
+                                      '{$currRowVal}','{$currColVal}',this.value);" >
+                        {section name=userWeight loop=$collapser.intra_groups[group].rules[rule].userWeights}
+                          <option 
+                            value="{$collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight}"
+                            {if $collapser.intra_groups[group].rules[rule].matrixItems[$currRowValL][$currColValL]
+                              == $collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight }
+                               selected="1" 
+                            {/if} >
+                           {$collapser.intra_groups[group].rules[rule].userWeights[userWeight].label}
+                          </option>
+                        {/section}
+                      </select>
+                    {else}
+                    {* Empty cell *}
+                    {/if}
+                  </td>
+                {/section}
+              </tr>
+            {/section}
+          {else}
+            <tr>
+                <td class="paramDesc">{$collapser.intra_groups[group].rules[rule].description}</td>
+                <td class="paramDesc" style="text-align:right;">
+                  <select name="select1_{$collapser.intra_groups[group].name}_{$collapser.intra_groups[group].rules[rule].name}"
+                      class="bpsFormInput"
+                      onchange="updateSimpleRuleWeight('{$workspace.id}',
+                                  '{$collapser.intra_groups[group].rules[rule].name}',this.value);" >
+                    {section name=userWeight loop=$collapser.intra_groups[group].rules[rule].userWeights}
+                      <option 
+                        value="{$collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight}"
+                        {if $collapser.intra_groups[group].rules[rule].weight
+                          == $collapser.intra_groups[group].rules[rule].userWeights[userWeight].weight }
+                           selected="1" 
+                        {/if} >
+                       {$collapser.intra_groups[group].rules[rule].userWeights[userWeight].label}
+                      </option>
+                    {/section}
+                  </select>
+                </td>
+            </tr>
+          {/if}
         {/section}
       {/if}
       </table>

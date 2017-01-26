@@ -967,12 +967,24 @@ public class WorkspaceResource extends BaseResource {
 	@Produces({"application/xml", "application/json"})
 	@Path("{id}/activityRoles")
 	@Wrapped(element="activityRoles")
-	public List<ActivityRole> getActivityRoles(@Context ServletContext srvc, @PathParam("id") int id) {
+	public List<ActivityRole> getActivityRoles(@Context ServletContext srvc,  @Context UriInfo ui,
+			@PathParam("id") int id) {
 		List<ActivityRole> activityRoleList = null;
 		try {
 			Corpus corpus = getWorkspaceCorpus(getServiceContext(srvc), id, NO_CORPUS_OKAY);
 			if(corpus!=null) {
-				activityRoleList = corpus.getActivityRoles();
+	        	MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+	        	String noFamily = queryParams.getFirst("noFam");
+	        	int noFam = 0;
+	        	if(noFamily != null) {
+	        		try {
+	        			noFam = Integer.parseInt(noFamily);
+	        		} catch( NumberFormatException nfe) {
+	        			String tmp = myClass+".getPersons(): Ignoring docId.\n"+ nfe.getLocalizedMessage();
+	        			logger.error(tmp);
+	        		}
+	        	}
+				activityRoleList = corpus.getActivityRoles(noFam!=0);
 			} else {
 				activityRoleList = new ArrayList<ActivityRole>();
 			}
