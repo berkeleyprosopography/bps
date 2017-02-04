@@ -1,0 +1,4 @@
+---
+project_name: bps
+project_root: /opt/bps
+project_repo: git://github.com/berkeleyprosopography/bps.git

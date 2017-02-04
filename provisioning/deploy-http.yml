@@ -1,0 +1,35 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - variables.yml
+
+  tasks:
+
+    - name: Set enviroment variables
+      lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
+      with_items:
+        - { key: '^BPS_JEESERVER_HOME', value : 'BPS_JEESERVER_HOME=/var/lib/tomcat6/' }
+        - { key: '^BPS_WEBROOT', value : 'BPS_WEBROOT=/var/www/{{ project_name }}' }
+        - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
+      notify: source environment
+
+    - name: Install Apache configuration file.
+      template: src=files/apache2/bps.j2 dest=/etc/apache2/sites-available/{{ project_name }}.conf backup=yes
+
+    - name: make site available
+      file: src=/etc/apache2/sites-available/{{ project_name }} dest=/etc/apache2/sites-enabled/{{ project_name }} state=link
+      notify: restart apache2
+
+
+  handlers:
+  - name: restart apache2
+    service: name=apache2 state=restarted
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+      BPS_JEESERVER_HOME: /var/lib/tomcat6/
+      BPS_WEBROOT: "/var/www/{{ project_name }}"
+      BPS_CORPORA : "{{ project_root }}/corpora"
+      CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+
