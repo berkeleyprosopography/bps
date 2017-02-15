@@ -51,7 +51,7 @@
 
     #Docs rules
     RewriteRule   ^docs/(.*)$ modules/docs/$1
-    </Directory>
+    
 
     #SNA rules
     RewriteRule   ^SNA/{0,1}$ modules/SNA/SNA.php
@@ -62,7 +62,8 @@
 
     #Temporary tree layout
     RewriteRule   ^SNA/tree/{0,1}$ modules/SNA/TreeLayout/tree.php
-
+    </Directory>
+    
     ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
     <Directory "/usr/lib/cgi-bin">
         AllowOverride None
