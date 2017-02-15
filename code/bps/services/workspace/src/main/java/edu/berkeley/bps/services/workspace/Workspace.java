@@ -165,7 +165,7 @@ public class Workspace extends CachedEntity {
 			new HashMap<Integer, HashMap<Integer, ArrayList<Person>>>();
 		this.personListsByName =
 			new HashMap<Integer, ArrayList<Person>>();
-		this.clansByName = new HashMap<Integer, Clan>();
+		//this.clansByName = new HashMap<Integer, Clan>();
 		this.clanListsByDoc = new HashMap<Integer, ArrayList<Clan>>(); 
 		this.nradToEntityLinks = 
 			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
@@ -1123,7 +1123,7 @@ public class Workspace extends CachedEntity {
 		personListsByName.clear();
 		personToEntityLinkSets.clear();
 		clanListsByDoc.clear();
-		clansByName.clear();
+		//clansByName.clear();
 		nradToEntityLinks.clear();
 		graphLinks.clear();
 	}
@@ -1460,9 +1460,11 @@ public class Workspace extends CachedEntity {
 		return father;
 	}
 	
-	private Clan addClanForNRAD(NameRoleActivity nrad,
+	private Clan addClanForNRAD(
+			ServiceContext sc,
+			NameRoleActivity nrad,
 			ArrayList<Clan> clanListForDoc) {
-		Clan clan = findOrCreateClan(nrad);
+		Clan clan = findOrCreateClan(sc, nrad);
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
 		if(links==null) {
 			links = new EntityLinkSet<NameRoleActivity>(nrad, LinkType.Type.LINK_TO_CLAN);
@@ -1477,16 +1479,19 @@ public class Workspace extends CachedEntity {
 		return clan;
 	}
 	
-	private Clan findOrCreateClan(NameRoleActivity nrad) {
+	private Clan findOrCreateClan(ServiceContext sc, NameRoleActivity nrad) {
 		Name name = nrad.getName();
 		if(name==null)
 			throw new RuntimeException("Cannot find Clan for NRAD with no Name:"
 											+nrad.getDisplayName());
-		int clannameId = name.getId();	// get Name
-		Clan clan = clansByName.get(clannameId);
+		Connection dbConn = sc.getConnection();
+		// TODO: Verify with PLS that this is this.id the correct workspace id to pass?
+		Clan clan = Clan.FindByName(dbConn, this.id, name);
+				//clansByName.get(clannameId);
+		
 		if(clan==null) {
 			clan = new Clan(nrad);
-			clansByName.put(clannameId, clan);
+			//clansByName.put(clannameId, clan);
 		}
 		return clan;
 	}
@@ -1538,7 +1543,7 @@ public class Workspace extends CachedEntity {
 					}
 					NameRoleActivity clanNRAD = nrad.getClan();
 					if(clanNRAD!=null)
-						addClanForNRAD(clanNRAD, clanListForDoc);
+						addClanForNRAD(sc, clanNRAD, clanListForDoc);
 				}
 			}
 		}
