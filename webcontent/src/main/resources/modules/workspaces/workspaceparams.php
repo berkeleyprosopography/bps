@@ -342,12 +342,12 @@ function getCollapser($CFG,$wkspid){
 			// Next, collect the rules, by section, adding them to the appropriate group
 			if(isset($clpsrObj['allIntraDocRules'])) {
 				$ruleSet = &$clpsrObj['allIntraDocRules'];
-				if(!processRuleSet(&$ruleSet, &$collapser['intra_groups'] ))
+				if(!processRuleSet($ruleSet, $collapser['intra_groups'] ))
 					return false;
 			}
 			if(isset($clpsrObj['allCorpusWideRules'])) {
 				$ruleSet = &$clpsrObj['allCorpusWideRules'];
-				if(!processRuleSet(&$ruleSet, &$collapser['inter_groups'] ))
+				if(!processRuleSet($ruleSet, $collapser['inter_groups'] ))
 					return false;
 			}
 
