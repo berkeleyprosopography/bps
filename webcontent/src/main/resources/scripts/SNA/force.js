@@ -913,7 +913,7 @@ Network = function() {
 
 
  nodeHood = function(d){
- 	return d3.json("/SNA/data.json?id=" + d.id, function(json) {return network.updateData(json); });
+ 	return d3.json("data.json?id=" + d.id, function(json) {return network.updateData(json); });
  }
 
 
@@ -985,7 +985,7 @@ $(function() {
   $('#source_select').on("change", function(e) {
     var filename;
     filename = $(this).val();	
-    return d3.json("SNA/" + filename, function(json) {
+    return d3.json(filename, function(json) {
       return myNetwork.updateData(json);
     });
   });
