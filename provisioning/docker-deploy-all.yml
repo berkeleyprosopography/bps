@@ -55,7 +55,7 @@
     - name: Change permissions.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}
 
-    - name: Copy sources from shared folder to local /opt folder
+    - name: Copy sources from shared folder to {{ project_root }} folder
       copy: src=/bps dest={{ project_root }}
       sudo_user: "{{ user }}"
 

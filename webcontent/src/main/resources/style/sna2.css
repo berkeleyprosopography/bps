@@ -1,0 +1,121 @@
+  
+body {
+      color: #333;
+      font-size: 14px;
+      font-family: Lato, sans-serif;
+    }
+    #graph-container {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      position: absolute;
+    }
+    /* Control panel: */
+.control-panel {
+  color: #666;
+  border-top: 1px #ccc dashed;
+  background: #fff;
+  position: relative;
+  height: 84px;
+}
+.move-up {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  top: 0;
+  right: 60px;
+  margin: 5px;
+}
+.move-down {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  top: 20px;
+  right: 60px;
+  margin: 5px;
+}
+.move-left {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  top: 10px;
+  right: 90px;
+  margin: 5px;
+}
+.move-right {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  top: 10px;
+  right: 35px;
+  margin: 5px;
+}
+    #data-pane {
+      top: 10px;
+      /*bottom: 10px;*/
+      left: 10px;
+      position: absolute;
+      width: 230px;
+      background-color: rgb(249, 247, 237);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #graph-pane {
+      bottom: 10px;
+      /*bottom: 10px;*/
+      left: 10px;
+      position: absolute;
+      width: 230px;
+      height: 130px;
+      background-color: rgb(249, 247, 237);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #control-pane > div {
+      margin: 10px;
+      overflow-x: auto;
+    }
+    #control-pane {
+      top: 10px;
+      /*bottom: 10px;*/
+      right: 10px;
+      position: absolute;
+      width: 230px;
+      background-color: rgb(249, 247, 237);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    #control-pane > div {
+      margin: 10px;
+      overflow-x: auto;
+    }
+    .line {
+      clear: both;
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 12px 0 0 0;
+      border-bottom: 1px solid #aac789;
+      background: transparent;
+    }
+    h2, h3, h4 {
+      padding: 0;
+      font-variant: small-caps;
+    }
+    .green {
+      color: #437356;
+    }
+    h2.underline {
+      color: #437356;
+      background: #f4f0e4;
+      margin: 0;
+      border-radius: 2px;
+      padding: 8px 12px;
+      font-weight: 700;
+    }
+    .hidden {
+      display: none;
+      visibility: hidden;
+    }
+
+    input[type=range] {
+      width: 160px;
+    }

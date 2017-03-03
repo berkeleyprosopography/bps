@@ -16,7 +16,7 @@ if(($login_state != BPS_LOGGED_IN) && ($login_state != BPS_REG_PENDING)){
 }
 
 
-$style_block = '<link href='http://fonts.googleapis.com/css?family=Lato:300,700' rel='stylesheet' type='text/css'>';
+$style_block = '<link href="http://fonts.googleapis.com/css?family=Lato:300,700" rel="stylesheet" type="text/css">';
 $t->assign("style_block", $style_block);
 
 

@@ -39,7 +39,6 @@ $output_json = array(
 	'graph' => array(),
 	'nodes' => array(),
 	'edges' => array(),
-	'multigraph' => false,
 );
 
 if(!isset($_GET['wid'])) {
@@ -56,7 +55,7 @@ if(!isset($_GET['wid'])) {
 
 	foreach ($json->graph->node as $node) {
 		$output_node = array(
-			'id' => (int) $node->{'@id'},
+			'id' => (string) $node->{'@id'},
 		);
 		foreach ($node->data as $node_data) {
 			$output_node[$node_data->{'@key'}] = $node_data->{'$'};
@@ -69,12 +68,12 @@ if(!isset($_GET['wid'])) {
 
 
 	## TODO -> Add edge id
-	$i = 5;
+	$i = 0;
 	foreach ($json->graph->edge as $edge) {
 		$output_edge = array(
 			'source' => $internal_ids[$edge->{'@source'}],
 			'target' => $internal_ids[$edge->{'@target'}],
-			'id' => $i,
+			'id' => (string) $i,
 			'directed' => $edge->{'@directed'},
 		);
 		$i++;
