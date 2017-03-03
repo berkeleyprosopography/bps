@@ -1,0 +1,173 @@
+<!-- START SIGMA IMPORTS -->
+<script src="../src/sigma.core.js"></script>
+<script src="../src/conrad.js"></script>
+<script src="../src/utils/sigma.utils.js"></script>
+<script src="../src/utils/sigma.polyfills.js"></script>
+<script src="../src/sigma.settings.js"></script>
+<script src="../src/classes/sigma.classes.dispatcher.js"></script>
+<script src="../src/classes/sigma.classes.configurable.js"></script>
+<script src="../src/classes/sigma.classes.graph.js"></script>
+<script src="../src/classes/sigma.classes.camera.js"></script>
+<script src="../src/classes/sigma.classes.quad.js"></script>
+<script src="../src/classes/sigma.classes.edgequad.js"></script>
+<script src="../src/captors/sigma.captors.mouse.js"></script>
+<script src="../src/captors/sigma.captors.touch.js"></script>
+<script src="../src/renderers/sigma.renderers.canvas.js"></script>
+<script src="../src/renderers/sigma.renderers.webgl.js"></script>
+<script src="../src/renderers/sigma.renderers.svg.js"></script>
+<script src="../src/renderers/sigma.renderers.def.js"></script>
+<script src="../src/renderers/webgl/sigma.webgl.nodes.def.js"></script>
+<script src="../src/renderers/webgl/sigma.webgl.nodes.fast.js"></script>
+<script src="../src/renderers/webgl/sigma.webgl.edges.def.js"></script>
+<script src="../src/renderers/webgl/sigma.webgl.edges.fast.js"></script>
+<script src="../src/renderers/webgl/sigma.webgl.edges.arrow.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.labels.def.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.hovers.def.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.nodes.def.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edges.def.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edges.curve.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edges.arrow.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edges.curvedArrow.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edgehovers.def.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edgehovers.curve.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edgehovers.arrow.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.edgehovers.curvedArrow.js"></script>
+<script src="../src/renderers/canvas/sigma.canvas.extremities.def.js"></script>
+<script src="../src/renderers/svg/sigma.svg.utils.js"></script>
+<script src="../src/renderers/svg/sigma.svg.nodes.def.js"></script>
+<script src="../src/renderers/svg/sigma.svg.edges.def.js"></script>
+<script src="../src/renderers/svg/sigma.svg.edges.curve.js"></script>
+<script src="../src/renderers/svg/sigma.svg.labels.def.js"></script>
+<script src="../src/renderers/svg/sigma.svg.hovers.def.js"></script>
+<script src="../src/middlewares/sigma.middlewares.rescale.js"></script>
+<script src="../src/middlewares/sigma.middlewares.copy.js"></script>
+<script src="../src/misc/sigma.misc.animation.js"></script>
+<script src="../src/misc/sigma.misc.bindEvents.js"></script>
+<script src="../src/misc/sigma.misc.bindDOMEvents.js"></script>
+<script src="../src/misc/sigma.misc.drawHovers.js"></script>
+<!-- END SIGMA IMPORTS -->
+<script src="../plugins/sigma.parsers.json/sigma.parsers.json.js"></script>
+<script src="../plugins/sigma.layout.forceAtlas2/worker.js"></script>
+<script src="../plugins/sigma.layout.forceAtlas2/supervisor.js"></script>
+<div id="container">
+  <style>
+    #graph-container {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      position: absolute;
+    }
+  </style>
+  <div id="graph-container"></div>
+</div>
+
+<script>
+
+
+
+  function load_graph() {
+
+    console.log('load_graph:: init');
+      var g =  {
+        nodes: [
+          { id: 'n0' },
+          { id: 'n1' }
+        ],
+        edges: [
+          {
+            id: 'e0',
+            source: 'n0',
+            target: 'n1'
+          }
+        ]
+    };
+    console.log('load_graph:: returning', g);
+   return g;
+
+  }
+   // Create new Sigma instance in graph-container div (use your div name here) 
+   console.log('Creating root sigma object...');
+
+  s = new sigma({
+     graph: load_graph(),
+     container: 'graph-container',
+     renderer: {
+      container: document.getElementById('graph-container'),
+      type: 'canvas'
+     },
+     settings: {
+      minNodeSize: 8,
+      maxNodeSize: 16
+     }
+   });
+
+   console.log('constructed sigma object',  s.graph.nodes, s.graph.edges);
+
+   var i,
+    nodes = s.graph.nodes(),
+    len = nodes.length;
+    console.log("iterating over graph:: begin | len=", len);
+    for (i = 0; i < len; i++) {
+      console.log('Iterating over node', nodes[i]);
+    nodes[i].x = Math.random();
+    nodes[i].y = Math.random();
+    nodes[i].size = s.graph.degree(nodes[i].id);
+    nodes[i].color = nodes[i].center ? '#333' : '#666';
+    }
+    console.log("iterating over graph:: end");
+    // Refresh the display:
+    console.log("Refreshing visualization");
+    s.refresh();
+    
+    console.log("Enabling force atlas");
+    // ForceAtlas Layout
+    s.startForceAtlas2();
+    
+    load_bps(s);
+
+
+    function load_bps(s){
+      console.log("load_bps:: Using sigma parser to read json file");
+      sigma.parsers.json(
+        'bps_modified.json',
+        s,
+        function() {
+            // this below adds x, y attributes as well as size = degree of the node 
+            var i,
+              nodes = s.graph.nodes(),
+              len = nodes.length;
+
+
+            for (i = 0; i < len; i++) {
+                nodes[i].x = Math.random();
+                nodes[i].y = Math.random();
+                nodes[i].size = s.graph.degree(nodes[i].id);
+                nodes[i].color = nodes[i].center ? '#333' : '#666';
+                console.log('Node', i, 'has x,y =', nodes[i].x, nodes[i].y, "and size",nodes[i].size );
+            }
+
+            var k,
+              edges = s.graph.edges(),
+              len = edges.length;
+
+
+            for (k = 0; k < len; k++) {
+                console.log('Edge', k, 'is', edges[k] );
+
+            }
+
+            // Refresh the display:
+            s.refresh();
+            console.log(s);
+            // ForceAtlas Layout
+            s.startForceAtlas2();
+        }
+      ); 
+
+
+    }
+
+   // first you load a json with (important!) s parameter to refer to the sigma instance   
+    
+</script>

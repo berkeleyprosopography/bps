@@ -22,7 +22,7 @@ $t->assign("style_block", $style_block);
 
 
 
-$script_block = '<script src="https://cdn.jsdelivr.net/g/sigma.js@1.0.2(sigma.min.js+plugins/sigma.layout.forceAtlas2.min.js+plugins/sigma.parsers.gexf.min.js+plugins/sigma.parsers.json.min.js+plugins/sigma.plugins.animate.min.js+plugins/sigma.plugins.dragNodes.min.js+plugins/sigma.plugins.neighborhoods.min.js+plugins/sigma.renderers.customShapes.min.js)"></script>'."\n".'<script src="/scripts/SNA/libs/modernizr-2.0.6.min.js"></script>';
+$script_block = '<script src="/scripts/SNA/libs/modernizr-2.0.6.min.js"></script>';
 $t->assign("script_block", $script_block);
 
 

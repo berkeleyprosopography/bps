@@ -67,13 +67,12 @@ if(!isset($_GET['wid'])) {
 	}
 
 
-	## TODO -> Add edge id
 	$i = 0;
 	foreach ($json->graph->edge as $edge) {
 		$output_edge = array(
 			'source' => $internal_ids[$edge->{'@source'}],
 			'target' => $internal_ids[$edge->{'@target'}],
-			'id' => (string) $i,
+			'id' => (int) $i,
 			'directed' => $edge->{'@directed'},
 		);
 		$i++;

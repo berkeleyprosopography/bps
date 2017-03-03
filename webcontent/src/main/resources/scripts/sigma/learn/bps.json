@@ -1,0 +1,550 @@
+{
+    "directed": false,
+    "graph": [],
+    "links": [
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 25,
+            "target": 3,
+            "type": "Slave Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 25,
+            "target": 23,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 3,
+            "target": 12,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 15,
+            "target": 14,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 3,
+            "target": 22,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 25,
+            "target": 24,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 3,
+            "target": 24,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 3,
+            "target": 11,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 21,
+            "target": 3,
+            "type": "Neighbourhood",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 15,
+            "target": 12,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 25,
+            "target": 22,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 17,
+            "target": 3,
+            "type": "House Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 18,
+            "target": 3,
+            "type": "House Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 19,
+            "target": 3,
+            "type": "Neighbourhood",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 16,
+            "target": 3,
+            "type": "House Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 20,
+            "target": 3,
+            "type": "Neighbourhood",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 3,
+            "target": 8,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 3,
+            "target": 9,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "CM12",
+            "source": 2,
+            "target": 4,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 15,
+            "target": 13,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "CM12",
+            "source": 3,
+            "target": 4,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 5,
+            "target": 11,
+            "type": "Slave mark",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "CM12",
+            "source": 1,
+            "target": 2,
+            "type": "Slave Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 15,
+            "target": 3,
+            "type": "Slave Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 5,
+            "target": 3,
+            "type": "Slave Sale",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P296769",
+            "source": 3,
+            "target": 23,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 3,
+            "target": 13,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342456",
+            "source": 3,
+            "target": 14,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 3,
+            "target": 7,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 3,
+            "target": 10,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342446",
+            "source": 3,
+            "target": 6,
+            "type": "Ownership",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "P342504",
+            "source": 1,
+            "target": 3,
+            "type": "Neighbourhood",
+            "weight": "1.0"
+        },
+        {
+            "directed": "true",
+            "docID": "CM12",
+            "source": 0,
+            "target": 4,
+            "type": "Slave mark",
+            "weight": "1.0"
+        }
+    ],
+    "multigraph": false,
+    "nodes": [
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.020",
+            "KmeansClusterGroup": "0",
+            "clan": "Ah-utu",
+            "degree": "1",
+            "father": "Anu-ah-ušabši",
+            "gender": "M",
+            "id": 20,
+            "name": "Anu-ab-uṭir",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.009",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 9,
+            "name": "Anu-uballit",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.018",
+            "KmeansClusterGroup": "0",
+            "clan": "Ah-utu",
+            "degree": "1",
+            "father": "Anu-ah-ušabši",
+            "gender": "M",
+            "id": 18,
+            "name": "Ana-rabutika-anu",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.016",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 16,
+            "name": "Anu-zer-lišir",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.023",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "M",
+            "id": 23,
+            "name": "Atalihan",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.004",
+            "KmeansClusterGroup": "0",
+            "degree": "3",
+            "father": "Saniqqâ",
+            "gender": "M",
+            "id": 4,
+            "name": "Anu-ittannu",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.001",
+            "KmeansClusterGroup": "0",
+            "clan": "Ah-utu",
+            "degree": "2",
+            "father": "Tanittu-Anu",
+            "gender": "M",
+            "id": 1,
+            "name": "Nidintu-Anu",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.000",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "father": "Nana-iddin",
+            "gender": "M",
+            "id": 0,
+            "name": "Anu-belšunu",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.021",
+            "KmeansClusterGroup": "0",
+            "clan": "H",
+            "degree": "1",
+            "father": "Labaši",
+            "gender": "M",
+            "id": 21,
+            "name": "Nidintu-Anu",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.017",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 17,
+            "name": "Anu-zer-lišir",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "122.5",
+            "GMLid": "per.003",
+            "KmeansClusterGroup": "0",
+            "clan": "Ah-utu",
+            "degree": "23",
+            "father": "Tanittu-Anu",
+            "gender": "M",
+            "id": 3,
+            "name": "Nana-iddin",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.5",
+            "GMLid": "per.002",
+            "KmeansClusterGroup": "0",
+            "clan": "Ah-utu",
+            "degree": "2",
+            "father": "Nana-iddin",
+            "gender": "M",
+            "id": 2,
+            "name": "Anu-ahhe-iddin",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.015",
+            "KmeansClusterGroup": "0",
+            "degree": "4",
+            "father": "Hanin-esi",
+            "gender": "M",
+            "id": 15,
+            "name": "Ṭabat-Nana",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.008",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 8,
+            "name": "Tattannu-Nana",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.006",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 6,
+            "name": "Kidin-Anu",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.019",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 19,
+            "name": "Anu-balassu-iqi",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.007",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 7,
+            "name": "Anu-ah-ittannu",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.022",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "M",
+            "id": 22,
+            "name": "Rahmat-Anu",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.012",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "M",
+            "id": 12,
+            "name": "Šibqat-Bel",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.014",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "M",
+            "id": 14,
+            "name": "Amat-Bel",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.024",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "M",
+            "id": 24,
+            "name": "Anu-ah-tuqqin",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.010",
+            "KmeansClusterGroup": "0",
+            "degree": "1",
+            "gender": "M",
+            "id": 10,
+            "name": "Labaši",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.013",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "M",
+            "id": 13,
+            "name": "Sida",
+            "status": "slave"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.025",
+            "KmeansClusterGroup": "0",
+            "degree": "4",
+            "father": "Anu-ah-tuqqin",
+            "gender": "M",
+            "id": 25,
+            "name": "Mannu-ki-Dilbat",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.005",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "father": "Tattannu-Nana",
+            "gender": "F",
+            "id": 5,
+            "name": "Hanna",
+            "status": "free"
+        },
+        {
+            "BetweennessCentrality": "0.0",
+            "GMLid": "per.011",
+            "KmeansClusterGroup": "0",
+            "degree": "2",
+            "gender": "F",
+            "id": 11,
+            "name": "Ana-rabuti-Nana",
+            "status": "slave"
+        }
+    ]
+}
