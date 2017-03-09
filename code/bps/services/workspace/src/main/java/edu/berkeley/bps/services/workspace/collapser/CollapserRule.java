@@ -5,6 +5,7 @@ import edu.berkeley.bps.services.workspace.Workspace;
 
 public interface CollapserRule {
 
+	public static final int ALL_RULES = -1;
 	public static final int SHIFT_RULE = 1;
 	public static final int DISCOUNT_RULE = 2;
 	public static final int BOOST_RULE = 3;

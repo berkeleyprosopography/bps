@@ -277,27 +277,30 @@ function processRule(&$ruleObj ) {
 				);
 		}
 	}
-	if(isset($ruleObj['matrixAxisValues'])) {
+	if(isset($ruleObj['matrixAxisValues']) ) {
 		$newRule['matrixAxisValues'] = array();
 		$newRule['matrixAxisValuesLower'] = array();
-		foreach($ruleObj['matrixAxisValues']['axisValue'] as &$axis) {
-			$newRule['matrixAxisValues'][] = $axis;
-			$newRule['matrixAxisValuesLower'][] = strtolower($axis);
-		}
-		if(isset($ruleObj['matrixItems'])) {
-			$matrixItemsArray = array();
-			foreach($ruleObj['matrixItems']['matrixItemInfo'] as &$axis) {
-				if(!isset($axis['row']) || !isset($axis['col']) || !isset($axis['weight'])) {
-					$opmsg = "UI Rule: ".$newRule['name'].
-								" has a matrix Item that is missing values (passed back in collapser). ";
-					return false;
-				}
-				$matrixItemsArray[$axis['row']][$axis['col']] = $axis['weight'];
+		// May be empty because no corpus means no roles - absorb that quietly
+		if(isset($ruleObj['matrixAxisValues']['axisValue'])) {
+			foreach($ruleObj['matrixAxisValues']['axisValue'] as &$axis) {
+				$newRule['matrixAxisValues'][] = $axis;
+				$newRule['matrixAxisValuesLower'][] = strtolower($axis);
 			}
-			$newRule['matrixItems'] = $matrixItemsArray;
-		} else {
-			$opmsg = "UI Rule: ".$newRule['name']." has matrixAxisValues with no matrixItems! ";
-			return false;
+			if(isset($ruleObj['matrixItems'])) {
+				$matrixItemsArray = array();
+				foreach($ruleObj['matrixItems']['matrixItemInfo'] as &$axis) {
+					if(!isset($axis['row']) || !isset($axis['col']) || !isset($axis['weight'])) {
+						$opmsg = "UI Rule: ".$newRule['name'].
+									" has a matrix Item that is missing values (passed back in collapser). ";
+						return false;
+					}
+					$matrixItemsArray[$axis['row']][$axis['col']] = $axis['weight'];
+				}
+				$newRule['matrixItems'] = $matrixItemsArray;
+			} else {
+				$opmsg = "UI Rule: ".$newRule['name']." has matrixAxisValues with no matrixItems! ";
+				return false;
+			}
 		}
 	}
 	return $newRule;

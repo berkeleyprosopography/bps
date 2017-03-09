@@ -37,21 +37,39 @@
       </td>
     </tr>
   </table>
+  </div>
 
   {if !isset($collapser.intra_groups) }
-    <p>There are no intraDocument rule groups defined in the system!</p>
+		<div id="contentNarrow">
+	  	<p>There are no intraDocument rule groups defined in the system!</p>
+	  </div>
   {else}
-    <br/>
-    <h1>Step 1: Intra-document rules:</h1>
-    <h3><i>These rules collapse citations within a single document.</i></h3>
+		<div id="contentNarrow">
+			<br/>
+			<h1>Step 1: Intra-document rules:</h1>
+			<h3><i>These rules collapse citations within a single document.</i></h3>
+		</div>
 
     {* Loop over the intra-doc groups *}
     {section name=group loop=$collapser.intra_groups}
-      <h2>{$collapser.intra_groups[group].header}</h2>
-      <table cellpadding="10px" class="params" width="100%">
       {if !isset($collapser.intra_groups[group].rules) }
-        <p>There are no rules defined in this group!</p>
+				<div id="contentNarrow">
+					<h2>{$collapser.intra_groups[group].header}</h2>
+					<p>There are no rules defined in this group!</p>
+				</div>
       {else}
+				{* Determine if this is an matrix rule, and if so, use a wide div *}
+				{assign var=divClass value='contentNarrow'}
+        {section name=rule loop=$collapser.intra_groups[group].rules}
+          {if isset($collapser.intra_groups[group].rules[rule].matrixAxisValues)
+						and (($collapser.intra_groups[group].rules[rule].matrixAxisValues|@count)>6)}
+						{assign var=divClass value='contentWide'}
+					{/if}
+				{/section}
+						
+				<div id="{$divClass}">
+				<h2>{$collapser.intra_groups[group].header}</h2>
+				<table cellpadding="10px" class="params {$divClass}" width="100%">
         {* Loop over each rule in the group *}
         {section name=rule loop=$collapser.intra_groups[group].rules}
           {if isset($collapser.intra_groups[group].rules[rule].matrixAxisValues) }
@@ -62,6 +80,8 @@
                   <td class="paramDesc" colspan="{$smarty.section.mAxisVDummy.total+1}">
                       {$collapser.intra_groups[group].rules[rule].description}</td>
                 {/if}
+              {sectionelse}
+                  <td class="paramDesc">No roles found (no corpus?)</td>
               {/section}
             </tr>
             {* Row with the column names *}
@@ -130,20 +150,26 @@
             </tr>
           {/if}
         {/section}
+				</table>
+			</div>
       {/if}
-      </table>
     {/section}
   {/if}
 
   {if !isset($collapser.inter_groups) }
-    <p>There are no interDocument rule groups defined in the system!</p>
+		<div id="contentNarrow">
+			<p>There are no interDocument rule groups defined in the system!</p>
+		</div>
   {else}
-    <br/>
-    <h1>Step 2: Inter-document rules:</h1>
-    <h3><i>These rules collapse citations across all documents.</i></h3>
+		<div id="contentNarrow">
+			<br/>
+			<h1>Step 2: Inter-document rules:</h1>
+			<h3><i>These rules collapse citations across all documents.</i></h3>
+		</div>
 
     {* Loop over the inter-doc groups *}
     {section name=group loop=$collapser.inter_groups}
+		<div id="contentNarrow">
       <h2>{$collapser.inter_groups[group].header}</h2>
       <table cellpadding="10px" class="params" width="100%">
       {if !isset($collapser.inter_groups[group].rules) }
@@ -174,6 +200,7 @@
         {/section}
       {/if}
       </table>
+		</div>
     {/section}
   {/if}
 
