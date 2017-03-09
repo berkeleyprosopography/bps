@@ -119,6 +119,14 @@ em{
 	margin-right:auto;
 }
 
+/* used for some sections that are larger*/
+#contentWide{
+	width:100%;
+	margin-left:auto;
+	margin-right:auto;
+	overflow: auto;
+}
+
 /* ------------------------------------------------------- *
  * - Header     ------------------------------------------ *
  * ------------------------------------------------------- */
@@ -283,6 +291,10 @@ label.overlabel-apply {
 table.params {
 	margin-left:20px;
 	background-color:#F8E0BC;
+}
+
+table.params.contentWide {
+	margin-left:0px;
 }
 
 .caseTitle{

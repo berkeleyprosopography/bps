@@ -423,6 +423,35 @@ public class Workspace extends CachedEntity {
 		return;
 	}
 	
+	protected void persistClearCollapserMatrixRuleItemPairs(Connection dbConn, CollapserRuleBase rule) {
+		final String myName = ".persistClearCollapserMatrixRuleItemPairs: ";
+		// First, try to find the rule pairs in the DB, and if any found, update the passed rule pairs from the DB
+		final String DELETE_STMT = 
+				"DELETE FROM wksp_collapser_rule"
+				//Need to exclude the one entry for the rule weight, in the same table 
+				+" WHERE wksp_id=? AND name=? AND item!='"+CollapserRule.NO_ITEM_SPEC+"'";
+		
+		if(!(rule instanceof RoleMatrixDiscountRule)) {
+			String tmp = myClass+myName+"Rule: "+ rule.getName()+" is not a Matrix rule!";
+			throw new RuntimeException(tmp);
+		}
+		try {
+			PreparedStatement stmt = dbConn.prepareStatement(DELETE_STMT);
+			stmt.setInt(1, this.id);
+			stmt.setString(2, rule.getName());
+			int rows = stmt.executeUpdate();
+			logger.debug(myClass+myName+" cleared "+rows+" ItemPairs for Matrix Rule: "+ rule.getName());
+			stmt.close();
+		} catch(SQLException se) {
+			String tmp = myClass+myName+"Problem querying DB.\n"+ se.getMessage();
+			logger.error(tmp);
+			throw new WebApplicationException( 
+					Response.status(
+							Response.Status.INTERNAL_SERVER_ERROR).entity(tmp).build());
+		}
+		return;
+	}
+	
 	// TODO Make rule be a MatrixBaseClass once this is refactored
 	private void findAndUpdateMatrixPair(RoleMatrixDiscountRule rule, List<MatrixItemInfo> pairWeights, 
 			String itemSpec, double weight) {
@@ -831,8 +860,12 @@ public class Workspace extends CachedEntity {
 		clearEntityMaps();
 		this.corpus = newCorpus;
 		if(this.corpus!=null) {
-			if(collapser==null)
+			if(collapser==null) {
 				setupCollapser(sc);
+			} else {
+				// Make sure any rules that are corpus dependent get reinitialized and persisted
+				updateCollapserFromCorpus(sc);
+			}
 			rebuildEntitiesFromCorpus(sc);
 		}
 	}
@@ -933,6 +966,26 @@ public class Workspace extends CachedEntity {
 		// Persist the matrix cell settings - will update the rule if they already exist. 
 		persistCheckCollapserMatrixRuleItemPairs(dbConn, rmdRule);
 		
+	}
+	
+	/*
+	 * If we ever refresh from a corpus, or augment a corpus, we need to clean up rules
+	 * that depend upon the corpus. This should probably invoke an interface specifically for this. 
+	 */ 
+	public void updateCollapserFromCorpus(ServiceContext sc) {
+		Connection dbConn = sc.getConnection();
+		List<CollapserRuleBase> ruleList = 
+				collapser.getRules(CollapserRule.ALL_RULES, CollapserRule.WITHIN_DOCUMENTS);
+		for(CollapserRuleBase rule:ruleList) {
+			if(rule instanceof RoleMatrixDiscountRule) {
+				// Clear out any previous ItemPairs so we do not have stale info
+				persistClearCollapserMatrixRuleItemPairs(dbConn, rule);
+				// Now determine the new pairs needed for this corpus
+				rule.initialize(this);
+				// Persist the matrix cell settings. 
+				persistCheckCollapserMatrixRuleItemPairs(dbConn, (RoleMatrixDiscountRule)rule);
+			}
+		}
 	}
 	
 	public void updateWeightForCollapserRule(ServiceContext sc, double weight, String collapserRuleName ) {
