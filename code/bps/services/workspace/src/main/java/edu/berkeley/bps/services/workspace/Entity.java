@@ -19,8 +19,6 @@ public abstract class Entity {
 	protected Name declaredName = null;
 	protected String displayName = null;
 
-	protected int workspace_id = -1;
-
 	protected Entity() {
 		throw new RuntimeException("No-arg Ctor should not be called");
 	}
@@ -44,27 +42,6 @@ public abstract class Entity {
 		displayName = nrad.getDisplayName();
 	}
 
-	
-	public Entity(NameRoleActivity nrad, int workspace_id) {
-		super();
-		String fNameStr = null;
-		if((originalNRAD=nrad)==null 
-			// || (declaredName=originalNRAD.getName())==null 
-			// We can create Clan entities now
-			// || (declaredName.getNameType()!=Name.NAME_TYPE_CLAN)
-			// Need to support Person with missing forename...
-			// || (fNameStr=declaredName.getName())==null
-			// ||  fNameStr.isEmpty()
-			)
-			throw new IllegalArgumentException(
-				this.getClass().getName()+"Entity ctor must have valid name.");
-		this.id = originalNRAD.getId();		// Tied to base - simplifies mapping
-		this.workspace_id  = workspace_id;
-		declaredName=originalNRAD.getName();
-		//displayName = declaredName.getName();
-		displayName = nrad.getDisplayName();
-	}
-	
 	/**
 	 * @return the id
 	 */
