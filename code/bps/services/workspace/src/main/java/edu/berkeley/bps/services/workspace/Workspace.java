@@ -1154,12 +1154,15 @@ public class Workspace extends CachedEntity {
 			nradLink1 = nradLink2;
 			nradLink2 = nradLinkTmp;
 		} */
+		double weight = nradLink1.getWeight() * nradLink2.getWeight();
+		// Filter out persons that have no more weight
+		if(weight==0)
+			return;
 		String role1 = nradLink1.fromObj.getRoleString();
 		String role2 = nradLink2.fromObj.getRoleString();
 		Person pers1 = (Person)nradLink1.getEntity();
 		Person pers2 = (Person)nradLink2.getEntity();
 		String gplHash = GraphPersonsLink.createARIntHash(pers1, pers2);
-		double weight = nradLink1.getWeight() * nradLink2.getWeight();
 		GraphPersonsLink gpl = graphLinks.get(gplHash);
 		if(gpl == null) {
 			gpl = new GraphPersonsLink(pers1, role1, pers2, role2, weight);
