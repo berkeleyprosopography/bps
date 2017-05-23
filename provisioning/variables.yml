@@ -2,11 +2,11 @@
 project_name: bps
 project_root: /srv/bps
 project_repo: git://github.com/berkeleyprosopography/bps.git
-branch: master
-user: bpsuser
-user_password: platypusesarecute
-db_user: bpsdev
-db_password: G0Names!
-db_name: bpsdev
-tomcat_admin: tomcat
-tomcat_admin_password: bps4me
+branch: 
+user: 
+user_password: 
+db_user: 
+db_password: 
+db_name: 
+tomcat_admin: 
+tomcat_admin_password: 
