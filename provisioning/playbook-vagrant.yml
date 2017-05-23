@@ -121,7 +121,7 @@
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}/corpora
 
     - name: Copy sources from shared folder to local {{project_root}} folder
-      copy: src=/bps dest={{ project_root }}
+      command: cp -R /bps {{ project_root }}
       sudo_user: "{{ user }}"
 
     - name: Create the webroot directory.
