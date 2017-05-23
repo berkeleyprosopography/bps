@@ -14,6 +14,24 @@ Provisioning is done through a set of Ansible scripts. in particular:
  * `deploy-*` scripts allow to have a quick shortcut to deploy parts of the BPS system at will. These are especially useful in development. 
 
 
+### Variables
+
+You will need a `variables.yml` file in the `provisioning` folder that contains the following:
+
+    ---
+    project_name: bps
+    project_root: [directory where the tree will be copied | e.g. /srv/bps]
+    project_repo: [repo url, only needed in playbook-native | e.g. https://github.com/berkeleyprosopography/bps.git]
+    branch: [repo branch, only needed in playbook-native | e.g. master]
+    user: [unix user | e.g. bps-user ]
+    user_password: [bps-user password | e.g. password123]
+    db_user: bps-database-user
+    db_password: [bps-database-user password | e.g. password123]
+    db_name: [database name | e.g. bpsdev]
+    tomcat_admin: [tomcat admin user | e.g. tomcat]
+    tomcat_admin_password: [tomcat admin user password | e.g. password123]
+
+Please note that `variables.yml` is in `.gitignore` within this repo, so you'll need to make sure it exists locally by creating it, or by adding it to your fork.
 
 ## Deploying natively
 
