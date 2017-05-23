@@ -55,6 +55,7 @@
         - { key: '^BPS_JEESERVER_HOME', value : 'BPS_JEESERVER_HOME=/var/lib/tomcat6/' }
         - { key: '^BPS_WEBROOT', value : 'BPS_WEBROOT=/var/www/{{ project_name }}' }
         - { key: '^DB_USER', value : 'DB_USER={{ db_user }}'}
+        - { key: '^DB_NAME', value : 'DB_NAME={{ db_name }}'}
         - { key: '^DB_PASSWORD', value : 'DB_PASSWORD={{ db_password }}'}
         - { key: '^DB_PASSWORD_BPS', value : 'DB_PASSWORD_BPS={{ db_password }}'}
         - { key: '^BPS_CORPORA', value : 'BPS_CORPORA={{ project_root }}/corpora'}
@@ -64,7 +65,7 @@
     #- name: Start MySQL Database server
     #  shell: service mysql start
 
-    - name: Set user privileges
+    - name: Set DB privileges
       mysql_user:
         login_host: 127.0.0.1
         login_port: 3306
@@ -137,6 +138,7 @@
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_NAME: "{{ db_name }}"
         DB_USER: "{{ db_user }}"
         DB_PASSWORD: "{{ db_password }}"
         DB_PASSWORD_BPS: "{{ db_password }}"
@@ -151,6 +153,7 @@
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_NAME: "{{ db_name }}"
         DB_USER: "{{ db_user }}"
         DB_PASSWORD: "{{ db_password }}"
         DB_PASSWORD_BPS: "{{ db_password }}"
@@ -170,6 +173,7 @@
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
         BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_NAME: "{{ db_name }}"
         DB_USER: "{{ db_user }}"
         DB_PASSWORD: "{{ db_password }}"
         DB_PASSWORD_BPS: "{{ db_password }}"
