@@ -19,13 +19,30 @@
         - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
       notify: source environment
 
-    - name: Copy sources from  read-only shared folder to local {{ project_root }} folder
-      copy: src=/bps dest={{ project_root }}
-      sudo_user: "{{ user }}"
+    - name: Ensure Mysql is running
+      service: name=mysql state=running
 
-    - name: Build WAR with maven
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
-      #ignore_errors: yes
+    - name: Set user privileges
+      mysql_user:
+        login_host: 127.0.0.1
+        login_port: 3306
+        login_user: "root"
+        login_password: "{{db_password}}"
+        user: "{{db_user}}"
+        password: "{{db_password}}"
+        priv: "*.*:ALL,GRANT"
+        state: present
+        check_implicit_admin: True
+
+
+    - name: Create missing db directory
+      file: path={{project_root}}/bps/code/bps/services/common/target/db state=directory
+
+    - name: Copy db init file
+      copy: src=files/db/initdb.sql  dest={{ project_root }}/bps/code/bps/services/common/target/db/initdb.sql
+
+    - name: Create the DB
+      shell: ant create_db chdir={{ project_root }}/bps/code/bps/services
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
@@ -34,18 +51,10 @@
         DB_PASSWORD: "{{ db_password }}"
         DB_PASSWORD_BPS: "{{ db_password }}"
         BPS_CORPORA : "{{ project_root }}/corpora"
-        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPAT
-      notify: restart tomcat
-        
+        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+      notify: restart_mysql
+
   handlers:
-  - name: restart tomcat
-    service: name=tomcat6 state=restarted
-    environment:
-      JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
-      BPS_JEESERVER_HOME: /var/lib/tomcat6/
-      BPS_WEBROOT: "/var/www/{{ project_name }}"
-      DB_USER: "{{ db_user }}"
-      DB_PASSWORD: "{{ db_password }}"
-      DB_PASSWORD_BPS: "{{ db_password }}"
-      BPS_CORPORA : "{{ project_root }}/corpora"
-      CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
+
+  - name: restart_mysql
+    service: name=mysql state=started
