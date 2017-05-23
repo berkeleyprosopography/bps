@@ -16,7 +16,7 @@ Provisioning is done through a set of Ansible scripts. in particular:
 
 ### Variables
 
-You will need a `variables.yml` file in the `provisioning` folder that contains the following:
+You may need to adjust the values in `variables.yml` to match your use-case:
 
     ---
     project_name: bps
@@ -31,7 +31,6 @@ You will need a `variables.yml` file in the `provisioning` folder that contains 
     tomcat_admin: [tomcat admin user | e.g. tomcat]
     tomcat_admin_password: [tomcat admin user password | e.g. password123]
 
-Please note that `variables.yml` is in `.gitignore` within this repo, so you'll need to make sure it exists locally by creating it, or by adding it to your fork.
 
 ## Deploying natively
 

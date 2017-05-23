@@ -1,0 +1,12 @@
+---
+project_name: bps
+project_root: /srv/bps
+project_repo: git://github.com/berkeleyprosopography/bps.git
+branch: master
+user: bps
+user_password: password
+db_user: bps
+db_password: password
+db_name: bps
+tomcat_admin: tomcat
+tomcat_admin_password: password
