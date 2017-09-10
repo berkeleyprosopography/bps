@@ -223,7 +223,11 @@
       copy: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
       sudo: true
       
-
+    - name: Setup tomcat server configuration
+      copy: src=files/tomcat/etc-default-tomcat6 dest=/etc/default/tomcat6
+      sudo: true
+      notify: restart tomcat
+      when: java_debug is defined
 
   handlers:
   - name: restart apache2
