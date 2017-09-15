@@ -4,9 +4,9 @@ project_root: /srv/bps
 project_repo: git://github.com/berkeleyprosopography/bps.git
 branch: master
 user: bps
-user_password: password
+user_password: G0Names!
 db_user: bps
-db_password: password
+db_password: G0Names!
 db_name: bps
 tomcat_admin: tomcat
-tomcat_admin_password: password
+tomcat_admin_password: tcAdmin
