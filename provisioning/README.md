@@ -103,6 +103,11 @@ Enter the directory and copy the Vagrantfile of your choice as detailed above
     ln -s provisioning/Vagrantfile.dev Vagrantfile
     vagrant up
 
+and start the provisioning process with
+
+	cd bps
+    ansible-playbook -i provisioning/hosts provisioning/playbook-vagrant.yml
+
 BPS will be available on `localhost:7000`
 
 ## Deploying on Docker

@@ -10,3 +10,4 @@ db_password: G0Names!
 db_name: bps
 tomcat_admin: tomcat
 tomcat_admin_password: tcAdmin
+java_debug: true
