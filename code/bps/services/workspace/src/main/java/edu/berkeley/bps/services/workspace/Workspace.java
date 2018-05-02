@@ -165,7 +165,7 @@ public class Workspace extends CachedEntity {
 			new HashMap<Integer, HashMap<Integer, ArrayList<Person>>>();
 		this.personListsByName =
 			new HashMap<Integer, ArrayList<Person>>();
-		//this.clansByName = new HashMap<Integer, Clan>();
+		this.clansByName = new HashMap<Integer, Clan>();
 		this.clanListsByDoc = new HashMap<Integer, ArrayList<Clan>>(); 
 		this.nradToEntityLinks = 
 			new HashMap<Integer, EntityLinkSet<NameRoleActivity>>();
@@ -1154,12 +1154,15 @@ public class Workspace extends CachedEntity {
 			nradLink1 = nradLink2;
 			nradLink2 = nradLinkTmp;
 		} */
+		double weight = nradLink1.getWeight() * nradLink2.getWeight();
+		// Filter out persons that have no more weight
+		if(weight==0)
+			return;
 		String role1 = nradLink1.fromObj.getRoleString();
 		String role2 = nradLink2.fromObj.getRoleString();
 		Person pers1 = (Person)nradLink1.getEntity();
 		Person pers2 = (Person)nradLink2.getEntity();
 		String gplHash = GraphPersonsLink.createARIntHash(pers1, pers2);
-		double weight = nradLink1.getWeight() * nradLink2.getWeight();
 		GraphPersonsLink gpl = graphLinks.get(gplHash);
 		if(gpl == null) {
 			gpl = new GraphPersonsLink(pers1, role1, pers2, role2, weight);
@@ -1176,7 +1179,7 @@ public class Workspace extends CachedEntity {
 		personListsByName.clear();
 		personToEntityLinkSets.clear();
 		clanListsByDoc.clear();
-		//clansByName.clear();
+		clansByName.clear();
 		nradToEntityLinks.clear();
 		graphLinks.clear();
 	}
@@ -1513,11 +1516,9 @@ public class Workspace extends CachedEntity {
 		return father;
 	}
 	
-	private Clan addClanForNRAD(
-			ServiceContext sc,
-			NameRoleActivity nrad,
+	private Clan addClanForNRAD(NameRoleActivity nrad,
 			ArrayList<Clan> clanListForDoc) {
-		Clan clan = findOrCreateClan(sc, nrad);
+		Clan clan = findOrCreateClan(nrad);
 		EntityLinkSet<NameRoleActivity> links = nradToEntityLinks.get(nrad.getId());
 		if(links==null) {
 			links = new EntityLinkSet<NameRoleActivity>(nrad, LinkType.Type.LINK_TO_CLAN);
@@ -1532,19 +1533,17 @@ public class Workspace extends CachedEntity {
 		return clan;
 	}
 	
-	private Clan findOrCreateClan(ServiceContext sc, NameRoleActivity nrad) {
+	private Clan findOrCreateClan(NameRoleActivity nrad) {
 		Name name = nrad.getName();
 		if(name==null)
 			throw new RuntimeException("Cannot find Clan for NRAD with no Name:"
 											+nrad.getDisplayName());
-		Connection dbConn = sc.getConnection();
-		// TODO: Verify with PLS that this is this.id the correct workspace id to pass?
-		Clan clan = Clan.FindByName(dbConn, this.id, name);
-				//clansByName.get(clannameId);
+		int clannameId = name.getId();	// get Name
+		Clan clan = clansByName.get(clannameId);
 		
 		if(clan==null) {
 			clan = new Clan(nrad);
-			//clansByName.put(clannameId, clan);
+			clansByName.put(clannameId, clan);
 		}
 		return clan;
 	}
@@ -1596,7 +1595,7 @@ public class Workspace extends CachedEntity {
 					}
 					NameRoleActivity clanNRAD = nrad.getClan();
 					if(clanNRAD!=null)
-						addClanForNRAD(sc, clanNRAD, clanListForDoc);
+						addClanForNRAD(clanNRAD, clanListForDoc);
 				}
 			}
 		}

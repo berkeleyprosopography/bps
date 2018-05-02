@@ -6,9 +6,40 @@
     - variables.yml
 
   tasks:
-  - name: Build WAR with maven
-    shell: mvn clean install -DskipTests chdir={{ source_root }}/code/bps/services
-    #ignore_errors: yes
+
+    - name: Set enviroment variables
+      lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
+      with_items:
+        - { key: '^BPS_JEESERVER_HOME', value : 'BPS_JEESERVER_HOME=/var/lib/tomcat6/' }
+        - { key: '^BPS_WEBROOT', value : 'BPS_WEBROOT=/var/www/{{ project_name }}' }
+        - { key: '^DB_USER', value : 'DB_USER={{ db_user }}'}
+        - { key: '^DB_PASSWORD', value : 'DB_PASSWORD={{ db_password }}'}
+        - { key: '^DB_PASSWORD_BPS', value : 'DB_PASSWORD_BPS={{ db_password }}'}
+        - { key: '^BPS_CORPORA', value : 'BPS_CORPORA={{ project_root }}/corpora'}
+        - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
+      notify: source environment
+
+    - name: Copy sources from  read-only shared folder to local {{ project_root }} folder
+      copy: src=/bps dest={{ project_root }}
+      sudo_user: "{{ user }}"
+
+    - name: Build WAR with maven
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
+      #ignore_errors: yes
+      environment:
+        JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
+        BPS_JEESERVER_HOME: /var/lib/tomcat6/
+        BPS_WEBROOT: "/var/www/{{ project_name }}"
+        DB_USER: "{{ db_user }}"
+        DB_PASSWORD: "{{ db_password }}"
+        DB_PASSWORD_BPS: "{{ db_password }}"
+        BPS_CORPORA : "{{ project_root }}/corpora"
+        CLASSPATH: /usr/share/java/mysql.jar:$CLASSPAT
+      notify: restart tomcat
+        
+  handlers:
+  - name: restart tomcat
+    service: name=tomcat6 state=restarted
     environment:
       JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
       BPS_JEESERVER_HOME: /var/lib/tomcat6/
