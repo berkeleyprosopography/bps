@@ -25,9 +25,9 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder ".", "/bps"
   # The following assume you have a /var folder on your tree
   # Map the folder for a deploy target for the War files
-  config.vm.synced_folder "/var/local/tomcat/webapps", "/var/lib/tomcat6/webapps"
+  #config.vm.synced_folder "/var/local/tomcat/webapps", "/var/lib/tomcat6/webapps"
   # Map a folder for a deploy target for the web files
-  config.vm.synced_folder "/var/www/bps", "/var/www/bps"
+  #config.vm.synced_folder "/var/www/bps", "/var/www/bps"
 
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the

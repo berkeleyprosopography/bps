@@ -19,12 +19,8 @@
         - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
       notify: source environment
 
-    - name: Copy sources from  read-only shared folder to local {{ project_root }} folder
-      copy: src=/bps dest={{ project_root }}
-      sudo_user: "{{ user }}"
-
     - name: Build WAR with maven
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
+      shell: mvn clean install -DskipTests chdir={{ code_root }}/code/bps/services
       #ignore_errors: yes
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64

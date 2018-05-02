@@ -6,14 +6,8 @@
     - variables.yml
 
   tasks:
-    #- hostname: name=bpsdev
-    - name: Add NewRelic deb
-      apt_repository: repo='deb http://apt.newrelic.com/debian/ newrelic non-free' state=present
-      when: newrelic_license_key is defined
 
-    - name: Add NewRelic key
-      shell: wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
-      when: newrelic_license_key is defined
+   
 
     #- name: update apt cache
     #  apt: update_cache=yes
@@ -36,18 +30,6 @@
         - maven
         - python-pip
         - python-mysqldb
-
-
-    - name: Install NewRelic monitor
-      apt: name={{ item }} state=present
-      with_items:
-        - newrelic-sysmond
-      when: newrelic_license_key is defined
-
-    - name: Configure NewRelic
-      shell: nrsysmond-config --set license_key={{newrelic_license_key}}
-      notify: start_newrelic
-      when: newrelic_license_key is defined
 
     - name: Set enviroment variables
       lineinfile: dest=/etc/environment state=present regexp="{{ item.key }}" line="{{ item.value }}"
@@ -113,17 +95,13 @@
       file: group={{ user }} owner={{ user }} mode=755 state=directory path={{ project_root }}
 
     - name: Create the code directory.
-      file: group={{ user }} owner={{ user }} mode=755 state=directory path={{ project_root }}/code/
+      file: group={{ user }} owner={{ user }} mode=755 state=directory path={{ code_root }}
 
     - name: Change permissions.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}
 
     - name: Change for corpora dir.
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}/corpora
-
-    - name: Copy sources from shared folder to local {{project_root}} folder
-      command: cp -R /bps {{ project_root }}
-      sudo_user: "{{ user }}"
 
     - name: Create the webroot directory.
       file: state=directory path=/var/www/{{ project_name }}
@@ -132,7 +110,7 @@
       file: group={{ user }} owner={{ user }} mode=755 state=directory path=/var/www/{{ project_name }}
 
     - name: Build WAR with maven
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
+      shell: mvn clean install -DskipTests chdir={{ code_root }}/code/bps/services
       #ignore_errors: yes
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
@@ -146,7 +124,7 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Copy webroot files
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/webcontent
+      shell: mvn clean install -DskipTests chdir={{ code_root }}/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
@@ -161,14 +139,14 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Create missing db directory
-      file: path={{project_root}}/bps/code/bps/services/common/target/db state=directory
+      file: path={{code_root}}/code/bps/services/common/target/db state=directory
 
     - name: Copy db init file
-      copy: src=files/db/initdb.sql  dest={{ project_root }}/bps/code/bps/services/common/target/db/initdb.sql
+      copy: src=files/db/initdb.sql  dest={{ code_root }}/code/bps/services/common/target/db/initdb.sql
 
 
     - name: Create the DB
-      shell: ant create_db chdir={{ project_root }}/bps/code/bps/services
+      shell: ant create_db chdir={{ code_root }}/code/bps/services
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/

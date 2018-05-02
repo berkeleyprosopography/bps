@@ -19,18 +19,12 @@
         - { key: '^CLASSPATH', value : 'CLASSPATH=/usr/share/java/mysql.jar'}
       notify: source environment
 
-    - name: Copy sources from read-only shared folder to local {{ project_root }} folder
-      copy: src=/bps dest={{ project_root }}
-      sudo_user: "{{ user }}"
-   
     - name: Install Apache configuration file.
       template: src=files/apache2/bps.j2 dest=/etc/apache2/sites-available/{{ project_name }}.conf backup=yes
       notify: restart apache2
 
-
-
     - name: Copy webroot files
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/webcontent
+      shell: mvn clean install -DskipTests chdir={{ code_root }}/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
