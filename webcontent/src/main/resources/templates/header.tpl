@@ -27,27 +27,14 @@
 <body>
 	<div id="contentContainer">
 		<div id="headerBar">
-			<div id="headerBarLinks" class="smaller">
-				{if $currentUser_loggedIn }
-					Logged in as <a href="/profile?uid={$currentUser_id}"><span>{$currentUser_name}</span></a> | 
-					<a href="/help">Help</a> | 
-					{if $currentUser_isAdmin || $currentUser_isAuthStaff }
-					<a href="/admin">Admin</a> |
-					{/if}
-					<a href="/logout">Sign Out</a>
-				{else}
-					<a href="/register">Register</a> | 
-					<a href="/help">Help</a> | 
-					<a href="/login?redir={$currentURI}">Sign In</a>
-				{/if}
-			</div>
+			<p id="BPS_Header_Txt"> Berkeley Prosopography Services</p>
+			<img id="logo_img" src="/images/Banner_new.png" />
 		</div>
 		<div id="navBar">
 			<div id="navBarLinks">
 				<a class="navLink" href="/">Home</a>
 				<a class="navLink" href="/corpora/">Corpora</a>
 				<a class="navLink" href="/workspace">Workspace</a>
-				<!-- <a class="navLink" href="/SNA">SNA</a> -->
 			</div>
 			<!--
 			<div id="navBarSearchBox">
@@ -60,5 +47,21 @@
 				</form>
 			</div>
 			-->
+			<div id="navbar_right">
+				<span id="headerBarLinks" class="smaller">
+					{if $currentUser_loggedIn }
+						Logged in as <a href="/profile?uid={$currentUser_id}"><span>{$currentUser_name}</span></a> | 
+						<a href="/help">Help</a> | 
+						{if $currentUser_isAdmin || $currentUser_isAuthStaff }
+						<a href="/admin">Admin</a> |
+						{/if}
+						<a href="/logout">Sign Out</a>
+					{else}
+						<a href="/register">Register</a> | 
+						<a href="/help">Help</a> | 
+						<a href="/login?redir={$currentURI}">Sign In</a>
+					{/if}
+				</span>
+			</div>
 		</div>
 		<div id="content">
