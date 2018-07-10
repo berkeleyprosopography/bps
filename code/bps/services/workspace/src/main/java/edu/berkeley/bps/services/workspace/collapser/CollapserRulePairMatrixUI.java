@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface CollapserRulePairMatrixUI extends CollapserRuleUI {
 	
-	public static final String ROW_COL_KEY_SEP = "|";
-	public static final String ROW_COL_KEY_SEP_REGEX = "\\|";	// Need to escape the regex meaning of pipe
+	public static final String ROW_COL_KEY_SEP = "_|_";
+	public static final String ROW_COL_KEY_SEP_REGEX = "_\\|_";	// Need to escape the regex meaning of pipe
 
 	/**
 	 * @return the list of values that are paired to construct the

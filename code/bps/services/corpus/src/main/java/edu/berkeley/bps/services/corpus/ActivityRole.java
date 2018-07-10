@@ -102,7 +102,7 @@ public class ActivityRole {
 	 */
 	public ActivityRole(int id, Corpus corpus, String name, String description) {
 		this.id = id;
-		this.name = name;
+		this.name = name.trim();
 		this.corpus = corpus;
 		this.description = description;
 		if(name.equalsIgnoreCase(BROTHER_ROLE))
@@ -152,7 +152,7 @@ public class ActivityRole {
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
-		this.name = name;
+		this.name = name.trim();
 	}
 
 	/**
@@ -195,13 +195,14 @@ public class ActivityRole {
 	public static ActivityRole CreateAndPersist(Connection dbConn, 
 			Corpus corpus, String name, String description) {
 		//final String myName = ".CreateAndPersist: ";
+		name = name.trim();
 		int newId = persistNew(dbConn,corpus.getId(), name, description);
 		ActivityRole activityRole = new ActivityRole(newId, corpus, name, description); 
 		return activityRole;
 	}
 	
 	private static int persistNew(Connection dbConn, 
-			int corpus_id, String name, String description) {
+			int corpus_id, String name, String description) {	// name should already be trimmed
 		final String myName = ".persistNew: ";
 		final String INSERT_STMT = 
 			"INSERT INTO act_role(corpus_id, name, description, creation_time)"
@@ -333,6 +334,7 @@ public class ActivityRole {
 		final String SELECT_BY_NAME = 
 			"SELECT id, name, description FROM act_role WHERE name = ? and corpus_id = ?";
 		ActivityRole activityRole = null;
+		name = name.trim();	// Ensure no extra whitespace
 		try {
 			PreparedStatement stmt = dbConn.prepareStatement(SELECT_BY_NAME);
 			stmt.setString(1, name);
