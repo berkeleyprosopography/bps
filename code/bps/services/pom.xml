@@ -19,12 +19,12 @@
     <modules>
         <module>db</module>
         <module>common</module>
-				<module>user</module>
+        <module>user</module>
         <module>corpus</module>
-				<module>workspace</module>
-				<module>graphbuilder</module>
-				<module>sna</module>
-				<module>webapp</module>
+        <module>workspace</module>
+        <module>graphbuilder</module>
+        <module>sna</module>
+        <module>webapp</module>
     </modules>
 
     <repositories>
@@ -140,6 +140,7 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <configuration> </configuration>
                 </plugin>
+<!--
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
@@ -153,7 +154,7 @@
                         </archive>
                     </configuration>
                 </plugin>
-
+-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>

@@ -13,9 +13,10 @@ public abstract class TestDBBase extends TestCase {
 	final Logger logger = LoggerFactory.getLogger(TestDBBase.class);
 	
 	String host = "localhost";
-	String dbName = "bpsdev";
-	String dbUser = "bpsdev";
-	String dbPass = "G0Names!";
+        // These should be pulled from properties files.
+	String dbName = "name";
+	String dbUser = "user";
+	String dbPass = "password";
 
 	private String connectionUrl = null;
 	private Connection jdbcConnection = null;
