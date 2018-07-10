@@ -16,7 +16,7 @@ Provisioning is done through a set of Ansible scripts. in particular:
 
 ### Variables
 
-You may need to adjust the values in `variables.yml` to match your use-case:
+You may need to adjust the values in `variables.yml` to match your use-case. The values here should align to the environment variables that you set up for your build environment. Not in the list below is the corpus dir, which the playbook defines as {project_root}/corpora:
 
     ---
     project_name: bps
@@ -30,7 +30,8 @@ You may need to adjust the values in `variables.yml` to match your use-case:
     db_name: [database name | e.g. bpsdev]
     tomcat_admin: [tomcat admin user | e.g. tomcat]
     tomcat_admin_password: [tomcat admin user password | e.g. password123]
-
+    
+In addition, you should check that the setting for the corpus_dir
 
 ## Deploying natively
 
