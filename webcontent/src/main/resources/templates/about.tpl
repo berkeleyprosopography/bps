@@ -4,8 +4,7 @@
 <br />
 <h3>About BPS</h3>
 <p>Berkeley Prosopography Services (BPS) is exploring and developing a prototype application to build prosopographical 
-models that support research. The prototype focuses on a corpus of cuneiform 
-tablets transcribed into Babylonian.
+models that support research. 
 
 For more information, see the <a href="https://wikihub.berkeley.edu/display/istds/Berkeley+Prosopography+Services+Wiki+Home">project wiki pages.</a> 
 </p>
