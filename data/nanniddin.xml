@@ -1,0 +1,855 @@
+<teiCorpus>
+  <teiHeader>
+    <fileDesc>
+      <titleStmt/>
+      <publicationStmt/>
+      <sourceDesc>
+        <p/>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">BRM 2 01</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="BRM 2 01" type="transliteration">
+      <body>
+        <div type="activity" subtype="Lease" full_date=" [UNPARSED: July 16 304 BCE]">
+          <state type="Object">storage shed</state>
+          <p type="persons_list">
+            <persName role="witness" uid="1689">
+              <forename>Anu-ab-uṣur<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ahhe-bulluṭ<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1680">
+              <forename>Anu-ah-tuqqin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1690">
+              <forename>Anu-ahhe-bulluṭ<state type="Gender">m</state><state type="father">1689</state></forename>
+            </persName>
+            <persName role="lessee" uid="1678">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1683">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state><state type="father">1682</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1688">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1677">
+              <forename>Ištar-ah-iddin<state type="Gender">m</state><state type="father">1676</state></forename>
+            </persName>
+            <persName role="father" uid="1679">
+              <forename>Kidin-Anu<state type="Gender">m</state><state type="father">1678</state></forename>
+            </persName>
+            <persName role="father" uid="1686">
+              <forename>Kidin-Ištar<state type="Gender">m</state><state type="father">1685</state></forename>
+            </persName>
+            <persName role="grandfather" uid="1684">
+              <forename>Labaši<state type="Gender">m</state><state type="father">1683</state><state type="grandfather">1682</state></forename>
+            </persName>
+            <persName role="neighbor" uid="1676">
+              <forename>Mušezibitu<state type="Gender">f</state><state type="daughter">1677</state></forename>
+            </persName>
+            <persName role="witness" uid="1685">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Kidin-Ištar<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="lessor" uid="1674">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1682">
+              <forename>Qišti-Anu<state type="Gender">m</state><state type="grandson">1684</state></forename>
+              <forename type="patronymic">Ina-qibit-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1687">
+              <forename>Ša-Anu-iššu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Ina-qibit-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1692">
+              <forename>Šerki-Anu<state type="Gender">m</state><state type="father">1691</state></forename>
+            </persName>
+            <persName role="father" uid="1675">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">1674</state></forename>
+            </persName>
+            <persName role="scribe" uid="1691">
+              <forename>Ubar<state type="Gender">m</state></forename>
+              <forename type="patronymic">Šerki-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1681">
+              <forename>Nidintu-Anu<state type="Gender">m</state><state type="father">1680</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">VS 15 23</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="VS 15 23" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: October 13 279 BCE]">
+          <state type="Object">slave</state>
+          <p type="persons_list">
+            <persName role="neighbor" uid="10144">
+              <forename>Anu-belšunu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="buyer" uid="10150">
+              <forename>Anu-zer-iddin<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+              <forename type="patronymic">Nana-iddin<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="scribe" uid="10174">
+              <forename>Anu-ahhe-iddin</forename>
+              <forename type="patronymic">Anu-uballiṭ</forename>
+            </persName>
+            <persName role="father" uid="10175">
+              <forename>Anu-uballiṭ<state type="father">10174</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">VS 15 30</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="VS 15 30" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: July 03 168 BCE]">
+          <state type="Object">undeveloped plot</state>
+          <p type="persons_list">
+            <persName role="scribe" uid="10208">
+              <forename>Nidintu-Anu</forename>
+              <forename type="patronymic">Illut-Anu</forename>
+            </persName>
+            <persName role="father" uid="10196">
+              <forename>Anu-ah-ittannu</forename>
+            </persName>
+            <persName role="father" uid="10180">
+              <forename>Nidintu-Anu<state type="father">10179</state></forename>
+            </persName>
+            <persName role="grandfather" uid="10191">
+              <forename>Anu-ahhe-iddin<state type="father">10190</state><state type="grandfather">10189</state></forename>
+            </persName>
+            <persName role="father" uid="10199">
+              <forename>Rihat-Ištar<state type="father">10198</state></forename>
+            </persName>
+            <persName role="father" uid="10201">
+              <forename>Anu-ikṣur<state type="father">10200</state></forename>
+              <forename type="patronymic">Šullum</forename>
+            </persName>
+            <persName role="grandfather" uid="10202">
+              <forename>Šullum<state type="father">10201</state><state type="grandfather">10200</state></forename>
+            </persName>
+            <persName role="father" uid="10204">
+              <forename>Anu-uballiṭ<state type="father">10203</state></forename>
+            </persName>
+            <persName role="father" uid="10209">
+              <forename>Illut-Anu<state type="father">10208</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">BRM 2 25</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="BRM 2 25" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date="">
+          <state type="Object">slave</state>
+          <p type="persons_list">
+            <persName role="father" uid="2515">
+              <forename>Anu-ab-uṣur<state type="Gender">m</state><state type="father">2514</state></forename>
+            </persName>
+            <persName role="father" uid="2507">
+              <forename>Anu-ah-ušabši<state type="Gender">m</state><state type="father">2506</state></forename>
+            </persName>
+            <persName role="witness" uid="2516">
+              <forename>Anu-ahhe-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2521">
+              <forename>Anu-belšunu<state type="Gender">m</state><state type="father">2520</state></forename>
+            </persName>
+            <persName role="witness" uid="2514">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ab-uṣur<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2511">
+              <forename>Anu-uballiṭ<state type="Gender">m</state><state type="father">2510</state></forename>
+            </persName>
+            <persName role="witness" uid="2508">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+              <forename type="patronymic">Tattannu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave-mark" uid="2500">
+              <forename>Anu-zer-lišir<state type="Gender">m</state></forename>
+              <forename type="patronymic">Šamaš-ittannu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2519">
+              <forename>Balaṭu<state type="Gender">m</state><state type="father">2518</state></forename>
+            </persName>
+            <persName role="witness" uid="2510">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-uballiṭ<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="scribe" uid="2520">
+              <forename>Itti-Anu-nuhšu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-belšunu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="seller" uid="2498">
+              <forename>Labaši<state type="Gender">m</state><state type="grandson">2497</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2497">
+              <forename>Labaši<state type="Gender">m</state><state type="father">2496</state><state type="grandfather">2498</state></forename>
+            </persName>
+            <persName role="slave-mark" uid="2502">
+              <forename>Labaši<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2513">
+              <forename>Labaši<state type="Gender">m</state><state type="father">2512</state></forename>
+            </persName>
+            <persName role="buyer" uid="2504">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="seller" uid="2496">
+              <forename>Nidintu-Anu<state type="Gender">m</state><state type="father">2498</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2503">
+              <forename>Nidintu-Anu<state type="Gender">m</state><state type="father">2502</state></forename>
+            </persName>
+            <persName role="witness" uid="2512">
+              <forename>Nidintu-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2517">
+              <forename>Nidintu-Anu<state type="Gender">m</state><state type="father">2516</state></forename>
+            </persName>
+            <persName role="slave" uid="2499">
+              <forename>Rihat-Anu<state type="Gender">m</state><state type="slave">2498</state></forename>
+            </persName>
+            <persName role="witness" uid="2506">
+              <forename>Ša-Anu-iššu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ah-ušabši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2501">
+              <forename>Šamaš-ittannu<state type="Gender">m</state><state type="father">2500</state></forename>
+            </persName>
+            <persName role="father" uid="2505">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">2504</state></forename>
+            </persName>
+            <persName role="witness" uid="2518">
+              <forename>Tanittu-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Balaṭu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="2509">
+              <forename>Tattannu<state type="Gender">m</state><state type="father">2508</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">VDI 1955/4 1</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="VDI 1955/4 1" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: September 02 297 BCE]">
+          <state type="Object">male slave</state>
+          <p type="persons_list">
+            <persName role="slave sold" uid="10043">
+              <forename>Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10044">
+              <forename>Anu-ah-ittannu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10042">
+              <forename>Tattannu-Nana<state type="Gender">m</state><state type="father">10041</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10045">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10046">
+              <forename>Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10047">
+              <forename>Ana-rabut-Nana<state type="Gender">f</state></forename>
+            </persName>
+            <persName role="seller | slavemark" uid="10041">
+              <forename>Hanna<state type="Gender">f</state><state type="daughter">10042</state></forename>
+            </persName>
+            <persName role="witness" uid="10051">
+              <forename>Anu-zer-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10053">
+              <forename>Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10055">
+              <forename>Anu-bullissu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Eriba<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10059">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+              <forename type="patronymic">Iqiša<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10061">
+              <forename>Nidintu-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10069">
+              <forename>Bel-ab-uṣur<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nadin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10067">
+              <forename>Ṭabiya<state type="Gender">m</state></forename>
+              <forename type="patronymic">Apla<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10073">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Kidin-Ištar<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="scribe" uid="10075">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Itti-Anu-nuhšu</forename>
+            </persName>
+            <persName role="witness" uid="10065">
+              <forename>Anu-qišan<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10057">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10063">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="buyer" uid="10049">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10050">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">10049</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10048">
+              <forename>Tattannu-Nana<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10052">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10054">
+              <forename>Šerki-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10056">
+              <forename>Eriba<state type="Gender">m</state><state type="father">10055</state></forename>
+            </persName>
+            <persName role="witness" uid="10057">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10058">
+              <forename>Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10060">
+              <forename>Iqiša<state type="Gender">m</state><state type="father">10059</state></forename>
+            </persName>
+            <persName role="father" uid="10062">
+              <forename>Labaši<state type="Gender">m</state><state type="father">10061</state></forename>
+            </persName>
+            <persName role="father" uid="10064">
+              <forename>Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10066">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">10065</state></forename>
+            </persName>
+            <persName role="father" uid="10068">
+              <forename>Apla<state type="Gender">m</state><state type="father">10067</state></forename>
+            </persName>
+            <persName role="father" uid="10070">
+              <forename>Nadin<state type="Gender">m</state><state type="father">10069</state></forename>
+            </persName>
+            <persName role="witness" uid="10071">
+              <forename>Sin-belšunu</forename>
+              <forename type="patronymic">Anu-ah-iddin</forename>
+            </persName>
+            <persName role="father" uid="10076">
+              <forename>Itti-Anu-nuhšu<state type="father">10076</state></forename>
+            </persName>
+            <persName role="father" uid="10072">
+              <forename>Anu-ah-iddin<state type="father">10071</state></forename>
+            </persName>
+            <persName role="father" uid="10074">
+              <forename>Kidin-Ištar<state type="Gender">m</state><state type="father">10073</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">VS 15 03</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="VS 15 03" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: November 13 298 BCE]">
+          <state type="Object">slave</state>
+          <p type="persons_list">
+            <persName role="slave sold; slave mark" uid="10079">
+              <forename>Šibqat-Bel<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10080">
+              <forename>Sida<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave sold" uid="10081">
+              <forename>Amat-Marduk<state type="Gender">f</state></forename>
+            </persName>
+            <persName role="seller" uid="10077">
+              <forename>Ṭabat-Nana<state type="Gender">f</state><state type="daughter">10078</state></forename>
+            </persName>
+            <persName role="witness" uid="10090">
+              <forename>Nidintu-Anu<state type="Gender">m</state><state type="brother">10091</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10091">
+              <forename>Nana-iddin<state type="Gender">m</state><state type="brother">10090</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10089">
+              <forename>Ištar-šum-ereš<state type="Gender">m</state><state type="father">10088</state></forename>
+            </persName>
+            <persName role="witness" uid="10084">
+              <forename>Ana-rabutika-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ah-ušabši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="buyer" uid="10082">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10078">
+              <forename>Hanin-Esi<state type="Gender">f</state><state type="father">10077</state></forename>
+            </persName>
+            <persName role="father" uid="10083">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">10082</state></forename>
+            </persName>
+            <persName role="father" uid="10085">
+              <forename>Anu-ah-ušabši<state type="Gender">m</state><state type="father">10084</state></forename>
+            </persName>
+            <persName role="father" uid="10087">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state><state type="father">10086</state></forename>
+            </persName>
+            <persName role="witness" uid="10086">
+              <forename>Anu-zer-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Ina-qibit-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10088">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Ištar-šum-ereš<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10092">
+              <forename>Labaši<state type="father">10090</state></forename>
+            </persName>
+            <persName role="father" uid="10094">
+              <forename>Anu-mukin-apli<state type="Gender">m</state><state type="father">10093</state></forename>
+            </persName>
+            <persName role="witness" uid="10093">
+              <forename>Anu-ab-uṣur<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-mukin-apli<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10096">
+              <forename>Anu-zer-iddin<state type="Gender">m</state><state type="father">10095</state></forename>
+            </persName>
+            <persName role="witness" uid="10095">
+              <forename>Anu-mar-ittannu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-zer-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="10098">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">10097</state></forename>
+            </persName>
+            <persName role="witness" uid="10097">
+              <forename>Anu-ušallim<state type="Gender">m</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="10100">
+              <forename>Kidin-Ištar<state type="Gender">m</state><state type="Title">arad-ekalli</state><state type="father">10099</state></forename>
+            </persName>
+            <persName role="witness" uid="10099">
+              <forename>Nana-iddin<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Kidin-Ištar<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="father" uid="10102">
+              <forename>Itti-Anu-nuhšu<state type="father">10102</state></forename>
+            </persName>
+            <persName role="scribe" uid="10101">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Itti-Anu-nuhšu</forename>
+            </persName>
+            <persName role="father" uid="10104">
+              <forename>Kidin-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state><state type="father">10103</state></forename>
+            </persName>
+            <persName role="witness" uid="10103">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Ina-qibit-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">VS 15 11</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="VS 15 11" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: August 03 229 BCE]">
+          <state type="Object">slave</state>
+          <p type="persons_list">
+            <persName role="buyer" uid="10105">
+              <forename>Ana-rabutišu<state type="Gender">f</state><state type="Title">arad-ekalli</state><state type="daughter">10106</state><state type="wife">10107</state></forename>
+            </persName>
+            <persName role="seller; guarantor" uid="10111">
+              <forename>Anu-belšunu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10113">
+              <forename>Anu-ah-ušabši<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10115">
+              <forename>Nidintu-Ištar<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Anu-belšunu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10117">
+              <forename>[...]<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Anu-ah-ittannu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10119">
+              <forename>Nana-iddin<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10123">
+              <forename>Balaṭu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Šamaš-ittannu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10125">
+              <forename>Šamaš-ittannu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Anu-uballiṭ<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10127">
+              <forename>Labaši-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Tattannu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10131">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state><state type="brother">10132</state></forename>
+              <forename type="patronymic">Dumqi-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10132">
+              <forename>Tattannu<state type="Gender">m</state><state type="Title">arad-ekalli</state><state type="brother">10131</state></forename>
+              <forename type="patronymic">Dumqi-Anu<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10134">
+              <forename>Labaši<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Anu-ab-uṭer<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10136">
+              <forename>Anu-ah-iddin<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+              <forename type="patronymic">Ištar-šum-ereš<state type="Gender">m</state><state type="Title">arad-ekalli</state></forename>
+            </persName>
+            <persName role="witness" uid="10138">
+              <forename>Kidin-Anu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+              <forename type="patronymic">Ištar-hitu'a<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="guarantor" uid="10109">
+              <forename>Anu-balassu-iqbi<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+              <forename type="patronymic">Anu-zer-lišir<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="scribe" uid="10140">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Nidintu-Anu</forename>
+            </persName>
+            <persName role="father" uid="10106">
+              <forename>Mukin-apli<state type="father">10105</state></forename>
+            </persName>
+            <persName role="father" uid="10108">
+              <forename>Anu-belšunu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10107</state></forename>
+            </persName>
+            <persName role="husband" uid="10107">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="husband">10105</state></forename>
+              <forename type="patronymic">Anu-belšunu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="father" uid="10110">
+              <forename>Anu-zer-lišir<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10109</state></forename>
+            </persName>
+            <persName role="father" uid="10112">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10111</state></forename>
+            </persName>
+            <persName role="father" uid="10114">
+              <forename>Kidin-Anu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10113</state></forename>
+            </persName>
+            <persName role="father" uid="10116">
+              <forename>Anu-belšunu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10115</state></forename>
+            </persName>
+            <persName role="father" uid="10118">
+              <forename>Anu-ah-ittannu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10117</state></forename>
+            </persName>
+            <persName role="father" uid="10120">
+              <forename>Nidintu-Anu<state type="father">10119</state></forename>
+            </persName>
+            <persName role="witness" uid="10121">
+              <forename>Anu-zer-lišir<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+              <forename type="patronymic">Ša-Anu-iššu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="father" uid="10122">
+              <forename>Ša-Anu-iššu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10121</state></forename>
+            </persName>
+            <persName role="father" uid="10124">
+              <forename>Šamaš-ittannu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10123</state></forename>
+            </persName>
+            <persName role="father" uid="10126">
+              <forename>Anu-uballiṭ<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10125</state></forename>
+            </persName>
+            <persName role="father" uid="10128">
+              <forename>Tattannu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10127</state></forename>
+            </persName>
+            <persName role="witness" uid="10129">
+              <forename>Anu-balassu-iqbi<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+              <forename type="patronymic">Anu-zer-lišir<state type="Gender">m</state><state type="Title">sepir makkur Anu</state></forename>
+            </persName>
+            <persName role="father" uid="10130">
+              <forename>Anu-zer-lišir<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10109</state></forename>
+            </persName>
+            <persName role="witness" uid="10133">
+              <forename>Dumqi-Anu<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10132</state></forename>
+            </persName>
+            <persName role="father" uid="10135">
+              <forename>Anu-ab-uṭer<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10134</state></forename>
+            </persName>
+            <persName role="father" uid="10137">
+              <forename>Ištar-šum-ereš<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10136</state></forename>
+            </persName>
+            <persName role="father" uid="10139">
+              <forename>Ištar-hitu'a<state type="Gender">m</state><state type="Title">sepir makkur Anu</state><state type="father">10138</state></forename>
+            </persName>
+            <persName role="father" uid="10141">
+              <forename>Nidintu-Anu<state type="father">10140</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">CM 12 01</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="CM 12 01" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date="">
+          <state type="Object">half-share in slave</state>
+          <p type="persons_list">
+            <persName role="father" uid="1330">
+              <forename>[...]<state type="father">1329</state></forename>
+            </persName>
+            <persName role="father" uid="1328">
+              <forename>[...]</forename>
+            </persName>
+            <persName role="witness" uid="1311">
+              <forename>Ana-rabutika-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ah-ušabši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1327">
+              <forename>Anu-ah-ittannu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1312">
+              <forename>Anu-ah-ušabši<state type="Gender">m</state><state type="father">1311</state></forename>
+            </persName>
+            <persName role="buyer" uid="1309">
+              <forename>Anu-ahhe-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="scribe" uid="1331">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Itti-Anu-nuhšu</forename>
+            </persName>
+            <persName role="slavemark" uid="1307">
+              <forename>Anu-belšunu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nana-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1321">
+              <forename>Anu-ikṣur<state type="Gender">m</state><state type="brother">1320</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="slave" uid="1305">
+              <forename>Anu-ittannu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Saniqqa<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1320">
+              <forename>Anu-qišan<state type="Gender">m</state><state type="brother">1321</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1313">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1325">
+              <forename>Anu-uballiṭ<state type="Gender">m</state></forename>
+              <forename type="patronymic">Šamaš-ittannu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1324">
+              <forename>Anu-zer-ibni<state type="Gender">m</state><state type="father">1323</state></forename>
+            </persName>
+            <persName role="father" uid="1317">
+              <forename>Anu-zer-iddin<state type="Gender">m</state><state type="father">1316</state></forename>
+            </persName>
+            <persName role="witness" uid="1318">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1332">
+              <forename>Itti-Anu-nuhšu<state type="Gender">m</state><state type="father">1331</state></forename>
+            </persName>
+            <persName role="witness" uid="1316">
+              <forename>Kidin-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-zer-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1319">
+              <forename>Kidin-Anu</forename>
+            </persName>
+            <persName role="witness" uid="1329">
+              <forename>Labaši<state type="Gender">m</state></forename>
+              <forename type="patronymic">[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1310">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="co-owner" uid="1304">
+              <forename>Nana-iddin<state type="Gender">m</state><state type="brother">1302</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1314">
+              <forename>Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1315">
+              <forename>Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="seller; guarantor" uid="1302">
+              <forename>Nidintu-Anu<state type="Gender">m</state><state type="brother">1304</state></forename>
+              <forename type="patronymic">Tanittu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="1323">
+              <forename>Rabi-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-zer-ibni<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="father" uid="1306">
+              <forename>Saniqqa<state type="Gender">m</state><state type="father">1305</state></forename>
+            </persName>
+            <persName role="father" uid="1326">
+              <forename>Šamaš-ittannu<state type="father">1325</state></forename>
+            </persName>
+            <persName role="father" uid="1322">
+              <forename>Tanittu-Anu<state type="Gender">m</state><state type="father">1321</state></forename>
+            </persName>
+            <persName role="father" uid="1303">
+              <forename>Tanittu-Anu<state type="father">1304</state></forename>
+            </persName>
+            <persName role="father" uid="1308">
+              <forename>Nana-iddin<state type="father">1307</state></forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+</teiCorpus>

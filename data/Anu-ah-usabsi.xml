@@ -1,0 +1,393 @@
+<teiCorpus>
+  <teiHeader>
+    <fileDesc>
+      <titleStmt/>
+      <publicationStmt/>
+      <sourceDesc>
+        <p/>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">BRM 2 17</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="BRM 2 17" type="transliteration">
+      <body>
+        <div type="activity" subtype="assignment" full_date=" [UNPARSED: July 11 245 BCE]">
+          <state type="Object">workers</state>
+          <p type="persons_list">
+            <persName role="assigned_worker" uid="10010">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10011">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10012">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10013">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10014">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10015">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10016">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10017">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10018">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10019">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="10020">
+              <forename>[...]<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2166">
+              <forename>Kidin-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Labaši<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2168">
+              <forename>Nana-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2170">
+              <forename>Illut-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ab-uṣur<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2172">
+              <forename>Nana-iddin<state type="Gender">m</state><state type="brother">2174</state></forename>
+              <forename type="patronymic">Ana-rabut-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2174">
+              <forename>Anu-ikṣur<state type="brother">2172</state></forename>
+              <forename type="patronymic">Ana-rabut-Anu</forename>
+            </persName>
+            <persName role="assigned_worker" uid="2175">
+              <forename>Anu-ahhe-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2177">
+              <forename>Arad-reš<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nana-iddin<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2179">
+              <forename>Dummuq<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2180">
+              <forename>Anu-ikṣur</forename>
+              <forename type="patronymic">Nidintu-Anu</forename>
+            </persName>
+            <persName role="assigned_worker" uid="2182">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state><state type="brother">2184</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2184">
+              <forename>Šibqat-Anu<state type="Gender">m</state><state type="brother">2182</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2185">
+              <forename>Anu-mukin-apli<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2187">
+              <forename>Anu-bullissu<state type="Gender">m</state><state type="brother">2189</state></forename>
+              <forename type="patronymic">Anu-ab-uṣur<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2189">
+              <forename>Sumuttu-Anu<state type="Gender">m</state><state type="brother">2187</state></forename>
+              <forename type="patronymic">Anu-ab-uṣur<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2190">
+              <forename>Uṣuršu-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Rihat-Ištar<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2192">
+              <forename>Ina-qibit-Anu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2194">
+              <forename>Arad-reš<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2196">
+              <forename>Anu-ahhe-iddin<state type="Gender">m</state></forename>
+              <forename type="patronymic">Anu-ab-uṭer<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2198">
+              <forename>Libluṭ<state type="Gender">m</state><state type="brother">2199</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2199">
+              <forename>Anu-zer-iddin<state type="Gender">m</state><state type="brother">2199</state></forename>
+              <forename type="patronymic">Kidin-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="assigned_worker" uid="2201">
+              <forename>Nidintu-Ištar<state type="Gender">m</state></forename>
+              <forename type="patronymic">Nidintu-Anu<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="witness" uid="2203">
+              <forename>Anu-ah-ittannu</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="2205">
+              <forename>Anu-ah-ušabši</forename>
+              <forename type="patronymic">Ekur-zakir</forename>
+            </persName>
+            <persName role="witness" uid="2207">
+              <forename>Anu-balassu-iqbi<state type="brother">2208</state></forename>
+              <forename type="patronymic">Šamaš-ittannu</forename>
+            </persName>
+            <persName role="witness" uid="2208">
+              <forename>Uppulu<state type="brother">2207</state></forename>
+              <forename type="patronymic">Šamaš-ittannu</forename>
+            </persName>
+            <persName role="witness" uid="2210">
+              <forename>Šamaš-ittannu</forename>
+              <forename type="patronymic">Hunzu</forename>
+            </persName>
+            <persName role="witness" uid="2212">
+              <forename>Ištar-šum-ereš</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="2214">
+              <forename>Anu-uballiṭ</forename>
+              <forename type="patronymic">Kuri</forename>
+            </persName>
+            <persName role="witness" uid="2216">
+              <forename>Anu-zer-lišir</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="2218">
+              <forename>Balaṭu<state type="brother">2219</state></forename>
+              <forename type="patronymic">Šamaš-iddin</forename>
+            </persName>
+            <persName role="witness" uid="2219">
+              <forename>Ina-qibit-Anu<state type="brother">2218</state></forename>
+              <forename type="patronymic">Šamaš-iddin</forename>
+            </persName>
+            <persName role="witness" uid="2221">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="scribe" uid="2223">
+              <forename>Balaṭu</forename>
+              <forename type="patronymic">Ekur-zakir</forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">CM 12 01</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="CM 12 01" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: no_date 1000]">
+          <state type="Object">slave</state>
+          <p type="persons_list">
+            <persName role="seller" uid="1302">
+              <forename>Nidintu-Anu<state type="brother">1304</state></forename>
+              <forename type="patronymic">Tanittu-Anu</forename>
+            </persName>
+            <persName role="co-owner" uid="1304">
+              <forename>Nana-iddin<state type="brother">1302</state></forename>
+              <forename type="patronymic">Tanittu-Anu</forename>
+            </persName>
+            <persName role="slave" uid="1305">
+              <forename>Anu-ittannu<state type="Gender">m</state></forename>
+              <forename type="patronymic">Saniqqa<state type="Gender">m</state></forename>
+            </persName>
+            <persName role="principal" uid="1307">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Nana-iddin</forename>
+            </persName>
+            <persName role="buyer" uid="1309">
+              <forename>Anu-ahhe-iddin</forename>
+            </persName>
+            <persName role="witness" uid="1311">
+              <forename>Ana-rabutika-Anu</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="1313">
+              <forename>Anu-uballiṭ</forename>
+            </persName>
+            <persName role="witness" uid="1315">
+              <forename>Nidintu-Anu</forename>
+            </persName>
+            <persName role="witness" uid="1316">
+              <forename>Kidin-Anu</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="1318">
+              <forename>Ina-qibit-Anu</forename>
+            </persName>
+            <persName role="witness" uid="1320">
+              <forename>Anu-qišan<state type="brother">1321</state></forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="1321">
+              <forename>Anu-ikṣur<state type="brother">1320</state></forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="1323">
+              <forename>Rabi-Anu</forename>
+              <forename type="patronymic">Kuri</forename>
+            </persName>
+            <persName role="witness" uid="1325">
+              <forename>Anu-uballiṭ</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="1327">
+              <forename>Anu-ah-ittannu</forename>
+            </persName>
+            <persName role="witness" uid="1329">
+              <forename>Labaši</forename>
+              <forename type="patronymic">[...]</forename>
+            </persName>
+            <persName role="scribe" uid="1331">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Sin-leqe-unnini</forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">BRM 2 18</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="BRM 2 18" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: July 11 245 BCE]">
+          <state type="Object">workers</state>
+          <p type="persons_list">
+            <persName role="neighbor" uid="2233">
+              <forename>Anu-belšunu</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="neighbor" uid="2235">
+              <forename>Šidâ</forename>
+              <forename type="patronymic">Iddin-Nabu</forename>
+            </persName>
+            <persName role="holder:share" uid="2237">
+              <forename>Anu-ahhe-iddin</forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+      <body>
+        <div type="activity" subtype="Sale" full_date=" [UNPARSED: Oct. 25 244 BCE]">
+          <state type="Object">undeveloped plot</state>
+          <p type="persons_list">
+            <persName role="beneficiary" uid="2239">
+              <forename>Nidintu-Anu</forename>
+            </persName>
+            <persName role="beneficiary " uid="2240">
+              <forename>Nana-iddin<state type="brother">2239</state></forename>
+              <forename type="patronymic">Nidintu-Anu</forename>
+            </persName>
+            <persName role="holder:title" uid="2241">
+              <forename>Anu-zer-iddin</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="waiver" uid="2243">
+              <forename>Anu-balassu-iqbi</forename>
+              <forename type="patronymic">Ina-qibit-Anu</forename>
+            </persName>
+            <persName role="witness" uid="2245">
+              <forename>Anu-ah-ušabši</forename>
+              <forename type="patronymic">Ekur-zakir</forename>
+            </persName>
+            <persName role="witness" uid="2247">
+              <forename>Anu-zer-iddin<state type="brother">2248</state></forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="2248">
+              <forename>Tanittu-Anu<state type="brother">2247</state></forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="2250">
+              <forename>Anu-zer-iddin</forename>
+              <forename type="patronymic">Hunzu</forename>
+            </persName>
+            <persName role="witness" uid="2252">
+              <forename>Balaṭu</forename>
+              <forename type="patronymic">Luštammar-Adad</forename>
+            </persName>
+            <persName role="witness" uid="2254">
+              <forename>Anu-ab-uṣur</forename>
+              <forename type="patronymic">Kuri</forename>
+            </persName>
+            <persName role="witness" uid="2256">
+              <forename>Labaši</forename>
+              <forename type="patronymic">Ah'utu</forename>
+            </persName>
+            <persName role="witness" uid="2258">
+              <forename>Anu-balassu-iqbi</forename>
+              <forename type="patronymic">Luštammar-Adad</forename>
+            </persName>
+            <persName role="witness" uid="2260">
+              <forename>Illut-Anu</forename>
+              <forename type="patronymic">Ebabbar-šum-ibni</forename>
+            </persName>
+            <persName role="witness" uid="2262">
+              <forename>Kidin-Anu<state type="father">2263</state></forename>
+              <forename type="patronymic">Ištar-hitu'a</forename>
+            </persName>
+            <persName role="witness" uid="2263">
+              <forename>Anu-balassu-iqbi<state type="grandson">2264</state></forename>
+              <forename type="patronymic">Kidin-Anu</forename>
+            </persName>
+            <persName role="witness" uid="2264">
+              <forename>Ištar-hitu'a<state type="father">2262</state><state type="grandfather">2263</state></forename>
+            </persName>
+            <persName role="scribe" uid="2265">
+              <forename>Itti-Anu-nuhšu</forename>
+              <forename type="patronymic">Sin-leqi-unnini</forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+</teiCorpus>

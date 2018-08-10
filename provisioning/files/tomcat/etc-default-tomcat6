@@ -46,4 +46,3 @@ JAVA_OPTS="${JAVA_OPTS} -Xdebug -Xrunjdwp:transport=dt_socket,address=9876,serve
 # Unset LC_ALL to prevent user environment executing the init script from
 # influencing servlet behavior.  See Debian bug #645221
 unset LC_ALL
-

@@ -1,0 +1,156 @@
+<teiCorpus>
+  <teiHeader>
+    <fileDesc>
+      <titleStmt/>
+      <publicationStmt/>
+      <sourceDesc>
+        <p/>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">text2</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="text2" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date="2016-01-05 AD">
+          <state type="Object">land</state>
+          <p type="persons_list">
+            <persName role="seller" uid="12">
+              <forename>Joe
+                <state type="Gender">Male</state>
+              </forename>
+              <forename type="patronymic">Bob
+                <state type="Gender">Male</state>
+              </forename>
+              <forename type="patronymic" subtype="grandfather">Joe
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Smith</addName>
+            </persName>
+            <persName role="buyer" uid="14">
+              <forename>Fred
+                <state type="Gender">Male</state>
+              </forename>
+              <forename type="patronymic">Bob
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Jones</addName>
+            </persName>
+            <persName role="witness" uid="16">
+              <forename>John
+                <state type="Gender">Male</state>
+                <state type="brother">18</state>
+              </forename>
+              <forename type="patronymic">Harry
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Taylor</addName>
+            </persName>
+            <persName role="witness" uid="18">
+              <forename>Steve
+                <state type="Gender">Male</state>
+                <state type="brother">14</state>
+              </forename>
+              <forename type="patronymic">Harry
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Taylor</addName>
+            </persName>
+            <persName role="scribe" uid="20">
+              <forename>Don
+                <state type="Gender">Male</state>
+              </forename>
+              <forename type="patronymic">Bill
+                <state type="Gender">Male</state>
+              </forename>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+  <TEI>
+    <teiHeader>
+      <fileDesc>
+        <titleStmt>
+          <title>
+            <name type="cdlicat:id_text">text1</name>
+          </title>
+        </titleStmt>
+        <publicationStmt/>
+        <sourceDesc>
+          <p/>
+        </sourceDesc>
+      </fileDesc>
+    </teiHeader>
+    <text text_ID="text1" type="transliteration">
+      <body>
+        <div type="activity" subtype="Sale" full_date="2016-04-28 BC">
+          <state type="Object">house</state>
+          <p type="persons_list">
+            <persName role="seller" uid="1">
+              <forename>Joe
+                <state type="Gender">Male</state>
+                <state type="brother">7</state>
+              </forename>
+              <forename type="patronymic">Bob
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Smith</addName>
+            </persName>
+            <persName role="buyer" uid="3">
+              <forename>Fred
+                <state type="Gender">Male</state>
+              </forename>
+              <forename type="patronymic">Bob
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Jones</addName>
+            </persName>
+            <persName role="witness" uid="5">
+              <forename>Jim
+                <state type="Gender">Male</state>
+                <state type="brother">1</state>
+              </forename>
+              <forename type="patronymic">Bob
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Smith</addName>
+            </persName>
+            <persName role="witness" uid="7">
+              <forename>Fred
+                <state type="Gender">Male</state>
+              </forename>
+            </persName>
+            <persName role="witness" uid="9">
+              <forename>Bob
+                <state type="Gender">Male</state>
+              </forename>
+            </persName>
+            <persName role="scribe" uid="10">
+              <forename>Don
+                <state type="Gender">Male</state>
+              </forename>
+              <forename type="patronymic">Bill
+                <state type="Gender">Male</state>
+              </forename>
+              <addName type="clan">Jones</addName>
+            </persName>
+          </p>
+        </div>
+      </body>
+    </text>
+  </TEI>
+</teiCorpus>
