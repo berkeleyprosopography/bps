@@ -10,8 +10,7 @@ For more information, see the <a href="https://wikihub.berkeley.edu/display/istd
 </p>
 
 <p>BPS was originally created 
-at the University of California, Berkeley as a collaboration between the University's <a href="http://ist.berkeley.edu/ds/">IST/Data
-Services</a> group and the <a href="http://neareastern.berkeley.edu/">Near Eastern Studies Department</a>.&nbsp;
+at the University of California, Berkeley as a collaboration between the University's <a href="http://research-it.berkeley.edu/">Research IT</a> unit and the <a href="http://neareastern.berkeley.edu/">Near Eastern Studies Department</a>.&nbsp;
 </p>
 
 <p>
