@@ -122,7 +122,7 @@
       shell: chown -R {{ user }}:{{ user }} {{ project_root }}/corpora
 
     - name: Copy sources from shared folder to local {{project_root}} folder
-      command: cp -R /bps {{ project_root }}
+      command: cp -R /bps/code /bps/webcontent {{ project_root }}
       sudo_user: "{{ user }}"
 
     - name: Create the webroot directory.
@@ -132,7 +132,7 @@
       file: group={{ user }} owner={{ user }} mode=755 state=directory path=/var/www/{{ project_name }}
 
     - name: Build WAR with maven
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/code/bps/services
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/code/bps/services
       #ignore_errors: yes
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
@@ -146,7 +146,7 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Copy webroot files
-      shell: mvn clean install -DskipTests chdir={{ project_root }}/bps/webcontent
+      shell: mvn clean install -DskipTests chdir={{ project_root }}/webcontent
       sudo: yes
       #ignore_errors: yes
       environment:
@@ -161,14 +161,14 @@
         CLASSPATH: /usr/share/java/mysql.jar:$CLASSPATH
 
     - name: Create missing db directory
-      file: path={{project_root}}/bps/code/bps/services/common/target/db state=directory
+      file: path={{project_root}}/code/bps/services/common/target/db state=directory
 
     - name: Copy db init file
-      copy: src=files/db/initdb.sql  dest={{ project_root }}/bps/code/bps/services/common/target/db/initdb.sql
+      copy: src=files/db/initdb.sql  dest={{ project_root }}/code/bps/services/common/target/db/initdb.sql
 
 
     - name: Create the DB
-      shell: ant create_db chdir={{ project_root }}/bps/code/bps/services
+      shell: ant create_db chdir={{ project_root }}/code/bps/services
       environment:
         JAVA_HOME: /usr/lib/jvm/java-6-openjdk-amd64
         BPS_JEESERVER_HOME: /var/lib/tomcat6/
@@ -223,7 +223,7 @@
       copy: src=files/tomcat/server.xml dest=/etc/tomcat6/server.xml
       sudo: true
       
-    - name: Setup tomcat server configuration
+    - name: Setup tomcat server debug configuration
       copy: src=files/tomcat/etc-default-tomcat6 dest=/etc/default/tomcat6
       sudo: true
       notify: restart tomcat

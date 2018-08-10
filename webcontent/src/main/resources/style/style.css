@@ -179,7 +179,7 @@ em{
 	position: relative;
 	width:100%;
 	height: 30px;
-    border-top: 1px solid #551200;
+        border-top: 1px solid #551200;
 	background-color:#dfdcd6;
 }
 
@@ -240,6 +240,21 @@ em{
 	width: 90%;
 	margin: 50px auto 100px auto;
 	text-align:center;
+        border-top: 1px solid #dfdcd6;
+        padding-top: 5px;
+}
+
+#footer a, #footer a:visited{
+	color:#27556C;
+	font-weight:bold;
+}
+
+
+
+#logo_strip img{
+	height: 60px;
+        padding: 10px 20px;
+        vertical-align: middle;
 }
 
 /* ------------------------------------------------------- *
