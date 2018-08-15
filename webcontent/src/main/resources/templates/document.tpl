@@ -1,6 +1,19 @@
 {include file="header.tpl"}
+{if isset($corpusID) }
+    {include file="corpus_header.tpl"}
+{elseif isset($workspaceID) }
+    {assign var="wkspId" value=$workspaceID} 
+    {include file="workspace_header.tpl"}
+{else}
+    {literal}
+        <!-- Something wonky happened - document with no corpus or workspace context!!! -->
+    {/literal}
+{/if}
+    <br />
+    <br />
 
 	<p class="nav-right">
+<!--
 	{if isset($corpusID) }
 		<a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a>
 		</p>
@@ -10,6 +23,7 @@
 		</p>
 		<h1>Workspace Document Details</h1>
 	{/if}
+-->
 
 {if isset($errmsg) }
 	<h2>{$errmsg}</h2>
