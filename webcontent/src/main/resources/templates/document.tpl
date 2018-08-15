@@ -45,6 +45,7 @@
 				<td class="document" style="padding-top:6px">{$document.date_str}</td>
 			</tr>
 		</table>
+<!--`
 		<p>&nbsp;&nbsp;See also:
 				<a href="http://cdli.ucla.edu/{$document.alt_id}" target="_blank">CDLI</a>
 				&nbsp;&nbsp;<a href="http://oracc.museum.upenn.edu/hbtin/{$document.alt_id}" target="_blank">Oracc</a>
@@ -52,6 +53,7 @@
 				&nbsp;&nbsp;<a href="http://cdli.ucla.edu/dl/photo/{$document.alt_id}.jpg" target="_blank">Image</a>
 				&nbsp;&nbsp;<a href="http://cdli.ucla.edu/dl/lineart/{$document.alt_id}_l.jpg" target="_blank">Line art</a>
 		</p>
+-->
 		<div class="nrads_row">
 			{if empty($nrads)}
 			<h2><i>No</i> Name-Role-Activity instances found in Document</h2>
