@@ -35,6 +35,10 @@ public class Corpus extends CachedEntity {
 	public final static int NO_WKSP_ID = 0;
 	public final static int ANY_WKSP_ID = -1;
 	public final static int NO_CLONE_ID = 0;
+	public final static int ORDER_CORPORA_BY_NAME = 0;
+	public final static int ORDER_CORPORA_BY_DATE = 1;
+	public static final String ORDER_CORPORA_BY_NAME_PARAM = "name";
+	public static final String ORDER_CORPORA_BY_DATE_PARAM = "date";
 	public final static int ORDER_DOCS_BY_ALT_ID = 0;
 	public final static int ORDER_DOCS_BY_DATE = 1;
 	public static final String ORDER_DOCS_BY_ALT_ID_PARAM = "altId";
@@ -82,6 +86,29 @@ public class Corpus extends CachedEntity {
 	private HashMap<Integer, Name> namesById = null;
 	private HashMap<String, Name> namesByNymId = null;
 
+	public static class NameComparator implements	Comparator<Corpus> {
+		public int compare(Corpus corpus1, Corpus corpus2) {
+			String name1 = corpus1.getName();
+			String name2 = corpus2.getName();
+			if(name1==null) {
+				return(name2==null)?0:-1;
+			} else if(name2==null) {
+				return 1;
+			} else {
+				return name1.compareTo(name2);
+			}
+		}
+	}
+
+	/* Need to make lastUpdated part of Corpus object - deferring for now
+	public static class DateComparator implements	Comparator<Corpus> {
+		public int compare(Corpus corpus1, Corpus corpus2) {
+			long diff = doc1.getDate_norm()-doc2.getDate_norm();
+			return diff==0?0:(diff<0?-1:1);
+		}
+	}
+	*/
+	
 	/**
 	 * Create a new empty corpus.
 	 */
@@ -398,7 +425,7 @@ public class Corpus extends CachedEntity {
 	}
 	*/
 
-	public static List<Corpus> ListAll(ServiceContext sc, int wksp_id) {
+	public static List<Corpus> ListAll(ServiceContext sc, int wksp_id, int orderBy) {
 		Map<Integer, Object> idMap = getIdMap(sc, myClass);
 		ArrayList<Corpus> list = new ArrayList<Corpus>();
 		for(Object obj:idMap.values()) {
@@ -407,6 +434,13 @@ public class Corpus extends CachedEntity {
 				|| wksp_id==corpus.wkspId)
 				list.add(corpus);
 		}
+		/*
+		Comparator<Corpus> c = orderBy==ORDER_CORPORA_BY_NAME?
+										new Corpus.NameComparator()
+										: new Corpus.DateComparator();
+		 */
+		Comparator<Corpus> c = new Corpus.NameComparator();
+		Collections.sort(list, c);
 		return list;
 	}
 	

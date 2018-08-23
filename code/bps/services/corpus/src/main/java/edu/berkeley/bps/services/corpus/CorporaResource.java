@@ -84,7 +84,26 @@ public class CorporaResource extends BaseResource {
 					wksp_id = Integer.parseInt(wkspParam);
 				} catch( NumberFormatException nfe) {}
 			}
-			List<Corpus> corpusList = Corpus.ListAll(getServiceContext(srvc), wksp_id);
+			
+			// look for order-by setting
+			String orderByParam = queryParams.getFirst("o");
+			// Default to the "by name" value of 0 to order corpora
+			int orderBy;
+			if(orderByParam==null 
+					|| Corpus.ORDER_CORPORA_BY_NAME_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Corpus.ORDER_CORPORA_BY_NAME;
+			/* NYI - need to make modifiedDate part of corpus entity
+			 * } else if(Corpus.ORDER_CORPORA_BY_DATE_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Corpus.ORDER_CORPORA_BY_DATE;
+			 */
+			} else {
+            	throw new WebApplicationException( 
+        			Response.status(
+        				Response.Status.BAD_REQUEST).entity(
+        					"Unrecognized order spec: "+orderByParam).build());
+			}			
+			
+			List<Corpus> corpusList = Corpus.ListAll(getServiceContext(srvc), wksp_id, orderBy);
 			return corpusList;
 		} catch(WebApplicationException wae) {
 			throw wae;
