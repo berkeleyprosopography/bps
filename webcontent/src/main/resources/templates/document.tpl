@@ -133,9 +133,9 @@
 {/if}
 	<p class="nav-right">
 	{if isset($corpusID) }
-		<a href="/corpora/corpus?id={$corpusID}">Return to Corpus details</a>
+		<a href="/corpora/corpus?id={$corpusID}">Return to Corpus Documents</a>
 	{elseif isset($workspaceID) }
-		<a href="/workspace?id={$workspaceID}">Return to Workspace details</a>
+		<a href="/workspace?id={$workspaceID}">Return to Workspace Documents</a>
 	{/if}
 	</p>
 
