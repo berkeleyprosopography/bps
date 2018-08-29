@@ -4,9 +4,9 @@
 Vagrant.configure(2) do |config|
   
   config.vm.box = "bpsteam/bps-bare"
-  # config.vm.box_url = "http://app.vagrantup.com/brototype/boxes/bps-bare"
+  # config.vm.box_url = "https://app.vagrantup.com/bpsteam/boxes/bps-bare"
   # config.vm.box = "https://app.vagrantup.com/brototype/boxes/bps-bare.box"
-  config.vm.box_version = "0.0.1"
+  config.vm.box_version = "0.2"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
