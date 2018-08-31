@@ -90,11 +90,7 @@ em{
 	width:100%;
 	margin-left:auto;
 	margin-right:auto;
-
-	/*Min Height Hack - http://www.dustindiaz.com/min-height-fast-hack */
 	min-height: 775px;
-	height: auto !important;
-	height: 775px;
 }
 
 #content{

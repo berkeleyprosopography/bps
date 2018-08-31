@@ -15,8 +15,9 @@
 		{if $currSubNav!='admin'}<a href="/workspace?view=admin&wid={$wkspId}">
 		{else}<span class="currNav">{/if} 
 			Admin{if $currSubNav!='admin'}</a>{else}</span>{/if}
-		<a href="/SNA?wid={$wkspId}">Visualizer</a>
-		<a href="/SNA/2/?wid={$wkspId}">Vizualizer 2.0</a>
+		{if $currSubNav!='viz'}<a href="/SNA/2/?wid={$wkspId}">
+		{else}<span class="currNav">{/if} 
+			Vizualizer{if $currSubNav!='viz'}</a>{else}</span>{/if}
 	</span>
 </div>
 
