@@ -62,10 +62,10 @@
 			<table class="nrads_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 				<tr>
 					<td class="title" width="200px">Name</td>
-					<td class="title" width="200px">Normalized Form</td>
+<!--					<td class="title" width="200px">Normalized Form</td> -->
 					<td class="title" width="140px">Role</td>
 					<td class="title" width="140px">Activity</td>
-					<td class="title" width="140px">XML ID</td>
+<!--					<td class="title" width="140px">XML ID</td> -->
 				</tr>
 				{section name=nrad loop=$nrads}
 					<tr>
@@ -79,6 +79,7 @@
 								{$nrads[nrad].name}
 							{/if}
 						</td>
+<!-- Removing this for now to fix BPS-310
 						<td class="nrad" style="padding-top:6px">
 							{if $nrads[nrad].normalNameId != $nrads[nrad].nameId}
 								{$nrads[nrad].normalName}
@@ -86,6 +87,7 @@
 							&nbsp;-&nbsp; 
 							{/if}
 						</td>
+-->
 						<td class="nrad" style="padding-top:6px">
 							{if $nrads[nrad].activityRoleIsFamily}
 								<span class="familyIndent">&nbsp;</span>
@@ -95,9 +97,11 @@
 						<td class="nrad" style="padding-top:6px">
 							{$nrads[nrad].activity}
 						</td>
+<!-- Removing this for now to fix BPS-310
 						<td class="nrad" style="padding-top:6px">
 							{$nrads[nrad].xmlId}
 						</td>
+-->
 					</tr>
 						{if isset($nrads[nrad].links)}
 							{section name=ilink loop=$nrads[nrad].links}
