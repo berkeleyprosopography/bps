@@ -3,6 +3,10 @@
  */
 var filter;
 
+const LOG_ERROR = 1;
+const LOG_WARN = 2;
+const LOG_DEBUG = 3;
+var logLevel = LOG_ERROR;
 
 var stringToColour = function(str) {
   var hash = 0;
@@ -14,7 +18,9 @@ var stringToColour = function(str) {
     var value = (hash >> (i * 8)) & 0xFF;
     colour += ('00' + value.toString(16)).substr(-2);
   }
-  console.log('stringToColour', str, '->', colour)
+  if(logLevel >= LOG_DEBUG) {
+	console.log('stringToColour', str, '->', colour)
+  }
   return colour;
 };
 /**
@@ -30,7 +36,9 @@ var _ = {
   },
 
   removeClass: function(selectors, cssClass) {
-    console.log("removeClass");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("removeClass");
+	}
     var nodes = document.querySelectorAll(selectors);
     var l = nodes.length;
     for ( i = 0 ; i < l; i++ ) {
@@ -41,7 +49,9 @@ var _ = {
   },
 
   addClass: function (selectors, cssClass) {
-    console.log("addClass");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("addClass");
+	}
     var nodes = document.querySelectorAll(selectors);
     var l = nodes.length;
     for ( i = 0 ; i < l; i++ ) {
@@ -54,17 +64,23 @@ var _ = {
   },
 
   show: function (selectors) {
-    console.log("show");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("show");
+	}
     this.removeClass(selectors, 'hidden');
   },
 
   hide: function (selectors) {
-    console.log("hide");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("hide");
+	}
     this.addClass(selectors, 'hidden');
   },
 
   toggle: function (selectors, cssClass) {
-    console.log("toggle");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("toggle");
+	}
     var cssClass = cssClass || "hidden";
     var nodes = document.querySelectorAll(selectors);
     var l = nodes.length;
@@ -83,7 +99,9 @@ var _ = {
 
 
 function updatePane (graph, filter) {
-  console.log("updatePane");
+  if(logLevel >= LOG_DEBUG) {
+	console.log("updatePane");
+  }
   // get max degree
   var maxDegree = 0,
       categories = {};
@@ -92,10 +110,14 @@ function updatePane (graph, filter) {
 
   // read nodes
   graph.nodes().forEach(function(n) {
-    console.log("updatePane:: nodes:: forEach", n);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("updatePane:: nodes:: forEach", n);
+	}
     maxDegree = Math.max(maxDegree, graph.degree(n.id));
     categories[n.gender] = true;
-    console.log("updatePane:: nodes:: forEach:: maxDegree", maxDegree);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("updatePane:: nodes:: forEach:: maxDegree", maxDegree);
+	}
   })
 
   // min degree
@@ -114,9 +136,13 @@ function updatePane (graph, filter) {
 
     // read nodes
   graph.edges().forEach(function(n) {
-    console.log("updatePane:: edges:: forEach", n);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("updatePane:: edges:: forEach", n);
+	}
     edge_categories[n.label] = true;
-    console.log("updatePane:: edge:: forEach:: found", n.label);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("updatePane:: edge:: forEach:: found", n.label);
+	}
   })
 
   var edgecategoryElt = _.$('edge-category');
@@ -140,19 +166,25 @@ function updatePane (graph, filter) {
   // export button
   _.$('export-btn').addEventListener("click", function(e) {
     var chain = filter.export();
-    console.log(chain);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log(chain);
+	}
     _.$('dump').textContent = JSON.stringify(chain);
     _.show('#dump');
   });
 }
 
-console.log("init parser");
+if(logLevel >= LOG_DEBUG) {
+  console.log("init parser");
+}
 
 var wkspId = document.currentScript.getAttribute('workspace_id');
 
 var jsonpath = '/SNA/2/data.json?wid=' + wkspId
 
-console.log("Loaded workspace id " , wkspId);
+if(logLevel >= LOG_DEBUG) {
+  console.log("Loaded workspace id " , wkspId);
+}
 
 
 
@@ -177,7 +209,9 @@ sigma.parsers.json(jsonpath, {
 }, function(s) {
   // Initialize the Filter API
 
-  console.log("edit parsed graph for visualization");
+  if(logLevel >= LOG_DEBUG) {
+	console.log("edit parsed graph for visualization");
+  }
  var i,
   nodes = s.graph.nodes(),
   len = nodes.length;
@@ -189,42 +223,57 @@ for (i = 0; i < len; i++) {
     nodes[i].size = 5// s.graph.degree(nodes[i].id);
     nodes[i].label = nodes[i].name;
     nodes[i].color = nodes[i].center ? '#333' : '#666';
-    console.log('Node', nodes[i], 'has x,y =', nodes[i].x, nodes[i].y, "and size",nodes[i].size );
+	if(logLevel >= LOG_DEBUG) {
+	  console.log('Node', nodes[i], 'has x,y =', nodes[i].x, nodes[i].y, "and size",nodes[i].size );
+	}
 }
 
 var k,
   edges = s.graph.edges(),
   len = edges.length;
 
-console.log('Iterating over edges...');
+if(logLevel >= LOG_DEBUG) {
+  console.log('Iterating over edges...');
+}
 for (k = 0; k < len; k++) {
     edges[k].label = edges[k].type;
     edges[k].size = parseFloat(edges[k].weight); //have weights for relationships! these are important
     edges[k].type = 'curvedArrow';
     edges[k].color = stringToColour(edges[k].label);
-    console.log('Edge', k, 'is', edges[k] );
+	if(logLevel >= LOG_DEBUG) {
+	  console.log('Edge', k, 'is', edges[k] );
+	}
     //type: ['line', 'curve', 'arrow', 'curvedArrow'][Math.random() * 4 | 0]
 
 }
-console.log("refreshing");
+if(logLevel >= LOG_DEBUG) {
+  console.log("refreshing");
+}
 // Refresh the display:
 s.refresh();
 
-console.log(s);
+if(logLevel >= LOG_DEBUG) {
+  console.log(s);
+}
 // ForceAtlas Layout
 
 
 
 
-console.log("adding filters");
-
+if(logLevel >= LOG_DEBUG) {
+  console.log("adding filters");
   console.log(s);
+}
   filter = new sigma.plugins.filter(s);
-console.log("updating pane with filer");
+  if(logLevel >= LOG_DEBUG) {
+	console.log("updating pane with filer");
+  }
   updatePane(s.graph, filter);
 
   function applyMinDegreeFilter(e) {
-    console.log("applyMinDegreeFilter");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("applyMinDegreeFilter");
+	}
     var v = e.target.value;
     _.$('min-degree-val').textContent = v;
 
@@ -237,7 +286,9 @@ console.log("updating pane with filer");
   }
 
   function applyCategoryFilter(e) {
-    console.log("applyCategoryFilter");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("applyCategoryFilter");
+	}
     var c = e.target[e.target.selectedIndex].value;
     filter
       .undo('node-category')
@@ -248,22 +299,25 @@ console.log("updating pane with filer");
   }
 
   function applyEdgeCategoryFilter(e) {
-    console.log("applyEdgeCategoryFilter");
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("applyEdgeCategoryFilter");
+	}
     var c = e.target[e.target.selectedIndex].value;
     filter
       .undo('edge-category')
       .edgesBy(function(n) {
         var retval = !c.length || n.label === c;
         
-        nodes.filter(function(nn) { 
-          if ( nn.id === n.source || nn.id === n.target){
-            console.log('DISPLAY', nn.id);
-          }
-          else{
-            console.log('HIDE', nn.id);
-          }
-
-           })
+		if(logLevel >= LOG_DEBUG) {
+			nodes.filter(function(nn) { 
+			  if ( nn.id === n.source || nn.id === n.target){
+				console.log('DISPLAY', nn.id);
+			  }
+			  else{
+				console.log('HIDE', nn.id);
+			  }
+		   })
+		}
 
         return retval;
 
@@ -274,20 +328,26 @@ console.log("updating pane with filer");
   }
 
 function toggleRoundLayout(e) {
-    console.log("toggleRoundLayout", e.target.checked);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("toggleRoundLayout", e.target.checked);
+	}
     L = 10,
     N = 100;
-    if (e.target.checked == true) {
-          console.log('animating grid layout')
-          //s.killForceAtlas2();   
-        }
-     else {
-       console.log(' not animating grid layout')
-     }
+	if(logLevel >= LOG_DEBUG) {
+	  if (e.target.checked == true) {
+			console.log('animating grid layout')
+			//s.killForceAtlas2();   
+		  }
+	   else {
+		 console.log(' not animating grid layout')
+	   }
+	}
   }
 
  function animate(e) {
-    console.log("animate", e.target.checked);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("animate", e.target.checked);
+	}
     if (e.target.checked == true) {
         s.startForceAtlas2({worker: true, barnesHutOptimize: false});
     }
@@ -299,7 +359,9 @@ function toggleRoundLayout(e) {
 
 
  function hideEdges(e) {
-    console.log("hideEdges", e.target.checked);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("hideEdges", e.target.checked);
+	}
     if (e.target.checked == true) {
         s.settings({drawEdges: false,});
         s.refresh();
@@ -312,7 +374,9 @@ function toggleRoundLayout(e) {
   }
 
  function hideNodenames(e) {
-    console.log("hideEdges", e.target.checked);
+	if(logLevel >= LOG_DEBUG) {
+	  console.log("hideEdges", e.target.checked);
+	}
     if (e.target.checked == true) {
         s.settings({drawLabels: false,});
         s.refresh();
@@ -349,12 +413,16 @@ s.bind('overNode', function (e) {
   }
  
   if (calculate == true) {
-  console.log('Looking for adjacent edges', calculate);
+  if(logLevel >= LOG_DEBUG) {
+	console.log('Looking for adjacent edges', calculate);
+  }
   for (k = 0; k < len; k++) {
     
     //console.log("edge", k, 'from', edges[k].source, 'to', edges[k].target, 'in', d , d != edges[k].source && d != edges[k].target);
     if (d == edges[k].source || d == edges[k].target) {
-        console.log('found edge', edges[k]);
+		if(logLevel >= LOG_DEBUG) {
+		  console.log('found edge', edges[k]);
+		}
         edges[k].color = '#00f';
     }
     else {
@@ -382,7 +450,9 @@ s.bind('outNode', function (e) {
     edges = s.graph.edges(),
     len = edges.length;
 
-    console.log('resetting edges color');
+	if(logLevel >= LOG_DEBUG) {
+	  console.log('resetting edges color');
+	}
     for (k = 0; k < len; k++) {
           edges[k].color = stringToColour(edges[k].label);
     }
@@ -391,7 +461,7 @@ s.bind('outNode', function (e) {
 });
 
 function onNodeHover(event) {
-    window.console.log("clicked!");
+    window.console.log("clicked!");		// Not clear this is doing anything...
 } 
 
 
@@ -399,22 +469,26 @@ function exportAsPng(){
   s.renderers[0].snapshot({format: 'png', background: 'white', filename: 'graph.png',});
 }
 
-var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
-console.log("Registering drag listeners", dragListener);
-dragListener.bind('startdrag', function(event) {
-  console.log(event);
-});
-dragListener.bind('drag', function(event) {
-  console.log(event);
-});
-dragListener.bind('drop', function(event) {
-  console.log(event);
-});
-dragListener.bind('dragend', function(event) {
-  console.log(event);
-});
+if(logLevel >= LOG_DEBUG) {
+  var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+  console.log("Registering drag listeners", dragListener);
+  dragListener.bind('startdrag', function(event) {
+	console.log(event);
+  });
+  dragListener.bind('drag', function(event) {
+	console.log(event);
+  });
+  dragListener.bind('drop', function(event) {
+	console.log(event);
+  });
+  dragListener.bind('dragend', function(event) {
+	console.log(event);
+  });
+}
 
-console.log("Registering filter listeners");
+if(logLevel >= LOG_DEBUG) {
+  console.log("Registering filter listeners");
+}
   _.$('min-degree').addEventListener("input", applyMinDegreeFilter);  // for Chrome and FF
   _.$('min-degree').addEventListener("change", applyMinDegreeFilter); // for IE10+, that sucks
   _.$('node-category').addEventListener("change", applyCategoryFilter);
