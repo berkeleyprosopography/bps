@@ -469,8 +469,9 @@ function exportAsPng(){
   s.renderers[0].snapshot({format: 'png', background: 'white', filename: 'graph.png',});
 }
 
-if(logLevel >= LOG_DEBUG) {
   var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+
+if(logLevel >= LOG_DEBUG) {
   console.log("Registering drag listeners", dragListener);
   dragListener.bind('startdrag', function(event) {
 	console.log(event);
