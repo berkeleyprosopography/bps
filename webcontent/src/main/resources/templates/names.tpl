@@ -14,6 +14,7 @@
 		{/if}
 	{else}
 		<h1>{$names|@count} {$type}-Names in Corpus:</h1>
+            {if $type!='Clan'}
 		<p class="nav-right">
 			<span class="filterLabel">Filter by Role:&nbsp;</span>
 			<select id="RoleFilterSel">
@@ -23,7 +24,6 @@
 							{$roles[irole]}</option>
 				{/section}
 			</select>
-			{if $type!='Clan'}
 				<span class="filterLabel">Filter by Gender:&nbsp;</span>
 				<select id="GenderFilterSel">
 					<option value="All" {if !isset($genderFilter)}selected="true"{/if}>
@@ -35,10 +35,10 @@
 					<option value="unknown" {if 'unknown'==$genderFilter}selected="true"{/if}>
 							Unknown</option>
 				</select>
-			{/if}
 			<input id="goBtn" type="button" value="Go"
 							onclick="filterNames({$corpusID},'{$orderBy}');" />
 		</p>
+            {/if}
 		<table class="nrads_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 			<tr>
 				<td class="title" width="200px">

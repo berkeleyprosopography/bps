@@ -39,6 +39,12 @@ public class Person extends Entity {
 
 	private static final String FILIATION_SEPARATOR = "/";
 	
+	public final static int ORDER_PERSONS_BY_NAME = 0;
+	public final static int ORDER_PERSONS_BY_DATE = 1;
+	public static final String ORDER_PERSONS_BY_NAME_PARAM = "name";
+	public static final String ORDER_PERSONS_BY_DATE_PARAM = "date";
+	
+	
 	public static final int DEFAULT_ACTIVE_LIFE_YRS = 15;
 	public static final long DEFAULT_GENERATION_OFFSET = 
 								TimeUtils.convertYearsToMillis((double)DEFAULT_ACTIVE_LIFE_YRS);
@@ -76,6 +82,20 @@ public class Person extends Entity {
 	public static class DisplayNameComparator implements Comparator<Person> {
 		public int compare(Person pers1, Person pers2) {
 			return pers1.displayName.compareTo(pers2.displayName);
+		}
+	}
+	
+	public static class DateComparator implements Comparator<Person> {
+		public int compare(Person pers1, Person pers2) {
+			if(pers1.activeTimeSpan==null) {
+				return(pers2.activeTimeSpan==null)?0:-1;
+			} else if(pers2.activeTimeSpan==null) {
+				return 1;
+			} else {
+				long c1 = pers1.activeTimeSpan.getCenterPoint();
+				long c2 = pers2.activeTimeSpan.getCenterPoint();
+				return (c1==c2)?0:((c1>c2)?1:-1);
+			}
 		}
 	}
 	
@@ -221,7 +241,7 @@ public class Person extends Entity {
 		if(nradFather==null)
 			throw new RuntimeException(myClass+"Internal logic error in Person");
 		DerivedTimeSpan fatherActiveTimeSpan =
-			new DerivedTimeSpan(activeTimeSpan, generationOffset, 
+			new DerivedTimeSpan(activeTimeSpan, -generationOffset, // generationEarlier 
 					activeTimeSpanStdDev, activeTimeSpanWindow);
 		//DerivedTimeSpan fatherLifeTimeSpan =
 		//	new DerivedTimeSpan(lifeTimeSpan, lifeTimeSpanOffset, lifeTimeSpanStdDev);

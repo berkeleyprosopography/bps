@@ -1299,7 +1299,7 @@ public class Workspace extends CachedEntity {
 	 * @param docId			the document of interest
 	 * @return				the list of Persons
 	 */
-	public List<Person> getPersonsForAllDocs() {
+	public List<Person> getPersonsForAllDocs(int orderBy) {
 		List<Person> personList = new ArrayList<Person>(); 
 		
 		// Need to get unique persons, so we build a map indexed by the original NRAD id
@@ -1322,7 +1322,11 @@ public class Workspace extends CachedEntity {
 		}
 		// Add all the collected Persons to the array list and sort by displayName
 		personList.addAll(personsInWorkspace.values());
-		Collections.sort(personList, new Person.DisplayNameComparator());		
+		
+		Collections.sort(personList, 
+				(orderBy==Person.ORDER_PERSONS_BY_NAME)?
+						new Person.DisplayNameComparator()
+						: new Person.DateComparator());		
 
 		return personList;
 	}

@@ -1218,7 +1218,23 @@ public class WorkspaceResource extends BaseResource {
         			logger.error(tmp);
         		}
         	}
-        	return workspace.getPersonsForAllDocs();
+        	
+			String orderByParam = queryParams.getFirst("o");
+			// Default to the "no workspace" value of 0 to get the unattached corpora
+			int orderBy;
+			if(orderByParam==null 
+					|| Person.ORDER_PERSONS_BY_NAME_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Person.ORDER_PERSONS_BY_NAME;
+			} else if(Person.ORDER_PERSONS_BY_DATE_PARAM.equalsIgnoreCase(orderByParam)) {
+				orderBy = Person.ORDER_PERSONS_BY_DATE;
+			} else {
+            	throw new WebApplicationException( 
+        			Response.status(
+        				Response.Status.BAD_REQUEST).entity(
+        					"Unrecognized order spec: "+orderByParam).build());
+			}
+        	
+        	return workspace.getPersonsForAllDocs(orderBy);
 		} catch(RuntimeException re) {
 			String tmp = myClass+".getPersons(): Problem querying DB.\n"+ re.getLocalizedMessage();
 			logger.error(tmp);
