@@ -16,10 +16,10 @@
 			<table class="persons_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 				<tr>
 					<td class="title" width="160px">
-						<a href="/workspace?&o=name">Name</a>
+						<a href="/workspace?wid={$wkspId}&view=people&o=name">Name</a>
 					</td>
 					<td class="title" width="100px">
-						<a href="/workspace?&o=date">Floruit</a>
+						<a href="/workspace?wid={$wkspId}&view=people&o=date">Floruit</a>
 					</td>
 				</tr>
 				{section name=person loop=$people}

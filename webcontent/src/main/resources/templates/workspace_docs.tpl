@@ -14,12 +14,12 @@
 			<table class="docs_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 				<tr>
 					<td class="title" width="160px">
-						<a href="/workspace?&o=altId">Document</a>
+						<a href="/workspace?wid={$wkspId}&view=docs&o=altId">Document</a>
 					</td>
 					<td class="title" width="160px">Publication</td>
 					<td class="title" width="350px">Notes</td>
 					<td class="title" width="100px">
-						<a href="/workspace?&o=date">Date</a>
+						<a href="/workspace?wid={$wkspId}&view=docs&o=date">Date</a>
 					</td>
 				</tr>
 				{section name=doc loop=$documents}

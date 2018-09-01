@@ -16,7 +16,7 @@
 			<table class="clans_row" border="0" cellspacing="0" cellpadding="4px" width="100%">
 				<tr>
 					<td class="title" width="160px">
-						<a href="/workspace?&o=name">Name</a>
+						<a href="/workspace?wid={$wkspId}&view=clans&o=name">Name</a>
 					</td>
 				</tr>
 				{section name=clan loop=$clans}
