@@ -3,6 +3,14 @@
 require_once("../../libs/env.php");
 require_once($CFG->dirroot."/libs/utils.php");
 
+$script_block = '
+<script>
+function contact_cl() {
+alert("clicked");
+}
+</script>';
+$t->assign("script_block", $script_block);
+
 $t->assign('messages', null);
 $t->assign('name', "");
 $t->assign('email', "");
