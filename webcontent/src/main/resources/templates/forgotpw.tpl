@@ -6,7 +6,7 @@
 	{$message}
 </div>
 {/if}
-<form method="post" class="delphiForm">
+<form method="post" class="bpsForm">
 	
 	<label for="user">Username <span class="requiredFieldIndicator">*</span></label>
 	<input type="text" name="user" maxlength="40" />

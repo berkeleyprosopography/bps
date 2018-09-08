@@ -61,27 +61,16 @@ function sendRegMail($uid, $username, $email){
 		return;
 
 	$confirmUrl = $CFG->wwwroot . '/register?confirm=' . $uid;
-	$plaintextmsg = 
-		'Thank you for registering with BPS!
-
-Your username (to log in to the system) is: '.$username.'
-
-If you forget your password, you can ask the system 
-to email it to you. You can also change it on your profile page.
-
-Click on the link below '
-		 .'or copy and paste the URL into your browser to complete the registration.
-
-		 ' . $confirmUrl;
 	$htmlmsg = 
-		'<p>Thank you for registering with BPS!</p><p>Your username is: '.$username.'</p>'
+		'<html><head> <title>BPS registration notification</title></head>
+		<body><p>Thank you for registering with BPS!</p><p>Your username is: '.$username.'</p>'
 	   .'<p>If you forget your password, you can ask the system' 
 	   .' to email it to you. You can also change it on your profile page.</p>'
 	   .'<p>Click on the link below '
 		 .'or copy and paste the URL into your browser to complete the registration.'
-		 .'<br /><br /><a href="'.$confirmUrl.'">'.$confirmUrl.'</a></p>';
+		 .'<br /><br /><a href="'.$confirmUrl.'">'.$confirmUrl.'</a></p></body></html>';
 	$subj = 'Berkeley Prosopography Services: BPS registration';
-	return sendBPSMail($username, $email, $subj, $plaintextmsg, $htmlmsg);
+	return sendBPSMail($email, $subj, $htmlmsg);
 }
 
 /**

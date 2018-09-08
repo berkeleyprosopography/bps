@@ -130,17 +130,26 @@ function allEntitiesDecode( $str, $mode, $charset ) {
 }
 
 
-function sendBPSMail($nameTo, $emailTo, $subj, $plaintextmsg, $htmlmsg, $emailFrom = "bps_feedback@lists.berkeley.edu", $nameFrom = "BPS"){
+function sendBPSMail($emailTo, $subj, $htmlmsg){
 	global $CFG;
-	require_once $CFG->dirroot."/libs/XPM/XPM3_MAIL.php";
+	/*require_once $CFG->dirroot."/libs/XPM/XPM3_MAIL.php";
 	
-	$mail = new XPM3_MAIL;
-	$mail->Delivery('local');
+	//$mail = new XPM3_MAIL;
+	//$mail->Delivery('local');
 	$mail->From($emailFrom, $nameFrom);
 	$mail->AddTo($emailTo, $nameTo);
 	$mail->Text($plaintextmsg);
 	$mail->Html($htmlmsg);
 	return $mail->Send($subj);
+	*/
+
+	// Always set content-type when sending HTML email
+	$headers = "MIME-Version: 1.0" . "\r\n";
+	$headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+	$headers .= "From: BPS <".$CFG->contactEmail."> \r\n";
+
+
+	mail($emailTo,$subj,$htmlmsg,$headers);
 }
 
 function convert_smart_quotes($string){ 

@@ -10,7 +10,7 @@ require_once("../../libs/utils.php");
  */
 function checkUser($username){
 	global $db;
-	$sql = "select email from user where username = '$username'";
+	$sql = "select email from user where username = ?";
 	$stmt = $db->prepare($sql, array('text'), MDB2_PREPARE_RESULT);
 	$res =& $stmt->execute($username);
 	if (PEAR::isError($res)) {
@@ -50,16 +50,14 @@ function synthesizeAndUpdatePassword($username){
 }
 
 function sendPWMail($username, $email, $newPW){
-	$plaintextmsg = 
-		'Your password has been reset to: "'.$newPW
-			.'". You should reset this the next time you log in.';
 	$htmlmsg = 
-		'<p>Your password has been reset to: "'.$newPW
-			.'". You should reset this the next time you log in.</p>';
+		'<html><head> <title>BPS password notification</title></head>
+		<body><p>Your password has been reset to: "'.$newPW
+			.'". You should reset this the next time you log in.</p></body></html>';
 	// The message already mentions the password, but advertising it on the
-	// subject line seems even more unsafe.
+	// subject line seems even more unsafe, so be oblique.
 	$subj = 'Berkeley Prosopography Services';
-	return sendBPSMail($username, $email, $subj, $plaintextmsg, $htmlmsg);
+	return sendBPSMail($email, $subj, $htmlmsg);
 }
 
 $showErr = FALSE;			// Error to show if we find one

@@ -410,4 +410,13 @@ div.uxideas p.figcaption {
   text-align: center;
   font-weight: bold; 
 }
+#contact_click {
+  font-weight: bold; 
+  color:#27556C;
+  text-decoration: underline;
+}
 
+#contact_click:hover { 
+  font-weight: bold; 
+  cursor: pointer;
+}
