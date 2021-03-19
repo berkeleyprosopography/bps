@@ -26,7 +26,7 @@ django-stripe-payments==2.0.0
 django-tagging==0.3.4
 django-uuidfield==0.5.0
 django-xmlrpc==0.1.5
-djangorestframework==2.3.12
+djangorestframework==3.11.2
 drf-extensions==0.2.7
 drf-nested-routers==0.9.0
 gunicorn==17.5
