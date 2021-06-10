@@ -1,4 +1,4 @@
-Django==1.6
+Django==2.2.24
 Pillow==2.7.0
 PyYAML==3.11
 South==1.0.2
