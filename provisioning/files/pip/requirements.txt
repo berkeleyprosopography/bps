@@ -48,7 +48,7 @@ six==1.5.2
 sqlparse==0.1.15
 ssh-import-id==3.21
 stripe==1.21.0
-supervisor==3.0b2
+supervisor==3.0.1
 urllib3==1.7.1
 wsgiref==0.1.2
 zope.interface==4.0.5
