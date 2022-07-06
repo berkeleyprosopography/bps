@@ -30,7 +30,7 @@ djangorestframework==2.3.12
 drf-extensions==0.2.7
 drf-nested-routers==0.9.0
 gunicorn==17.5
-html5lib==0.999
+html5lib==0.999999999
 meld3==0.6.10
 newrelic==2.46.0.37
 oauthlib==0.7.2
